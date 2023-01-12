@@ -1,0 +1,260 @@
+*, *::before, *::after {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+:root {
+	--color-light: #ffffff;
+	--color-gray: #3c3c3c;
+	--color-dark: #1b1b1b;
+
+	--color-error: rgb(219, 84, 97);
+	--color-success: rgb(84, 219, 104);
+	
+	--header-height: 4.5rem;
+	--nav-width: 4rem;
+	--rem-clamp: clamp(.5rem, 2vw, 1rem);
+	--default-shadow: 0 1px 2px 0 rgb(0 0 0 / 60%), 0 2px 6px 2px rgb(0 0 0 / 30%);
+}
+
+/* Default properties */
+img {
+	width: 100%;
+}
+
+button {
+	border: 0;
+	border-radius: 4px;
+	background-color: var(--color-dark);
+	color: var(--color-light);
+}
+
+button:hover {
+	cursor: pointer;
+}
+
+input,
+select,
+textarea {
+	width: 100%;
+	
+	border: 2px solid var(--color-gray);
+	border-radius: 4px;
+	padding: .75rem;
+	outline: 0;
+	box-shadow: var(--default-shadow);
+	background-color: var(--color-dark);
+	color: var(--color-light);
+	
+	font-size: 1rem;
+}
+
+input::placeholder,
+textarea::placeholder {
+	color: var(--color-gray);
+}
+
+input[type="datetime-local"] {
+	color-scheme: dark;
+}
+
+svg path,
+svg rect {
+	fill: var(--color-light);
+}
+
+/* Utility classes */
+.hidden {
+	display: none !important;
+}
+
+.error {
+	color: var(--color-error) !important;
+	font-size: 1rem !important;
+}
+
+.error-icon path,
+.error-icon rect {
+	fill: var(--color-error) !important;
+}
+
+.error-input {
+	border: 2px solid var(--color-error) !important;
+}
+
+.success {
+	color: var(--color-success) !important;
+	font-size: 1rem !important;
+}
+
+/* General styling */
+body {
+	height: 100vh;
+	background-color: var(--color-dark);
+	color: var(--color-light);
+}
+
+header {
+	width: 100%;
+	height: var(--header-height);
+	
+	display: flex;
+	align-items: center;
+
+	padding: 1rem;
+	box-shadow: var(--default-shadow);
+	background-color: var(--color-gray);
+}
+
+header > div {
+	height: 100%;
+	transform: translateX(-2.6rem);
+
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	
+	transition: transform .3s ease-in-out;
+}
+
+#toggle-nav {
+	--height: 1.5rem;
+	height: var(--height);
+	
+	background-color: transparent;
+}
+
+#toggle-nav svg {
+	height: var(--height);
+	width: var(--height);
+}
+
+h1 {
+	font-size: clamp(1.3rem, 7vw, 2rem);
+}
+
+.nav-divider {
+	position: relative;
+	height: calc(100% - var(--header-height));
+	
+	display: flex;
+
+	padding-block: var(--rem-clamp);
+}
+
+.nav-divider.show-nav > nav {
+	left: var(--rem-clamp);
+}
+
+.nav-divider.show-nav > .window-container {
+	margin-left: calc(var(--nav-width) + var(--rem-clamp));
+}
+
+nav {
+	--padding: .5rem;
+	z-index: 1;
+	position: absolute;
+	left: var(--rem-clamp);
+	height: calc(100% - (2 * var(--rem-clamp)));
+	width: var(--nav-width);
+	
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	gap: var(--padding);
+	overflow-y: auto;
+
+	padding: var(--padding);
+	border-radius: 4px;
+	background-color: var(--color-gray);
+	
+	transition: left .3s ease-in-out;
+}
+
+nav > div {
+	width: 100%;
+	
+	display: flex;
+	flex-direction: column;
+	gap: var(--padding);
+}
+
+nav > div > button {
+	width: 100%;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	
+	padding: .5rem;
+	border: 0;
+	border-radius: 4px;
+	background-color: var(--color-dark);
+	color: var(--color-light);
+	
+	transition: background-color .1s ease-in-out;
+}
+
+nav > div > button:hover {
+	background-color: var(--color-gray);
+}
+
+nav > div > button svg {
+	height: 1.8rem;
+	width: 2rem;
+}
+
+.window-container {
+	margin-left: calc(4rem + var(--rem-clamp));
+	width: 100%;
+	
+	display: flex;
+	overflow-y: auto;
+	overflow-x: hidden;
+	
+	transition: margin-left .3s ease-in-out;
+}
+
+.window-container > div {
+	width: 100%;
+	flex: 0 0 auto;
+	
+	transform: translateX(0);
+
+	transition: transform .5s ease-in-out;
+}
+
+.window-container:has(.show-window) #home,
+.window-container:has(.show-window) .show-window {
+	transform: translateX(-100%);
+}
+
+.window-container > div:not(#home) {
+	padding: var(--rem-clamp);
+}
+
+.window-container > div:not(#home) > h2 {
+	text-align: center;
+	font-size: clamp(1.3rem, 5vw, 2rem);
+	margin-bottom: 2rem;
+}
+
+.window-container > div:not(#home) > p {
+	text-align: center;
+}
+
+.window-container > div:not(#home) > p > a {
+	color: var(--color-light);
+}
+
+@media (max-width: 543px) {
+	.window-container {
+		margin-left: 0;
+	}
+
+	nav {
+		left: -100%;
+	}
+}

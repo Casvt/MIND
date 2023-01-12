@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="stylesheet" href="/static/css/general.css">
+	<link rel="stylesheet" href="/static/css/reminders.css">
+	<link rel="stylesheet" href="/static/css/add_edit.css">
+	<link rel="stylesheet" href="/static/css/notification.css">
+	<link rel="stylesheet" href="/static/css/settings.css">
+	<script src="/static/js/general.js" defer></script>
+	<script src="/static/js/reminders.js" defer></script>
+	<script src="/static/js/add.js" defer></script>
+	<script src="/static/js/edit.js" defer></script>
+	<script src="/static/js/notification.js" defer></script>
+	<script src="/static/js/settings.js" defer></script>
+
+	<title>Reminders - Noted</title>
+</head>
+<body>
+	<header>
+		<div>
+			<button id="toggle-nav">
+				<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve">
+					<g>
+						<rect y="11" width="24" height="2" rx="1"></rect>
+						<rect y="4" width="24" height="2" rx="1"></rect>
+						<rect y="18" width="24" height="2" rx="1"></rect>
+					</g>
+				</svg>
+			</button>
+			<h1>Noted Reminders</h1>
+		</div>
+	</header>
+	<div class="nav-divider">
+		<nav>
+			<div>
+				<button id="home-button" aria-label="Home" title="Home">
+					<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve">
+						<g>
+							<path d="M23.121,9.069,15.536,1.483a5.008,5.008,0,0,0-7.072,0L.879,9.069A2.978,2.978,0,0,0,0,11.19v9.817a3,3,0,0,0,3,3H21a3,3,0,0,0,3-3V11.19A2.978,2.978,0,0,0,23.121,9.069ZM15,22.007H9V18.073a3,3,0,0,1,6,0Zm7-1a1,1,0,0,1-1,1H17V18.073a5,5,0,0,0-10,0v3.934H3a1,1,0,0,1-1-1V11.19a1.008,1.008,0,0,1,.293-.707L9.878,2.9a3.008,3.008,0,0,1,4.244,0l7.585,7.586A1.008,1.008,0,0,1,22,11.19Z"></path>
+						</g>
+					</svg>
+				</button>
+				<button id="notification-services-button" aria-label="Notification Services" title="Notification Services">
+					<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve">
+						<g>
+							<path d="M23.83,14.12l-1.56-5.84c-.88-3.15-3.47-5.48-6.58-6.11-.01-.01-.02-.03-.03-.04-1.57-1.38-3.58-2.14-5.66-2.14C5.94,0,2.5,2.76,1.63,6.68L.11,12.35c-.31,1.38,.03,2.81,.91,3.91,.89,1.1,2.21,1.74,3.62,1.74h.19c.06,.09,.12,.18,.19,.26,.89,1.1,2.21,1.74,3.62,1.74h.96c.23,2.24,2.1,4,4.4,4s4.17-1.76,4.4-4h.95c1.46,0,2.81-.67,3.7-1.84,.88-1.17,1.17-2.64,.78-4.04Zm-21.25,.89c-.5-.63-.69-1.44-.53-2.19l1.52-5.67c.67-3.04,3.32-5.16,6.43-5.16,.62,0,1.22,.11,1.8,.28-3.05,.8-5.46,3.22-6.17,6.4l-1.52,5.67c-.12,.53-.14,1.06-.08,1.58-.57-.13-1.08-.45-1.45-.92Zm11.42,6.99c-1.2,0-2.19-.86-2.4-2h4.8c-.21,1.14-1.2,2-2.4,2Zm7.46-5.04c-.5,.66-1.27,1.04-2.11,1.04H8.64c-.81,0-1.56-.36-2.06-.99-.5-.63-.69-1.44-.53-2.19l1.52-5.67c.67-3.04,3.32-5.16,6.43-5.16,2.95,0,5.55,1.98,6.34,4.81l1.56,5.84c.22,.8,.06,1.64-.44,2.31Z"></path>
+						</g>
+					</svg>
+				</button>
+				<button id="settings-button" aria-label="Settings" title="Settings">
+					<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve">
+						<g>
+							<path d="M1,4.75H3.736a3.728,3.728,0,0,0,7.195,0H23a1,1,0,0,0,0-2H10.931a3.728,3.728,0,0,0-7.195,0H1a1,1,0,0,0,0,2ZM7.333,2a1.75,1.75,0,1,1-1.75,1.75A1.752,1.752,0,0,1,7.333,2Z"></path>
+							<path d="M23,11H20.264a3.727,3.727,0,0,0-7.194,0H1a1,1,0,0,0,0,2H13.07a3.727,3.727,0,0,0,7.194,0H23a1,1,0,0,0,0-2Zm-6.333,2.75A1.75,1.75,0,1,1,18.417,12,1.752,1.752,0,0,1,16.667,13.75Z"></path>
+							<path d="M23,19.25H10.931a3.728,3.728,0,0,0-7.195,0H1a1,1,0,0,0,0,2H3.736a3.728,3.728,0,0,0,7.195,0H23a1,1,0,0,0,0-2ZM7.333,22a1.75,1.75,0,1,1,1.75-1.75A1.753,1.753,0,0,1,7.333,22Z"></path>
+						</g>
+					</svg>
+				</button>
+			</div>
+			<div>
+				<button id="logout-button" aria-label="Log out of Noted" tilte="Logout">
+					<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve">
+						<g>
+							<path d="M11.476,15a1,1,0,0,0-1,1v3a3,3,0,0,1-3,3H5a3,3,0,0,1-3-3V5A3,3,0,0,1,5,2H7.476a3,3,0,0,1,3,3V8a1,1,0,0,0,2,0V5a5.006,5.006,0,0,0-5-5H5A5.006,5.006,0,0,0,0,5V19a5.006,5.006,0,0,0,5,5H7.476a5.006,5.006,0,0,0,5-5V16A1,1,0,0,0,11.476,15Z"></path>
+							<path d="M22.867,9.879,18.281,5.293a1,1,0,1,0-1.414,1.414l4.262,4.263L6,11a1,1,0,0,0,0,2H6l15.188-.031-4.323,4.324a1,1,0,1,0,1.414,1.414l4.586-4.586A3,3,0,0,0,22.867,9.879Z"></path>
+						</g>
+					</svg>
+				</button>
+			</div>
+		</nav>
+		<main class="window-container">
+			<div id="home">
+				<div class="search-container">
+					<form id="search-form">
+						<div class="search-bar">
+							<button type="submit">
+								<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 513.749 513.749" style="enable-background:new 0 0 512 512" xml:space="preserve">
+									<g>
+										<g>
+											<path d="M504.352,459.061l-99.435-99.477c74.402-99.427,54.115-240.344-45.312-314.746S119.261-9.277,44.859,90.15   S-9.256,330.494,90.171,404.896c79.868,59.766,189.565,59.766,269.434,0l99.477,99.477c12.501,12.501,32.769,12.501,45.269,0   c12.501-12.501,12.501-32.769,0-45.269L504.352,459.061z M225.717,385.696c-88.366,0-160-71.634-160-160s71.634-160,160-160   s160,71.634,160,160C385.623,314.022,314.044,385.602,225.717,385.696z"></path>
+										</g>
+									</g>
+								</svg>
+							</button>
+							<input type="text" id="search-input" required placeholder="Search..." aria-placeholder="Search for reminders">
+							<button type="button" id="clear-button">
+								<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512.021 512.021" style="enable-background:new 0 0 512 512" xml:space="preserve">
+									<g>
+										<g>
+											<path d="M301.258,256.01L502.645,54.645c12.501-12.501,12.501-32.769,0-45.269c-12.501-12.501-32.769-12.501-45.269,0l0,0   L256.01,210.762L54.645,9.376c-12.501-12.501-32.769-12.501-45.269,0s-12.501,32.769,0,45.269L210.762,256.01L9.376,457.376   c-12.501,12.501-12.501,32.769,0,45.269s32.769,12.501,45.269,0L256.01,301.258l201.365,201.387   c12.501,12.501,32.769,12.501,45.269,0c12.501-12.501,12.501-32.769,0-45.269L301.258,256.01z"></path>
+										</g>
+									</g>
+								</svg>
+							</button>
+						</div>
+					</form>
+				</div>
+				<div id="reminder-list">
+					<button class="entry" id="add-entry" aria-label="Add reminder" title="Add reminder">
+						<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
+							<g>
+								<g>
+									<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
+								</g>
+							</g>
+						</svg>
+						<p class="error hidden" id="no-service-error">Add a notification service first!</p>
+					</button>
+				</div>
+			</div>
+			<div id="add">
+				<h2>Add a reminder</h2>
+				<div class="form-container">
+					<form id="add-form">
+						<input type="text" id="title-input" placeholder="Title" required>
+						<div class="sub-inputs">
+							<input type="datetime-local" id="time-input" required>
+							<select id="notification-service-input" required></select>
+						</div>
+						<textarea id="text-input" cols="30" rows="10" placeholder="Text (optional)"></textarea>
+						<div class="options">
+							<button type="button" id="close-add">Cancel</button>
+							<button type="submit">Add</button>
+						</div>
+					</form>
+				</div>
+			</div>
+			<div id="edit">
+				<h2>Edit a reminder</h2>
+				<div class="form-container">
+					<form id="edit-form">
+						<input type="text" id="title-edit-input" placeholder="Title" required>
+						<div class="sub-inputs">
+							<input type="datetime-local" id="time-edit-input" required>
+							<select id="notification-service-edit-input" required></select>
+						</div>
+						<textarea id="text-edit-input" cols="30" rows="10" placeholder="Text (optional)"></textarea>
+						<div class="options">
+							<button type="button" id="close-edit">Cancel</button>
+							<button type="submit">Save</button>
+						</div>
+					</form>
+				</div>
+			</div>
+			<div id="notification">
+				<h2>Notification Services</h2>
+				<p>Setup your notification providers here. See the <a target="_blank" href="https://github.com/caronc/apprise#supported-notifications">Apprise URL documentation</a> to learn how to make a valid Apprise URL.</p>
+				<div class="table-container">
+					<button id="add-service-button" title="Add notification service" aria-label="Add notification service">
+						<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
+							<g>
+								<g>
+									<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
+								</g>
+							</g>
+						</svg>
+					</button>
+					<table>
+						<thead>
+							<tr>
+								<th class="title-column">Title</th>
+								<th class="url-column">Apprise URL</th>
+								<th title="Actions" aria-label="Actions" class="action-column">
+									<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve">
+										<g>
+											<path d="M11.24,24a2.262,2.262,0,0,1-.948-.212,2.18,2.18,0,0,1-1.2-2.622L10.653,16H6.975A3,3,0,0,1,4.1,12.131l3.024-10A2.983,2.983,0,0,1,10,0h3.693a2.6,2.6,0,0,1,2.433,3.511L14.443,8H17a3,3,0,0,1,2.483,4.684l-6.4,10.3A2.2,2.2,0,0,1,11.24,24ZM10,2a1,1,0,0,0-.958.71l-3.024,10A1,1,0,0,0,6.975,14H12a1,1,0,0,1,.957,1.29L11.01,21.732a.183.183,0,0,0,.121.241A.188.188,0,0,0,11.4,21.9l6.4-10.3a1,1,0,0,0,.078-1.063A.979.979,0,0,0,17,10H13a1,1,0,0,1-.937-1.351l2.19-5.84A.6.6,0,0,0,13.693,2Z"></path>
+										</g>
+									</svg>
+								</th>
+							</tr>
+						</thead>
+						<tbody id="services-list">
+							<tr id="add-row" class="hidden">
+								<td class="title-column">
+									<input type="text">
+								</td>
+								<td class="url-column">
+									<input type="text">
+								</td>
+								<td class="action-column">
+									<button data-type="save" title="Add" aria-label="Add">
+										<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve">
+											<g>
+												<path d="M12,10a4,4,0,1,0,4,4A4,4,0,0,0,12,10Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,16Z"></path><path d="M22.536,4.122,19.878,1.464A4.966,4.966,0,0,0,16.343,0H5A5.006,5.006,0,0,0,0,5V19a5.006,5.006,0,0,0,5,5H19a5.006,5.006,0,0,0,5-5V7.657A4.966,4.966,0,0,0,22.536,4.122ZM17,2.08V3a3,3,0,0,1-3,3H10A3,3,0,0,1,7,3V2h9.343A2.953,2.953,0,0,1,17,2.08ZM22,19a3,3,0,0,1-3,3H5a3,3,0,0,1-3-3V5A3,3,0,0,1,5,2V3a5.006,5.006,0,0,0,5,5h4a4.991,4.991,0,0,0,4.962-4.624l2.16,2.16A3.02,3.02,0,0,1,22,7.657Z"></path>
+											</g>
+										</svg>
+									</button>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+			<div id="settings">
+				<h2>Settings</h2>
+				<div class="settings-container">
+					<h3>Change Password</h3>
+					<form id="change-password-form">
+						<input type="password" id="password-input" autocomplete="new-password" required>
+						<button type="submit">Change</button>
+					</form>
+					<h3>Delete Account</h3>
+					<button id="delete-account-button">Delete Account</button>
+				</div>
+			</div>
+		</main>
+	</div>
+</body>
+</html>

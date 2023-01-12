@@ -1,0 +1,54 @@
+.form-container {
+	max-width: 30rem;
+	margin-inline: auto;
+}
+
+.form-container > form {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 1rem;
+}
+
+.form-container > form input,
+.form-container > form select,
+.form-container > form textarea {
+	padding: 1rem;
+}
+
+.sub-inputs,
+.options {
+	--gap: 1rem;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: var(--gap);
+}
+
+.sub-inputs > input,
+.sub-inputs > select {
+	width: calc(50% - (var(--gap) / 2));
+}
+
+.options > button {
+	width: 6rem;
+	
+	border: 2px solid var(--color-gray);
+	padding: .5rem 1rem;
+	
+	font-size: 1.1rem;
+
+	transition: background-color .1s ease-in-out;
+}
+
+.options > button:hover {
+	background-color: var(--color-gray);
+}
+
+@media (max-width: 460px) {
+	.sub-inputs > input,
+	.sub-inputs > select {
+		width: 100%;
+	}
+}

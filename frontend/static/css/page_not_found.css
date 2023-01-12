@@ -1,0 +1,21 @@
+main {
+	height: calc(100% - var(--header-height));
+	
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 1rem;
+}
+
+h2 {
+	font-size: clamp(3rem, 12vw, 5rem);
+}
+
+p {
+	font-size: clamp(1rem, 4.2vw, 1.75rem);
+}
+
+a {
+	color: var(--color-light);
+}

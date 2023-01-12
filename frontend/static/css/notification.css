@@ -1,0 +1,97 @@
+.table-container {
+	margin-top: 2rem;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
+	overflow-x: auto;
+}
+
+#add-service-button {
+	padding: .5rem 8rem;
+	background-color: var(--color-gray);
+}
+
+#add-service-button > svg {
+	height: 1rem;
+	width: 1rem;
+}
+
+.table-container > table {
+	margin-inline: auto;
+	
+	border-spacing: 0px;
+}
+
+.table-container > table th,
+.table-container > table td {
+	text-align: left;
+}
+
+.table-container > table th {
+	padding-block: .5rem;
+}
+
+.table-container > table td {
+	border-top: 1px solid var(--color-gray);
+}
+
+.table-container > table tr:has(input:not(:read-only)) td {
+	padding-block: .5rem;
+}
+
+.title-column {
+	width: 8rem;
+	
+	padding-left: 1.5rem;
+	padding-right: 1rem;
+}
+
+.url-column {
+	width: 21rem;
+}
+
+#services-list input {
+	min-width: 6rem;
+
+	border-radius: 2px;
+	padding: .5rem;
+	box-shadow: none;
+}
+
+.url-column > input {
+	min-width: 10rem;
+}
+
+#services-list input:read-only {
+	border-color: transparent;
+	padding: 0;
+}
+
+#services-list tr:has(input:not(:read-only)) td.action-column {
+	padding-block: 1rem;
+}
+
+.action-column {
+	display: flex;
+	gap: .5rem;
+	
+	padding: .5rem;
+	padding-right: 1.5rem;
+}
+
+.action-column svg {
+	width: 1rem;
+	height: 1rem;
+}
+
+#services-list tr:has(input:read-only) > td.action-column > button[data-type="edit"],
+#services-list tr:not(:has(input:read-only)) > td.action-column > button[data-type="save"] {
+	display: inline-block;
+}
+
+#services-list tr:not(:has(input:read-only)) > td.action-column > button[data-type="edit"],
+#services-list tr:has(input:read-only) > td.action-column > button[data-type="save"] {
+	display: none;
+}

@@ -1,0 +1,42 @@
+.settings-container {
+	max-width: 50rem;
+	margin-inline: auto;
+
+	text-align: center;
+}
+
+.settings-container > h3 {
+	margin-bottom: 1.25rem;
+
+	padding-bottom: .5rem;
+	border-bottom: 2px solid var(--color-gray);
+
+	font-size: 1.4rem;
+}
+
+.settings-container > h3:not(:first-of-type) {
+	margin-top: 2.5rem;
+}
+
+.settings-container button {
+	padding: .5rem 2rem;
+	background-color: var(--color-gray);
+	
+	box-shadow: var(--default-shadow);
+}
+
+#change-password-form {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 1rem;
+}
+
+#change-password-form > input {
+	max-width: 20rem;
+}
+
+#delete-account-button {
+	background-color: var(--color-error);
+}
