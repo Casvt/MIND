@@ -1,7 +1,7 @@
 # Noted
 A simple self hosted reminder platform that uses push to send notifications to your device. Set the reminder and forget about it! 📢
 
-Core Features
+## Core Features
 * Basic auth
 * Utilizes Apprise
 * Create and delete reminders
