@@ -134,6 +134,16 @@ h1 {
 	font-size: clamp(1.3rem, 7vw, 2rem);
 }
 
+noscript {
+	width: 90%;
+	margin-inline: 1rem;
+
+	border-radius: 4px;
+	padding: 1rem;
+	background-color: var(--color-error);
+	color: var(--color-light);
+}
+
 .nav-divider {
 	position: relative;
 	height: calc(100% - var(--header-height));
