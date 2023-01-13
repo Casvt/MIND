@@ -25,7 +25,10 @@ function showWindow(id) {
 };
 
 function hideWindow() {
-	document.querySelector('.show-window').classList.remove('show-window');
+	const el = document.querySelector('.show-window')
+	if (el) {
+		el.classList.remove('show-window');
+	};
 };
 
 // code run on load

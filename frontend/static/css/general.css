@@ -91,6 +91,8 @@ svg rect {
 /* General styling */
 body {
 	height: 100vh;
+	overflow-x: hidden;
+
 	background-color: var(--color-dark);
 	color: var(--color-light);
 }
