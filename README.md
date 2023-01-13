@@ -5,5 +5,6 @@ Core Features
 * Basic auth
 * Utilizes Apprise
 * Create and delete reminders
+* Schedule reminders
 
 See the [wiki](https://github.com/Casvt/Noted/wiki) for instructions on how to install and setup Noted.
