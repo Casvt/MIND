@@ -39,9 +39,6 @@
 	opacity: 0;
 	
 	transition: opacity .1s linear;
-	-o-transition: opacity .1s linear;
-	-moz-transition: opacity .1s linear;
-	-webkit-transition: opacity .1s linear;
 }
 
 .search-bar:focus-within #clear-button {
@@ -72,11 +69,12 @@
 	width: 2rem;
 }
 
-#add-entry:not(:has(p#no-service-error.hidden)) path {
-	fill: var(--color-error);
+#add-entry:not(.error.error-icon) p {
+	display: none;
 }
 
-#no-service-error {
+#add-entry.error.error-icon p {
+	display: block;
 	font-size: .8rem !important;
 }
 
@@ -119,9 +117,6 @@
 	background-color: rgb(0 0 0 / 25%);
 	
 	transition: opacity .2s ease-in;
-	-o-transition: opacity .2s ease-in;
-	-moz-transition: opacity .2s ease-in;
-	-webkit-transition: opacity .2s ease-in;
 }
 
 .entry-overlay::before {
@@ -150,9 +145,6 @@
 @media (max-width: 543px) {
 	header > div {
 		transform: translateX(0);
-		-o-transform: translateX(0);
-		-moz-transform: translateX(0);
-		-webkit-transform: translateX(0);
 	}
 
 	.entry {

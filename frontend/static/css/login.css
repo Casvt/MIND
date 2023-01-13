@@ -6,9 +6,6 @@ main {
 
 main.show-create > .form-container {
 	transform: translateY(-100%);
-	-o-transform: translateY(-100%);
-	-moz-transform: translateY(-100%);
-	-webkit-transform: translateY(-100%);
 }
 
 .form-container {
@@ -21,9 +18,6 @@ main.show-create > .form-container {
 	padding: 1rem;
 	
 	transition: transform .25s ease-in-out;
-	-o-transition: transform .25s ease-in-out;
-	-moz-transition: transform .25s ease-in-out;
-	-webkit-transition: transform .25s ease-in-out;
 }
 
 form {

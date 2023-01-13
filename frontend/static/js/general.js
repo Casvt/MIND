@@ -13,8 +13,8 @@ function toggleNav() {
 };
 
 function showWindow(id) {
-	document.querySelectorAll(`.window-container > div:not(#home)`).forEach(e => {
-		if (e.id === id) {
+	document.querySelectorAll(`.window-container > div`).forEach(e => {
+		if (e.id === id || e.id === 'home') {
 			e.classList.remove('hidden');
 			setTimeout(() => e.classList.add('show-window'), 0);
 		} else {
@@ -25,10 +25,9 @@ function showWindow(id) {
 };
 
 function hideWindow() {
-	const el = document.querySelector('.show-window')
-	if (el) {
-		el.classList.remove('show-window');
-	};
+	document.querySelectorAll('.show-window').forEach(e => {
+		e.classList.remove('show-window');
+	});
 };
 
 // code run on load

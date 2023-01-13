@@ -33,11 +33,11 @@
 	padding-block: .5rem;
 }
 
-.table-container > table td {
+#services-list > tr > td {
 	border-top: 1px solid var(--color-gray);
 }
 
-.table-container > table tr:has(input:not(:read-only)) td {
+#services-list > tr.edit > td {
 	padding-block: .5rem;
 }
 
@@ -69,7 +69,7 @@
 	padding: 0;
 }
 
-#services-list tr:has(input:not(:read-only)) td.action-column {
+#services-list > tr.edit > td.action-column {
 	padding-block: 1rem;
 }
 
@@ -86,12 +86,12 @@
 	height: 1rem;
 }
 
-#services-list tr:has(input:read-only) > td.action-column > button[data-type="edit"],
-#services-list tr:not(:has(input:read-only)) > td.action-column > button[data-type="save"] {
+#services-list > tr:not(.edit) > td.action-column > button[data-type="edit"],
+#services-list > tr.edit > td.action-column > button[data-type="save"] {
 	display: inline-block;
 }
 
-#services-list tr:not(:has(input:read-only)) > td.action-column > button[data-type="edit"],
-#services-list tr:has(input:read-only) > td.action-column > button[data-type="save"] {
+#services-list > tr.edit > td.action-column > button[data-type="edit"],
+#services-list > tr:not(.edit) > td.action-column > button[data-type="save"] {
 	display: none;
 }

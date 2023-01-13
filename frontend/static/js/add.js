@@ -37,7 +37,7 @@ function addReminder() {
 };
 
 function showAdd() {
-	if (document.getElementById('no-service-error').classList.contains('hidden')) {
+	if (!document.getElementById('add-entry').classList.contains('error')) {
 		showWindow('add');
 	};
 };

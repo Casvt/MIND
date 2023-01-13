@@ -10,7 +10,7 @@ function fillNotificationSelection() {
 	})
 	.then(json => {
 		if (json.result.length) {
-			document.getElementById('no-service-error').classList.add('hidden');
+			document.getElementById('add-entry').classList.remove('error', 'error-icon');
 			[document.getElementById('notification-service-input'),
 			document.getElementById('notification-service-edit-input')].forEach(options => {
 				options.innerHTML = '';
@@ -78,7 +78,7 @@ function fillNotificationSelection() {
 				table.appendChild(entry);
 			});	
 		} else {
-			document.getElementById('no-service-error').classList.remove('hidden');
+			document.getElementById('add-entry').classList.add('error', 'error-icon');
 		};
 	})
 	.catch(e => {
@@ -102,6 +102,9 @@ function deleteService(id) {
 		};
 		
 		row.remove();
+		if (document.querySelectorAll('#services-list > tr:not(#add-row)').length === 0) {
+			document.getElementById('add-entry').classList.add('error', 'error-icon');
+		};
 	})
 	.catch(e => {
 		if (e === 401) {
@@ -118,6 +121,7 @@ function deleteService(id) {
 
 function editService(id) {
 	document.querySelectorAll(`tr[data-id="${id}"] input`).forEach(e => e.removeAttribute('readonly'));
+	document.querySelector(`tr[data-id="${id}"]`).classList.add('edit');
 };
 
 function saveService(id) {

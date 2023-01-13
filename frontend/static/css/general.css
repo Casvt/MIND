@@ -185,9 +185,6 @@ nav {
 	background-color: var(--color-gray);
 	
 	transition: left .3s ease-in-out;
-	-o-transition: left .3s ease-in-out;
-	-moz-transition: left .3s ease-in-out;
-	-webkit-transition: left .3s ease-in-out;
 }
 
 nav > div {
@@ -212,9 +209,6 @@ nav > div > button {
 	color: var(--color-light);
 	
 	transition: background-color .1s ease-in-out;
-	-o-transition: background-color .1s ease-in-out;
-	-moz-transition: background-color .1s ease-in-out;
-	-webkit-transition: background-color .1s ease-in-out;
 }
 
 nav > div > button:hover {
@@ -235,9 +229,6 @@ nav > div > button svg {
 	overflow-x: hidden;
 	
 	transition: margin-left .3s ease-in-out;
-	-o-transition: margin-left .3s ease-in-out;
-	-moz-transition: margin-left .3s ease-in-out;
-	-webkit-transition: margin-left .3s ease-in-out;
 }
 
 .window-container > div {
@@ -245,22 +236,12 @@ nav > div > button svg {
 	flex: 0 0 auto;
 	
 	transform: translateX(0);
-	-o-transform: translateX(0);
-	-moz-transform: translateX(0);
-	-webkit-transform: translateX(0);
 
 	transition: transform .5s ease-in-out;
-	-o-transition: transform .5s ease-in-out;
-	-moz-transition: transform .5s ease-in-out;
-	-webkit-transition: transform .5s ease-in-out;
 }
 
-.window-container:has(.show-window) #home,
-.window-container:has(.show-window) .show-window {
+.window-container > div.show-window {
 	transform: translateX(-100%);
-	-o-transform: translateX(-100%);
-	-moz-transform: translateX(-100%);
-	-webkit-transform: translateX(-100%);
 }
 
 .window-container > div:not(#home) {
