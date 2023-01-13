@@ -92,6 +92,6 @@
 }
 
 #services-list > tr.edit > td.action-column > button[data-type="edit"],
-#services-list > tr:not(.edit) > td.action-column > button[data-type="save"] {
+#services-list > tr:not(.edit):not(#add-row) > td.action-column > button[data-type="save"] {
 	display: none;
 }
