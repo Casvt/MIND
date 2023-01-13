@@ -3,18 +3,11 @@
 	max-width: 40rem;
 	margin: auto;
 	
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	gap: 1rem;
-	
 	padding-block: clamp(1rem, 4vw, 2rem);
 }
 
 #search-form {
 	margin-inline: 1rem;
-	flex-grow: 1;
 }
 
 .search-bar {

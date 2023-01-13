@@ -137,8 +137,10 @@ h1 {
 }
 
 noscript {
-	width: 90%;
+	display: block;
+	max-width: 95%;
 	margin-inline: 1rem;
+	margin-bottom: 1rem;
 
 	border-radius: 4px;
 	padding: 1rem;
