@@ -373,7 +373,7 @@ def api_reminders_list():
 		GET:
 			Description: Get a list of all reminders
 			Parameters (url):
-				sort_by: how to sort the result. Allowed values are 'title', 'title_reversed', 'date_added' and 'date_added_reversed'
+				sort_by: how to sort the result. Allowed values are 'title', 'title_reversed', 'time' and 'time_reversed'
 			Returns:
 				200:
 					The id, title, url and username of every reminder
