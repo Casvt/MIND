@@ -6,21 +6,22 @@ from typing import Union
 
 from flask import g
 
-NOTED_DB_FILE = 'Noted.db'
-
 class Singleton(type):
-        _instances = {}
-        def __call__(cls, *args, **kwargs):
-                i = f'{cls}{current_thread()}'
-                if i not in cls._instances:
-                        cls._instances[i] = super(Singleton, cls).__call__(*args, **kwargs)
+	_instances = {}
+	def __call__(cls, *args, **kwargs):
+		i = f'{cls}{current_thread()}'
+		if i not in cls._instances:
+			cls._instances[i] = super(Singleton, cls).__call__(*args, **kwargs)
 
-                return cls._instances[i]
+		return cls._instances[i]
 
 class DBConnection(Connection, metaclass=Singleton):
-        def __init__(self, file: str, timeout: float):
-                super().__init__(file, timeout=timeout)
-                super().cursor().execute("PRAGMA foreign_keys = ON;")
+	file = ''
+	
+	def __init__(self, timeout: float) -> None:
+		super().__init__(self.file, timeout=timeout)
+		super().cursor().execute("PRAGMA foreign_keys = ON;")
+		return
 
 def get_db(output_type: Union[dict, tuple]=tuple):
 	"""Get a database cursor instance. Coupled to Flask's g.
@@ -34,7 +35,7 @@ def get_db(output_type: Union[dict, tuple]=tuple):
 	try:
 			cursor = g.cursor
 	except AttributeError:
-			db = DBConnection(NOTED_DB_FILE, timeout=20.0)
+			db = DBConnection(timeout=20.0)
 			cursor = g.cursor = db.cursor()
 
 	if output_type is dict:
