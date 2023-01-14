@@ -39,6 +39,8 @@ function addReminder() {
 function showAdd() {
 	if (!document.getElementById('add-entry').classList.contains('error')) {
 		showWindow('add');
+	} else {
+		showWindow('notification');
 	};
 };
 
