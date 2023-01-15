@@ -2,7 +2,8 @@
 
 from sqlite3 import IntegrityError
 from threading import Thread
-from time import sleep, time as epoch_time
+from time import sleep
+from time import time as epoch_time
 from typing import List, Literal
 
 from apprise import Apprise
@@ -12,6 +13,12 @@ from backend.custom_exceptions import (InvalidTime,
                                        NotificationServiceNotFound,
                                        ReminderNotFound)
 from backend.db import close_db, get_db
+
+filter_function = lambda query, p: (
+	query in p["title"].lower()
+	or query in p["text"].lower()
+	or query in p["notification_service_title"].lower()
+)
 
 class ReminderHandler():
 	"""Run in a thread to handle the set reminders
@@ -249,16 +256,11 @@ class Reminders:
 			List[dict]: All reminders that match. Similar output to self.fetchall
 		"""		
 		query = query.lower()
-		passwords = self.fetchall()
-		passwords = list(filter(
-			lambda p: (
-				query in p["title"].lower()
-				or query in p["text"].lower()
-				or query in p["notification_service_title"].lower()
-			),
-			passwords
+		reminders = list(filter(
+			lambda p: filter_function(query, p),
+			self.fetchall()
 		))
-		return passwords
+		return reminders
 
 	def fetchone(self, id: int) -> Reminder:
 		"""Get one reminder
