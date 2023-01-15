@@ -1,9 +1,9 @@
 function fillTable(result) {
 	const table = document.getElementById('reminder-list');
-	table.querySelectorAll('button:not(#add-entry)').forEach(e => e.remove());
+	table.querySelectorAll('div:not(#add-entry)').forEach(e => e.remove());
 
 	result.forEach(reminder => {
-		const entry = document.createElement('button');
+		const entry = document.createElement('div');
 		entry.classList.add('entry');
 		entry.dataset.id = reminder.id;
 		
@@ -36,6 +36,11 @@ function fillTable(result) {
 		options.appendChild(delete_entry);
 
 		table.appendChild(entry);
+		
+		// Increase size if title is overflowing
+		if (title.clientHeight < title.scrollHeight) {
+			entry.classList.add('expand');
+		};
 	});
 };
 

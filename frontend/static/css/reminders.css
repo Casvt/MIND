@@ -47,12 +47,14 @@
 
 /* REMINDER LIST */
 #reminder-list {
+	--gap: 1rem;
+	--entry-width: 13rem;
 	max-width: 43rem;
 	margin-inline: auto;
 	
 	display: flex;
-	justify-content: center;
-	gap: 1rem;
+	justify-content: left;
+	gap: var(--gap);
 	flex-wrap: wrap;
 	
 	padding: 1rem;
@@ -79,7 +81,7 @@
 }
 
 .entry {
-	width: 13rem;
+	width: var(--entry-width);
 	height: 6rem;
 	position: relative;
 
@@ -87,12 +89,19 @@
 	flex-direction: column;
 	justify-content: space-between;
 	
-	padding: 1rem;
+	border-radius: 4px;
+	padding: .75rem;
 	background-color: var(--color-gray);
+}
+
+.entry.expand {
+	width: calc(var(--entry-width) * 2 + var(--gap));
 }
 
 .entry h2 {
 	overflow-y: hidden;
+	
+	text-align: left;
 }
 
 .entry-overlay {
