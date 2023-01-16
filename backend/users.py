@@ -8,7 +8,7 @@ from backend.reminders import Reminders
 from backend.security import generate_salt_hash, get_hash
 
 ONEPASS_USERNAME_CHARACTERS = 'abcedfghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.!@$'
-ONEPASS_INVALID_USERNAMES = ['users','api']
+ONEPASS_INVALID_USERNAMES = ['reminders','api']
 
 class User:
 	"""Represents an user account
