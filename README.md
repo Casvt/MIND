@@ -1,7 +1,7 @@
 # Noted Reminders
 A simple self hosted reminder platform that uses push to send notifications to your device. Set the reminder and forget about it! 📢
 
-Noted is a simple self hosted application for creating reminders that are pushed to your device using the [Apprise](https://github.com/caronc/apprise) API. You can send messages to just about every platform, including scheduled emails!
+Noted is a simple self hosted application for creating reminders that get pushed to your device using the [Apprise](https://github.com/caronc/apprise) API. You can send messages to just about every platform, including scheduled emails!
 
 ![noted-reminders-dashboard](https://user-images.githubusercontent.com/57927413/212753936-8306b0bb-57a7-4912-a675-d92e25cd2220.png)
 
