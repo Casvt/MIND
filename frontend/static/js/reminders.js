@@ -93,7 +93,7 @@ function clearSearch() {
 }
 
 function deleteReminder(id) {
-	const entry = document.querySelector(`button.entry[data-id="${id}"]`);
+	const entry = document.querySelector(`div.entry[data-id="${id}"]`);
 	entry.remove();
 	
 	fetch(`/api/reminders/${id}?api_key=${api_key}`, {
