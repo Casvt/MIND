@@ -95,6 +95,10 @@
 	background-color: var(--color-gray);
 }
 
+div.entry.fit {
+	flex-grow: 1;
+}
+
 .entry.expand {
 	width: calc(var(--entry-width) * 2 + var(--gap));
 }

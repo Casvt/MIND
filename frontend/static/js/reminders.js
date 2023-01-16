@@ -1,6 +1,6 @@
 function fillTable(result) {
 	const table = document.getElementById('reminder-list');
-	table.querySelectorAll('div:not(#add-entry)').forEach(e => e.remove());
+	table.querySelectorAll('div.entry').forEach(e => e.remove());
 
 	result.forEach(reminder => {
 		const entry = document.createElement('div');
@@ -37,11 +37,11 @@ function fillTable(result) {
 
 		table.appendChild(entry);
 		
-		// Increase size if title is overflowing
 		if (title.clientHeight < title.scrollHeight) {
 			entry.classList.add('expand');
 		};
 	});
+	table.querySelectorAll('div.entry').forEach(reminder => reminder.classList.add('fit'));
 };
 
 function fillList() {
@@ -119,7 +119,7 @@ function deleteReminder(id) {
 // code run on load
 
 fillList();
-setInterval(fillList, 60000);
+// setInterval(fillList, 60000);
 
 document.getElementById('search-form').setAttribute('action', 'javascript:search();');
 document.getElementById('clear-button').addEventListener('click', e => clearSearch());
