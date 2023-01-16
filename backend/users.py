@@ -106,7 +106,7 @@ def register_user(username: str, password: str) -> int:
 	Returns:
 		user_id (int): The id of the new user. User registered successful
 	"""
-	#check if username is valid
+	# Check if username is valid
 	_check_username(username)
 
 	cursor = get_db()

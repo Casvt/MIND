@@ -6,13 +6,15 @@ from typing import Any, Tuple
 
 from flask import Blueprint, g, request
 
-from backend.custom_exceptions import (AccessUnauthorized, InvalidKeyValue, InvalidTime, InvalidURL,
-                                       KeyNotFound, NotificationServiceInUse, NotificationServiceNotFound, ReminderNotFound,
-                                       UsernameInvalid, UsernameTaken,
-                                       UserNotFound)
+from backend.custom_exceptions import (AccessUnauthorized, InvalidKeyValue,
+                                       InvalidTime, InvalidURL, KeyNotFound,
+                                       NotificationServiceInUse,
+                                       NotificationServiceNotFound,
+                                       ReminderNotFound, UsernameInvalid,
+                                       UsernameTaken, UserNotFound)
 from backend.notification_service import (NotificationService,
                                           NotificationServices)
-from backend.reminders import reminder_handler, Reminders
+from backend.reminders import Reminders, reminder_handler
 from backend.users import User, register_user
 
 api = Blueprint('api', __name__)

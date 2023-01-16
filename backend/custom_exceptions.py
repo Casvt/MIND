@@ -1,5 +1,7 @@
 #-*- coding: utf-8 -*-
 
+from typing import Any, Dict
+
 class UsernameTaken(Exception):
 	"""The username is already taken"""
 	api_response = {'error': 'UsernameTaken', 'result': {}, 'code': 400}
@@ -43,7 +45,7 @@ class KeyNotFound(Exception):
 		super().__init__(self.key)
 
 	@property
-	def api_response(self):
+	def api_response(self) -> Dict[str, Any]:
 		return {'error': 'KeyNotFound', 'result': {'key': self.key}, 'code': 400}
 
 class InvalidKeyValue(Exception):
@@ -54,5 +56,5 @@ class InvalidKeyValue(Exception):
 		super().__init__(self.key)
 
 	@property
-	def api_response(self):
+	def api_response(self) -> Dict[str, Any]:
 		return {'error': 'KeyNotFound', 'result': {'key': self.key, 'value': self.value}, 'code': 400}
