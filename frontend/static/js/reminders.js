@@ -119,7 +119,7 @@ function deleteReminder(id) {
 // code run on load
 
 fillList();
-// setInterval(fillList, 60000);
+setInterval(fillList, 60000);
 
 document.getElementById('search-form').setAttribute('action', 'javascript:search();');
 document.getElementById('clear-button').addEventListener('click', e => clearSearch());
