@@ -264,7 +264,7 @@ class Reminder:
 		return
 
 class Reminders:
-	"""Represents the reminder vault of the user account
+	"""Represents the reminder library of the user account
 	"""	
 	sort_functions = {
 		'title': (lambda r: (r['title'], r['time']), False),

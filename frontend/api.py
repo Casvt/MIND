@@ -373,7 +373,7 @@ def api_notification_service(n_id: int):
 		return return_api({})
 
 #===================
-# Vault endpoints
+# Library endpoints
 #===================
 
 @api.route('/reminders', methods=['GET','POST'])
@@ -391,7 +391,7 @@ def api_reminders_list():
 				sort_by: how to sort the result. Allowed values are 'title', 'title_reversed', 'time' and 'time_reversed'
 			Returns:
 				200:
-					The id, title, url and username of every reminder
+					The id, title, text, time, notification_service and notification_service_title of each reminder
 		POST:
 			Description: Add a reminder
 			Parameters (body (content-type: application/json)):
