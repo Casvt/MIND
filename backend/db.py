@@ -6,21 +6,24 @@ from typing import Union
 
 from flask import g
 
-NOTED_DB_FILE = 'Noted.db'
+__DATABASE_VERSION__ = 1
 
 class Singleton(type):
-        _instances = {}
-        def __call__(cls, *args, **kwargs):
-                i = f'{cls}{current_thread()}'
-                if i not in cls._instances:
-                        cls._instances[i] = super(Singleton, cls).__call__(*args, **kwargs)
+	_instances = {}
+	def __call__(cls, *args, **kwargs):
+		i = f'{cls}{current_thread()}'
+		if i not in cls._instances:
+			cls._instances[i] = super(Singleton, cls).__call__(*args, **kwargs)
 
-                return cls._instances[i]
+		return cls._instances[i]
 
 class DBConnection(Connection, metaclass=Singleton):
-        def __init__(self, file: str, timeout: float):
-                super().__init__(file, timeout=timeout)
-                super().cursor().execute("PRAGMA foreign_keys = ON;")
+	file = ''
+	
+	def __init__(self, timeout: float) -> None:
+		super().__init__(self.file, timeout=timeout)
+		super().cursor().execute("PRAGMA foreign_keys = ON;")
+		return
 
 def get_db(output_type: Union[dict, tuple]=tuple):
 	"""Get a database cursor instance. Coupled to Flask's g.
@@ -34,7 +37,7 @@ def get_db(output_type: Union[dict, tuple]=tuple):
 	try:
 			cursor = g.cursor
 	except AttributeError:
-			db = DBConnection(NOTED_DB_FILE, timeout=20.0)
+			db = DBConnection(timeout=20.0)
 			cursor = g.cursor = db.cursor()
 
 	if output_type is dict:
@@ -55,6 +58,16 @@ def close_db(e=None) -> None:
 		db.commit()
 	except AttributeError:
 		pass
+	return
+
+def migrate_db(current_db_version: int) -> None:
+	"""
+	Migrate a Noted database from it's current version 
+	to the newest version supported by the Noted version installed.
+	"""
+	print('Migrating database to newer version...')
+	cursor = get_db()
+		
 	return
 
 def setup_db() -> None:
@@ -84,10 +97,43 @@ def setup_db() -> None:
 			text TEXT,
 			time INTEGER NOT NULL,
 			notification_service INTEGER NOT NULL,
+
+			repeat_quantity VARCHAR(15),
+			repeat_interval INTEGER,
+			original_time INTEGER,
 			
 			FOREIGN KEY (user_id) REFERENCES users(id),
 			FOREIGN KEY (notification_service) REFERENCES notification_services(id)
 		);
+		CREATE TABLE IF NOT EXISTS templates(
+			id INTEGER PRIMARY KEY,
+			user_id INTEGER NOT NULL,
+			title VARCHAR(255) NOT NULL,
+			text TEXT,
+			notification_service INTEGER NOT NULL,
+			
+			FOREIGN KEY (user_id) REFERENCES users(id),
+			FOREIGN KEY (notification_service) REFERENCES notification_services(id)
+		);
+		CREATE TABLE IF NOT EXISTS config(
+			key VARCHAR(255) PRIMARY KEY,
+			value TEXT NOT NULL
+		);
 	""")
+
+	cursor.execute("""
+		INSERT OR IGNORE INTO config(key, value)
+		VALUES ('database_version', ?);
+		""",
+		(__DATABASE_VERSION__,)
+	)
+	current_db_version = int(cursor.execute("SELECT value FROM config WHERE key = 'database_version' LIMIT 1;").fetchone()[0])
+	
+	if current_db_version < __DATABASE_VERSION__:
+		migrate_db(current_db_version)
+		cursor.execute(
+			"UPDATE config SET value = ? WHERE key = 'database_version' LIMIT 1;",
+			(__DATABASE_VERSION__,)
+		)
 
 	return

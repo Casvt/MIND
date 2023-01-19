@@ -2,32 +2,33 @@
 #-*- coding: utf-8 -*-
 
 from os import urandom
-from os.path import dirname, join
+from os.path import dirname, join, abspath
 from sys import version_info
 
 from flask import Flask, render_template, request
 from waitress.server import create_server
 
-from backend.db import close_db, setup_db
+from backend.db import close_db, setup_db, DBConnection
 from frontend.api import api, reminder_handler
 from frontend.ui import ui
 
 HOST = '0.0.0.0'
 PORT = '8080'
 THREADS = 10
+DB_FILENAME = 'Noted.db'
 
 def _folder_path(*folders) -> str:
 	"""Turn filepaths relative to the project folder into absolute paths
 	Returns:
 		str: The absolute filepath
 	"""
-	return join(dirname(__file__), *folders)
+	return join(dirname(abspath(__file__)), *folders)
 
 def _create_app() -> Flask:
 	"""Create a Flask app instance
 	Returns:
 		Flask: The created app instance
-	"""	
+	""" 
 	app = Flask(
 		__name__,
 		template_folder=_folder_path('frontend','templates'),
@@ -78,6 +79,7 @@ def Noted() -> None:
 	# Register web server
 	app = _create_app()
 	with app.app_context():
+		DBConnection.file = _folder_path(DB_FILENAME)
 		setup_db()
 		reminder_handler._find_next_reminder()
 

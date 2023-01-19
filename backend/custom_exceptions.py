@@ -1,5 +1,7 @@
 #-*- coding: utf-8 -*-
 
+from typing import Any, Dict
+
 class UsernameTaken(Exception):
 	"""The username is already taken"""
 	api_response = {'error': 'UsernameTaken', 'result': {}, 'code': 400}
@@ -26,7 +28,13 @@ class NotificationServiceNotFound(Exception):
 
 class NotificationServiceInUse(Exception):
 	"""The notification service is wished to be deleted but a reminder is still using it"""
-	api_response = {'error': 'NotificationServiceInUse', 'result': {}, 'code': 400}
+	def __init__(self, type: str=''):
+		self.type = type
+		super().__init__(self.type)
+
+	@property
+	def api_response(self) -> Dict[str, Any]:
+		return {'error': 'NotificationServiceInUse', 'result': {'type': self.type}, 'code': 400}
 
 class InvalidTime(Exception):
 	"""The time given is in the past"""
@@ -43,7 +51,7 @@ class KeyNotFound(Exception):
 		super().__init__(self.key)
 
 	@property
-	def api_response(self):
+	def api_response(self) -> Dict[str, Any]:
 		return {'error': 'KeyNotFound', 'result': {'key': self.key}, 'code': 400}
 
 class InvalidKeyValue(Exception):
@@ -54,5 +62,9 @@ class InvalidKeyValue(Exception):
 		super().__init__(self.key)
 
 	@property
-	def api_response(self):
-		return {'error': 'KeyNotFound', 'result': {'key': self.key, 'value': self.value}, 'code': 400}
+	def api_response(self) -> Dict[str, Any]:
+		return {'error': 'InvalidKeyValue', 'result': {'key': self.key, 'value': self.value}, 'code': 400}
+
+class TemplateNotFound(Exception):
+	"""The template was not found"""
+	api_response = {'error': 'TemplateNotFound', 'result': {}, 'code': 404}

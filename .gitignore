@@ -133,4 +133,6 @@ dmypy.json
 
 # VS code
 *.code-workspace
-.vscode/
+
+# Docker
+Dockerfile

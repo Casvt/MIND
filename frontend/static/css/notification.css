@@ -5,7 +5,6 @@
 	flex-direction: column;
 	align-items: center;
 	gap: 1rem;
-	overflow-x: auto;
 }
 
 #add-service-button {
@@ -18,66 +17,63 @@
 	width: 1rem;
 }
 
-.table-container > table {
+.overflow-container {
 	margin-inline: auto;
-	
+	width: 100%;
+	max-width: 50rem;
+
+	overflow-x: auto;
+}
+
+.overflow-container > table {
 	border-spacing: 0px;
 }
 
-.table-container > table th,
-.table-container > table td {
+.overflow-container > table th,
+.overflow-container > table td {
 	text-align: left;
 }
 
-.table-container > table th {
-	padding-block: .5rem;
+.overflow-container > table th {
+	padding: .5rem;
 }
 
 #services-list > tr > td {
 	border-top: 1px solid var(--color-gray);
-}
-
-#services-list > tr.edit > td {
-	padding-block: .5rem;
+	padding: .25rem;
 }
 
 .title-column {
-	width: 8rem;
+	min-width: 9.5rem;
+	width: 25%;
 	
 	padding-left: 1.5rem;
 	padding-right: 1rem;
 }
 
 .url-column {
-	width: 21rem;
+	min-width: 26rem;
+	width: 65%;
 }
 
 #services-list input {
-	min-width: 6rem;
-
 	border-radius: 2px;
-	padding: .5rem;
+	padding: .25rem;
 	box-shadow: none;
-}
-
-.url-column > input {
-	min-width: 10rem;
 }
 
 #services-list input:read-only {
 	border-color: transparent;
-	padding: 0;
 }
 
-#services-list > tr.edit > td.action-column {
-	padding-block: 1rem;
-}
-
-.action-column {
+#services-list > tr > td.action-column {
+	min-width: 4rem;
+	width: 20%;
+	
 	display: flex;
 	gap: .5rem;
 	
-	padding: .5rem;
+	padding: calc(.5rem + 2px);
 	padding-right: 1.5rem;
 }
 
@@ -92,6 +88,6 @@
 }
 
 #services-list > tr.edit > td.action-column > button[data-type="edit"],
-#services-list > tr:not(.edit) > td.action-column > button[data-type="save"] {
+#services-list > tr:not(.edit):not(#add-row) > td.action-column > button[data-type="save"] {
 	display: none;
 }

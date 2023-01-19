@@ -9,7 +9,7 @@ def get_hash(salt: bytes, data: str) -> bytes:
 	"""Hash a string using the supplied salt
 
 	Args:
-		salt (bytes): The salt to use wwhen hashing
+		salt (bytes): The salt to use when hashing
 		data (str): The data to hash
 
 	Returns:

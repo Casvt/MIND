@@ -6,13 +6,16 @@ from typing import Any, Tuple
 
 from flask import Blueprint, g, request
 
-from backend.custom_exceptions import (AccessUnauthorized, InvalidKeyValue, InvalidTime, InvalidURL,
-                                       KeyNotFound, NotificationServiceInUse, NotificationServiceNotFound, ReminderNotFound,
-                                       UsernameInvalid, UsernameTaken,
-                                       UserNotFound)
+from backend.custom_exceptions import (AccessUnauthorized, InvalidKeyValue,
+                                       InvalidTime, InvalidURL, KeyNotFound,
+                                       NotificationServiceInUse,
+                                       NotificationServiceNotFound,
+                                       ReminderNotFound, UsernameInvalid,
+                                       UsernameTaken, UserNotFound)
 from backend.notification_service import (NotificationService,
                                           NotificationServices)
-from backend.reminders import reminder_handler, Reminders
+from backend.reminders import Reminders, reminder_handler
+from backend.templates import Template, Templates
 from backend.users import User, register_user
 
 api = Blueprint('api', __name__)
@@ -80,9 +83,26 @@ def extract_key(values: dict, key: str, check_existence: bool=True) -> Any:
 				value = int(value)
 			except (ValueError, TypeError):
 				raise InvalidKeyValue(key, value)
+				
+		elif key == 'repeat_interval':
+			try:
+				value = int(value)
+				if value <= 0:
+					raise ValueError
+			except (ValueError, TypeError):
+				raise InvalidKeyValue(key, value)
 			
 		elif key == 'sort_by':
 			if not value in Reminders.sort_functions:
+				raise InvalidKeyValue(key, value)
+				
+		elif key == 'repeat_quantity':
+			if not value in ("year", "month", "week", "day", "hours", "minutes"):
+				raise InvalidKeyValue(key, value)
+				
+		elif key in ('username', 'password', 'new_password', 'title', 'url',
+					'text', 'query'):
+			if not isinstance(value, str):
 				raise InvalidKeyValue(key, value)
 
 	else:
@@ -358,7 +378,7 @@ def api_notification_service(n_id: int):
 		return return_api({})
 
 #===================
-# Vault endpoints
+# Library endpoints
 #===================
 
 @api.route('/reminders', methods=['GET','POST'])
@@ -376,7 +396,7 @@ def api_reminders_list():
 				sort_by: how to sort the result. Allowed values are 'title', 'title_reversed', 'time' and 'time_reversed'
 			Returns:
 				200:
-					The id, title, url and username of every reminder
+					The id, title, text, time, notification_service, notification_service_title, repeat_quantity and repeat_interval of each reminder
 		POST:
 			Description: Add a reminder
 			Parameters (body (content-type: application/json)):
@@ -384,9 +404,11 @@ def api_reminders_list():
 				time (required): the epoch timestamp that the reminder should be sent at
 				notification_service (required): the id of the notification service to use to send the notification
 				text: the body of the reminder
+				repeat_quantity ('year', 'month', 'week', 'day', 'hours', 'minutes'): The quantity of the repeat_interval
+				repeat_interval: The number of the interval
 			Returns:
 				200:
-					The id of the new reminder entry
+					The info about the new reminder entry
 				400:
 					KeyNotFound: One of the required parameters was not given
 	"""
@@ -403,11 +425,15 @@ def api_reminders_list():
 		time = extract_key(data, 'time')
 		notification_service = extract_key(data, 'notification_service')
 		text = extract_key(data, 'text', check_existence=False)
+		repeat_quantity = extract_key(data, 'repeat_quantity', check_existence=False)
+		repeat_interval = extract_key(data, 'repeat_interval', check_existence=False)
 
 		result = reminders.add(title=title,
 								time=time,
 								notification_service=notification_service,
-								text=text)
+								text=text,
+								repeat_quantity=repeat_quantity,
+								repeat_interval=repeat_interval)
 		return return_api(result.get(), code=201)
 
 @api.route('/reminders/search', methods=['GET'])
@@ -433,7 +459,7 @@ def api_reminders_query():
 	result = g.user_data.reminders.search(query)
 	return return_api(result)
 
-@api.route('/reminders/<r_id>', methods=['GET','PUT','DELETE'])
+@api.route('/reminders/<int:r_id>', methods=['GET','PUT','DELETE'])
 @error_handler
 @auth
 def api_get_reminder(r_id: int):
@@ -458,6 +484,8 @@ def api_get_reminder(r_id: int):
 				time: The new epoch timestamp the the reminder should be send.
 				notification_service: The new id of the notification service to use to send the reminder.
 				text: The new body of the reminder.
+				repeat_quantity ('year', 'month', 'week', 'day', 'hours', 'minutes'): The quantity of the repeat_interval
+				repeat_interval: The number of the interval 
 			Returns:
 				200:
 					Reminder updated successfully
@@ -482,13 +510,123 @@ def api_get_reminder(r_id: int):
 		time = extract_key(data, 'time', check_existence=False)
 		notification_service = extract_key(data, 'notification_service', check_existence=False)
 		text = extract_key(data, 'text', check_existence=False)
+		repeat_quantity = extract_key(data, 'repeat_quantity', check_existence=False)
+		repeat_interval = extract_key(data, 'repeat_interval', check_existence=False)
+
 		
 		result = reminders.fetchone(r_id).update(title=title,
 												time=time,
 												notification_service=notification_service,
-												text=text)
+												text=text,
+												repeat_quantity=repeat_quantity,
+												repeat_interval=repeat_interval)
 		return return_api(result)
 
 	elif request.method == 'DELETE':
 		reminders.fetchone(r_id).delete()
+		return return_api({})
+
+#===================
+# Template endpoints
+#===================
+
+@api.route('/templates', methods=['GET', 'POST'])
+@error_handler
+@auth
+def api_get_templates():
+	"""
+	Endpoint: /templates
+	Description: Manage the templates
+	Requires being logged in: Yes
+	Methods:
+		GET:
+			Description: Get a list of all templates
+			Returns:
+				200:
+					The id, title, notification_service and text of every template
+		POST:
+			Description: Add a template
+			Parameters (body (content-type: application/json)):
+				title (required): the title of the template
+				notification_service (required): the id of the notification service to use to send the notification
+				text: the body of the template
+			Returns:
+				200:
+					The info about the new template entry
+				400:
+					KeyNotFound: One of the required parameters was not given
+	"""
+	templates: Templates = g.user_data.templates
+	
+	if request.method == 'GET':
+		result = templates.fetchall()
+		return return_api(result)
+	
+	elif request.method == 'POST':
+		data = request.get_json()
+		title = extract_key(data, 'title')
+		notification_service = extract_key(data, 'notification_service')
+		text = extract_key(data, 'text', check_existence=False)
+		
+		result = templates.add(title=title,
+								notification_service=notification_service,
+								text=text)
+		return return_api(result.get(), code=201)
+
+@api.route('/templates/<int:t_id>', methods=['GET', 'PUT', 'DELETE'])
+@error_handler
+@auth
+def api_get_template(t_id: int):
+	"""
+	Endpoint: /templates/<t_id>
+	Description: Manage a specific template
+	Requires being logged in: Yes
+	URL Parameters:
+		<t_id>:
+			The id of the template
+	Methods:
+		GET:
+			Returns:
+				200:
+					All info about the template
+				404:
+					No template found with the given id
+		PUT:
+			Description: Edit the template
+			Parameters (body (content-type: application/json)):
+				title: The new title of the entry.
+				notification_service: The new id of the notification service to use to send the reminder.
+				text: The new body of the template.
+			Returns:
+				200:
+					Template updated successfully
+				404:
+					No template found with the given id
+		DELETE:
+			Description: Delete the template
+			Returns:
+				200:
+					Template deleted successfully
+				404:
+					No template found with the given id
+	"""
+	template: Template = g.user_data.templates.fetchone(t_id)
+	
+	if request.method == 'GET':
+		result = template.get()
+		return return_api(result)
+		
+	elif request.method == 'PUT':
+		data = request.get_json()
+		title = extract_key(data, 'title', check_existence=False)
+		notification_service = extract_key(data, 'notification_service', check_existence=False)
+		text = extract_key(data, 'text', check_existence=False)
+		
+		result = template.update(title=title,
+								notification_service=notification_service,
+								text=text)
+		return return_api(result)
+
+	elif request.method == 'DELETE':
+		template.delete()
 		return return_api({})

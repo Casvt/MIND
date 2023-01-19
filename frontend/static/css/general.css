@@ -2,6 +2,8 @@
 	box-sizing: border-box;
 	margin: 0;
 	padding: 0;
+	font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+	font-size: 1rem;
 }
 
 :root {
@@ -260,6 +262,27 @@ nav > div > button svg {
 
 .window-container > div:not(#home) > p > a {
 	color: var(--color-light);
+}
+
+.tab-selector {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 1rem;
+	
+	padding-top: 1rem;
+}
+
+.tab-selector > button {
+	border: 2px solid var(--color-gray);
+	padding: .5rem 1rem;
+	transition: background-color .3s ease-in-out;
+}
+
+.tab-selector > button[data-selected="true"] {
+	background-color: var(--color-gray);
 }
 
 @media (max-width: 543px) {

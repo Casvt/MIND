@@ -6,9 +6,10 @@ from backend.db import get_db
 from backend.notification_service import NotificationServices
 from backend.reminders import Reminders
 from backend.security import generate_salt_hash, get_hash
+from backend.templates import Templates
 
 ONEPASS_USERNAME_CHARACTERS = 'abcedfghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.!@$'
-ONEPASS_INVALID_USERNAMES = ['users','api']
+ONEPASS_INVALID_USERNAMES = ['reminders','api']
 
 class User:
 	"""Represents an user account
@@ -51,6 +52,17 @@ class User:
 		if not hasattr(self, 'notification_services_instance'):
 			self.notification_services_instance = NotificationServices(self.user_id)
 		return self.notification_services_instance
+
+	@property
+	def templates(self) -> Templates:
+		"""Get access to the templates of the user account
+
+		Returns:
+			Templates: Templates instance that can be used to access the templates of the user account
+		"""	
+		if not hasattr(self, 'templates_instance'):
+			self.templates_instance = Templates(self.user_id)
+		return self.templates_instance
 
 	def edit_password(self, new_password: str) -> None:
 		"""Change the password of the account
@@ -106,7 +118,7 @@ def register_user(username: str, password: str) -> int:
 	Returns:
 		user_id (int): The id of the new user. User registered successful
 	"""
-	#check if username is valid
+	# Check if username is valid
 	_check_username(username)
 
 	cursor = get_db()
