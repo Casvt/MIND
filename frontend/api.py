@@ -99,6 +99,11 @@ def extract_key(values: dict, key: str, check_existence: bool=True) -> Any:
 		elif key == 'repeat_quantity':
 			if not value in ("year", "month", "week", "day", "hours", "minutes"):
 				raise InvalidKeyValue(key, value)
+				
+		elif key in ('username', 'password', 'new_password', 'title', 'url',
+					'text', 'query'):
+			if not isinstance(value, str):
+				raise InvalidKeyValue(key, value)
 
 	else:
 		if key == 'sort_by':
