@@ -15,6 +15,7 @@ from backend.custom_exceptions import (AccessUnauthorized, InvalidKeyValue,
 from backend.notification_service import (NotificationService,
                                           NotificationServices)
 from backend.reminders import Reminders, reminder_handler
+from backend.templates import Template, Templates
 from backend.users import User, register_user
 
 api = Blueprint('api', __name__)
@@ -451,7 +452,7 @@ def api_reminders_query():
 	result = g.user_data.reminders.search(query)
 	return return_api(result)
 
-@api.route('/reminders/<r_id>', methods=['GET','PUT','DELETE'])
+@api.route('/reminders/<int:r_id>', methods=['GET','PUT','DELETE'])
 @error_handler
 @auth
 def api_get_reminder(r_id: int):
@@ -514,4 +515,109 @@ def api_get_reminder(r_id: int):
 
 	elif request.method == 'DELETE':
 		reminders.fetchone(r_id).delete()
+		return return_api({})
+
+#===================
+# Template endpoints
+#===================
+
+@api.route('/templates', methods=['GET', 'POST'])
+@error_handler
+@auth
+def api_get_templates():
+	"""
+	Endpoint: /templates
+	Description: Manage the templates
+	Requires being logged in: Yes
+	Methods:
+		GET:
+			Description: Get a list of all templates
+			Returns:
+				200:
+					The id, title, notification_service and text of every template
+		POST:
+			Description: Add a template
+			Parameters (body (content-type: application/json)):
+				title (required): the title of the template
+				notification_service (required): the id of the notification service to use to send the notification
+				text: the body of the template
+			Returns:
+				200:
+					The info about the new template entry
+				400:
+					KeyNotFound: One of the required parameters was not given
+	"""
+	templates: Templates = g.user_data.templates
+	
+	if request.method == 'GET':
+		result = templates.fetchall()
+		return return_api(result)
+	
+	elif request.method == 'POST':
+		data = request.get_json()
+		title = extract_key(data, 'title')
+		notification_service = extract_key(data, 'notification_service')
+		text = extract_key(data, 'text', check_existence=False)
+		
+		result = templates.add(title=title,
+								notification_service=notification_service,
+								text=text)
+		return return_api(result.get(), code=201)
+
+@api.route('/templates/<int:t_id>', methods=['GET', 'PUT', 'DELETE'])
+@error_handler
+@auth
+def api_get_template(t_id: int):
+	"""
+	Endpoint: /templates/<t_id>
+	Description: Manage a specific template
+	Requires being logged in: Yes
+	URL Parameters:
+		<t_id>:
+			The id of the template
+	Methods:
+		GET:
+			Returns:
+				200:
+					All info about the template
+				404:
+					No template found with the given id
+		PUT:
+			Description: Edit the template
+			Parameters (body (content-type: application/json)):
+				title: The new title of the entry.
+				notification_service: The new id of the notification service to use to send the reminder.
+				text: The new body of the template.
+			Returns:
+				200:
+					Template updated successfully
+				404:
+					No template found with the given id
+		DELETE:
+			Description: Delete the template
+			Returns:
+				200:
+					Template deleted successfully
+				404:
+					No template found with the given id
+	"""
+	template: Template = g.user_data.templates.fetchone(t_id)
+	
+	if request.method == 'GET':
+		result = template.get()
+		return return_api(result)
+		
+	elif request.method == 'PUT':
+		data = request.get_json()
+		title = extract_key(data, 'title', check_existence=False)
+		notification_service = extract_key(data, 'notification_service', check_existence=False)
+		text = extract_key(data, 'text', check_existence=False)
+		
+		result = template.update(title=title,
+								notification_service=notification_service,
+								text=text)
+		return return_api(result)
+
+	elif request.method == 'DELETE':
+		template.delete()
 		return return_api({})

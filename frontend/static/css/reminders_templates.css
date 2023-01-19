@@ -46,7 +46,8 @@
 }
 
 /* REMINDER LIST */
-#reminder-list {
+#reminder-list,
+#template-list {
 	--gap: 1rem;
 	--entry-width: 13rem;
 	max-width: 43rem;
@@ -60,13 +61,15 @@
 	padding: 1rem;
 }
 
-#add-entry {
+#add-entry,
+#add-template {
 	justify-content: center;
 	align-items: center;
 	gap: .5rem;
 }
 
-#add-entry svg {
+#add-entry svg,
+#add-template svg {
 	height: 2rem;
 	width: 2rem;
 }
@@ -95,7 +98,8 @@
 	background-color: var(--color-gray);
 }
 
-div.entry.fit {
+div.entry.fit,
+button.entry.fit {
 	flex-grow: 1;
 }
 
@@ -158,6 +162,11 @@ div.entry.fit {
 
 .entry:hover > .entry-overlay {
 	opacity: 1;
+}
+
+#delete-template {
+	border-color: var(--color-error);
+	color: var(--color-error);
 }
 
 @media (max-width: 543px) {
