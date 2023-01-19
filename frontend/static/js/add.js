@@ -5,6 +5,15 @@ const inputs = {
 	'text': document.getElementById('text-input')
 };
 
+const type_buttons = {
+	'normal-button': document.getElementById('normal-button'),
+	'repeat-button': document.getElementById('repeat-button'),
+	
+	'repeat-bar': document.querySelector('.repeat-bar'),
+	'repeat-interval': document.getElementById('repeat-interval'),
+	'repeat-quantity': document.getElementById('repeat-quantity')
+};
+
 function addReminder() {
 	const data = {
 		'title': inputs.title.value,
@@ -12,6 +21,11 @@ function addReminder() {
 		'notification_service': inputs.notification_service.value,
 		'text': inputs.text.value
 	};
+	if (type_buttons['repeat-button'].dataset.selected === 'true') {
+		data['repeat_quantity'] = type_buttons['repeat-quantity'].value;
+		data['repeat_interval'] = type_buttons['repeat-interval'].value
+	};
+
 	fetch(`/api/reminders?api_key=${api_key}`, {
 		'method': 'POST',
 		'headers': {'Content-Type': 'application/json'},
@@ -50,11 +64,31 @@ function closeAdd() {
 		inputs.title.value = '';
 		inputs.time.value = '';
 		inputs.notification_service.value = document.querySelector('#notification-service-input option[selected]').value;
+		toggleNormal();
 		inputs.text.value = '';
 	}, 500);
+};
+
+function toggleNormal() {
+	type_buttons['normal-button'].dataset.selected = 'true';
+	type_buttons['repeat-button'].dataset.selected = 'false';
+
+	type_buttons['repeat-bar'].classList.add('hidden');
+	type_buttons['repeat-interval'].removeAttribute('required');
+	type_buttons['repeat-interval'].value = '';
+};
+
+function toggleRepeated() {
+	type_buttons['normal-button'].dataset.selected = 'false';
+	type_buttons['repeat-button'].dataset.selected = 'true';
+	
+	type_buttons['repeat-bar'].classList.remove('hidden');
+	type_buttons['repeat-interval'].setAttribute('required', '');
 };
 
 // code run on load
 
 document.getElementById('add-form').setAttribute('action', 'javascript:addReminder();');
+document.getElementById('normal-button').addEventListener('click', e => toggleNormal());
+document.getElementById('repeat-button').addEventListener('click', e => toggleRepeated());
 document.getElementById('close-add').addEventListener('click', e => closeAdd());

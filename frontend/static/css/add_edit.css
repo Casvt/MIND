@@ -12,7 +12,8 @@
 
 .form-container > form input,
 .form-container > form select,
-.form-container > form textarea {
+.form-container > form textarea,
+.form-container > form button {
 	padding: 1rem;
 }
 
@@ -27,11 +28,69 @@
 }
 
 .sub-inputs > input,
-.sub-inputs > select {
+.sub-inputs > select,
+.sub-inputs > button {
 	width: calc(50% - (var(--gap) / 2));
 }
 
-.options > button {
+.sub-inputs > button {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: .75rem;
+	
+	border: 2px solid var(--color-gray);
+
+	font-size: 1.1rem;
+}
+
+.sub-inputs > button > svg {
+	width: 1rem;
+	height: 1rem;
+}
+
+.sub-inputs > button[data-selected="false"] > svg {
+	opacity: 0;
+}
+
+.repeat-bar,
+.repeat-edit-bar {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	overflow-x: auto;
+
+	border: 2px solid var(--color-gray);
+	border-radius: 4px;
+}
+
+.repeat-bar > *,
+.repeat-edit-bar > * {
+	border: 0;
+	box-shadow: none;
+}
+
+.repeat-bar > p,
+.repeat-edit-bar > p {
+	min-width: 7rem;
+
+	padding: 1rem;
+	padding-right: .25rem;
+}
+
+.repeat-bar > input[type="number"],
+.repeat-edit-bar > input[type="number"] {
+	min-width: 5rem;
+	
+	padding-left: .25rem;
+}
+
+.repeat-bar > select,
+.repeat-edit-bar > select {
+	min-width: 8rem;
+}
+
+div.options > button {
 	width: 6rem;
 	
 	border: 2px solid var(--color-gray);

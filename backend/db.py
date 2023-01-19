@@ -85,6 +85,10 @@ def setup_db() -> None:
 			text TEXT,
 			time INTEGER NOT NULL,
 			notification_service INTEGER NOT NULL,
+
+			repeat_quantity VARCHAR(15),
+			repeat_interval INTEGER,
+			original_time INTEGER,
 			
 			FOREIGN KEY (user_id) REFERENCES users(id),
 			FOREIGN KEY (notification_service) REFERENCES notification_services(id)
