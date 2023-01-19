@@ -15,6 +15,9 @@ const type_buttons = {
 };
 
 function addReminder() {
+	inputs.time.classList.remove('error-input');
+	inputs.time.removeAttribute('title');
+	
 	const data = {
 		'title': inputs.title.value,
 		'time': new Date(inputs.time.value).getTime() / 1000,
@@ -44,6 +47,9 @@ function addReminder() {
 	.catch(e => {
 		if (e === 401) {
 			window.location.href = '/';
+		} else if (e === 400) {
+			inputs.time.classList.add('error-input');
+			inputs.time.title = 'Time is in the past';
 		} else {
 			console.log(e);
 		};
