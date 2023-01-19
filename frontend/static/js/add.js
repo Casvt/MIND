@@ -52,6 +52,7 @@ function addReminder() {
 
 function showAdd() {
 	if (!document.getElementById('add-entry').classList.contains('error')) {
+		loadTemplates(force=false);
 		showWindow('add');
 	} else {
 		showWindow('notification');
@@ -61,6 +62,7 @@ function showAdd() {
 function closeAdd() {
 	hideWindow();
 	setTimeout(() => {
+		document.getElementById('template-selection').value = document.querySelector('#template-selection option[selected]').value;
 		inputs.title.value = '';
 		inputs.time.value = '';
 		inputs.notification_service.value = document.querySelector('#notification-service-input option[selected]').value;
@@ -89,6 +91,7 @@ function toggleRepeated() {
 // code run on load
 
 document.getElementById('add-form').setAttribute('action', 'javascript:addReminder();');
+document.getElementById('template-selection').addEventListener('change', e => loadTemplate());
 document.getElementById('normal-button').addEventListener('click', e => toggleNormal());
 document.getElementById('repeat-button').addEventListener('click', e => toggleRepeated());
 document.getElementById('close-add').addEventListener('click', e => closeAdd());

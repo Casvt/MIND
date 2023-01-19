@@ -40,6 +40,7 @@
 	gap: .75rem;
 	
 	border: 2px solid var(--color-gray);
+	box-shadow: var(--default-shadow);
 
 	font-size: 1.1rem;
 }
@@ -62,6 +63,7 @@
 
 	border: 2px solid var(--color-gray);
 	border-radius: 4px;
+	box-shadow: var(--default-shadow);
 }
 
 .repeat-bar > *,

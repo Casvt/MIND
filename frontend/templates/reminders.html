@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 	<link rel="stylesheet" href="/static/css/general.css">
-	<link rel="stylesheet" href="/static/css/reminders.css">
+	<link rel="stylesheet" href="/static/css/reminders_templates.css">
 	<link rel="stylesheet" href="/static/css/add_edit.css">
 	<link rel="stylesheet" href="/static/css/notification.css">
 	<link rel="stylesheet" href="/static/css/settings.css">
@@ -16,6 +16,7 @@
 	<script src="/static/js/edit.js" defer></script>
 	<script src="/static/js/notification.js" defer></script>
 	<script src="/static/js/settings.js" defer></script>
+	<script src="/static/js/templates.js" defer></script>
 
 	<title>Reminders - Noted</title>
 </head>
@@ -74,49 +75,71 @@
 		</nav>
 		<main class="window-container">
 			<div id="home">
-				<div class="search-container">
-					<noscript>Javascript is disabled. The web-ui of Noted does not work with JavaScript disabled.</noscript>
-					<form id="search-form">
-						<div class="search-bar">
-							<button type="submit">
-								<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 513.749 513.749" style="enable-background:new 0 0 512 512" xml:space="preserve">
-									<g>
-										<g>
-											<path d="M504.352,459.061l-99.435-99.477c74.402-99.427,54.115-240.344-45.312-314.746S119.261-9.277,44.859,90.15   S-9.256,330.494,90.171,404.896c79.868,59.766,189.565,59.766,269.434,0l99.477,99.477c12.501,12.501,32.769,12.501,45.269,0   c12.501-12.501,12.501-32.769,0-45.269L504.352,459.061z M225.717,385.696c-88.366,0-160-71.634-160-160s71.634-160,160-160   s160,71.634,160,160C385.623,314.022,314.044,385.602,225.717,385.696z"></path>
-										</g>
-									</g>
-								</svg>
-							</button>
-							<input type="text" id="search-input" required placeholder="Search..." aria-placeholder="Search for reminders">
-							<button type="button" id="clear-button">
-								<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512.021 512.021" style="enable-background:new 0 0 512 512" xml:space="preserve">
-									<g>
-										<g>
-											<path d="M301.258,256.01L502.645,54.645c12.501-12.501,12.501-32.769,0-45.269c-12.501-12.501-32.769-12.501-45.269,0l0,0   L256.01,210.762L54.645,9.376c-12.501-12.501-32.769-12.501-45.269,0s-12.501,32.769,0,45.269L210.762,256.01L9.376,457.376   c-12.501,12.501-12.501,32.769,0,45.269s32.769,12.501,45.269,0L256.01,301.258l201.365,201.387   c12.501,12.501,32.769,12.501,45.269,0c12.501-12.501,12.501-32.769,0-45.269L301.258,256.01z"></path>
-										</g>
-									</g>
-								</svg>
-							</button>
-						</div>
-					</form>
+				<div class="tab-selector">
+					<button id="reminders-selector" data-selected="true">Reminders</button>
+					<button id="templates-selector" data-selected="false">Templates</button>
 				</div>
-				<div id="reminder-list">
-					<button class="entry" id="add-entry" aria-label="Add reminder" title="Add reminder">
-						<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
-							<g>
+				<div id="reminder-tab">
+					<div class="search-container">
+						<noscript>Javascript is disabled. The web-ui of Noted does not work with JavaScript disabled.</noscript>
+						<form id="search-form">
+							<div class="search-bar">
+								<button type="submit">
+									<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 513.749 513.749" style="enable-background:new 0 0 512 512" xml:space="preserve">
+										<g>
+											<g>
+												<path d="M504.352,459.061l-99.435-99.477c74.402-99.427,54.115-240.344-45.312-314.746S119.261-9.277,44.859,90.15   S-9.256,330.494,90.171,404.896c79.868,59.766,189.565,59.766,269.434,0l99.477,99.477c12.501,12.501,32.769,12.501,45.269,0   c12.501-12.501,12.501-32.769,0-45.269L504.352,459.061z M225.717,385.696c-88.366,0-160-71.634-160-160s71.634-160,160-160   s160,71.634,160,160C385.623,314.022,314.044,385.602,225.717,385.696z"></path>
+											</g>
+										</g>
+									</svg>
+								</button>
+								<input type="text" id="search-input" required placeholder="Search..." aria-placeholder="Search for reminders">
+								<button type="button" id="clear-button">
+									<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512.021 512.021" style="enable-background:new 0 0 512 512" xml:space="preserve">
+										<g>
+											<g>
+												<path d="M301.258,256.01L502.645,54.645c12.501-12.501,12.501-32.769,0-45.269c-12.501-12.501-32.769-12.501-45.269,0l0,0   L256.01,210.762L54.645,9.376c-12.501-12.501-32.769-12.501-45.269,0s-12.501,32.769,0,45.269L210.762,256.01L9.376,457.376   c-12.501,12.501-12.501,32.769,0,45.269s32.769,12.501,45.269,0L256.01,301.258l201.365,201.387   c12.501,12.501,32.769,12.501,45.269,0c12.501-12.501,12.501-32.769,0-45.269L301.258,256.01z"></path>
+											</g>
+										</g>
+									</svg>
+								</button>
+							</div>
+						</form>
+					</div>
+					<div id="reminder-list">
+						<button class="entry" id="add-entry" aria-label="Add reminder" title="Add reminder">
+							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
 								<g>
-									<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
+									<g>
+										<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
+									</g>
 								</g>
-							</g>
-						</svg>
-						<p>Add a notification service first!</p>
-					</button>
+							</svg>
+							<p>Add a notification service first!</p>
+						</button>
+					</div>
+				</div>
+				<div id="template-tab" class="hidden">
+					<div id="template-list">
+						<button class="entry" id="add-template" aria-label="Add template" title="Add template">
+							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
+								<g>
+									<g>
+										<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
+									</g>
+								</g>
+							</svg>
+						</button>
+					</div>
 				</div>
 			</div>
 			<div id="add">
 				<h2>Add a reminder</h2>
 				<div class="form-container">
 					<form id="add-form">
+						<select id="template-selection">
+							<option value="0" selected>No template</option>
+						</select>
 						<input type="text" id="title-input" placeholder="Title" required>
 						<div class="sub-inputs">
 							<input type="datetime-local" id="time-input" required>
@@ -268,6 +291,35 @@
 					</form>
 					<h3>Delete Account</h3>
 					<button id="delete-account-button">Delete Account</button>
+				</div>
+			</div>
+			<div id="add-template">
+				<h2>Add a template</h2>
+				<div class="form-container">
+					<form id="template-form">
+						<input type="text" id="title-template-input" placeholder="Title" required>
+						<select id="notification-service-template-input" required></select>
+						<textarea id="text-template-input" cols="30" rows="10" placeholder="Text (optional)"></textarea>
+						<div class="options">
+							<button type="button" id="close-template">Cancel</button>
+							<button type="submit">Add</button>
+						</div>
+					</form>
+				</div>
+			</div>
+			<div id="edit-template">
+				<h2>Edit a template</h2>
+				<div class="form-container">
+					<form id="template-edit-form">
+						<input type="text" id="title-template-edit-input" placeholder="Title" required>
+						<select id="notification-service-template-edit-input" required></select>
+						<textarea id="text-template-edit-input" cols="30" rows="10" placeholder="Text (optional)"></textarea>
+						<div class="options">
+							<button type="button" id="close-edit-template">Cancel</button>
+							<button type="button" id="delete-template">Delete</button>
+							<button type="submit">Save</button>
+						</div>
+					</form>
 				</div>
 			</div>
 		</main>

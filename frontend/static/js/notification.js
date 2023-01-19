@@ -11,8 +11,12 @@ function fillNotificationSelection() {
 	.then(json => {
 		if (json.result.length) {
 			document.getElementById('add-entry').classList.remove('error', 'error-icon');
-			[document.getElementById('notification-service-input'),
-			document.getElementById('notification-service-edit-input')].forEach(options => {
+			[
+				document.getElementById('notification-service-input'),
+				document.getElementById('notification-service-edit-input'),
+				document.getElementById('notification-service-template-input'),
+				document.getElementById('notification-service-template-edit-input')
+			].forEach(options => {
 				options.innerHTML = '';
 				json.result.forEach(service => {
 					const entry = document.createElement('option');
@@ -95,10 +99,11 @@ function deleteService(id) {
 	fetch(`/api/notificationservices/${id}?api_key=${api_key}`, {
 		'method': 'DELETE'
 	})
-	.then(response => {
+	.then(response => response.json())
+	.then(json => {
 		// catch errors
-		if (!response.ok) {
-			return Promise.reject(response.status);
+		if (json.error !== null) {
+			return Promise.reject(json);
 		};
 		
 		row.remove();
@@ -107,12 +112,12 @@ function deleteService(id) {
 		};
 	})
 	.catch(e => {
-		if (e === 401) {
+		if (e.error === 'ApiKeyExpired' || e.error === 'ApiKeyInvalid') {
 			window.location.href = '/';
-		} else if (e === 400) {
+		} else if (e.error === 'NotificationServiceInUse') {
 			const delete_button = row.querySelector('button[title="Delete"]');
 			delete_button.classList.add('error-icon');
-			delete_button.title = 'The notification service is still in use by a reminder';
+			delete_button.title = `The notification service is still in use by a ${e.result.type}`;
 		} else {
 			console.log(e);
 		};

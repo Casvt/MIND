@@ -28,7 +28,13 @@ class NotificationServiceNotFound(Exception):
 
 class NotificationServiceInUse(Exception):
 	"""The notification service is wished to be deleted but a reminder is still using it"""
-	api_response = {'error': 'NotificationServiceInUse', 'result': {}, 'code': 400}
+	def __init__(self, type: str=''):
+		self.type = type
+		super().__init__(self.type)
+
+	@property
+	def api_response(self) -> Dict[str, Any]:
+		return {'error': 'NotificationServiceInUse', 'result': {'type': self.type}, 'code': 400}
 
 class InvalidTime(Exception):
 	"""The time given is in the past"""
@@ -58,3 +64,7 @@ class InvalidKeyValue(Exception):
 	@property
 	def api_response(self) -> Dict[str, Any]:
 		return {'error': 'InvalidKeyValue', 'result': {'key': self.key, 'value': self.value}, 'code': 400}
+
+class TemplateNotFound(Exception):
+	"""The template was not found"""
+	api_response = {'error': 'TemplateNotFound', 'result': {}, 'code': 404}

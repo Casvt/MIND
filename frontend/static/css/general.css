@@ -264,6 +264,27 @@ nav > div > button svg {
 	color: var(--color-light);
 }
 
+.tab-selector {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 1rem;
+	
+	padding-top: 1rem;
+}
+
+.tab-selector > button {
+	border: 2px solid var(--color-gray);
+	padding: .5rem 1rem;
+	transition: background-color .3s ease-in-out;
+}
+
+.tab-selector > button[data-selected="true"] {
+	background-color: var(--color-gray);
+}
+
 @media (max-width: 543px) {
 	.window-container {
 		margin-left: 0;

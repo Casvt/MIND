@@ -134,3 +134,4 @@ setInterval(fillList, 60000);
 document.getElementById('search-form').setAttribute('action', 'javascript:search();');
 document.getElementById('clear-button').addEventListener('click', e => clearSearch());
 document.getElementById('add-entry').addEventListener('click', e => showAdd());
+document.getElementById('add-template').addEventListener('click', e => showWindow('add-template'));
