@@ -1,11 +1,12 @@
 function fillTable(result) {
 	const table = document.getElementById('reminder-list');
-	table.querySelectorAll('div.entry').forEach(e => e.remove());
+	table.querySelectorAll('button.entry:not(#add-entry)').forEach(e => e.remove());
 
 	result.forEach(reminder => {
-		const entry = document.createElement('div');
+		const entry = document.createElement('button');
 		entry.classList.add('entry');
 		entry.dataset.id = reminder.id;
+		entry.addEventListener('click', e => showEdit(reminder.id));
 		
 		const title = document.createElement('h2');
 		title.innerText = reminder.title;
@@ -26,24 +27,6 @@ function fillTable(result) {
 		};
 		time.innerText = formatted_date;
 		entry.appendChild(time);
-		
-		const options = document.createElement('div');
-		options.classList.add('entry-overlay');
-		entry.appendChild(options);
-		
-		const edit_entry = document.createElement('button');
-		edit_entry.addEventListener('click', e => showEdit(reminder.id));
-		edit_entry.innerHTML = edit_icon;
-		edit_entry.title = 'Edit reminder';
-		edit_entry.setAttribute('aria-label', 'Edit reminder');
-		options.appendChild(edit_entry);
-		
-		const delete_entry = document.createElement('button');
-		delete_entry.addEventListener('click', e => deleteReminder(reminder.id));
-		delete_entry.innerHTML = delete_icon;
-		delete_entry.title = 'Delete reminder';
-		delete_entry.setAttribute('aria-label', 'Delete reminder');
-		options.appendChild(delete_entry);
 
 		table.appendChild(entry);
 		
@@ -51,7 +34,7 @@ function fillTable(result) {
 			entry.classList.add('expand');
 		};
 	});
-	table.querySelectorAll('div.entry').forEach(reminder => reminder.classList.add('fit'));
+	table.querySelectorAll('button.entry:not(#add-entry)').forEach(reminder => reminder.classList.add('fit'));
 };
 
 function fillList() {
@@ -101,30 +84,6 @@ function clearSearch() {
 	document.getElementById('search-input').value = '';
 	fillList();
 }
-
-function deleteReminder(id) {
-	const entry = document.querySelector(`div.entry[data-id="${id}"]`);
-	entry.remove();
-	
-	fetch(`/api/reminders/${id}?api_key=${api_key}`, {
-		'method': 'DELETE'
-	})
-	.then(response => {
-		// catch errors
-		if (!response.ok) {
-			return Promise.reject(response.status);
-		};
-	})
-	.catch(e => {
-		if (e === 401) {
-			window.location.href = '/';
-		} else if (e === 404) {
-			fillList();
-		} else {
-			console.log(e);
-		};
-	});
-};
 
 // code run on load
 

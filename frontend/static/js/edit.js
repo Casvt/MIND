@@ -112,9 +112,36 @@ function toggleEditRepeated() {
 	edit_type_buttons['repeat-edit-interval'].setAttribute('required', '');
 };
 
+function deleteReminder() {
+	const id = document.getElementById('edit-form').dataset.id;
+	fetch(`/api/reminders/${id}?api_key=${api_key}`, {
+		'method': 'DELETE'
+	})
+	.then(response => {
+		// catch errors
+		if (!response.ok) {
+			return Promise.reject(response.status);
+		};
+
+		fillList();
+		hideWindow();
+		return;
+	})
+	.catch(e => {
+		if (e === 401) {
+			window.location.href = '/';
+		} else if (e === 404) {
+			fillList();
+		} else {
+			console.log(e);
+		};
+	});
+};
+
 // code run on load
 
 document.getElementById('edit-form').setAttribute('action', 'javascript:editReminder();');
 document.getElementById('normal-edit-button').addEventListener('click', e => toggleEditNormal());
 document.getElementById('repeat-edit-button').addEventListener('click', e => toggleEditRepeated());
 document.getElementById('close-edit').addEventListener('click', e => hideWindow());
+document.getElementById('delete-reminder').addEventListener('click', e => deleteReminder());

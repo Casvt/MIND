@@ -107,6 +107,11 @@ div.options > button {
 	background-color: var(--color-gray);
 }
 
+#delete-reminder {
+	border-color: var(--color-error);
+	color: var(--color-error);
+}
+
 @media (max-width: 460px) {
 	.sub-inputs > input,
 	.sub-inputs > select {
