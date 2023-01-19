@@ -6,6 +6,8 @@ from typing import Union
 
 from flask import g
 
+__DATABASE_VERSION__ = 1
+
 class Singleton(type):
 	_instances = {}
 	def __call__(cls, *args, **kwargs):
@@ -58,6 +60,16 @@ def close_db(e=None) -> None:
 		pass
 	return
 
+def migrate_db(current_db_version: int) -> None:
+	"""
+	Migrate a Noted database from it's current version 
+	to the newest version supported by the Noted version installed.
+	"""
+	print('Migrating database to newer version...')
+	cursor = get_db()
+		
+	return
+
 def setup_db() -> None:
 	"""Setup the database
 	"""
@@ -93,6 +105,25 @@ def setup_db() -> None:
 			FOREIGN KEY (user_id) REFERENCES users(id),
 			FOREIGN KEY (notification_service) REFERENCES notification_services(id)
 		);
+		CREATE TABLE IF NOT EXISTS config(
+			key VARCHAR(255) PRIMARY KEY,
+			value TEXT NOT NULL
+		);
 	""")
+
+	cursor.execute("""
+		INSERT OR IGNORE INTO config(key, value)
+		VALUES ('database_version', ?);
+		""",
+		(__DATABASE_VERSION__,)
+	)
+	current_db_version = int(cursor.execute("SELECT value FROM config WHERE key = 'database_version' LIMIT 1;").fetchone()[0])
+	
+	if current_db_version < __DATABASE_VERSION__:
+		migrate_db(current_db_version)
+		cursor.execute(
+			"UPDATE config SET value = ? WHERE key = 'database_version' LIMIT 1;",
+			(__DATABASE_VERSION__,)
+		)
 
 	return
