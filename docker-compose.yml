@@ -1,0 +1,11 @@
+version: '3.3'
+services:
+    noted:
+        container_name: noted
+        volumes:
+            - 'noted-db:/app'
+        environment:
+            - TZ=Europe/Amsterdam
+        ports:
+            - '8080:8080'
+        image: 'mrcas/noted:latest'
