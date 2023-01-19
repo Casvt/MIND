@@ -82,9 +82,21 @@ def extract_key(values: dict, key: str, check_existence: bool=True) -> Any:
 				value = int(value)
 			except (ValueError, TypeError):
 				raise InvalidKeyValue(key, value)
+				
+		elif key == 'repeat_interval':
+			try:
+				value = int(value)
+				if value <= 0:
+					raise ValueError
+			except (ValueError, TypeError):
+				raise InvalidKeyValue(key, value)
 			
 		elif key == 'sort_by':
 			if not value in Reminders.sort_functions:
+				raise InvalidKeyValue(key, value)
+				
+		elif key == 'repeat_quantity':
+			if not value in ("year", "month", "week", "day", "hours", "minutes"):
 				raise InvalidKeyValue(key, value)
 
 	else:
@@ -405,11 +417,15 @@ def api_reminders_list():
 		time = extract_key(data, 'time')
 		notification_service = extract_key(data, 'notification_service')
 		text = extract_key(data, 'text', check_existence=False)
+		repeat_quantity = extract_key(data, 'repeat_quantity', check_existence=False)
+		repeat_interval = extract_key(data, 'repeat_interval', check_existence=False)
 
 		result = reminders.add(title=title,
 								time=time,
 								notification_service=notification_service,
-								text=text)
+								text=text,
+								repeat_quantity=repeat_quantity,
+								repeat_interval=repeat_interval)
 		return return_api(result.get(), code=201)
 
 @api.route('/reminders/search', methods=['GET'])
@@ -484,11 +500,16 @@ def api_get_reminder(r_id: int):
 		time = extract_key(data, 'time', check_existence=False)
 		notification_service = extract_key(data, 'notification_service', check_existence=False)
 		text = extract_key(data, 'text', check_existence=False)
+		repeat_quantity = extract_key(data, 'repeat_quantity', check_existence=False)
+		repeat_interval = extract_key(data, 'repeat_interval', check_existence=False)
+
 		
 		result = reminders.fetchone(r_id).update(title=title,
 												time=time,
 												notification_service=notification_service,
-												text=text)
+												text=text,
+												repeat_quantity=repeat_quantity,
+												repeat_interval=repeat_interval)
 		return return_api(result)
 
 	elif request.method == 'DELETE':

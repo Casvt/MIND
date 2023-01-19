@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 
+from datetime import datetime
 from sqlite3 import IntegrityError
 from threading import Thread
 from time import sleep
@@ -7,9 +8,10 @@ from time import time as epoch_time
 from typing import List, Literal
 
 from apprise import Apprise
+from dateutil.relativedelta import relativedelta
 from flask import Flask
 
-from backend.custom_exceptions import (InvalidTime,
+from backend.custom_exceptions import (InvalidKeyValue, InvalidTime,
                                        NotificationServiceNotFound,
                                        ReminderNotFound)
 from backend.db import close_db, get_db
@@ -19,6 +21,18 @@ filter_function = lambda query, p: (
 	or query in p["text"].lower()
 	or query in p["notification_service_title"].lower()
 )
+
+def _find_next_time(
+	original_time: int,
+	repeat_quantity: Literal["year", "month", "week", "day", "hours", "minutes"],
+	repeat_interval: int
+) -> int:
+	td = relativedelta(**{repeat_quantity: repeat_interval})
+	new_time = datetime.fromtimestamp(original_time)
+	current_time = datetime.fromtimestamp(epoch_time())
+	while new_time <= current_time:
+		new_time += td
+	return int(new_time.timestamp())
 
 class ReminderHandler():
 	"""Run in a thread to handle the set reminders
@@ -33,7 +47,6 @@ class ReminderHandler():
 	def _find_next_reminder(self) -> None:
 		"""Note when next reminder is (could be in the past) or otherwise None
 		"""
-
 		with self.context():
 			next_timestamp = get_db().execute(
 				"SELECT time FROM reminders ORDER BY time LIMIT 1;"
@@ -65,26 +78,45 @@ class ReminderHandler():
 		while not self.stop:
 			if self.next_reminder and self.next_reminder <= epoch_time():
 				with self.context():
-					cursor = get_db()
+					cursor = get_db(dict)
 					# Get all reminders for the timestamp
-					reminders = cursor.execute(
-						"SELECT notification_service, title, text FROM reminders WHERE time = ?",
+					reminders = cursor.execute("""
+						SELECT
+							id,
+							notification_service, title, text,
+							repeat_quantity, repeat_interval, original_time
+						FROM reminders
+						WHERE time = ?;
+						""",
 						(self.next_reminder,)
 					).fetchall()
 					
-					# Send of each reminder
 					for reminder in reminders:
+						# Send of reminder
 						a = Apprise()
 						url = cursor.execute(
 							"SELECT url FROM notification_services WHERE id = ?",
-							(reminder[0],)
-						).fetchone()[0]
+							(reminder["notification_service"],)
+						).fetchone()["url"]
 						a.add(url)
-						a.notify(title=reminder[1], body=reminder[2])
+						a.notify(title=reminder["title"], body=reminder["text"])
 
-					# Delete the reminders from the database
-					cursor.execute("DELETE FROM reminders WHERE time = ?", (self.next_reminder,))
-					
+						if reminder['repeat_quantity'] is None:
+							# Delete the reminders from the database
+							cursor.execute("DELETE FROM reminders WHERE id = ?", (reminder['id'],))
+						else:
+							# Set next time
+							new_time = _find_next_time(
+								reminder['original_time'],
+								reminder['repeat_quantity'],
+								reminder['repeat_interval']
+							)
+							self.submit_next_reminder(new_time)
+							cursor.execute(
+								"UPDATE reminders SET time = ? WHERE id = ?;",
+								(new_time, reminder['id'])
+							)
+
 					# Note when next reminder is (could be in the past) or otherwise None
 					self._find_next_reminder()
 
@@ -122,7 +154,9 @@ class Reminder:
 				r.title, r.text,
 				r.time,
 				r.notification_service,
-				ns.title AS notification_service_title
+				ns.title AS notification_service_title,
+				r.repeat_quantity,
+				r.repeat_interval
 			FROM
 				reminders r
 				INNER JOIN notification_services ns
@@ -140,7 +174,9 @@ class Reminder:
 		title: str = None,
 		time: int = None,
 		notification_service: int = None,
-		text: str = None
+		text: str = None,
+		repeat_quantity: Literal["year", "month", "week", "day", "hours", "minutes"] = None,
+		repeat_interval: int = None
 	) -> dict:
 		"""Edit the reminder
 
@@ -151,11 +187,20 @@ class Reminder:
 			text (str, optional): The new body of the reminder. Defaults to None.
 
 		Returns:
-			dict: The new password info
+			dict: The new reminder info
 		"""
+		cursor = get_db()
+
 		# Validate data
-		if time < epoch_time():
-			raise InvalidTime
+		if repeat_quantity is None and repeat_interval is not None:
+			raise InvalidKeyValue('repeat_quantity', repeat_quantity)
+		elif repeat_quantity is not None and repeat_interval is None:
+			raise InvalidKeyValue('repeat_interval', repeat_interval)
+		repeated_reminder = repeat_quantity is not None and repeat_interval is not None
+
+		if not repeated_reminder:
+			if time < epoch_time():
+				raise InvalidTime
 		time = round(time)
 
 		# Get current data and update it with new values
@@ -164,28 +209,50 @@ class Reminder:
 			'title': title,
 			'time': time,
 			'notification_service': notification_service,
-			'text': text
+			'text': text,
+			'repeat_quantity': repeat_quantity,
+			'repeat_interval': repeat_interval
 		}
 		for k, v in new_values.items():
-			if v is not None:
+			if k in ('repeat_quantity', 'repeat_interval') or v is not None:
 				data[k] = v
 
 		# Update database
 		try:
-			get_db().execute("""
-				UPDATE reminders
-				SET title=?, text=?, time=?, notification_service=?
-				WHERE id = ?;
-				""", (
-					data["title"],
-					data["text"],
-					data["time"],
-					data["notification_service"],
-					self.id
-			))
+			if not repeated_reminder:
+				next_time = data["time"]
+				cursor.execute("""
+					UPDATE reminders
+					SET title=?, text=?, time=?, notification_service=?, repeat_quantity=?, repeat_interval=?
+					WHERE id = ?;
+					""", (
+						data["title"],
+						data["text"],
+						data["time"],
+						data["notification_service"],
+						data["repeat_quantity"],
+						data["repeat_interval"],
+						self.id
+				))
+			else:
+				next_time = _find_next_time(data["time"], data["repeat_quantity"], data["repeat_interval"])
+				cursor.execute("""
+					UPDATE reminders
+					SET title=?, text=?, time=?, notification_service=?, repeat_quantity=?, repeat_interval=?, original_time=?
+					WHERE id = ?;
+					""", (
+						data["title"],
+						data["text"],
+						next_time,
+						data["notification_service"],
+						data["repeat_quantity"],
+						data["repeat_interval"],
+						data["time"],
+						self.id
+				))
 		except IntegrityError:
 			raise NotificationServiceNotFound
-		reminder_handler.submit_next_reminder(time)
+		reminder_handler.submit_next_reminder(next_time)
 
 		return self.get()
 
@@ -230,7 +297,9 @@ class Reminders:
 				r.title, r.text,
 				r.time,
 				r.notification_service,
-				ns.title AS notification_service_title
+				ns.title AS notification_service_title,
+				r.repeat_quantity,
+				r.repeat_interval
 			FROM
 				reminders r
 				INNER JOIN notification_services ns
@@ -278,7 +347,9 @@ class Reminders:
 		title: str,
 		time: int,
 		notification_service: int,
-		text: str = ''
+		text: str = '',
+		repeat_quantity: Literal["year", "month", "week", "day", "hours", "minutes"] = None,
+		repeat_interval: int = None
 	) -> Reminder:
 		"""Add a reminder
 
@@ -287,22 +358,34 @@ class Reminders:
 			time (int): The epoch timestamp the the reminder should be send.
 			notification_service (int): The id of the notification service to use to send the reminder.
 			text (str, optional): The body of the reminder. Defaults to ''.
+			repeat_quantity (Literal["year", "month", "week", "day", "hours", "minutes"], optional): The quantity of the repeat specified for the reminder. Defaults to None.
+			repeat_interval (int, optional): The amount of repeat_quantity, like "5" (hours). Defaults to None.
 
 		Returns:
 			dict: The info about the reminder
 		"""
-		# Validate data
 		if time < epoch_time():
 			raise InvalidTime
 		time = round(time)
-		
-		# Insert into db
+
+		if repeat_quantity is None and repeat_interval is not None:
+			raise InvalidKeyValue('repeat_quantity', repeat_quantity)
+		elif repeat_quantity is not None and repeat_interval is None:
+			raise InvalidKeyValue('repeat_interval', repeat_interval)
+
 		try:
-			id = get_db().execute("""
-				INSERT INTO reminders(user_id, title, text, time, notification_service)
-				VALUES (?,?,?,?,?);
-			""", (self.user_id, title, text, time, notification_service,)
-			).lastrowid
+			if repeat_quantity is None and repeat_interval is None:
+				id = get_db().execute("""
+					INSERT INTO reminders(user_id, title, text, time, notification_service)
+					VALUES (?,?,?,?,?);
+				""", (self.user_id, title, text, time, notification_service)
+				).lastrowid
+			else:
+				id = get_db().execute("""
+					INSERT INTO reminders(user_id, title, text, time, notification_service, repeat_quantity, repeat_interval, original_time)
+					VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+				""", (self.user_id, title, text, time, notification_service, repeat_quantity, repeat_interval, time)
+				).lastrowid
 		except IntegrityError:
 			raise NotificationServiceNotFound
 		reminder_handler.submit_next_reminder(time)

@@ -14,6 +14,16 @@ function fillTable(result) {
 		const time = document.createElement('p');
 		var d = new Date(reminder.time * 1000);
 		var formatted_date = d.toLocaleString('en-CA').slice(0,10) + ' ' + d.toTimeString().slice(0,5);
+		if (reminder.repeat_interval !== null) {
+			if (reminder.repeat_interval === 1) {
+				var quantity = reminder.repeat_quantity.endsWith('s') ? reminder.repeat_quantity.slice(0, -1) : reminder.repeat_quantity;
+				var interval_text = ` (each ${quantity})`;
+			} else {
+				var quantity = reminder.repeat_quantity.endsWith('s') ? reminder.repeat_quantity : reminder.repeat_quantity + 's';
+				var interval_text = ` (every ${reminder.repeat_interval} ${quantity})`;
+			};
+			formatted_date += interval_text;
+		};
 		time.innerText = formatted_date;
 		entry.appendChild(time);
 		
@@ -119,7 +129,7 @@ function deleteReminder(id) {
 // code run on load
 
 fillList();
-// setInterval(fillList, 60000);
+setInterval(fillList, 60000);
 
 document.getElementById('search-form').setAttribute('action', 'javascript:search();');
 document.getElementById('clear-button').addEventListener('click', e => clearSearch());

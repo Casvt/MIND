@@ -57,4 +57,4 @@ class InvalidKeyValue(Exception):
 
 	@property
 	def api_response(self) -> Dict[str, Any]:
-		return {'error': 'KeyNotFound', 'result': {'key': self.key, 'value': self.value}, 'code': 400}
+		return {'error': 'InvalidKeyValue', 'result': {'key': self.key, 'value': self.value}, 'code': 400}
