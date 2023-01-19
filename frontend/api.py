@@ -396,7 +396,7 @@ def api_reminders_list():
 				sort_by: how to sort the result. Allowed values are 'title', 'title_reversed', 'time' and 'time_reversed'
 			Returns:
 				200:
-					The id, title, text, time, notification_service and notification_service_title of each reminder
+					The id, title, text, time, notification_service, notification_service_title, repeat_quantity and repeat_interval of each reminder
 		POST:
 			Description: Add a reminder
 			Parameters (body (content-type: application/json)):
@@ -404,9 +404,11 @@ def api_reminders_list():
 				time (required): the epoch timestamp that the reminder should be sent at
 				notification_service (required): the id of the notification service to use to send the notification
 				text: the body of the reminder
+				repeat_quantity ('year', 'month', 'week', 'day', 'hours', 'minutes'): The quantity of the repeat_interval
+				repeat_interval: The number of the interval
 			Returns:
 				200:
-					The id of the new reminder entry
+					The info about the new reminder entry
 				400:
 					KeyNotFound: One of the required parameters was not given
 	"""
@@ -482,6 +484,8 @@ def api_get_reminder(r_id: int):
 				time: The new epoch timestamp the the reminder should be send.
 				notification_service: The new id of the notification service to use to send the reminder.
 				text: The new body of the reminder.
+				repeat_quantity ('year', 'month', 'week', 'day', 'hours', 'minutes'): The quantity of the repeat_interval
+				repeat_interval: The number of the interval 
 			Returns:
 				200:
 					Reminder updated successfully
