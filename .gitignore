@@ -136,4 +136,3 @@ dmypy.json
 
 # Docker
 Dockerfile
-.dockerignore
