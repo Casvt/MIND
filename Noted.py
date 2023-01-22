@@ -15,7 +15,7 @@ from frontend.ui import ui
 HOST = '0.0.0.0'
 PORT = '8080'
 THREADS = 10
-DB_FILENAME = 'Noted.db'
+DB_FILENAME = 'db', 'Noted.db'
 
 def _folder_path(*folders) -> str:
 	"""Turn filepaths relative to the project folder into absolute paths
@@ -79,7 +79,7 @@ def Noted() -> None:
 	# Register web server
 	app = _create_app()
 	with app.app_context():
-		DBConnection.file = _folder_path(DB_FILENAME)
+		DBConnection.file = _folder_path(*DB_FILENAME)
 		setup_db()
 		reminder_handler._find_next_reminder()
 
