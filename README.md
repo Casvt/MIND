@@ -27,10 +27,9 @@ You can see our planned features in our [Project board](https://github.com/users
 ## Installation
 Replace the timezone value (`TZ=`) to the [TZ database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) of your timezone!
 ```bash
-docker volume create noted-db
 docker run -d \
 	--name noted \
-	-v noted-db:/app \
+	-v noted-db:/app/db \
 	-e TZ=Europe/Amsterdam \
 	-p 8080:8080 \
 	mrcas/noted:latest

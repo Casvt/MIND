@@ -29,7 +29,7 @@ def _find_next_time(
 ) -> int:
 	td = relativedelta(**{repeat_quantity: repeat_interval})
 	new_time = datetime.fromtimestamp(original_time)
-	current_time = datetime.fromtimestamp(epoch_time())
+	current_time = datetime.fromtimestamp(datetime.utcnow().timestamp())
 	while new_time <= current_time:
 		new_time += td
 	return int(new_time.timestamp())
@@ -76,7 +76,7 @@ class ReminderHandler():
 
 	def _handle(self) -> None:
 		while not self.stop:
-			if self.next_reminder and self.next_reminder <= epoch_time():
+			if self.next_reminder and self.next_reminder <= datetime.utcnow().timestamp():
 				with self.context():
 					cursor = get_db(dict)
 					# Get all reminders for the timestamp
@@ -182,7 +182,7 @@ class Reminder:
 
 		Args:
 			title (str): The new title of the entry. Defaults to None.
-			time (int): The new epoch timestamp the the reminder should be send. Defaults to None.
+			time (int): The new UTC epoch timestamp the the reminder should be send. Defaults to None.
 			notification_service (int): The new id of the notification service to use to send the reminder. Defaults to None.
 			text (str, optional): The new body of the reminder. Defaults to None.
 
@@ -198,10 +198,11 @@ class Reminder:
 			raise InvalidKeyValue('repeat_interval', repeat_interval)
 		repeated_reminder = repeat_quantity is not None and repeat_interval is not None
 
-		if not repeated_reminder:
-			if time < epoch_time():
-				raise InvalidTime
-		time = round(time)
+		if time is not None:
+			if not repeated_reminder:
+				if time < datetime.utcnow().timestamp():
+					raise InvalidTime
+			time = round(time)
 
 		# Get current data and update it with new values
 		data = self.get()
@@ -355,7 +356,7 @@ class Reminders:
 
 		Args:
 			title (str): The title of the entry
-			time (int): The epoch timestamp the the reminder should be send.
+			time (int): The UTC epoch timestamp the the reminder should be send.
 			notification_service (int): The id of the notification service to use to send the reminder.
 			text (str, optional): The body of the reminder. Defaults to ''.
 			repeat_quantity (Literal["year", "month", "week", "day", "hours", "minutes"], optional): The quantity of the repeat specified for the reminder. Defaults to None.
@@ -364,7 +365,7 @@ class Reminders:
 		Returns:
 			dict: The info about the reminder
 		"""
-		if time < epoch_time():
+		if time < datetime.utcnow().timestamp():
 			raise InvalidTime
 		time = round(time)
 

@@ -13,7 +13,8 @@ function fillTable(result) {
 		entry.appendChild(title);
 
 		const time = document.createElement('p');
-		var d = new Date(reminder.time * 1000);
+		var offset = new Date(reminder.time * 1000).getTimezoneOffset() * -60;
+		var d = new Date((reminder.time + offset) * 1000);
 		var formatted_date = d.toLocaleString('en-CA').slice(0,10) + ' ' + d.toTimeString().slice(0,5);
 		if (reminder.repeat_interval !== null) {
 			if (reminder.repeat_interval === 1) {

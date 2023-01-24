@@ -3,7 +3,7 @@ services:
     noted:
         container_name: noted
         volumes:
-            - 'noted-db:/app'
+            - 'noted-db:/app/db'
         environment:
             - TZ=Europe/Amsterdam
         ports:

@@ -1,12 +1,14 @@
 #-*- coding: utf-8 -*-
 
+from datetime import datetime
 from sqlite3 import Connection, Row
 from threading import current_thread
+from time import time
 from typing import Union
 
 from flask import g
 
-__DATABASE_VERSION__ = 1
+__DATABASE_VERSION__ = 2
 
 class Singleton(type):
 	_instances = {}
@@ -67,7 +69,18 @@ def migrate_db(current_db_version: int) -> None:
 	"""
 	print('Migrating database to newer version...')
 	cursor = get_db()
-		
+	if current_db_version == 1:
+		# V1 -> V2
+		t = time()
+		utc_offset = datetime.fromtimestamp(t) - datetime.utcfromtimestamp(t)
+		reminders = cursor.execute("SELECT time, id FROM reminders;").fetchall()
+		new_reminders = []
+		new_reminders_append = new_reminders.append
+		for reminder in reminders:
+			new_reminders_append([round((datetime.fromtimestamp(reminder[0]) - utc_offset).timestamp()), reminder[1]])
+		cursor.executemany("UPDATE reminders SET time = ? WHERE id = ?;", new_reminders)
+		__DATABASE_VERSION__ = 2
+
 	return
 
 def setup_db() -> None:
