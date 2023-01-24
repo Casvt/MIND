@@ -14,7 +14,7 @@ from backend.custom_exceptions import (AccessUnauthorized, InvalidKeyValue,
                                        UsernameTaken, UserNotFound)
 from backend.notification_service import (NotificationService,
                                           NotificationServices)
-from backend.reminders import Reminders, reminder_handler
+from backend.reminders import Reminders, reminder_handler, test_reminder
 from backend.templates import Template, Templates
 from backend.users import User, register_user
 
@@ -458,6 +458,18 @@ def api_reminders_query():
 
 	result = g.user_data.reminders.search(query)
 	return return_api(result)
+
+@api.route('/reminders/test', methods=['POST'])
+@error_handler
+@auth
+def api_test_reminder():
+	data = request.get_json()
+	title = extract_key(data, 'title')
+	notification_service = extract_key(data, 'notification_service')
+	text = extract_key(data, 'text', check_existence=False)
+
+	test_reminder(title, notification_service, text)
+	return return_api({}, code=201)
 
 @api.route('/reminders/<int:r_id>', methods=['GET','PUT','DELETE'])
 @error_handler

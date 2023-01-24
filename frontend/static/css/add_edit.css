@@ -112,6 +112,26 @@ div.options > button {
 	color: var(--color-error);
 }
 
+#test-reminder {
+	display: flex;
+	gap: 1rem;
+	
+	overflow-x: hidden;
+}
+
+#test-reminder > div {
+	width: 100%;
+	flex: 0 0 auto;
+	
+	font-size: inherit;
+	
+	transition: transform .1s linear;
+}
+
+#test-reminder.show-sent > div {
+	transform: translateX(calc(-100% - 1rem));
+}
+
 @media (max-width: 460px) {
 	.sub-inputs > input,
 	.sub-inputs > select {

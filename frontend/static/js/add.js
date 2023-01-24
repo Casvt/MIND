@@ -74,6 +74,7 @@ function closeAdd() {
 		inputs.notification_service.value = document.querySelector('#notification-service-input option[selected]').value;
 		toggleNormal();
 		inputs.text.value = '';
+		document.getElementById('test-reminder').classList.remove('show-sent');
 	}, 500);
 };
 
@@ -89,9 +90,43 @@ function toggleNormal() {
 function toggleRepeated() {
 	type_buttons['normal-button'].dataset.selected = 'false';
 	type_buttons['repeat-button'].dataset.selected = 'true';
-	
+
 	type_buttons['repeat-bar'].classList.remove('hidden');
 	type_buttons['repeat-interval'].setAttribute('required', '');
+};
+
+function testReminder() {
+	const input = document.getElementById('test-reminder');
+	if (inputs.title.value === '') {
+		input.classList.add('error-input');
+		input.title = 'No title set';
+		return
+	} else {
+		input.classList.remove('error-input');
+		input.removeAttribute('title');
+	};
+	const data = {
+		'title': inputs.title.value,
+		'notification_service': inputs.notification_service.value,
+		'text': inputs.text.value
+	};
+	fetch(`/api/reminders/test?api_key=${api_key}`, {
+		'method': 'POST',
+		'headers': {'Content-Type': 'application/json'},
+		'body': JSON.stringify(data)
+	})
+	.then(response => {
+		// catch errors
+		if (!response.ok) {
+			return Promise.reject(response.status);
+		};
+		input.classList.add('show-sent');		
+	})
+	.catch(e => {
+		if (e === 401) {
+			window.location.href = '/';
+		};
+	});
 };
 
 // code run on load
@@ -101,3 +136,4 @@ document.getElementById('template-selection').addEventListener('change', e => lo
 document.getElementById('normal-button').addEventListener('click', e => toggleNormal());
 document.getElementById('repeat-button').addEventListener('click', e => toggleRepeated());
 document.getElementById('close-add').addEventListener('click', e => closeAdd());
+document.getElementById('test-reminder').addEventListener('click', e => testReminder());

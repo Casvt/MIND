@@ -393,3 +393,26 @@ class Reminders:
 
 		# Return info
 		return self.fetchone(id)
+
+def test_reminder(
+	title: str,
+	notification_service: int,
+	text: str = ''
+) -> None:
+	"""Test send a reminder draft
+
+	Args:
+		title (str): Title title of the entry
+		notification_service (int): The id of the notification service to use to send the reminder
+		text (str, optional): The body of the reminder. Defaults to ''.
+	"""
+	a = Apprise()
+	url = get_db(dict).execute(
+		"SELECT url FROM notification_services WHERE id = ?",
+		(notification_service,)
+	).fetchone()
+	if not url:
+		raise NotificationServiceNotFound
+	a.add(url[0])
+	a.notify(title=title, body=text)
+	return
