@@ -401,7 +401,7 @@ def api_reminders_list():
 			Description: Add a reminder
 			Parameters (body (content-type: application/json)):
 				title (required): the title of the reminder
-				time (required): the epoch timestamp that the reminder should be sent at
+				time (required): the UTC epoch timestamp that the reminder should be sent at
 				notification_service (required): the id of the notification service to use to send the notification
 				text: the body of the reminder
 				repeat_quantity ('year', 'month', 'week', 'day', 'hours', 'minutes'): The quantity of the repeat_interval
@@ -481,7 +481,7 @@ def api_get_reminder(r_id: int):
 			Description: Edit the reminder
 			Parameters (body (content-type: application/json)):
 				title: The new title of the entry.
-				time: The new epoch timestamp the the reminder should be send.
+				time: The new UTC epoch timestamp the the reminder should be send.
 				notification_service: The new id of the notification service to use to send the reminder.
 				text: The new body of the reminder.
 				repeat_quantity ('year', 'month', 'week', 'day', 'hours', 'minutes'): The quantity of the repeat_interval

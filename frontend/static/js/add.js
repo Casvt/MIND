@@ -20,7 +20,7 @@ function addReminder() {
 	
 	const data = {
 		'title': inputs.title.value,
-		'time': new Date(inputs.time.value).getTime() / 1000,
+		'time': (new Date(inputs.time.value) / 1000) + (new Date(inputs.time.value).getTimezoneOffset() * 60),
 		'notification_service': inputs.notification_service.value,
 		'text': inputs.text.value
 	};

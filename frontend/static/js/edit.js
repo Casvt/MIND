@@ -18,7 +18,7 @@ function editReminder() {
 	const id = document.getElementById('edit-form').dataset.id;
 	const data = {
 		'title': edit_inputs.title.value,
-		'time': new Date(edit_inputs.time.value).getTime() / 1000,
+		'time': (new Date(edit_inputs.time.value) / 1000) + (new Date(edit_inputs.time.value).getTimezoneOffset() * 60),
 		'notification_service': edit_inputs.notification_service.value,
 		'text': edit_inputs.text.value,
 		'repeat_quantity': null,
@@ -67,9 +67,10 @@ function showEdit(id) {
 	.then(json => {
 		edit_inputs.title.value = json.result.title;
 
-		edit_inputs.time.value = new Date(
+		var trigger_date = new Date(
 			(json.result.time + new Date(json.result.time * 1000).getTimezoneOffset() * -60) * 1000
-		).toISOString().slice(0, 16);
+		);
+		edit_inputs.time.value = trigger_date.toLocaleString('en-CA').slice(0,10) + 'T' + trigger_date.toTimeString().slice(0,5);
 		edit_inputs.notification_service.value = json.result.notification_service;
 
 		if (json.result['repeat_interval'] === null) {
