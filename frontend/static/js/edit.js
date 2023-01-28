@@ -2,7 +2,8 @@ const edit_inputs = {
 	'title': document.getElementById('title-edit-input'),
 	'time': document.getElementById('time-edit-input'),
 	'notification_service': document.getElementById('notification-service-edit-input'),
-	'text': document.getElementById('text-edit-input')
+	'text': document.getElementById('text-edit-input'),
+	'color': document.querySelector('#edit .color-list')
 };
 
 const edit_type_buttons = {
@@ -22,7 +23,11 @@ function editReminder() {
 		'notification_service': edit_inputs.notification_service.value,
 		'text': edit_inputs.text.value,
 		'repeat_quantity': null,
-		'repeat_interval': null
+		'repeat_interval': null,
+		'color': null
+	};
+	if (!edit_inputs.color.classList.contains('hidden')) {
+		data['color'] = edit_inputs.color.querySelector('button[data-selected="true"]').dataset.color;
 	};
 	if (edit_type_buttons['repeat-edit-button'].dataset.selected === 'true') {
 		data['repeat_quantity'] = edit_type_buttons['repeat-edit-quantity'].value;
@@ -65,6 +70,13 @@ function showEdit(id) {
 		return response.json();
 	})
 	.then(json => {
+		if (json.result['color'] !== null) {
+			if (edit_inputs.color.classList.contains('hidden')) {
+				toggleColor(edit_inputs.color);
+			};
+			selectColor(edit_inputs.color, json.result['color']);
+		};
+
 		edit_inputs.title.value = json.result.title;
 
 		var trigger_date = new Date(
@@ -142,6 +154,7 @@ function deleteReminder() {
 // code run on load
 
 document.getElementById('edit-form').setAttribute('action', 'javascript:editReminder();');
+document.getElementById('color-edit-toggle').addEventListener('click', e => toggleColor(edit_inputs.color));
 document.getElementById('normal-edit-button').addEventListener('click', e => toggleEditNormal());
 document.getElementById('repeat-edit-button').addEventListener('click', e => toggleEditRepeated());
 document.getElementById('close-edit').addEventListener('click', e => hideWindow());
