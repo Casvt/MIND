@@ -133,3 +133,21 @@ dmypy.json
 
 # VS code
 *.code-workspace
+.vscode/
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Git(hub)
+.gitignore
+.git/
+.github/
+
+# Various files
+*.md
+LICENSE
+
+# Tests
+tests/
