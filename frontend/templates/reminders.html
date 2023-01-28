@@ -137,9 +137,13 @@
 				<h2>Add a reminder</h2>
 				<div class="form-container">
 					<form id="add-form">
-						<select id="template-selection">
-							<option value="0" selected>No template</option>
-						</select>
+						<div class="sub-inputs">
+							<select id="template-selection">
+								<option value="0" selected>No template</option>
+							</select>
+							<button type="button" id="color-toggle">Color</button>
+						</div>
+						<div class="color-list hidden"></div>
 						<input type="text" id="title-input" placeholder="Title" required>
 						<div class="sub-inputs">
 							<input type="datetime-local" id="time-input" required>
@@ -191,6 +195,8 @@
 				<h2>Edit a reminder</h2>
 				<div class="form-container">
 					<form id="edit-form">
+						<button type="button" id="color-edit-toggle">Color</button>
+						<div class="color-list hidden"></div>
 						<input type="text" id="title-edit-input" placeholder="Title" required>
 						<div class="sub-inputs">
 							<input type="datetime-local" id="time-edit-input" required>
@@ -302,6 +308,8 @@
 				<h2>Add a template</h2>
 				<div class="form-container">
 					<form id="template-form">
+						<button type="button" id="color-template-toggle">Color</button>
+						<div class="color-list hidden"></div>
 						<input type="text" id="title-template-input" placeholder="Title" required>
 						<select id="notification-service-template-input" required></select>
 						<textarea id="text-template-input" cols="30" rows="10" placeholder="Text (optional)"></textarea>
@@ -316,6 +324,8 @@
 				<h2>Edit a template</h2>
 				<div class="form-container">
 					<form id="template-edit-form">
+						<button type="button" id="color-template-edit-toggle">Color</button>
+						<div class="color-list hidden"></div>
 						<input type="text" id="title-template-edit-input" placeholder="Title" required>
 						<select id="notification-service-template-edit-input" required></select>
 						<textarea id="text-template-edit-input" cols="30" rows="10" placeholder="Text (optional)"></textarea>

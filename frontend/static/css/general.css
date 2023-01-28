@@ -11,8 +11,8 @@
 	--color-gray: #3c3c3c;
 	--color-dark: #1b1b1b;
 
-	--color-error: rgb(219, 84, 97);
-	--color-success: rgb(84, 219, 104);
+	--color-error: #db5461;
+	--color-success: #54db68;
 	
 	--header-height: 4.5rem;
 	--nav-width: 4rem;

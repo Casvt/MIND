@@ -7,6 +7,9 @@ function fillTable(result) {
 		entry.classList.add('entry');
 		entry.dataset.id = reminder.id;
 		entry.addEventListener('click', e => showEdit(reminder.id));
+		if (reminder.color !== null) {
+			entry.style.setProperty('--color', reminder.color);
+		};
 		
 		const title = document.createElement('h2');
 		title.innerText = reminder.title;

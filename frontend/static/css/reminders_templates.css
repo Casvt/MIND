@@ -84,6 +84,7 @@
 }
 
 .entry {
+	--color: var(--color-gray);
 	width: var(--entry-width);
 	height: 6rem;
 	position: relative;
@@ -95,7 +96,7 @@
 	
 	border-radius: 4px;
 	padding: .75rem;
-	background-color: var(--color-gray);
+	background-color: var(--color);
 }
 
 button.entry.fit {
