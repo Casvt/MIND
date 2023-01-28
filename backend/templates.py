@@ -27,7 +27,8 @@ class Template:
 			SELECT
 				id,
 				title, text,
-				notification_service
+				notification_service,
+				color
 			FROM templates
 			WHERE id = ?;
 			""",
@@ -39,7 +40,8 @@ class Template:
 	def update(self,
 		title: str = None,
 		notification_service: int = None,
-		text: str = None
+		text: str = None,
+		color: str = None
 	) -> dict:
 		"""Edit the template
 
@@ -47,6 +49,7 @@ class Template:
 			title (str): The new title of the entry. Defaults to None.
 			notification_service (int): The new id of the notification service to use to send the reminder. Defaults to None.
 			text (str, optional): The new body of the template. Defaults to None.
+			color (str, optional): The new hex code of the color of the template, which is shown in the web-ui. Defaults to None.
 
 		Returns:
 			dict: The new template info
@@ -57,21 +60,23 @@ class Template:
 		new_values = {
 			'title': title,
 			'notification_service': notification_service,
-			'text': text
+			'text': text,
+			'color': color
 		}
 		for k, v in new_values.items():
-			if v is not None:
+			if k in ('color',) or v is not None:
 				data[k] = v
 				
 		try:
 			cursor.execute("""
 				UPDATE templates
-				SET title=?, notification_service=?, text=?
+				SET title=?, notification_service=?, text=?, color=?
 				WHERE id = ?;
 				""", (
 					data['title'],
 					data['notification_service'],
 					data['text'],
+					data['color'],
 					self.id
 			))
 		except IntegrityError:
@@ -95,13 +100,14 @@ class Templates:
 		"""Get all templates
 
 		Returns:
-			List[dict]: The id, title, text and notification_service
+			List[dict]: The id, title, text, notification_service and color
 		"""
 		templates: list = list(map(dict, get_db(dict).execute("""
 			SELECT
 				id,
 				title, text,
-				notification_service
+				notification_service,
+				color
 			FROM templates
 			WHERE user_id = ?
 			ORDER BY title, id;
@@ -126,7 +132,8 @@ class Templates:
 		self,
 		title: str,
 		notification_service: int,
-		text: str = ''
+		text: str = '',
+		color: str = None
 	) -> Template:
 		"""Add a template
 
@@ -134,16 +141,17 @@ class Templates:
 			title (str): The title of the entry
 			notification_service (int): The id of the notification service to use to send the reminder.
 			text (str, optional): The body of the reminder. Defaults to ''.
+			color (str, optional): The hex code of the color of the template, which is shown in the web-ui. Defaults to None.
 
 		Returns:
 			Template: The info about the template
 		"""	
 		try:
 			id = get_db().execute("""
-				INSERT INTO templates(user_id, title, text, notification_service)
-				VALUES (?,?,?,?);
+				INSERT INTO templates(user_id, title, text, notification_service, color)
+				VALUES (?,?,?,?,?);
 				""",
-				(self.user_id, title, text, notification_service)
+				(self.user_id, title, text, notification_service, color)
 			).lastrowid
 		except IntegrityError:
 			raise NotificationServiceNotFound

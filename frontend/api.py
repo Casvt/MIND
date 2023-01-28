@@ -3,6 +3,7 @@
 from os import urandom
 from time import time as epoch_time
 from typing import Any, Tuple
+from re import compile
 
 from flask import Blueprint, g, request
 
@@ -14,12 +15,13 @@ from backend.custom_exceptions import (AccessUnauthorized, InvalidKeyValue,
                                        UsernameTaken, UserNotFound)
 from backend.notification_service import (NotificationService,
                                           NotificationServices)
-from backend.reminders import Reminders, reminder_handler
+from backend.reminders import Reminders, reminder_handler, test_reminder
 from backend.templates import Template, Templates
 from backend.users import User, register_user
 
 api = Blueprint('api', __name__)
 api_key_map = {}
+color_regex = compile(r'#[0-9a-f]{6}')
 
 """
 AUTHENTICATION:
@@ -104,6 +106,10 @@ def extract_key(values: dict, key: str, check_existence: bool=True) -> Any:
 					'text', 'query'):
 			if not isinstance(value, str):
 				raise InvalidKeyValue(key, value)
+				
+		elif key == 'color':
+			if not color_regex.search(value):
+				raise InvalidKeyValue(key, value)
 
 	else:
 		if key == 'sort_by':
@@ -127,7 +133,7 @@ def api_login():
 	Requires being logged in: No
 	Methods:
 		POST:
-			Parameters (body (content-type: application/json)):
+			Parameters (body):
 				username (required): the username of the user account
 				password (required): the password of the user account
 			Returns:
@@ -216,7 +222,7 @@ def api_add_user():
 	Requires being logged in: No
 	Methods:
 		POST:
-			Parameters (body (content-type: application/json)):
+			Parameters (body):
 				username (required): the username of the new user account
 				password (required): the password of the new user account
 			Returns:
@@ -248,7 +254,7 @@ def api_manage_user():
 	Methods:
 		PUT:
 			Description: Change the password of the user account
-			Parameters (body (content-type: application/json)):
+			Parameters (body):
 				new_password (required): the new password of the user account
 			Returns:
 				200:
@@ -297,7 +303,7 @@ def api_notification_services_list():
 					The id, title and url of every notification service
 		POST:
 			Description: Add a notification service
-			Parameters (body (content-type: application/json)):
+			Parameters (body):
 				title (required): the title of the notification service
 				url (required): the apprise url of the notification service
 			Returns:
@@ -340,7 +346,7 @@ def api_notification_service(n_id: int):
 					No notification service found with the given id
 		PUT:
 			Description: Edit the notification service
-			Parameters (body (content-type: application/json)):
+			Parameters (body):
 				title: The new title of the entry.
 				url: The new apprise url of the entry.
 			Returns:
@@ -396,16 +402,17 @@ def api_reminders_list():
 				sort_by: how to sort the result. Allowed values are 'title', 'title_reversed', 'time' and 'time_reversed'
 			Returns:
 				200:
-					The id, title, text, time, notification_service, notification_service_title, repeat_quantity and repeat_interval of each reminder
+					The id, title, text, time, notification_service, notification_service_title, repeat_quantity, repeat_interval and color of each reminder
 		POST:
 			Description: Add a reminder
-			Parameters (body (content-type: application/json)):
+			Parameters (body):
 				title (required): the title of the reminder
 				time (required): the UTC epoch timestamp that the reminder should be sent at
 				notification_service (required): the id of the notification service to use to send the notification
 				text: the body of the reminder
 				repeat_quantity ('year', 'month', 'week', 'day', 'hours', 'minutes'): The quantity of the repeat_interval
 				repeat_interval: The number of the interval
+				color: The hex code of the color of the reminder, which is shown in the web-ui
 			Returns:
 				200:
 					The info about the new reminder entry
@@ -427,13 +434,15 @@ def api_reminders_list():
 		text = extract_key(data, 'text', check_existence=False)
 		repeat_quantity = extract_key(data, 'repeat_quantity', check_existence=False)
 		repeat_interval = extract_key(data, 'repeat_interval', check_existence=False)
+		color = extract_key(data, 'color', check_existence=False)
 
 		result = reminders.add(title=title,
 								time=time,
 								notification_service=notification_service,
 								text=text,
 								repeat_quantity=repeat_quantity,
-								repeat_interval=repeat_interval)
+								repeat_interval=repeat_interval,
+								color=color)
 		return return_api(result.get(), code=201)
 
 @api.route('/reminders/search', methods=['GET'])
@@ -459,6 +468,36 @@ def api_reminders_query():
 	result = g.user_data.reminders.search(query)
 	return return_api(result)
 
+@api.route('/reminders/test', methods=['POST'])
+@error_handler
+@auth
+def api_test_reminder():
+	"""
+	Endpoint: /reminders/test
+	Description: Test send a reminder draft
+	Requires being logged in: Yes
+	Methods:
+		GET:
+			Parameters (body):
+				title (required): The title of the entry.
+				notification_service (required): The new id of the notification service to use to send the reminder.
+				text: The body of the reminder.
+			Returns:
+				201:
+					The reminder is sent (doesn't mean it works, just that it was sent)
+				400:
+					KeyNotFound: One of the required parameters was not given
+				404:
+					NotificationServiceNotFound: The notification service given was not found
+	"""
+	data = request.get_json()
+	title = extract_key(data, 'title')
+	notification_service = extract_key(data, 'notification_service')
+	text = extract_key(data, 'text', check_existence=False)
+
+	test_reminder(title, notification_service, text)
+	return return_api({}, code=201)
+
 @api.route('/reminders/<int:r_id>', methods=['GET','PUT','DELETE'])
 @error_handler
 @auth
@@ -479,13 +518,14 @@ def api_get_reminder(r_id: int):
 					No reminder found with the given id
 		PUT:
 			Description: Edit the reminder
-			Parameters (body (content-type: application/json)):
+			Parameters (body):
 				title: The new title of the entry.
 				time: The new UTC epoch timestamp the the reminder should be send.
 				notification_service: The new id of the notification service to use to send the reminder.
 				text: The new body of the reminder.
-				repeat_quantity ('year', 'month', 'week', 'day', 'hours', 'minutes'): The quantity of the repeat_interval
-				repeat_interval: The number of the interval 
+				repeat_quantity ('year', 'month', 'week', 'day', 'hours', 'minutes'): The new quantity of the repeat_interval.
+				repeat_interval: The new number of the interval.
+				color: The new hex code of the color of the reminder, which is shown in the web-ui.
 			Returns:
 				200:
 					Reminder updated successfully
@@ -512,14 +552,15 @@ def api_get_reminder(r_id: int):
 		text = extract_key(data, 'text', check_existence=False)
 		repeat_quantity = extract_key(data, 'repeat_quantity', check_existence=False)
 		repeat_interval = extract_key(data, 'repeat_interval', check_existence=False)
-
+		color = extract_key(data, 'color', check_existence=False)
 		
 		result = reminders.fetchone(r_id).update(title=title,
 												time=time,
 												notification_service=notification_service,
 												text=text,
 												repeat_quantity=repeat_quantity,
-												repeat_interval=repeat_interval)
+												repeat_interval=repeat_interval,
+												color=color)
 		return return_api(result)
 
 	elif request.method == 'DELETE':
@@ -543,13 +584,14 @@ def api_get_templates():
 			Description: Get a list of all templates
 			Returns:
 				200:
-					The id, title, notification_service and text of every template
+					The id, title, notification_service, text and color of every template
 		POST:
 			Description: Add a template
-			Parameters (body (content-type: application/json)):
+			Parameters (body):
 				title (required): the title of the template
 				notification_service (required): the id of the notification service to use to send the notification
 				text: the body of the template
+				color: the hex code of the color of the template, which is shown in the web-ui
 			Returns:
 				200:
 					The info about the new template entry
@@ -567,10 +609,12 @@ def api_get_templates():
 		title = extract_key(data, 'title')
 		notification_service = extract_key(data, 'notification_service')
 		text = extract_key(data, 'text', check_existence=False)
+		color = extract_key(data, 'color', check_existence=False)
 		
 		result = templates.add(title=title,
 								notification_service=notification_service,
-								text=text)
+								text=text,
+								color=color)
 		return return_api(result.get(), code=201)
 
 @api.route('/templates/<int:t_id>', methods=['GET', 'PUT', 'DELETE'])
@@ -593,10 +637,11 @@ def api_get_template(t_id: int):
 					No template found with the given id
 		PUT:
 			Description: Edit the template
-			Parameters (body (content-type: application/json)):
+			Parameters (body):
 				title: The new title of the entry.
 				notification_service: The new id of the notification service to use to send the reminder.
 				text: The new body of the template.
+				color: The new hex code of the color of the template.
 			Returns:
 				200:
 					Template updated successfully
@@ -621,10 +666,12 @@ def api_get_template(t_id: int):
 		title = extract_key(data, 'title', check_existence=False)
 		notification_service = extract_key(data, 'notification_service', check_existence=False)
 		text = extract_key(data, 'text', check_existence=False)
+		color = extract_key(data, 'color', check_existence=False)
 		
 		result = template.update(title=title,
 								notification_service=notification_service,
-								text=text)
+								text=text,
+								color=color)
 		return return_api(result)
 
 	elif request.method == 'DELETE':

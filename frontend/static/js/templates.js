@@ -1,13 +1,15 @@
 const template_inputs = {
 	'title': document.getElementById('title-template-input'),
 	'notification-service': document.getElementById('notification-service-template-input'),
-	'text': document.getElementById('text-template-input')
+	'text': document.getElementById('text-template-input'),
+	'color': document.querySelector('#add-template .color-list')
 };
 
 const edit_template_inputs = {
 	'title': document.getElementById('title-template-edit-input'),
 	'notification-service': document.getElementById('notification-service-template-edit-input'),
-	'text': document.getElementById('text-template-edit-input')
+	'text': document.getElementById('text-template-edit-input'),
+	'color': document.querySelector('#edit-template .color-list')
 };
 
 function loadTemplates(force=true) {
@@ -68,6 +70,9 @@ function loadTemplate() {
 		inputs.title.value = '';
 		inputs.notification_service.value = document.querySelector('#notification-service-input option[selected]').value;
 		inputs.text.value = '';
+		if (!inputs.color.classList.contains('hidden')) {
+			toggleColor(inputs.color);
+		};
 	} else {
 		fetch(`/api/templates/${id}?api_key=${api_key}`)
 		.then(response => {
@@ -81,6 +86,16 @@ function loadTemplate() {
 			inputs.title.value = json.result.title;
 			inputs.notification_service.value = json.result.notification_service;
 			inputs.text.value = json.result.text;
+			if (json.result.color !== null) {
+				if (inputs.color.classList.contains('hidden')) {
+					toggleColor(inputs.color);
+				};
+				selectColor(inputs.color, json.result.color);
+			} else {
+				if (!inputs.color.classList.contains('hidden')) {
+					toggleColor(inputs.color);
+				};
+			};
 		})
 		.catch(e => {
 			if (e === 401) {
@@ -96,7 +111,11 @@ function addTemplate() {
 	const data = {
 		'title': template_inputs.title.value,
 		'notification_service': template_inputs["notification-service"].value,
-		'text': template_inputs.text.value
+		'text': template_inputs.text.value,
+		'color': null
+	};
+	if (!template_inputs.color.classList.contains('hidden')) {
+		data['color'] = template_inputs.color.querySelector('button[data-selected="true"]').dataset.color;
 	};
 	fetch(`/api/templates?api_key=${api_key}`, {
 		'method': 'POST',
@@ -128,6 +147,9 @@ function closeAddTemplate() {
 		template_inputs.title.value = '';
 		template_inputs['notification-service'].value = document.querySelector('#notification-service-template-input option[selected]').value;
 		template_inputs.text.value = '';
+		if (!template_inputs.color.classList.contains('hidden')) {
+			toggleColor(inputs.color);
+		};
 	}, 500);
 };
 
@@ -145,6 +167,12 @@ function showEditTemplate(id) {
 		edit_template_inputs.title.value = json.result.title;
 		edit_template_inputs['notification-service'].value = json.result.notification_service;
 		edit_template_inputs.text.value = json.result.text;
+		if (json.result.color !== null) {
+			if (edit_template_inputs.color.classList.contains('hidden')) {
+				toggleColor(edit_template_inputs.color);
+			};
+			selectColor(edit_template_inputs.color, json.result.color);
+		};
 		showWindow('edit-template');
 	})
 	.catch(e => {
@@ -161,7 +189,11 @@ function saveTemplate() {
 	const data = {
 		'title': edit_template_inputs.title.value,
 		'notification_service': edit_template_inputs['notification-service'].value,
-		'text': edit_template_inputs.text.value
+		'text': edit_template_inputs.text.value,
+		'color': null
+	};
+	if (!edit_template_inputs.color.classList.contains('hidden')) {
+		data['color'] = edit_template_inputs.color.querySelector('button[data-selected="true"]').dataset.color;
 	};
 	fetch(`/api/templates/${id}?api_key=${api_key}`, {
 		'method': 'PUT',
@@ -211,7 +243,9 @@ function deleteTemplate() {
 // code run on load
 
 document.getElementById('template-form').setAttribute('action', 'javascript:addTemplate();');
+document.getElementById('color-template-toggle').addEventListener('click', e => toggleColor(template_inputs.color));
 document.getElementById('close-template').addEventListener('click', e => closeAddTemplate());
 document.getElementById('template-edit-form').setAttribute('action', 'javascript:saveTemplate()');
+document.getElementById('color-template-edit-toggle').addEventListener('click', e => toggleColor(edit_template_inputs.color));
 document.getElementById('close-edit-template').addEventListener('click', e => hideWindow());
 document.getElementById('delete-template').addEventListener('click', e => deleteTemplate());

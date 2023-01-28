@@ -33,6 +33,7 @@
 	width: calc(50% - (var(--gap) / 2));
 }
 
+.form-container > form > button,
 .sub-inputs > button {
 	display: flex;
 	justify-content: center;
@@ -52,6 +53,32 @@
 
 .sub-inputs > button[data-selected="false"] > svg {
 	opacity: 0;
+}
+
+.color-list {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 1rem;
+	flex-wrap: wrap;
+
+	padding: 1rem;
+	border: 2px solid var(--color-gray);
+	border-radius: 4px;
+	box-shadow: var(--default-shadow);
+}
+
+.color-list > button {
+	height: 1.5rem;
+	width: 1.5rem;
+
+	padding: 1rem;
+	border: 1px solid transparent;
+	background-color: var(--color);
+}
+
+.color-list > button[data-selected='true'] {
+	border-color: var(--color-white);
 }
 
 .repeat-bar,
@@ -112,9 +139,30 @@ div.options > button {
 	color: var(--color-error);
 }
 
+#test-reminder {
+	display: flex;
+	gap: 1rem;
+	
+	overflow-x: hidden;
+}
+
+#test-reminder > div {
+	width: 100%;
+	flex: 0 0 auto;
+	
+	font-size: inherit;
+	
+	transition: transform .1s linear;
+}
+
+#test-reminder.show-sent > div {
+	transform: translateX(calc(-100% - 1rem));
+}
+
 @media (max-width: 460px) {
 	.sub-inputs > input,
-	.sub-inputs > select {
+	.sub-inputs > select,
+	.sub-inputs > button {
 		width: 100%;
 	}
 }

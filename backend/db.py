@@ -8,7 +8,7 @@ from typing import Union
 
 from flask import g
 
-__DATABASE_VERSION__ = 2
+__DATABASE_VERSION__ = 3
 
 class Singleton(type):
 	_instances = {}
@@ -79,7 +79,17 @@ def migrate_db(current_db_version: int) -> None:
 		for reminder in reminders:
 			new_reminders_append([round((datetime.fromtimestamp(reminder[0]) - utc_offset).timestamp()), reminder[1]])
 		cursor.executemany("UPDATE reminders SET time = ? WHERE id = ?;", new_reminders)
-		__DATABASE_VERSION__ = 2
+		current_db_version = 2
+		
+	if current_db_version == 2:
+		# V2 -> V3
+		cursor.executescript("""
+			ALTER TABLE reminders
+			ADD color VARCHAR(7);
+			ALTER TABLE templates
+			ADD color VARCHAR(7);
+		""")
+		current_db_version = 3
 
 	return
 
@@ -115,6 +125,8 @@ def setup_db() -> None:
 			repeat_interval INTEGER,
 			original_time INTEGER,
 			
+			color VARCHAR(7),
+			
 			FOREIGN KEY (user_id) REFERENCES users(id),
 			FOREIGN KEY (notification_service) REFERENCES notification_services(id)
 		);
@@ -125,6 +137,8 @@ def setup_db() -> None:
 			text TEXT,
 			notification_service INTEGER NOT NULL,
 			
+			color VARCHAR(7),
+
 			FOREIGN KEY (user_id) REFERENCES users(id),
 			FOREIGN KEY (notification_service) REFERENCES notification_services(id)
 		);
