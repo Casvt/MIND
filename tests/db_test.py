@@ -1,7 +1,7 @@
 import unittest
 
 from backend.db import DBConnection
-from Noted import DB_FILENAME, _folder_path
+from MIND import DB_FILENAME, _folder_path
 
 class Test_DB(unittest.TestCase):
 	def test_foreign_key(self):

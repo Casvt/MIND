@@ -64,8 +64,8 @@ def close_db(e=None) -> None:
 
 def migrate_db(current_db_version: int) -> None:
 	"""
-	Migrate a Noted database from it's current version 
-	to the newest version supported by the Noted version installed.
+	Migrate a MIND database from it's current version 
+	to the newest version supported by the MIND version installed.
 	"""
 	print('Migrating database to newer version...')
 	cursor = get_db()

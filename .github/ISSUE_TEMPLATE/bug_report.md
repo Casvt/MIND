@@ -26,7 +26,7 @@ assignees: ''
 **Version info**
  - OS: [e.g. iOS]
  - Browser: [e.g. chrome, safari]
- - Noted Version: [e.g. V1.0.0]
+ - MIND Version: [e.g. V1.0.0]
  - Python Version: [e.g. V3.7]
 
 **Additional context**

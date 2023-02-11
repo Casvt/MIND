@@ -1,11 +1,11 @@
 version: '3.3'
 services:
-    noted:
-        container_name: noted
+    mind:
+        container_name: mind
         volumes:
-            - 'noted-db:/app/db'
+            - 'mind-db:/app/db'
         environment:
             - TZ=Europe/Amsterdam
         ports:
             - '8080:8080'
-        image: 'mrcas/noted:latest'
+        image: 'mrcas/mind:latest'
