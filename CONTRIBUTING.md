@@ -1,8 +1,8 @@
-# Contributing to Noted
+# Contributing to MIND
 ## General steps
-Contributing to Noted consists of 5 steps, listed hereunder. 
+Contributing to MIND consists of 5 steps, listed hereunder. 
 
-1. Make a [contributing request](https://github.com/Casvt/Noted/issues/new?template=contribute-request.md), where you describe what you plan on doing. This request needs to get approved before you can start, or your pull request won't be accepted. This is to avoid multiple people from doing the same thing and to avoid you wasting your time if we do not wish the changes. This is also where discussions can be held about how something will be implemented.
+1. Make a [contributing request](https://github.com/Casvt/MIND/issues/new?template=contribute-request.md), where you describe what you plan on doing. This request needs to get approved before you can start, or your pull request won't be accepted. This is to avoid multiple people from doing the same thing and to avoid you wasting your time if we do not wish the changes. This is also where discussions can be held about how something will be implemented.
 2. When the request is accepted, start your local development (more info about this below).
 3. When done, create a pull request to the Development branch, where you mention again what you've changed/added and give a link to the original contributing request issue.
 4. The PR will be reviewed and if requested, changes will need to be made before it is accepted. 
@@ -22,7 +22,7 @@ python3 -m unittest discover -v -s './tests' -p '*_test.py'
 6. Test your version thoroughly to catch as many bugs as possible (if any).
 
 ## Styling guide
-The code of Noted is written in such way that it follows the following rules. Your code should too.
+The code of MIND is written in such way that it follows the following rules. Your code should too.
 
 1. Compatible with python 3.7 .
 2. Tabs (4 space size) are used for indentation.

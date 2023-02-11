@@ -4,9 +4,9 @@ from flask import Flask
 
 from frontend.api import api
 from frontend.ui import ui
-from Noted import _create_app
+from MIND import _create_app
 
-class Test_Noted(unittest.TestCase):
+class Test_MIND(unittest.TestCase):
 	def test_create_app(self):
 		result = _create_app()
 		self.assertIsInstance(result, Flask)

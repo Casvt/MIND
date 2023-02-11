@@ -2,7 +2,8 @@
 #-*- coding: utf-8 -*-
 
 from os import makedirs, urandom
-from os.path import abspath, dirname, join
+from os.path import abspath, dirname, join, isfile
+from shutil import move
 from sys import version_info
 
 from flask import Flask, render_template, request
@@ -15,7 +16,7 @@ from frontend.ui import ui
 HOST = '0.0.0.0'
 PORT = '8080'
 THREADS = 10
-DB_FILENAME = 'db', 'Noted.db'
+DB_FILENAME = 'db', 'MIND.db'
 
 def _folder_path(*folders) -> str:
 	"""Turn filepaths relative to the project folder into absolute paths
@@ -67,8 +68,8 @@ def _create_app() -> Flask:
 	
 	return app
 
-def Noted() -> None:
-	"""The main function of Noted
+def MIND() -> None:
+	"""The main function of MIND
 	Returns:
 		None
 	"""
@@ -79,6 +80,8 @@ def Noted() -> None:
 	# Register web server
 	app = _create_app()
 	with app.app_context():
+		if isfile(_folder_path('db', 'Noted.db')):
+			move(_folder_path('db', 'Noted.db'), _folder_path('db', 'MIND.db'))
 		db_location = _folder_path(*DB_FILENAME)
 		makedirs(dirname(db_location), exist_ok=True)
 		DBConnection.file = db_location
@@ -90,9 +93,9 @@ def Noted() -> None:
 
 	# Create waitress server and run
 	server = create_server(app, host=HOST, port=PORT, threads=THREADS)
-	print(f'Noted running on http://{HOST}:{PORT}/')
+	print(f'MIND running on http://{HOST}:{PORT}/')
 	server.run()
-	print(f'\nShutting down Noted...')
+	print(f'\nShutting down MIND...')
 	
 	# Stopping thread
 	reminder_handler.stop_handling()
@@ -101,4 +104,4 @@ def Noted() -> None:
 	return
 
 if __name__ == "__main__":
-	Noted()
+	MIND()
