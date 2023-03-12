@@ -4,19 +4,20 @@
 	<meta charset="UTF-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta id="url_prefix" data-value="{{url_prefix}}">
 
-	<link rel="stylesheet" href="/static/css/general.css">
-	<link rel="stylesheet" href="/static/css/reminders_templates.css">
-	<link rel="stylesheet" href="/static/css/add_edit.css">
-	<link rel="stylesheet" href="/static/css/notification.css">
-	<link rel="stylesheet" href="/static/css/settings.css">
-	<script src="/static/js/general.js" defer></script>
-	<script src="/static/js/reminders.js" defer></script>
-	<script src="/static/js/add.js" defer></script>
-	<script src="/static/js/edit.js" defer></script>
-	<script src="/static/js/notification.js" defer></script>
-	<script src="/static/js/settings.js" defer></script>
-	<script src="/static/js/templates.js" defer></script>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/general.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/reminders_templates.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/add_edit.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/notification.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+	<script src="{{ url_for('static', filename='js/general.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='js/reminders.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='js/add.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='js/edit.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='js/notification.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='js/settings.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='js/templates.js') }}" defer></script>
 
 	<title>Reminders - MIND</title>
 </head>
@@ -173,10 +174,10 @@
 							<select id="repeat-quantity">
 								<option value="minutes">Minute(s)</option>
 								<option value="hours">Hour(s)</option>
-								<option value="day" selected>Day(s)</option>
-								<option value="week">Week(s)</option>
-								<option value="month">Month(s)</option>
-								<option value="year">Year(s)</option>
+								<option value="days" selected>Day(s)</option>
+								<option value="weeks">Week(s)</option>
+								<option value="months">Month(s)</option>
+								<option value="years">Year(s)</option>
 							</select>
 						</div>
 						<textarea id="text-input" cols="30" rows="10" placeholder="Text (optional)"></textarea>
@@ -226,10 +227,10 @@
 							<select id="repeat-edit-quantity">
 								<option value="minutes">Minute(s)</option>
 								<option value="hours">Hour(s)</option>
-								<option value="day" selected>Day(s)</option>
-								<option value="week">Week(s)</option>
-								<option value="month">Month(s)</option>
-								<option value="year">Year(s)</option>
+								<option value="days" selected>Day(s)</option>
+								<option value="weeks">Week(s)</option>
+								<option value="months">Month(s)</option>
+								<option value="years">Year(s)</option>
 							</select>
 						</div>
 						<textarea id="text-edit-input" cols="30" rows="10" placeholder="Text (optional)"></textarea>

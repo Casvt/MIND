@@ -10,7 +10,7 @@ function login(data=null) {
 			'password': document.getElementById('password-input').value
 		};
 	};
-	fetch(`/api/auth/login`, {
+	fetch(`${url_prefix}/api/auth/login`, {
 		'method': 'POST',
 		'headers': {'Content-Type': 'application/json'},
 		'body': JSON.stringify(data)
@@ -25,7 +25,7 @@ function login(data=null) {
 	})
 	.then(json => {
 		sessionStorage.setItem('api_key', json.result.api_key);
-		window.location.href = '/reminders';
+		window.location.href = `${url_prefix}/reminders`;
 	})
 	.catch(e => {
 		if (e === 401) {
@@ -49,7 +49,7 @@ function create() {
 		'username': document.getElementById('new-username-input').value,
 		'password': document.getElementById('new-password-input').value
 	};
-	fetch(`/api/user/add`, {
+	fetch(`${url_prefix}/api/user/add`, {
 		'method': 'POST',
 		'headers': {'Content-Type': 'application/json'},
 		'body': JSON.stringify(data)
@@ -80,6 +80,8 @@ function toggleWindow() {
 };
 
 // code run on load
+
+const url_prefix = document.getElementById('url_prefix').dataset.value;
 
 document.getElementById('login-form').setAttribute('action', 'javascript:login();');
 document.getElementById('create-form').setAttribute('action', 'javascript:create();');

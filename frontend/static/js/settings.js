@@ -2,7 +2,7 @@ function changePassword() {
 	const data = {
 		'new_password': document.getElementById('password-input').value
 	};
-	fetch(`/api/user?api_key=${api_key}`, {
+	fetch(`${url_prefix}/api/user?api_key=${api_key}`, {
 		'method': 'PUT',
 		'headers': {'Content-Type': 'application/json'},
 		'body': JSON.stringify(data)
@@ -16,7 +16,7 @@ function changePassword() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = '/';
+			window.location.href = url_prefix;
 		} else {
 			console.log(e);
 		};
@@ -24,11 +24,11 @@ function changePassword() {
 };
 
 function deleteAccount() {
-	fetch(`/api/user?api_key=${api_key}`, {
+	fetch(`${url_prefix}/api/user?api_key=${api_key}`, {
 		'method': 'DELETE'
 	})
 	.then(response => {
-		window.location.href = '/';
+		window.location.href = url_prefix;
 	});
 };
 

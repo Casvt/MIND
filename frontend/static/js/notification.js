@@ -1,5 +1,5 @@
 function fillNotificationSelection() {
-	fetch(`/api/notificationservices?api_key=${api_key}`)
+	fetch(`${url_prefix}/api/notificationservices?api_key=${api_key}`)
 	.then(response => {
 		// catch errors
 		if (!response.ok) {
@@ -87,7 +87,7 @@ function fillNotificationSelection() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = '/';
+			window.location.href = url_prefix;
 		} else {
 			console.log(e);
 		};
@@ -96,7 +96,7 @@ function fillNotificationSelection() {
 
 function deleteService(id) {
 	const row = document.querySelector(`tr[data-id="${id}"]`);
-	fetch(`/api/notificationservices/${id}?api_key=${api_key}`, {
+	fetch(`${url_prefix}/api/notificationservices/${id}?api_key=${api_key}`, {
 		'method': 'DELETE'
 	})
 	.then(response => response.json())
@@ -113,7 +113,7 @@ function deleteService(id) {
 	})
 	.catch(e => {
 		if (e.error === 'ApiKeyExpired' || e.error === 'ApiKeyInvalid') {
-			window.location.href = '/';
+			window.location.href = url_prefix;
 		} else if (e.error === 'NotificationServiceInUse') {
 			const delete_button = row.querySelector('button[title="Delete"]');
 			delete_button.classList.add('error-icon');
@@ -136,7 +136,7 @@ function saveService(id) {
 		'title': row.querySelector(`td.title-column > input`).value,
 		'url': row.querySelector(`td.url-column > input`).value
 	};
-	fetch(`/api/notificationservices/${id}?api_key=${api_key}`, {
+	fetch(`${url_prefix}/api/notificationservices/${id}?api_key=${api_key}`, {
 		'method': 'PUT',
 		'headers': {'Content-Type': 'application/json'},
 		'body': JSON.stringify(data)
@@ -151,7 +151,7 @@ function saveService(id) {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = '/';
+			window.location.href = url_prefix;
 		} else if (e === 400) {
 			save_button.classList.add('error-icon');
 			save_button.title = 'Invalid Apprise URL';
@@ -176,7 +176,7 @@ function addService() {
 		'title': inputs_buttons.title.value,
 		'url': inputs_buttons.url.value
 	};
-	fetch(`/api/notificationservices?api_key=${api_key}`, {
+	fetch(`${url_prefix}/api/notificationservices?api_key=${api_key}`, {
 		'method': 'POST',
 		'headers': {'Content-Type': 'application/json'},
 		'body': JSON.stringify(data)
@@ -199,7 +199,7 @@ function addService() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = '/';
+			window.location.href = url_prefix;
 		} else if (e === 400) {
 			inputs_buttons.save_button.classList.add('error-icon');
 			inputs_buttons.save_button.title = 'Invalid Apprise URL';

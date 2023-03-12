@@ -99,7 +99,7 @@ def extract_key(values: dict, key: str, check_existence: bool=True) -> Any:
 				raise InvalidKeyValue(key, value)
 				
 		elif key == 'repeat_quantity':
-			if not value in ("year", "month", "week", "day", "hours", "minutes"):
+			if not value in ("years", "months", "weeks", "days", "hours", "minutes"):
 				raise InvalidKeyValue(key, value)
 				
 		elif key in ('username', 'password', 'new_password', 'title', 'url',
@@ -119,6 +119,10 @@ def extract_key(values: dict, key: str, check_existence: bool=True) -> Any:
 			value = ''
 				
 	return value
+
+@api.errorhandler(404)
+def not_found(e):
+	return return_api({}, 'Not Found', 404)
 
 #===================
 # Authentication endpoints
@@ -410,7 +414,7 @@ def api_reminders_list():
 				time (required): the UTC epoch timestamp that the reminder should be sent at
 				notification_service (required): the id of the notification service to use to send the notification
 				text: the body of the reminder
-				repeat_quantity ('year', 'month', 'week', 'day', 'hours', 'minutes'): The quantity of the repeat_interval
+				repeat_quantity ('years', 'months', 'weeks', 'days', 'hours', 'minutes'): The quantity of the repeat_interval
 				repeat_interval: The number of the interval
 				color: The hex code of the color of the reminder, which is shown in the web-ui
 			Returns:
@@ -523,7 +527,7 @@ def api_get_reminder(r_id: int):
 				time: The new UTC epoch timestamp the the reminder should be send.
 				notification_service: The new id of the notification service to use to send the reminder.
 				text: The new body of the reminder.
-				repeat_quantity ('year', 'month', 'week', 'day', 'hours', 'minutes'): The new quantity of the repeat_interval.
+				repeat_quantity ('years', 'months', 'weeks', 'days', 'hours', 'minutes'): The new quantity of the repeat_interval.
 				repeat_interval: The new number of the interval.
 				color: The new hex code of the color of the reminder, which is shown in the web-ui.
 			Returns:
