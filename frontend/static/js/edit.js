@@ -34,7 +34,7 @@ function editReminder() {
 		data['repeat_interval'] = edit_type_buttons['repeat-edit-interval'].value;
 	};
 
-	fetch(`/api/reminders/${id}?api_key=${api_key}`, {
+	fetch(`${url_prefix}/api/reminders/${id}?api_key=${api_key}`, {
 		'method': 'PUT',
 		'headers': {'Content-Type': 'application/json'},
 		'body': JSON.stringify(data)
@@ -51,7 +51,7 @@ function editReminder() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = '/';
+			window.location.href = url_prefix;
 		} else {
 			console.log(e);
 		};
@@ -60,7 +60,7 @@ function editReminder() {
 
 function showEdit(id) {
 	document.getElementById('edit-form').dataset.id = id;
-	fetch(`/api/reminders/${id}?api_key=${api_key}`)
+	fetch(`${url_prefix}/api/reminders/${id}?api_key=${api_key}`)
 	.then(response => {
 		// catch errors
 		if (!response.ok) {
@@ -99,7 +99,7 @@ function showEdit(id) {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = '/';
+			window.location.href = url_prefix;
 		} else if (e === 404) {
 			fillList();
 		} else {
@@ -127,7 +127,7 @@ function toggleEditRepeated() {
 
 function deleteReminder() {
 	const id = document.getElementById('edit-form').dataset.id;
-	fetch(`/api/reminders/${id}?api_key=${api_key}`, {
+	fetch(`${url_prefix}/api/reminders/${id}?api_key=${api_key}`, {
 		'method': 'DELETE'
 	})
 	.then(response => {
@@ -142,7 +142,7 @@ function deleteReminder() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = '/';
+			window.location.href = url_prefix;
 		} else if (e === 404) {
 			fillList();
 		} else {

@@ -1,10 +1,10 @@
 function logout() { 
-	fetch(`/api/auth/logout?api_key=${api_key}`, {
+	fetch(`${url_prefix}/api/auth/logout?api_key=${api_key}`, {
 		'method': 'POST'
 	})
 	.then(response => {
 		sessionStorage.removeItem('api_key');
-		window.location.href = '/';
+		window.location.href = url_prefix;
 	});
 };
 
@@ -49,9 +49,10 @@ function showTab(tab_id, button_id, load_function=null) {
 
 // code run on load
 
+const url_prefix = document.getElementById('url_prefix').dataset.value;
 const api_key = sessionStorage.getItem('api_key');
 if (api_key === null) {
-	window.location.href = '/';
+	window.location.href = url_prefix;
 };
 
 document.getElementById('toggle-nav').addEventListener('click', e => toggleNav());

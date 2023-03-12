@@ -42,7 +42,7 @@ function fillTable(result) {
 };
 
 function fillList() {
-	fetch(`/api/reminders?api_key=${api_key}`)
+	fetch(`${url_prefix}/api/reminders?api_key=${api_key}`)
 	.then(response => {
 		// catch errors
 		if (!response.ok) {
@@ -55,7 +55,7 @@ function fillList() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = '/';
+			window.location.href = url_prefix;
 		} else {
 			console.log(e);
 		};
@@ -64,7 +64,7 @@ function fillList() {
 
 function search() {
 	const query = document.getElementById('search-input').value;
-	fetch(`/api/reminders/search?api_key=${api_key}&query=${query}`)
+	fetch(`${url_prefix}/api/reminders/search?api_key=${api_key}&query=${query}`)
 	.then(response => {
 		// catch errors
 		if (!response.ok) {
@@ -77,7 +77,7 @@ function search() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = '/';
+			window.location.href = url_prefix;
 		} else {
 			console.log(e);
 		};

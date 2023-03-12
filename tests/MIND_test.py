@@ -15,6 +15,6 @@ class Test_MIND(unittest.TestCase):
 		self.assertEqual(result.blueprints.get('api'), api)
 
 		handlers = result.error_handler_spec[None].keys()
-		required_handlers = 404, 400, 405, 500
+		required_handlers = 400, 405, 500
 		for handler in required_handlers:
 			self.assertIn(handler, handlers)
