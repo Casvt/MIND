@@ -19,7 +19,7 @@ Mind is a simple self hosted application for creating reminders that get pushed 
 * Schedule reminders
 * Recurring reminders
 * Docker image
-* Mobile fiendly
+* Mobile friendly
 
 ## Planned Features
 You can see our planned features in our [Project board](https://github.com/users/Casvt/projects/3).
