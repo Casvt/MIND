@@ -35,7 +35,7 @@ function addReminder() {
 		data['repeat_interval'] = type_buttons['repeat-interval'].value
 	};
 
-	fetch(`/api/reminders?api_key=${api_key}`, {
+	fetch(`${url_prefix}/api/reminders?api_key=${api_key}`, {
 		'method': 'POST',
 		'headers': {'Content-Type': 'application/json'},
 		'body': JSON.stringify(data)
@@ -52,7 +52,7 @@ function addReminder() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = '/';
+			window.location.href = url_prefix;
 		} else if (e === 400) {
 			inputs.time.classList.add('error-input');
 			inputs.time.title = 'Time is in the past';
@@ -144,7 +144,7 @@ function testReminder() {
 		'notification_service': inputs.notification_service.value,
 		'text': inputs.text.value
 	};
-	fetch(`/api/reminders/test?api_key=${api_key}`, {
+	fetch(`${url_prefix}/api/reminders/test?api_key=${api_key}`, {
 		'method': 'POST',
 		'headers': {'Content-Type': 'application/json'},
 		'body': JSON.stringify(data)
@@ -158,7 +158,7 @@ function testReminder() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = '/';
+			window.location.href = url_prefix;
 		};
 	});
 };

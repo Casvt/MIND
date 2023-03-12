@@ -18,7 +18,7 @@ function loadTemplates(force=true) {
 		return
 	};
 
-	fetch(`/api/templates?api_key=${api_key}`)
+	fetch(`${url_prefix}/api/templates?api_key=${api_key}`)
 	.then(response => {
 		// catch errors
 		if (!response.ok) {
@@ -57,7 +57,7 @@ function loadTemplates(force=true) {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = '/';
+			window.location.href = url_prefix;
 		} else {
 			console.log(e);
 		};
@@ -74,7 +74,7 @@ function loadTemplate() {
 			toggleColor(inputs.color);
 		};
 	} else {
-		fetch(`/api/templates/${id}?api_key=${api_key}`)
+		fetch(`${url_prefix}/api/templates/${id}?api_key=${api_key}`)
 		.then(response => {
 			// catch errors
 			if (!response.ok) {
@@ -99,7 +99,7 @@ function loadTemplate() {
 		})
 		.catch(e => {
 			if (e === 401) {
-				window.location.href = '/';
+				window.location.href = url_prefix;
 			} else {
 				console.log(e);
 			};
@@ -117,7 +117,7 @@ function addTemplate() {
 	if (!template_inputs.color.classList.contains('hidden')) {
 		data['color'] = template_inputs.color.querySelector('button[data-selected="true"]').dataset.color;
 	};
-	fetch(`/api/templates?api_key=${api_key}`, {
+	fetch(`${url_prefix}/api/templates?api_key=${api_key}`, {
 		'method': 'POST',
 		'headers': {'Content-Type': 'application/json'},
 		'body': JSON.stringify(data)
@@ -134,7 +134,7 @@ function addTemplate() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = '/';
+			window.location.href = url_prefix;
 		} else {
 			console.log(e);
 		};
@@ -154,7 +154,7 @@ function closeAddTemplate() {
 };
 
 function showEditTemplate(id) {
-	fetch(`/api/templates/${id}?api_key=${api_key}`)
+	fetch(`${url_prefix}/api/templates/${id}?api_key=${api_key}`)
 	.then(response => {
 		// catch errors
 		if (!response.ok) {
@@ -177,7 +177,7 @@ function showEditTemplate(id) {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = '/';
+			window.location.href = url_prefix;
 		} else {
 			console.log(e);
 		};
@@ -195,7 +195,7 @@ function saveTemplate() {
 	if (!edit_template_inputs.color.classList.contains('hidden')) {
 		data['color'] = edit_template_inputs.color.querySelector('button[data-selected="true"]').dataset.color;
 	};
-	fetch(`/api/templates/${id}?api_key=${api_key}`, {
+	fetch(`${url_prefix}/api/templates/${id}?api_key=${api_key}`, {
 		'method': 'PUT',
 		'headers': {'Content-Type': 'application/json'},
 		'body': JSON.stringify(data)
@@ -210,7 +210,7 @@ function saveTemplate() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = '/';
+			window.location.href = url_prefix;
 		} else {
 			console.log(e);
 		};
@@ -219,7 +219,7 @@ function saveTemplate() {
 
 function deleteTemplate() {
 	const id = document.getElementById('template-edit-form').dataset.id;
-	fetch(`/api/templates/${id}?api_key=${api_key}`, {
+	fetch(`${url_prefix}/api/templates/${id}?api_key=${api_key}`, {
 		'method': 'DELETE'
 	})
 	.then(response => {
@@ -233,7 +233,7 @@ function deleteTemplate() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = '/';
+			window.location.href = url_prefix;
 		} else {
 			console.log(e);
 		};
