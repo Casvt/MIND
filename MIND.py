@@ -17,7 +17,7 @@ from frontend.ui import ui
 
 HOST = '0.0.0.0'
 PORT = '8080'
-URL_PREFIX = '' # Must start with '/' e.g. '/mind' 
+URL_PREFIX = '' # Must either be empty or start with '/' e.g. '/mind' 
 THREADS = 10
 DB_FILENAME = 'db', 'MIND.db'
 
@@ -74,6 +74,7 @@ def MIND() -> None:
 	# Check python version
 	if (version_info.major < 3) or (version_info.major == 3 and version_info.minor < 7):
 		print('Error: the minimum python version required is python3.7 (currently ' + version_info.major + '.' + version_info.minor + '.' + version_info.micro + ')')
+		exit(1)
 
 	# Register web server
 	# We need to get the value to ui.py but MIND.py imports from ui.py so we get an import loop.

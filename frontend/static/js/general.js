@@ -4,7 +4,7 @@ function logout() {
 	})
 	.then(response => {
 		sessionStorage.removeItem('api_key');
-		window.location.href = url_prefix;
+		window.location.href = url_prefix || '/';
 	});
 };
 
