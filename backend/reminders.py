@@ -4,7 +4,6 @@ from datetime import datetime
 from sqlite3 import IntegrityError
 from threading import Thread
 from time import sleep
-from time import time as epoch_time
 from typing import List, Literal
 
 from apprise import Apprise
@@ -24,7 +23,7 @@ filter_function = lambda query, p: (
 
 def _find_next_time(
 	original_time: int,
-	repeat_quantity: Literal["year", "month", "week", "day", "hours", "minutes"],
+	repeat_quantity: Literal["years", "months", "weeks", "days", "hours", "minutes"],
 	repeat_interval: int
 ) -> int:
 	td = relativedelta(**{repeat_quantity: repeat_interval})
@@ -176,7 +175,7 @@ class Reminder:
 		time: int = None,
 		notification_service: int = None,
 		text: str = None,
-		repeat_quantity: Literal["year", "month", "week", "day", "hours", "minutes"] = None,
+		repeat_quantity: Literal["years", "months", "weeks", "days", "hours", "minutes"] = None,
 		repeat_interval: int = None,
 		color: str = None
 	) -> dict:
@@ -187,7 +186,7 @@ class Reminder:
 			time (int): The new UTC epoch timestamp the the reminder should be send. Defaults to None.
 			notification_service (int): The new id of the notification service to use to send the reminder. Defaults to None.
 			text (str, optional): The new body of the reminder. Defaults to None.
-			repeat_quantity (Literal["year", "month", "week", "day", "hours", "minutes"], optional): The new quantity of the repeat specified for the reminder. Defaults to None.
+			repeat_quantity (Literal["years", "months", "weeks", "days", "hours", "minutes"], optional): The new quantity of the repeat specified for the reminder. Defaults to None.
 			repeat_interval (int, optional): The new amount of repeat_quantity, like "5" (hours). Defaults to None.
 			color (str, optional): The new hex code of the color of the reminder, which is shown in the web-ui. Defaults to None.
 
@@ -358,7 +357,7 @@ class Reminders:
 		time: int,
 		notification_service: int,
 		text: str = '',
-		repeat_quantity: Literal["year", "month", "week", "day", "hours", "minutes"] = None,
+		repeat_quantity: Literal["years", "months", "weeks", "days", "hours", "minutes"] = None,
 		repeat_interval: int = None,
 		color: str = None
 	) -> Reminder:
@@ -369,7 +368,7 @@ class Reminders:
 			time (int): The UTC epoch timestamp the the reminder should be send.
 			notification_service (int): The id of the notification service to use to send the reminder.
 			text (str, optional): The body of the reminder. Defaults to ''.
-			repeat_quantity (Literal["year", "month", "week", "day", "hours", "minutes"], optional): The quantity of the repeat specified for the reminder. Defaults to None.
+			repeat_quantity (Literal["years", "months", "weeks", "days", "hours", "minutes"], optional): The quantity of the repeat specified for the reminder. Defaults to None.
 			repeat_interval (int, optional): The amount of repeat_quantity, like "5" (hours). Defaults to None.
 			color (str, optional): The hex code of the color of the reminder, which is shown in the web-ui. Defaults to None.
 

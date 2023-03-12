@@ -8,7 +8,7 @@ from typing import Union
 
 from flask import g
 
-__DATABASE_VERSION__ = 3
+__DATABASE_VERSION__ = 4
 
 class Singleton(type):
 	_instances = {}
@@ -90,6 +90,15 @@ def migrate_db(current_db_version: int) -> None:
 			ADD color VARCHAR(7);
 		""")
 		current_db_version = 3
+		
+	if current_db_version == 3:
+		# V3 -> V4
+		cursor.executescript("""
+			UPDATE reminders
+			SET repeat_quantity = repeat_quantity || 's'
+			WHERE repeat_quantity NOT LIKE '%s';
+		""")
+		current_db_version = 4
 
 	return
 
