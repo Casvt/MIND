@@ -7,13 +7,17 @@ from backend.custom_exceptions import (NotificationServiceNotFound,
                                        TemplateNotFound)
 from backend.db import get_db
 
+
 class Template:
 	"""Represents a template
 	"""	
 	def __init__(self, template_id: int):
 		self.id = template_id
 		
-		exists = get_db().execute("SELECT 1 FROM templates WHERE id = ? LIMIT 1;", (self.id,)).fetchone()
+		exists = get_db().execute(
+			"SELECT 1 FROM templates WHERE id = ? LIMIT 1;",
+			(self.id,)
+		).fetchone()
 		if not exists:
 			raise TemplateNotFound
 			
@@ -30,7 +34,8 @@ class Template:
 				notification_service,
 				color
 			FROM templates
-			WHERE id = ?;
+			WHERE id = ?
+			LIMIT 1;
 			""",
 			(self.id,)
 		).fetchone()
@@ -113,7 +118,7 @@ class Templates:
 			ORDER BY title, id;
 			""",
 			(self.user_id,)
-		).fetchall()))
+		)))
 
 		return templates
 

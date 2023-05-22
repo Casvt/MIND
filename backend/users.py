@@ -17,7 +17,7 @@ class User:
 	def __init__(self, username: str, password: str):
 		# Fetch data of user to check if user exists and to check if password is correct
 		result = get_db(dict).execute(
-			"SELECT id, salt, hash FROM users WHERE username = ?", 
+			"SELECT id, salt, hash FROM users WHERE username = ? LIMIT 1;", 
 			(username,)
 		).fetchone()
 		if not result:

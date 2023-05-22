@@ -37,15 +37,15 @@ def get_db(output_type: Union[dict, tuple]=tuple):
 		Cursor: The Cursor instance to use
 	"""	
 	try:
-			cursor = g.cursor
+		cursor = g.cursor
 	except AttributeError:
-			db = DBConnection(timeout=20.0)
-			cursor = g.cursor = db.cursor()
+		db = DBConnection(timeout=20.0)
+		cursor = g.cursor = db.cursor()
 
 	if output_type is dict:
-			cursor.row_factory = Row
+		cursor.row_factory = Row
 	else:
-			cursor.row_factory = None
+		cursor.row_factory = None
 
 	return g.cursor
 
@@ -73,10 +73,10 @@ def migrate_db(current_db_version: int) -> None:
 		# V1 -> V2
 		t = time()
 		utc_offset = datetime.fromtimestamp(t) - datetime.utcfromtimestamp(t)
-		reminders = cursor.execute("SELECT time, id FROM reminders;").fetchall()
+		cursor.execute("SELECT time, id FROM reminders;")
 		new_reminders = []
 		new_reminders_append = new_reminders.append
-		for reminder in reminders:
+		for reminder in cursor:
 			new_reminders_append([round((datetime.fromtimestamp(reminder[0]) - utc_offset).timestamp()), reminder[1]])
 		cursor.executemany("UPDATE reminders SET time = ? WHERE id = ?;", new_reminders)
 		current_db_version = 2
@@ -163,12 +163,14 @@ def setup_db() -> None:
 		""",
 		(__DATABASE_VERSION__,)
 	)
-	current_db_version = int(cursor.execute("SELECT value FROM config WHERE key = 'database_version' LIMIT 1;").fetchone()[0])
+	current_db_version = int(cursor.execute(
+		"SELECT value FROM config WHERE key = 'database_version' LIMIT 1;"
+	).fetchone()[0])
 	
 	if current_db_version < __DATABASE_VERSION__:
 		migrate_db(current_db_version)
 		cursor.execute(
-			"UPDATE config SET value = ? WHERE key = 'database_version' LIMIT 1;",
+			"UPDATE config SET value = ? WHERE key = 'database_version';",
 			(__DATABASE_VERSION__,)
 		)
 

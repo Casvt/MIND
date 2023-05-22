@@ -94,7 +94,7 @@ class ReminderHandler():
 						# Send of reminder
 						a = Apprise()
 						url = cursor.execute(
-							"SELECT url FROM notification_services WHERE id = ?",
+							"SELECT url FROM notification_services WHERE id = ? LIMIT 1;",
 							(reminder["notification_service"],)
 						).fetchone()["url"]
 						a.add(url)
@@ -102,7 +102,10 @@ class ReminderHandler():
 
 						if reminder['repeat_quantity'] is None:
 							# Delete the reminders from the database
-							cursor.execute("DELETE FROM reminders WHERE id = ?", (reminder['id'],))
+							cursor.execute(
+								"DELETE FROM reminders WHERE id = ?",
+								(reminder['id'],)
+							)
 						else:
 							# Set next time
 							new_time = _find_next_time(
@@ -138,7 +141,10 @@ class Reminder:
 		self.id = reminder_id
 
 		# Check if reminder exists
-		if not get_db().execute("SELECT 1 FROM reminders WHERE id = ? LIMIT 1", (self.id,)).fetchone():
+		if not get_db().execute(
+			"SELECT 1 FROM reminders WHERE id = ? LIMIT 1",
+			(self.id,)
+		).fetchone():
 			raise ReminderNotFound
 
 	def get(self) -> dict:
@@ -147,7 +153,7 @@ class Reminder:
 		Returns:
 			dict: The info about the reminder
 		"""
-		reminder: dict = get_db(dict).execute("""
+		reminder = get_db(dict).execute("""
 			SELECT
 				r.id,
 				r.title, r.text,
@@ -157,12 +163,11 @@ class Reminder:
 				r.repeat_quantity,
 				r.repeat_interval,
 				r.color
-			FROM
-				reminders r
-				INNER JOIN notification_services ns
-			ON
-				r.notification_service = ns.id
-				AND r.id = ?;
+			FROM reminders r
+			INNER JOIN notification_services ns
+			ON r.notification_service = ns.id
+			WHERE r.id = ?
+			LIMIT 1;
 			""",
 			(self.id,)
 		).fetchone()
@@ -229,7 +234,11 @@ class Reminder:
 				next_time = data["time"]
 				cursor.execute("""
 					UPDATE reminders
-					SET title=?, text=?, time=?, notification_service=?, repeat_quantity=?, repeat_interval=?, color=?
+					SET
+						title=?, text=?,
+						time=?, notification_service=?,
+						repeat_quantity=?, repeat_interval=?,
+						color=?
 					WHERE id = ?;
 					""", (
 						data["title"],
@@ -242,10 +251,17 @@ class Reminder:
 						self.id
 				))
 			else:
-				next_time = _find_next_time(data["time"], data["repeat_quantity"], data["repeat_interval"])
+				next_time = _find_next_time(
+					data["time"],
+					data["repeat_quantity"], data["repeat_interval"]
+				)
 				cursor.execute("""
 					UPDATE reminders
-					SET title=?, text=?, time=?, notification_service=?, repeat_quantity=?, repeat_interval=?, original_time=?, color=?
+					SET
+						title=?, text=?,
+						time=?, notification_service=?,
+						repeat_quantity=?, repeat_interval=?, original_time=?,
+						color=?
 					WHERE id = ?;
 					""", (
 						data["title"],
@@ -309,15 +325,13 @@ class Reminders:
 				r.repeat_quantity,
 				r.repeat_interval,
 				r.color
-			FROM
-				reminders r
-				INNER JOIN notification_services ns
-			ON
-				r.notification_service = ns.id
-				AND r.user_id = ?;
+			FROM reminders r
+			INNER JOIN notification_services ns
+			ON r.notification_service = ns.id
+			WHERE r.user_id = ?;
 			""",
 			(self.user_id,)
-		).fetchall()))
+		)))
 
 		# Sort result
 		reminders.sort(key=sort_function[0], reverse=sort_function[1])
@@ -418,7 +432,7 @@ def test_reminder(
 	"""
 	a = Apprise()
 	url = get_db(dict).execute(
-		"SELECT url FROM notification_services WHERE id = ?",
+		"SELECT url FROM notification_services WHERE id = ? LIMIT 1;",
 		(notification_service,)
 	).fetchone()
 	if not url:
