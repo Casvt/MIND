@@ -57,7 +57,7 @@ function loadTemplates(force=true) {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = url_prefix;
+			window.location.href = `${url_prefix}/`;
 		} else {
 			console.log(e);
 		};
@@ -99,7 +99,7 @@ function loadTemplate() {
 		})
 		.catch(e => {
 			if (e === 401) {
-				window.location.href = url_prefix;
+				window.location.href = `${url_prefix}/`;
 			} else {
 				console.log(e);
 			};
@@ -134,7 +134,7 @@ function addTemplate() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = url_prefix;
+			window.location.href = `${url_prefix}/`;
 		} else {
 			console.log(e);
 		};
@@ -177,7 +177,7 @@ function showEditTemplate(id) {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = url_prefix;
+			window.location.href = `${url_prefix}/`;
 		} else {
 			console.log(e);
 		};
@@ -210,7 +210,7 @@ function saveTemplate() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = url_prefix;
+			window.location.href = `${url_prefix}/`;
 		} else {
 			console.log(e);
 		};
@@ -233,7 +233,7 @@ function deleteTemplate() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = url_prefix;
+			window.location.href = `${url_prefix}/`;
 		} else {
 			console.log(e);
 		};

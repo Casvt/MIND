@@ -87,7 +87,7 @@ function fillNotificationSelection() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = url_prefix;
+			window.location.href = `${url_prefix}/`;
 		} else {
 			console.log(e);
 		};
@@ -113,7 +113,7 @@ function deleteService(id) {
 	})
 	.catch(e => {
 		if (e.error === 'ApiKeyExpired' || e.error === 'ApiKeyInvalid') {
-			window.location.href = url_prefix;
+			window.location.href = `${url_prefix}/`;
 		} else if (e.error === 'NotificationServiceInUse') {
 			const delete_button = row.querySelector('button[title="Delete"]');
 			delete_button.classList.add('error-icon');
@@ -151,7 +151,7 @@ function saveService(id) {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = url_prefix;
+			window.location.href = `${url_prefix}/`;
 		} else if (e === 400) {
 			save_button.classList.add('error-icon');
 			save_button.title = 'Invalid Apprise URL';
@@ -199,7 +199,7 @@ function addService() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = url_prefix;
+			window.location.href = `${url_prefix}/`;
 		} else if (e === 400) {
 			inputs_buttons.save_button.classList.add('error-icon');
 			inputs_buttons.save_button.title = 'Invalid Apprise URL';

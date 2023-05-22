@@ -51,7 +51,7 @@ function editReminder() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = url_prefix;
+			window.location.href = `${url_prefix}/`;
 		} else {
 			console.log(e);
 		};
@@ -99,7 +99,7 @@ function showEdit(id) {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = url_prefix;
+			window.location.href = `${url_prefix}/`;
 		} else if (e === 404) {
 			fillList();
 		} else {
@@ -142,7 +142,7 @@ function deleteReminder() {
 	})
 	.catch(e => {
 		if (e === 401) {
-			window.location.href = url_prefix;
+			window.location.href = `${url_prefix}/`;
 		} else if (e === 404) {
 			fillList();
 		} else {
