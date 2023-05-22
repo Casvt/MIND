@@ -4,7 +4,7 @@ function logout() {
 	})
 	.then(response => {
 		sessionStorage.removeItem('api_key');
-		window.location.href = url_prefix || '/';
+		window.location.href = `${url_prefix}/`;
 	});
 };
 
@@ -52,7 +52,7 @@ function showTab(tab_id, button_id, load_function=null) {
 const url_prefix = document.getElementById('url_prefix').dataset.value;
 const api_key = sessionStorage.getItem('api_key');
 if (api_key === null) {
-	window.location.href = url_prefix;
+	window.location.href = `${url_prefix}/`;
 };
 
 document.getElementById('toggle-nav').addEventListener('click', e => toggleNav());
