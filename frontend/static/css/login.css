@@ -1,6 +1,6 @@
 main {
 	height: calc(100vh - var(--header-height));
-	
+
 	overflow-y: hidden;
 }
 
@@ -52,7 +52,7 @@ form input {
 	text-decoration: underline;
 }
 
-form button[type="submit"] {
+button[type="submit"] {
 	padding: .5rem 1rem;
 
 	font-size: 1.1rem;

@@ -134,7 +134,7 @@ div.options > button {
 	background-color: var(--color-gray);
 }
 
-#delete-reminder {
+#delete-info {
 	border-color: var(--color-error);
 	color: var(--color-error);
 }
@@ -165,4 +165,54 @@ div.options > button {
 	.sub-inputs > button {
 		width: 100%;
 	}
+}
+
+#info.show-add-template #template-selection,
+#info.show-add-template #time-input,
+#info.show-add-template #normal-button,
+#info.show-add-template #repeat-button,
+#info.show-add-template .repeat-bar,
+#info.show-add-template #test-reminder,
+#info.show-add-template #delete-info {
+	display: none;
+}
+
+#info.show-add-template #text-input {
+	margin-top: -1rem;
+}
+
+#info.show-add-template form > *,
+#info.show-add-template .sub-inputs > * {
+	width: 100%;
+}
+
+#info.show-add-reminder #delete-info {
+	display: none;
+}
+
+#info.show-edit-reminder #template-selection,
+#info.show-edit-reminder #test-reminder {
+	display: none;
+}
+
+#info.show-edit-reminder #color-toggle {
+	width: 100%;
+}
+
+#info.show-edit-template #template-selection,
+#info.show-edit-template #time-input,
+#info.show-edit-template #normal-button,
+#info.show-edit-template #repeat-button,
+#info.show-edit-template .repeat-bar,
+#info.show-edit-template #test-reminder {
+	display: none;
+}
+
+#info.show-edit-template #text-input {
+	margin-top: -1rem;
+}
+
+#info.show-edit-template #color-toggle,
+#info.show-edit-template #notification-service-input {
+	width: 100%;
 }

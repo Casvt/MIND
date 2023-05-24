@@ -1,31 +1,28 @@
+const inputs_buttons = {
+	'save_button': document.querySelector('#add-row button[data-type="save"]'),
+	'title': document.querySelector('#add-row td.title-column input'),
+	'url': document.querySelector('#add-row td.url-column input')
+};
+
 function fillNotificationSelection() {
 	fetch(`${url_prefix}/api/notificationservices?api_key=${api_key}`)
 	.then(response => {
-		// catch errors
-		if (!response.ok) {
-			return Promise.reject(response.status);
-		};
-		
+		if (!response.ok) return Promise.reject(response.status);
 		return response.json();
 	})
 	.then(json => {
 		if (json.result.length) {
-			document.getElementById('add-entry').classList.remove('error', 'error-icon');
-			[
-				document.getElementById('notification-service-input'),
-				document.getElementById('notification-service-edit-input'),
-				document.getElementById('notification-service-template-input'),
-				document.getElementById('notification-service-template-edit-input')
-			].forEach(options => {
-				options.innerHTML = '';
-				json.result.forEach(service => {
-					const entry = document.createElement('option');
-					entry.value = service.id;
-					entry.innerText = service.title;
-					options.appendChild(entry);
-				});
-				options.querySelector(':nth-child(1)').setAttribute('selected', '');
+			document.getElementById('add-reminder').classList.remove('error', 'error-icon');
+
+			const options = document.getElementById('notification-service-input');
+			options.innerHTML = '';
+			json.result.forEach(service => {
+				const entry = document.createElement('option');
+				entry.value = service.id;
+				entry.innerText = service.title;
+				options.appendChild(entry);
 			});
+			options.querySelector(':nth-child(1)').setAttribute('selected', '');
 			
 			const table = document.getElementById('services-list');
 			table.querySelectorAll('tr:not(#add-row)').forEach(e => e.remove());
@@ -60,7 +57,7 @@ function fillNotificationSelection() {
 				edit_button.addEventListener('click', e => editService(service.id));
 				edit_button.title = 'Edit';
 				edit_button.setAttribute('aria-label', 'Edit');
-				edit_button.innerHTML = edit_icon;
+				edit_button.innerHTML = icons.edit;
 				actions.appendChild(edit_button);
 				
 				const save_button = document.createElement('button');
@@ -68,7 +65,7 @@ function fillNotificationSelection() {
 				save_button.addEventListener('click', e => saveService(service.id));
 				save_button.title = 'Save Edits';
 				save_button.setAttribute('aria-label', 'Save Edits');
-				save_button.innerHTML = save_icon;
+				save_button.innerHTML = icons.save;
 				actions.appendChild(save_button);
 				
 				const delete_button = document.createElement('button');
@@ -76,51 +73,20 @@ function fillNotificationSelection() {
 				delete_button.addEventListener('click', e => deleteService(service.id));
 				delete_button.title = 'Delete';
 				delete_button.setAttribute('aria-label', 'Delete');
-				delete_button.innerHTML = delete_icon;
+				delete_button.innerHTML = icons.delete;
 				actions.appendChild(delete_button);
 				
 				table.appendChild(entry);
 			});	
 		} else {
-			document.getElementById('add-entry').classList.add('error', 'error-icon');
+			document.getElementById('add-reminder').classList.add('error', 'error-icon');
 		};
 	})
 	.catch(e => {
-		if (e === 401) {
+		if (e === 401)
 			window.location.href = `${url_prefix}/`;
-		} else {
+		else
 			console.log(e);
-		};
-	});
-};
-
-function deleteService(id) {
-	const row = document.querySelector(`tr[data-id="${id}"]`);
-	fetch(`${url_prefix}/api/notificationservices/${id}?api_key=${api_key}`, {
-		'method': 'DELETE'
-	})
-	.then(response => response.json())
-	.then(json => {
-		// catch errors
-		if (json.error !== null) {
-			return Promise.reject(json);
-		};
-		
-		row.remove();
-		if (document.querySelectorAll('#services-list > tr:not(#add-row)').length === 0) {
-			document.getElementById('add-entry').classList.add('error', 'error-icon');
-		};
-	})
-	.catch(e => {
-		if (e.error === 'ApiKeyExpired' || e.error === 'ApiKeyInvalid') {
-			window.location.href = `${url_prefix}/`;
-		} else if (e.error === 'NotificationServiceInUse') {
-			const delete_button = row.querySelector('button[title="Delete"]');
-			delete_button.classList.add('error-icon');
-			delete_button.title = `The notification service is still in use by a ${e.result.type}`;
-		} else {
-			console.log(e);
-		};
 	});
 };
 
@@ -142,23 +108,44 @@ function saveService(id) {
 		'body': JSON.stringify(data)
 	})
 	.then(response => {
-		// catch errors
-		if (!response.ok) {
-			return Promise.reject(response.status);
-		};
+		if (!response.ok) return Promise.reject(response.status);
 		
 		fillNotificationSelection();
 	})
 	.catch(e => {
-		if (e === 401) {
+		if (e === 401)
 			window.location.href = `${url_prefix}/`;
-		} else if (e === 400) {
+		else if (e === 400) {
 			save_button.classList.add('error-icon');
 			save_button.title = 'Invalid Apprise URL';
 			save_button.setAttribute('aria-label', 'Invalid Apprise URL');
-		} else {
+		} else
 			console.log(e);
-		};
+	});
+};
+
+function deleteService(id) {
+	const row = document.querySelector(`tr[data-id="${id}"]`);
+	fetch(`${url_prefix}/api/notificationservices/${id}?api_key=${api_key}`, {
+		'method': 'DELETE'
+	})
+	.then(response => response.json())
+	.then(json => {
+		if (json.error !== null) return Promise.reject(json);
+		
+		row.remove();
+		if (document.querySelectorAll('#services-list > tr:not(#add-row)').length === 0)
+			document.getElementById('add-entry').classList.add('error', 'error-icon');
+	})
+	.catch(e => {
+		if (e.error === 'ApiKeyExpired' || e.error === 'ApiKeyInvalid')
+			window.location.href = `${url_prefix}/`;
+		else if (e.error === 'NotificationServiceInUse') {
+			const delete_button = row.querySelector('button[title="Delete"]');
+			delete_button.classList.add('error-icon');
+			delete_button.title = `The notification service is still in use by a ${e.result.type}`;
+		} else
+			console.log(e);
 	});
 };
 
@@ -167,11 +154,6 @@ function toggleAddService() {
 };
 
 function addService() {
-	const inputs_buttons = {
-		'save_button': document.querySelector('#add-row button[data-type="save"]'),
-		'title': document.querySelector('#add-row td.title-column input'),
-		'url': document.querySelector('#add-row td.url-column input')
-	};
 	const data = {
 		'title': inputs_buttons.title.value,
 		'url': inputs_buttons.url.value
@@ -182,10 +164,7 @@ function addService() {
 		'body': JSON.stringify(data)
 	})
 	.then(response => {
-		// catch errors
-		if (!response.ok) {
-			return Promise.reject(response.status);
-		};
+		if (!response.ok) return Promise.reject(response.status);
 		
 		inputs_buttons.title.value = '';
 		inputs_buttons.url.value = '';
@@ -198,15 +177,14 @@ function addService() {
 		fillNotificationSelection();
 	})
 	.catch(e => {
-		if (e === 401) {
+		if (e === 401)
 			window.location.href = `${url_prefix}/`;
-		} else if (e === 400) {
+		else if (e === 400) {
 			inputs_buttons.save_button.classList.add('error-icon');
 			inputs_buttons.save_button.title = 'Invalid Apprise URL';
 			inputs_buttons.save_button.setAttribute('aria-label', 'Invalid Apprise URL');
-		} else {
+		} else
 			console.log(e);
-		};
 	});
 };
 

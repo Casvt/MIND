@@ -7,7 +7,7 @@ from os.path import abspath, dirname, isfile, join
 from shutil import move
 from sys import version_info
 
-from flask import Flask
+from flask import Flask, render_template, request
 from waitress.server import create_server
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
@@ -57,6 +57,12 @@ def _create_app() -> Flask:
 	@app.errorhandler(500)
 	def internal_error(e):
 		return {'error': 'Internal error', 'result': {}}, 500
+	
+	@app.errorhandler(404)
+	def not_found(e):
+		if request.path.startswith('/api'):
+			return {'error': 'Not Found', 'result': {}}, 404
+		return render_template('page_not_found.html', url_prefix=logging.URL_PREFIX)
 
 	app.register_blueprint(ui)
 	app.register_blueprint(api, url_prefix="/api")

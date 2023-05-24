@@ -8,18 +8,14 @@ function changePassword() {
 		'body': JSON.stringify(data)
 	})
 	.then(response => {
-		// catch errors
-		if (!response.ok) {
-			return Promise.reject(response.status);
-		};
+		if (!response.ok) return Promise.reject(response.status);
 		window.location.reload();
 	})
 	.catch(e => {
-		if (e === 401) {
+		if (e === 401)
 			window.location.href = `${url_prefix}/`;
-		} else {
+		else
 			console.log(e);
-		};
 	});
 };
 

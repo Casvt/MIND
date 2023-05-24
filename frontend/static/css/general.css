@@ -20,7 +20,9 @@
 	--default-shadow: 0 1px 2px 0 rgb(0 0 0 / 60%), 0 2px 6px 2px rgb(0 0 0 / 30%);
 }
 
+/*  */
 /* Default properties */
+/*  */
 img {
 	width: 100%;
 }
@@ -66,7 +68,9 @@ svg rect {
 	fill: var(--color-light);
 }
 
+/*  */
 /* Utility classes */
+/*  */
 .hidden {
 	display: none !important;
 }
@@ -90,7 +94,9 @@ svg rect {
 	font-size: 1rem !important;
 }
 
+/*  */
 /* General styling */
+/*  */
 body {
 	height: 100vh;
 	overflow-x: hidden;
@@ -99,6 +105,21 @@ body {
 	color: var(--color-light);
 }
 
+noscript {
+	display: block;
+	max-width: 95%;
+	margin-inline: 1rem;
+	margin-bottom: 1rem;
+
+	border-radius: 4px;
+	padding: 1rem;
+	background-color: var(--color-error);
+	color: var(--color-light);
+}
+
+/*  */
+/* Header */
+/*  */
 header {
 	width: 100%;
 	height: var(--header-height);
@@ -138,18 +159,9 @@ h1 {
 	font-size: clamp(1.3rem, 7vw, 2rem);
 }
 
-noscript {
-	display: block;
-	max-width: 95%;
-	margin-inline: 1rem;
-	margin-bottom: 1rem;
-
-	border-radius: 4px;
-	padding: 1rem;
-	background-color: var(--color-error);
-	color: var(--color-light);
-}
-
+/*  */
+/* Nav */
+/*  */
 .nav-divider {
 	position: relative;
 	height: calc(100% - var(--header-height));
@@ -222,6 +234,9 @@ nav > div > button svg {
 	width: 2rem;
 }
 
+/*  */
+/* Main window */
+/*  */
 .window-container {
 	margin-left: calc(4rem + var(--rem-clamp));
 	width: 100%;

@@ -120,10 +120,6 @@ def extract_key(values: dict, key: str, check_existence: bool=True) -> Any:
 				
 	return value
 
-@api.errorhandler(404)
-def not_found(e):
-	return return_api({}, 'Not Found', 404)
-
 #===================
 # Authentication endpoints
 #===================
