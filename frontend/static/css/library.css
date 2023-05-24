@@ -47,6 +47,7 @@
 
 /* REMINDER LIST */
 #reminder-list,
+#static-reminder-list,
 #template-list {
 	--gap: 1rem;
 	--entry-width: 13rem;
@@ -113,11 +114,6 @@ button.entry.fit {
 	font-size: 1.25em;
 	line-height: 1.18;
 	font-weight: 500;
-}
-
-#delete-template {
-	border-color: var(--color-error);
-	color: var(--color-error);
 }
 
 @media (max-width: 543px) {

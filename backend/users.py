@@ -6,6 +6,7 @@ from backend.db import get_db
 from backend.notification_service import NotificationServices
 from backend.reminders import Reminders
 from backend.security import generate_salt_hash, get_hash
+from backend.static_reminders import StaticReminders
 from backend.templates import Templates
 
 ONEPASS_USERNAME_CHARACTERS = 'abcedfghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.!@$'
@@ -63,6 +64,17 @@ class User:
 		if not hasattr(self, 'templates_instance'):
 			self.templates_instance = Templates(self.user_id)
 		return self.templates_instance
+
+	@property
+	def static_reminders(self) -> StaticReminders:
+		"""Get access to the static reminders of the user account
+
+		Returns:
+			StaticReminders: StaticReminders instance that can be used to access the static reminders of the user account
+		"""	
+		if not hasattr(self, 'static_reminders_instance'):
+			self.static_reminders_instance = StaticReminders(self.user_id)
+		return self.static_reminders_instance
 
 	def edit_password(self, new_password: str) -> None:
 		"""Change the password of the account

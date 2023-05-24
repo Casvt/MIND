@@ -6,6 +6,7 @@ function showAdd(type) {
 	inputs.notification_service.value = document.querySelector('#notification-service-input option[selected]').value;
 	toggleNormal();
 	toggleColor(true);
+	document.getElementById('test-reminder').classList.remove('show-sent');
 
 	const cl = document.getElementById('info').classList;
 	cl.forEach(c => {
@@ -15,10 +16,17 @@ function showAdd(type) {
 	if (type === types.reminder) {
 		cl.add('show-add-reminder');
 		document.querySelector('#info h2').innerText = 'Add a reminder';
+		document.querySelector('#test-reminder > div:first-child').innerText = 'Test';
 		inputs.time.setAttribute('required', '');
 	} else if (type === types.template) {
 		cl.add('show-add-template');
 		document.querySelector('#info h2').innerText = 'Add a template';
+		document.querySelector('#test-reminder > div:first-child').innerText = 'Test';
+		inputs.time.removeAttribute('required');
+	} else if (type === types.static_reminder) {
+		cl.add('show-add-static-reminder');
+		document.querySelector('#info h2').innerText = 'Add a static reminder';
+		document.querySelector('#test-reminder > div:first-child').innerText = 'Test';
 		inputs.time.removeAttribute('required');
 	} else
 		return;
@@ -32,6 +40,11 @@ function showEdit(id, type) {
 		inputs.time.setAttribute('required', '');
 	} else if (type === types.template) {
 		url = `${url_prefix}/api/templates/${id}?api_key=${api_key}`;
+		inputs.time.removeAttribute('required');
+		type_buttons.repeat_interval.removeAttribute('required');
+	} else if (type === types.static_reminder) {
+		url = `${url_prefix}/api/staticreminders/${id}?api_key=${api_key}`;
+		document.getElementById('test-reminder').classList.remove('show-sent');
 		inputs.time.removeAttribute('required');
 		type_buttons.repeat_interval.removeAttribute('required');
 	} else return;
@@ -89,14 +102,26 @@ function showEdit(id, type) {
 	if (type === types.reminder) {
 		cl.add('show-edit-reminder');
 		document.querySelector('#info h2').innerText = 'Edit a reminder';
+		document.querySelector('#test-reminder > div:first-child').innerText = 'Test';
 	} else if (type === types.template) {
 		cl.add('show-edit-template');
 		document.querySelector('#info h2').innerText = 'Edit a template';
+		document.querySelector('#test-reminder > div:first-child').innerText = 'Test';
+	} else if (type === types.static_reminder) {
+		cl.add('show-edit-static-reminder');
+		document.querySelector('#info h2').innerText = 'Edit a static reminder';
+		document.querySelector('#test-reminder > div:first-child').innerText = 'Trigger';
 	} else
 		return;
 };
 
 // code run on load
 
-document.getElementById('add-reminder').addEventListener('click', e => showAdd(types.reminder));
+document.getElementById('add-reminder').addEventListener('click', e => {
+	if (document.getElementById('add-reminder').classList.contains('error'))
+		showWindow('notification');
+	else
+		showAdd(types.reminder);
+});
+document.getElementById('add-static-reminder').addEventListener('click', e => showAdd(types.static_reminder));
 document.getElementById('add-template').addEventListener('click', e => showAdd(types.template));

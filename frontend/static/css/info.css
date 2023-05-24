@@ -167,6 +167,31 @@ div.options > button {
 	}
 }
 
+/*  */
+/* Adding */
+/*  */
+#info.show-add-reminder #delete-info {
+	display: none;
+}
+
+#info.show-add-static-reminder #time-input,
+#info.show-add-static-reminder #normal-button,
+#info.show-add-static-reminder #repeat-button,
+#info.show-add-static-reminder .repeat-bar,
+#info.show-add-static-reminder #delete-info {
+	display: none;
+}
+
+#info.show-add-static-reminder #text-input {
+	margin-top: -1rem;
+}
+
+#info.show-add-static-reminder #template-selection,
+#info.show-add-static-reminder #color-toggle,
+#info.show-add-static-reminder #notification-service-input {
+	width: 100%;
+}
+
 #info.show-add-template #template-selection,
 #info.show-add-template #time-input,
 #info.show-add-template #normal-button,
@@ -181,21 +206,37 @@ div.options > button {
 	margin-top: -1rem;
 }
 
-#info.show-add-template form > *,
-#info.show-add-template .sub-inputs > * {
+#info.show-add-template #color-toggle,
+#info.show-add-template #notification-service-input {
 	width: 100%;
 }
 
-#info.show-add-reminder #delete-info {
-	display: none;
-}
-
+/*  */
+/* Editing */
+/*  */
 #info.show-edit-reminder #template-selection,
 #info.show-edit-reminder #test-reminder {
 	display: none;
 }
 
 #info.show-edit-reminder #color-toggle {
+	width: 100%;
+}
+
+#info.show-edit-static-reminder #template-selection,
+#info.show-edit-static-reminder #time-input,
+#info.show-edit-static-reminder #normal-button,
+#info.show-edit-static-reminder #repeat-button,
+#info.show-edit-static-reminder .repeat-bar {
+	display: none;
+}
+
+#info.show-edit-static-reminder #text-input {
+	margin-top: -1rem;
+}
+
+#info.show-edit-static-reminder #color-toggle,
+#info.show-edit-static-reminder #notification-service-input {
 	width: 100%;
 }
 

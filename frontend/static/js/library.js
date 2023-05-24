@@ -16,7 +16,7 @@ function showTab(button) {
 // 
 function fillTable(table, results) {
 	table.querySelectorAll('button.entry:not(.add-entry)').forEach(e => e.remove());
-	
+
 	results.forEach(r => {
 		const entry = document.createElement('button');
 		entry.classList.add('entry');
@@ -75,6 +75,10 @@ function fillReminders() {
 	fillLibrary(`/api/reminders?api_key=${api_key}`, types.reminder);
 };
 
+function fillStaticReminders() {
+	fillLibrary(`/api/staticreminders?api_key=${api_key}`, types.static_reminder);
+}
+
 function fillTemplates() {
 	fillLibrary(`/api/templates?api_key=${api_key}`, types.template);
 };
@@ -110,6 +114,7 @@ document.querySelectorAll('.tab-selector > button').forEach(b => {
 });
 
 fillReminders();
+fillStaticReminders();
 fillTemplates();
 setInterval(fillReminders, 60000);
 

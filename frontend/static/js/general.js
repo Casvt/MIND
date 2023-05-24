@@ -1,5 +1,6 @@
 const types = {
 	'reminder': document.getElementById('reminder-list'),
+	'static_reminder': document.getElementById('static-reminder-list'),
 	'template': document.getElementById('template-list')
 };
 
@@ -9,7 +10,10 @@ const icons = {
 	'delete': '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve"><g><g id="_01_align_center" data-name="01 align center"><path d="M22,4H17V2a2,2,0,0,0-2-2H9A2,2,0,0,0,7,2V4H2V6H4V21a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V6h2ZM9,2h6V4H9Zm9,19a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V6H18Z"></path><rect x="9" y="10" width="2" height="8"></rect><rect x="13" y="10" width="2" height="8"></rect></g></g></svg>'
 };
 
-const info_classes = ['show-add-reminder', 'show-add-template', 'show-edit-reminder', 'show-edit-template'];
+const info_classes = [
+	'show-add-reminder', 'show-add-template', 'show-add-static-reminder',
+	'show-edit-reminder', 'show-edit-template', 'show-edit-static-reminder'
+];
 
 function toggleNav() {
 	document.querySelector('.nav-divider').classList.toggle('show-nav');

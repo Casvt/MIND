@@ -63,24 +63,35 @@ function toggleRepeated() {
 
 function testReminder() {
 	const input = document.getElementById('test-reminder');
-	if (inputs.title.value === '') {
-		input.classList.add('error-input');
-		input.title = 'No title set';
-		return
-	} else {
-		input.classList.remove('error-input');
-		input.removeAttribute('title');
-	};
-	const data = {
-		'title': inputs.title.value,
-		'notification_service': inputs.notification_service.value,
-		'text': inputs.text.value
-	};
-	fetch(`${url_prefix}/api/reminders/test?api_key=${api_key}`, {
+	const cl = document.getElementById('info').classList;
+	const r_id = document.getElementById('info').dataset.id;
+	const headers = {
 		'method': 'POST',
-		'headers': {'Content-Type': 'application/json'},
-		'body': JSON.stringify(data)
-	})
+		'headers': {'Content-Type': 'application/json'}
+	};
+	let url;
+	if (cl.contains('show-edit-static-reminder')) {
+		// Trigger static reminder
+		url = `${url_prefix}/api/staticreminders/${r_id}?api_key=${api_key}`;
+	} else {
+		// Test reminder draft
+		if (inputs.title.value === '') {
+			input.classList.add('error-input');
+			input.title = 'No title set';
+			return
+		} else {
+			input.classList.remove('error-input');
+			input.removeAttribute('title');
+		};
+		const data = {
+			'title': inputs.title.value,
+			'notification_service': inputs.notification_service.value,
+			'text': inputs.text.value
+		};
+		headers.body = JSON.stringify(data);
+		url = `${url_prefix}/api/reminders/test?api_key=${api_key}`;
+	};
+	fetch(url, headers)
 	.then(response => {
 		if (!response.ok) return Promise.reject(response.status);
 		input.classList.add('show-sent');		
@@ -103,6 +114,9 @@ function deleteInfo() {
 	} else if (cl.contains('show-edit-template')) {
 		// Delete template
 		url = `${url_prefix}/api/templates/${e_id}?api_key=${api_key}`;
+	} else if (cl.contains('show-edit-static-reminder')) {
+		// Delete static reminder
+		url = `${url_prefix}/api/staticreminders/${e_id}?api_key=${api_key}`;
 	} else return;
 	
 	fetch(url, {'method': 'DELETE'})
@@ -111,6 +125,7 @@ function deleteInfo() {
 
 		fillNotificationSelection();
 		fillReminders();
+		fillStaticReminders();
 		fillTemplates();
 		hideWindow();
 	})
@@ -156,6 +171,11 @@ function submitInfo() {
 		fetch_data.url = `${url_prefix}/api/templates?api_key=${api_key}`;
 		fetch_data.method = 'POST';
 
+	} else if (cl.contains('show-add-static-reminder')) {
+		// Add static reminder
+		fetch_data.url = `${url_prefix}/api/staticreminders?api_key=${api_key}`;
+		fetch_data.method = 'POST';
+		
 	} else if (cl.contains('show-edit-reminder')) {
 		// Edit reminder
 		data['time'] = (new Date(inputs.time.value) / 1000) + (new Date(inputs.time.value).getTimezoneOffset() * 60)
@@ -171,6 +191,11 @@ function submitInfo() {
 		fetch_data.url = `${url_prefix}/api/templates/${e_id}?api_key=${api_key}`;
 		fetch_data.method = 'PUT';
 
+	} else if (cl.contains('show-edit-static-reminder')) {
+		// Edit a static reminder
+		fetch_data.url = `${url_prefix}/api/staticreminders/${e_id}?api_key=${api_key}`;
+		fetch_data.method = 'PUT';
+		
 	} else return;
 	
 	fetch(fetch_data.url, {
@@ -182,6 +207,7 @@ function submitInfo() {
 		if (!response.ok) return Promise.reject(response.status);
 
 		fillReminders();
+		fillStaticReminders();
 		fillTemplates();
 		hideWindow();
 	})

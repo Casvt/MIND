@@ -1,9 +1,9 @@
 #-*- coding: utf-8 -*-
 
 from os import urandom
+from re import compile
 from time import time as epoch_time
 from typing import Any, Tuple
-from re import compile
 
 from flask import Blueprint, g, request
 
@@ -16,6 +16,7 @@ from backend.custom_exceptions import (AccessUnauthorized, InvalidKeyValue,
 from backend.notification_service import (NotificationService,
                                           NotificationServices)
 from backend.reminders import Reminders, reminder_handler, test_reminder
+from backend.static_reminders import StaticReminders
 from backend.templates import Template, Templates
 from backend.users import User, register_user
 
@@ -243,7 +244,7 @@ def api_add_user():
 	user_id = register_user(username, password)
 	return return_api({'user_id': user_id}, code=201)
 		
-@api.route('/user', methods=['PUT','DELETE'])
+@api.route('/user', methods=['PUT', 'DELETE'])
 @error_handler
 @auth
 def api_manage_user():
@@ -287,7 +288,7 @@ def api_manage_user():
 # Notification service endpoints
 #===================
 
-@api.route('/notificationservices', methods=['GET','POST'])
+@api.route('/notificationservices', methods=['GET', 'POST'])
 @error_handler
 @auth
 def api_notification_services_list():
@@ -387,7 +388,7 @@ def api_notification_service(n_id: int):
 # Library endpoints
 #===================
 
-@api.route('/reminders', methods=['GET','POST'])
+@api.route('/reminders', methods=['GET', 'POST'])
 @error_handler
 @auth
 def api_reminders_list():
@@ -498,7 +499,7 @@ def api_test_reminder():
 	test_reminder(title, notification_service, text)
 	return return_api({}, code=201)
 
-@api.route('/reminders/<int:r_id>', methods=['GET','PUT','DELETE'])
+@api.route('/reminders/<int:r_id>', methods=['GET', 'PUT', 'DELETE'])
 @error_handler
 @auth
 def api_get_reminder(r_id: int):
@@ -676,4 +677,123 @@ def api_get_template(t_id: int):
 
 	elif request.method == 'DELETE':
 		template.delete()
+		return return_api({})
+
+#===================
+# Static reminder endpoints
+#===================
+
+@api.route('/staticreminders', methods=['GET', 'POST'])
+@error_handler
+@auth
+def api_static_reminders_list():
+	"""
+	Endpoint: /staticreminders
+	Description: Manage the static reminders
+	Requires being logged in: Yes
+	Methods:
+		GET:
+			Description: Get a list of all static reminders
+			Returns:
+				200:
+					The id, title, text, notification_service, notification_service_title and color of each static reminder
+		POST:
+			Description: Add a static reminder
+			Parameters (body):
+				title (required): the title of the static reminder
+				notification_service (required): the id of the notification service to use to send the notification
+				text: the body of the static reminder
+				color: The hex code of the color of the static reminder, which is shown in the web-ui
+			Returns:
+				200:
+					The info about the new static reminder entry
+				400:
+					KeyNotFound: One of the required parameters was not given
+	"""	
+	reminders: StaticReminders = g.user_data.static_reminders
+	
+	if request.method == 'GET':
+		result = reminders.fetchall()
+		return return_api(result)
+	
+	elif request.method == 'POST':
+		data = request.get_json()
+		title = extract_key(data, 'title')
+		notification_service = extract_key(data, 'notification_service')
+		text = extract_key(data, 'text', check_existence=False)
+		color = extract_key(data, 'color', check_existence=False)
+		
+		result = reminders.add(title=title,
+			 					notification_service=notification_service,
+								text=text,
+								color=color)
+		return return_api(result.get(), code=201)
+
+@api.route('/staticreminders/<int:r_id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@error_handler
+@auth
+def api_get_static_reminder(r_id: int):
+	"""
+	Endpoint: /staticreminders/<r_id>
+	Description: Manage a specific static reminder
+	Requires being logged in: Yes
+	URL Parameters:
+		<r_id>:
+			The id of the static reminder
+	Methods:
+		GET:
+			Returns:
+				200:
+					All info about the static reminder
+				404:
+					No static reminder found with the given id
+		POST:
+			Description: Trigger the static reminder
+			Returns:
+				200:
+					Static reminder triggered successfully
+		PUT:
+			Description: Edit the static reminder
+			Parameters (body):
+				title: The new title of the static reminder.
+				notification_service: The new id of the notification service to use to send the reminder.
+				text: The new body of the static reminder.
+				color: The new hex code of the color of the static reminder, which is shown in the web-ui.
+			Returns:
+				200:
+					Static reminder updated successfully
+				404:
+					No static reminder found with the given id
+		DELETE:
+			Description: Delete the static reminder
+			Returns:
+				200:
+					Static reminder deleted successfully
+				404:
+					No static reminder found with the given id
+	"""
+	reminders: StaticReminders = g.user_data.static_reminders
+	if request.method == 'GET':
+		result = reminders.fetchone(r_id).get()
+		return return_api(result)
+
+	elif request.method == 'POST':
+		reminders.trigger_reminder(r_id)
+		return return_api({})
+
+	elif request.method == 'PUT':
+		data = request.get_json()
+		title = extract_key(data, 'title', check_existence=False)
+		notification_service = extract_key(data, 'notification_service', check_existence=False)
+		text = extract_key(data, 'text', check_existence=False)
+		color = extract_key(data, 'color', check_existence=False)
+		
+		result = reminders.fetchone(r_id).update(title=title,
+												notification_service=notification_service,
+												text=text,
+												color=color)
+		return return_api(result)
+
+	elif request.method == 'DELETE':
+		reminders.fetchone(r_id).delete()
 		return return_api({})

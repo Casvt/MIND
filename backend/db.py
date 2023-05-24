@@ -151,6 +151,18 @@ def setup_db() -> None:
 			FOREIGN KEY (user_id) REFERENCES users(id),
 			FOREIGN KEY (notification_service) REFERENCES notification_services(id)
 		);
+		CREATE TABLE IF NOT EXISTS static_reminders(
+			id INTEGER PRIMARY KEY,
+			user_id INTEGER NOT NULL,
+			title VARCHAR(255) NOT NULL,
+			text TEXT,
+			notification_service INTEGER NOT NULL,
+			
+			color VARCHAR(7),
+			
+			FOREIGN KEY (user_id) REFERENCES users(id),
+			FOREIGN KEY (notification_service) REFERENCES notification_services(id)
+		);
 		CREATE TABLE IF NOT EXISTS config(
 			key VARCHAR(255) PRIMARY KEY,
 			value TEXT NOT NULL

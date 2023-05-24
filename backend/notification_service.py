@@ -96,7 +96,15 @@ class NotificationService:
 		)
 		if cursor.fetchone():
 			raise NotificationServiceInUse('template')
-		
+
+		# Check if no static reminders exist with this service
+		cursor.execute(
+			"SELECT 1 FROM static_reminders WHERE notification_service = ? LIMIT 1;",
+			(self.id,)
+		)
+		if cursor.fetchone():
+			raise NotificationServiceInUse('static reminder')
+
 		cursor.execute(
 			"DELETE FROM notification_services WHERE id = ?",
 			(self.id,)
