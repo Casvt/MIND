@@ -95,10 +95,7 @@ def MIND() -> None:
 		makedirs(dirname(db_location), exist_ok=True)
 		DBConnection.file = db_location
 		setup_db()
-		reminder_handler._find_next_reminder()
-
-	# Start thread
-	reminder_handler.thread.start()
+		reminder_handler.find_next_reminder()
 
 	# Create waitress server and run
 	server = create_server(app, host=HOST, port=PORT, threads=THREADS)
@@ -109,7 +106,6 @@ def MIND() -> None:
 	# Stopping thread
 	reminder_handler.stop_handling()
 
-	print('Bye')
 	return
 
 if __name__ == "__main__":

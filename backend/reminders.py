@@ -2,8 +2,7 @@
 
 from datetime import datetime
 from sqlite3 import IntegrityError
-from threading import Thread
-from time import sleep
+from threading import Timer
 from typing import List, Literal
 
 from apprise import Apprise
@@ -33,101 +32,102 @@ def _find_next_time(
 		new_time += td
 	return int(new_time.timestamp())
 
-class ReminderHandler():
-	"""Run in a thread to handle the set reminders
-	"""
+class ReminderHandler:
+	"""Handle set reminders
+	"""	
 	def __init__(self, context) -> None:
 		self.context = context
-		self.thread = Thread(target=self._handle, name='Reminder Handler')
-		self.stop = False
+		self.next_trigger = {
+			'thread': None,
+			'time': None
+		}
 
 		return
 
-	def _find_next_reminder(self) -> None:
-		"""Note when next reminder is (could be in the past) or otherwise None
+	def __trigger_reminders(self, time: int) -> None:
+		"""Trigger all reminders that are set for a certain time
+
+		Args:
+			time (int): The time of the reminders to trigger
 		"""
 		with self.context():
-			next_timestamp = get_db().execute(
-				"SELECT time FROM reminders ORDER BY time LIMIT 1;"
-			).fetchone()
+			cursor = get_db(dict)
+			cursor.execute("""
+				SELECT
+					r.id,
+					r.title, r.text,
+					r.repeat_quantity, r.repeat_interval, r.original_time,
+					ns.url
+				FROM reminders r
+				INNER JOIN notification_services ns
+				ON r.notification_service = ns.id	
+				WHERE time = ?;
+			""", (time,))
+			reminders = list(map(dict, cursor))
+			
+			for reminder in reminders:
+				# Send of reminder
+				a = Apprise()
+				a.add(reminder['url'])
+				a.notify(title=reminder["title"], body=reminder["text"])
 
-		if next_timestamp is None:
-			self.next_reminder: None = next_timestamp
-		else:
-			self.next_reminder: int = next_timestamp[0]
+				if reminder['repeat_quantity'] is None:
+					# Delete the reminder from the database
+					cursor.execute(
+						"DELETE FROM reminders WHERE id = ?",
+						(reminder['id'],)
+					)
+				else:
+					# Set next time
+					new_time = _find_next_time(
+						reminder['original_time'],
+						reminder['repeat_quantity'],
+						reminder['repeat_interval']
+					)
+					cursor.execute(
+						"UPDATE reminders SET time = ? WHERE id = ?;",
+						(new_time, reminder['id'])
+					)
 
-		return
+				self.next_trigger.update({
+					'thread': None,
+					'time': None
+				})
+				self.find_next_reminder()
 
-	def submit_next_reminder(self, timestamp: int=None) -> bool:
-		if timestamp is None:
-			self._find_next_reminder()
-			return False
-		
-		if self.next_reminder is None:
-			self.next_reminder = timestamp
-			return True
+	def find_next_reminder(self, time: int=None) -> None:
+		"""Determine when the soonest reminder is and set the timer to that time
 
-		if timestamp < self.next_reminder:
-			self.next_reminder = timestamp
-			return True
+		Args:
+			time (int, optional): The timestamp to check for. Otherwise check soonest in database. Defaults to None.
+		"""
+		if not time:
+			with self.context():
+				time = get_db().execute("""
+					SELECT DISTINCT r1.time
+					FROM reminders r1
+					LEFT JOIN reminders r2
+					ON r1.time > r2.time
+					WHERE r2.id IS NULL;
+				""").fetchone()
+				if time is None:
+					return
+				time = time[0]
 
-		return False
-
-	def _handle(self) -> None:
-		while not self.stop:
-			if self.next_reminder and self.next_reminder <= datetime.utcnow().timestamp():
-				with self.context():
-					cursor = get_db(dict)
-					# Get all reminders for the timestamp
-					reminders = cursor.execute("""
-						SELECT
-							id,
-							notification_service, title, text,
-							repeat_quantity, repeat_interval, original_time
-						FROM reminders
-						WHERE time = ?;
-						""",
-						(self.next_reminder,)
-					).fetchall()
-					
-					for reminder in reminders:
-						# Send of reminder
-						a = Apprise()
-						url = cursor.execute(
-							"SELECT url FROM notification_services WHERE id = ? LIMIT 1;",
-							(reminder["notification_service"],)
-						).fetchone()["url"]
-						a.add(url)
-						a.notify(title=reminder["title"], body=reminder["text"])
-
-						if reminder['repeat_quantity'] is None:
-							# Delete the reminders from the database
-							cursor.execute(
-								"DELETE FROM reminders WHERE id = ?",
-								(reminder['id'],)
-							)
-						else:
-							# Set next time
-							new_time = _find_next_time(
-								reminder['original_time'],
-								reminder['repeat_quantity'],
-								reminder['repeat_interval']
-							)
-							self.submit_next_reminder(new_time)
-							cursor.execute(
-								"UPDATE reminders SET time = ? WHERE id = ?;",
-								(new_time, reminder['id'])
-							)
-
-					# Note when next reminder is (could be in the past) or otherwise None
-					self._find_next_reminder()
-
-			sleep(5)
-		return
-
+		if (self.next_trigger['thread'] is None
+		or time < self.next_trigger['time']):
+			if self.next_trigger['thread'] is not None:
+				self.next_trigger['thread'].cancel()
+			t = time - datetime.utcnow().timestamp()
+			self.next_trigger['thread'] = Timer(t, self.__trigger_reminders, (time,))
+			self.next_trigger['thread'].start()
+			self.next_trigger['time'] = time
+	
 	def stop_handling(self) -> None:
-		self.stop = True
-		self.thread.join()
+		"""Stop the timer if it's active
+		"""
+		if self.next_trigger['thread'] is not None:
+			self.next_trigger['thread'].cancel()
 		return
 
 handler_context = Flask('handler')
@@ -276,15 +276,14 @@ class Reminder:
 				))
 		except IntegrityError:
 			raise NotificationServiceNotFound
-		reminder_handler.submit_next_reminder(next_time)
-
+		reminder_handler.find_next_reminder(next_time)
 		return self.get()
 
 	def delete(self) -> None:
 		"""Delete the reminder
 		"""		
 		get_db().execute("DELETE FROM reminders WHERE id = ?", (self.id,))
-		reminder_handler.submit_next_reminder(None)
+		reminder_handler.find_next_reminder()
 		return
 
 class Reminders:
@@ -413,7 +412,7 @@ class Reminders:
 				).lastrowid
 		except IntegrityError:
 			raise NotificationServiceNotFound
-		reminder_handler.submit_next_reminder(time)
+		reminder_handler.find_next_reminder(time)
 
 		# Return info
 		return self.fetchone(id)
