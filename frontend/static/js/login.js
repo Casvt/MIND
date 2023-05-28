@@ -44,7 +44,7 @@ function login(data=null) {
 		return response.json();
 	})
 	.then(json => {
-		sessionStorage.setItem('api_key', json.result.api_key);
+		localStorage.setItem('MIND_api_key', json.result.api_key);
 		window.location.href = `${url_prefix}/reminders`;
 	})
 	.catch(e => {
@@ -92,9 +92,25 @@ function create() {
 	});
 };
 
+function checkLogin() {
+	fetch(`${url_prefix}/api/auth/status?api_key=${localStorage.getItem('MIND_api_key')}`)
+	.then(response => {
+		if (!response.ok) return Promise.reject(response.status);
+		window.location.href = '/reminders';
+	})
+	.catch(e => {
+		if (e === 401)
+			console.log('API key expired')
+		else
+			console.log(e);
+	});
+};
+
 // code run on load
 
 const url_prefix = document.getElementById('url_prefix').dataset.value;
+
+checkLogin();
 
 document.getElementById('login-form').setAttribute('action', 'javascript:login();');
 document.getElementById('create-form').setAttribute('action', 'javascript:create();');
