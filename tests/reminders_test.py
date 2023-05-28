@@ -1,5 +1,4 @@
 import unittest
-from threading import Thread
 
 from backend.reminders import filter_function, ReminderHandler
 
@@ -8,13 +7,6 @@ class Test_Reminder_Handler(unittest.TestCase):
 		context = 'test'
 		instance = ReminderHandler(context)
 		self.assertIs(context, instance.context)
-
-		self.assertIsInstance(instance.thread, Thread)
-
-		self.assertFalse(instance.stop)
-		with self.assertRaises(RuntimeError):
-			instance.stop_handling()
-		self.assertTrue(instance.stop)
 
 	def test_filter_function(self):
 		p = {

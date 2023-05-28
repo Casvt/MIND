@@ -7,7 +7,7 @@ from os.path import abspath, dirname, isfile, join
 from shutil import move
 from sys import version_info
 
-from flask import Flask
+from flask import Flask, render_template, request
 from waitress.server import create_server
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
@@ -57,6 +57,12 @@ def _create_app() -> Flask:
 	@app.errorhandler(500)
 	def internal_error(e):
 		return {'error': 'Internal error', 'result': {}}, 500
+	
+	@app.errorhandler(404)
+	def not_found(e):
+		if request.path.startswith('/api'):
+			return {'error': 'Not Found', 'result': {}}, 404
+		return render_template('page_not_found.html', url_prefix=logging.URL_PREFIX)
 
 	app.register_blueprint(ui)
 	app.register_blueprint(api, url_prefix="/api")
@@ -89,10 +95,7 @@ def MIND() -> None:
 		makedirs(dirname(db_location), exist_ok=True)
 		DBConnection.file = db_location
 		setup_db()
-		reminder_handler._find_next_reminder()
-
-	# Start thread
-	reminder_handler.thread.start()
+		reminder_handler.find_next_reminder()
 
 	# Create waitress server and run
 	server = create_server(app, host=HOST, port=PORT, threads=THREADS)
@@ -103,7 +106,6 @@ def MIND() -> None:
 	# Stopping thread
 	reminder_handler.stop_handling()
 
-	print('Bye')
 	return
 
 if __name__ == "__main__":

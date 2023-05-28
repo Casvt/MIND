@@ -2,8 +2,7 @@
 
 from datetime import datetime
 from sqlite3 import IntegrityError
-from threading import Thread
-from time import sleep
+from threading import Timer
 from typing import List, Literal
 
 from apprise import Apprise
@@ -33,98 +32,108 @@ def _find_next_time(
 		new_time += td
 	return int(new_time.timestamp())
 
-class ReminderHandler():
-	"""Run in a thread to handle the set reminders
-	"""
+class ReminderHandler:
+	"""Handle set reminders
+	"""	
 	def __init__(self, context) -> None:
 		self.context = context
-		self.thread = Thread(target=self._handle, name='Reminder Handler')
-		self.stop = False
+		self.next_trigger = {
+			'thread': None,
+			'time': None
+		}
 
 		return
 
-	def _find_next_reminder(self) -> None:
-		"""Note when next reminder is (could be in the past) or otherwise None
+	def __trigger_reminders(self, time: int) -> None:
+		"""Trigger all reminders that are set for a certain time
+
+		Args:
+			time (int): The time of the reminders to trigger
 		"""
 		with self.context():
-			next_timestamp = get_db().execute(
-				"SELECT time FROM reminders ORDER BY time LIMIT 1;"
-			).fetchone()
+			cursor = get_db(dict)
+			cursor.execute("""
+				SELECT
+					r.id,
+					r.title, r.text,
+					r.repeat_quantity, r.repeat_interval, r.original_time
+				FROM reminders r
+				WHERE time = ?;
+			""", (time,))
+			reminders = list(map(dict, cursor))
+			
+			for reminder in reminders:
+				cursor.execute("""
+					SELECT url
+					FROM reminder_services rs
+					INNER JOIN notification_services ns
+					ON rs.notification_service_id = ns.id
+					WHERE rs.reminder_id = ?;
+				""", (reminder['id'],))
+				
+				# Send of reminder
+				a = Apprise()
+				for url in cursor:
+					a.add(url['url'])
+				a.notify(title=reminder["title"], body=reminder["text"])
 
-		if next_timestamp is None:
-			self.next_reminder: None = next_timestamp
-		else:
-			self.next_reminder: int = next_timestamp[0]
+				if reminder['repeat_quantity'] is None:
+					# Delete the reminder from the database
+					cursor.execute(
+						"DELETE FROM reminders WHERE id = ?;",
+						(reminder['id'],)
+					)
+				else:
+					# Set next time
+					new_time = _find_next_time(
+						reminder['original_time'],
+						reminder['repeat_quantity'],
+						reminder['repeat_interval']
+					)
+					cursor.execute(
+						"UPDATE reminders SET time = ? WHERE id = ?;",
+						(new_time, reminder['id'])
+					)
 
-		return
+				self.next_trigger.update({
+					'thread': None,
+					'time': None
+				})
+				self.find_next_reminder()
 
-	def submit_next_reminder(self, timestamp: int=None) -> bool:
-		if timestamp is None:
-			self._find_next_reminder()
-			return False
-		
-		if self.next_reminder is None:
-			self.next_reminder = timestamp
-			return True
+	def find_next_reminder(self, time: int=None) -> None:
+		"""Determine when the soonest reminder is and set the timer to that time
 
-		if timestamp < self.next_reminder:
-			self.next_reminder = timestamp
-			return True
+		Args:
+			time (int, optional): The timestamp to check for. Otherwise check soonest in database. Defaults to None.
+		"""
+		if not time:
+			with self.context():
+				time = get_db().execute("""
+					SELECT DISTINCT r1.time
+					FROM reminders r1
+					LEFT JOIN reminders r2
+					ON r1.time > r2.time
+					WHERE r2.id IS NULL;
+				""").fetchone()
+				if time is None:
+					return
+				time = time[0]
 
-		return False
-
-	def _handle(self) -> None:
-		while not self.stop:
-			if self.next_reminder and self.next_reminder <= datetime.utcnow().timestamp():
-				with self.context():
-					cursor = get_db(dict)
-					# Get all reminders for the timestamp
-					reminders = cursor.execute("""
-						SELECT
-							id,
-							notification_service, title, text,
-							repeat_quantity, repeat_interval, original_time
-						FROM reminders
-						WHERE time = ?;
-						""",
-						(self.next_reminder,)
-					).fetchall()
-					
-					for reminder in reminders:
-						# Send of reminder
-						a = Apprise()
-						url = cursor.execute(
-							"SELECT url FROM notification_services WHERE id = ?",
-							(reminder["notification_service"],)
-						).fetchone()["url"]
-						a.add(url)
-						a.notify(title=reminder["title"], body=reminder["text"])
-
-						if reminder['repeat_quantity'] is None:
-							# Delete the reminders from the database
-							cursor.execute("DELETE FROM reminders WHERE id = ?", (reminder['id'],))
-						else:
-							# Set next time
-							new_time = _find_next_time(
-								reminder['original_time'],
-								reminder['repeat_quantity'],
-								reminder['repeat_interval']
-							)
-							self.submit_next_reminder(new_time)
-							cursor.execute(
-								"UPDATE reminders SET time = ? WHERE id = ?;",
-								(new_time, reminder['id'])
-							)
-
-					# Note when next reminder is (could be in the past) or otherwise None
-					self._find_next_reminder()
-
-			sleep(5)
-		return
-
+		if (self.next_trigger['thread'] is None
+		or time < self.next_trigger['time']):
+			if self.next_trigger['thread'] is not None:
+				self.next_trigger['thread'].cancel()
+			t = time - datetime.utcnow().timestamp()
+			self.next_trigger['thread'] = Timer(t, self.__trigger_reminders, (time,))
+			self.next_trigger['thread'].start()
+			self.next_trigger['time'] = time
+	
 	def stop_handling(self) -> None:
-		self.stop = True
-		self.thread.join()
+		"""Stop the timer if it's active
+		"""
+		if self.next_trigger['thread'] is not None:
+			self.next_trigger['thread'].cancel()
 		return
 
 handler_context = Flask('handler')
@@ -138,7 +147,10 @@ class Reminder:
 		self.id = reminder_id
 
 		# Check if reminder exists
-		if not get_db().execute("SELECT 1 FROM reminders WHERE id = ? LIMIT 1", (self.id,)).fetchone():
+		if not get_db().execute(
+			"SELECT 1 FROM reminders WHERE id = ? LIMIT 1",
+			(self.id,)
+		).fetchone():
 			raise ReminderNotFound
 
 	def get(self) -> dict:
@@ -147,33 +159,35 @@ class Reminder:
 		Returns:
 			dict: The info about the reminder
 		"""
-		reminder: dict = get_db(dict).execute("""
+		reminder = get_db(dict).execute("""
 			SELECT
-				r.id,
-				r.title, r.text,
-				r.time,
-				r.notification_service,
-				ns.title AS notification_service_title,
-				r.repeat_quantity,
-				r.repeat_interval,
-				r.color
-			FROM
-				reminders r
-				INNER JOIN notification_services ns
-			ON
-				r.notification_service = ns.id
-				AND r.id = ?;
+				id,
+				title, text,
+				time,
+				repeat_quantity,
+				repeat_interval,
+				color
+			FROM reminders
+			WHERE id = ?
+			LIMIT 1;
 			""",
 			(self.id,)
 		).fetchone()
+		reminder = dict(reminder)
 
-		return dict(reminder)
+		reminder['notification_services'] = list(map(lambda r: r[0], get_db().execute("""
+			SELECT notification_service_id
+			FROM reminder_services
+			WHERE reminder_id = ?;
+		""", (self.id,))))
+
+		return reminder
 
 	def update(
 		self,
 		title: str = None,
 		time: int = None,
-		notification_service: int = None,
+		notification_services: List[int] = None,
 		text: str = None,
 		repeat_quantity: Literal["years", "months", "weeks", "days", "hours", "minutes"] = None,
 		repeat_interval: int = None,
@@ -184,11 +198,14 @@ class Reminder:
 		Args:
 			title (str): The new title of the entry. Defaults to None.
 			time (int): The new UTC epoch timestamp the the reminder should be send. Defaults to None.
-			notification_service (int): The new id of the notification service to use to send the reminder. Defaults to None.
+			notification_services (List[int]): The new list of id's of the notification services to use to send the reminder. Defaults to None.
 			text (str, optional): The new body of the reminder. Defaults to None.
 			repeat_quantity (Literal["years", "months", "weeks", "days", "hours", "minutes"], optional): The new quantity of the repeat specified for the reminder. Defaults to None.
 			repeat_interval (int, optional): The new amount of repeat_quantity, like "5" (hours). Defaults to None.
 			color (str, optional): The new hex code of the color of the reminder, which is shown in the web-ui. Defaults to None.
+
+		Raises:
+			NotificationServiceNotFound: One of the notification services was not found
 
 		Returns:
 			dict: The new reminder info
@@ -213,7 +230,6 @@ class Reminder:
 		new_values = {
 			'title': title,
 			'time': time,
-			'notification_service': notification_service,
 			'text': text,
 			'repeat_quantity': repeat_quantity,
 			'repeat_interval': repeat_interval,
@@ -224,51 +240,71 @@ class Reminder:
 				data[k] = v
 
 		# Update database
-		try:
-			if not repeated_reminder:
-				next_time = data["time"]
-				cursor.execute("""
-					UPDATE reminders
-					SET title=?, text=?, time=?, notification_service=?, repeat_quantity=?, repeat_interval=?, color=?
-					WHERE id = ?;
-					""", (
-						data["title"],
-						data["text"],
-						data["time"],
-						data["notification_service"],
-						data["repeat_quantity"],
-						data["repeat_interval"],
-						data["color"],
-						self.id
-				))
-			else:
-				next_time = _find_next_time(data["time"], data["repeat_quantity"], data["repeat_interval"])
-				cursor.execute("""
-					UPDATE reminders
-					SET title=?, text=?, time=?, notification_service=?, repeat_quantity=?, repeat_interval=?, original_time=?, color=?
-					WHERE id = ?;
-					""", (
-						data["title"],
-						data["text"],
-						next_time,
-						data["notification_service"],
-						data["repeat_quantity"],
-						data["repeat_interval"],
-						data["time"],
-						data["color"],
-						self.id
-				))
-		except IntegrityError:
-			raise NotificationServiceNotFound
-		reminder_handler.submit_next_reminder(next_time)
+		if not repeated_reminder:
+			next_time = data["time"]
+			cursor.execute("""
+				UPDATE reminders
+				SET
+					title=?, text=?,
+					time=?,
+					repeat_quantity=?, repeat_interval=?,
+					color=?
+				WHERE id = ?;
+				""", (
+					data["title"],
+					data["text"],
+					data["time"],
+					data["repeat_quantity"],
+					data["repeat_interval"],
+					data["color"],
+					self.id
+			))
+		else:
+			next_time = _find_next_time(
+				data["time"],
+				data["repeat_quantity"], data["repeat_interval"]
+			)
+			cursor.execute("""
+				UPDATE reminders
+				SET
+					title=?, text=?,
+					time=?,
+					repeat_quantity=?, repeat_interval=?, original_time=?,
+					color=?
+				WHERE id = ?;
+				""", (
+					data["title"],
+					data["text"],
+					next_time,
+					data["repeat_quantity"],
+					data["repeat_interval"],
+					data["time"],
+					data["color"],
+					self.id
+			))
 
+		if notification_services:
+			cursor.connection.isolation_level = None
+			cursor.execute("BEGIN TRANSACTION;")
+			cursor.execute("DELETE FROM reminder_services WHERE reminder_id = ?", (self.id,))
+			try:
+				cursor.executemany(
+					"INSERT INTO reminder_services(reminder_id, notification_service_id) VALUES (?,?)",
+					((self.id, s) for s in notification_services)
+				)
+				cursor.execute("COMMIT;")
+			except IntegrityError:
+				raise NotificationServiceNotFound
+			cursor.connection.isolation_level = ""
+
+		reminder_handler.find_next_reminder(next_time)
 		return self.get()
 
 	def delete(self) -> None:
 		"""Delete the reminder
 		"""		
 		get_db().execute("DELETE FROM reminders WHERE id = ?", (self.id,))
-		reminder_handler.submit_next_reminder(None)
+		reminder_handler.find_next_reminder()
 		return
 
 class Reminders:
@@ -291,7 +327,7 @@ class Reminders:
 			sort_by (Literal["time", "time_reversed", "title", "title_reversed"], optional): How to sort the result. Defaults to "time".
 
 		Returns:
-			List[dict]: The id, title, text, time, notification_service, notification_service_title and color of each reminder
+			List[dict]: The id, title, text, time and color of each reminder
 		"""		
 		sort_function = self.sort_functions.get(
 			sort_by,
@@ -301,23 +337,17 @@ class Reminders:
 		# Fetch all reminders
 		reminders: list = list(map(dict, get_db(dict).execute("""
 			SELECT
-				r.id,
-				r.title, r.text,
-				r.time,
-				r.notification_service,
-				ns.title AS notification_service_title,
-				r.repeat_quantity,
-				r.repeat_interval,
-				r.color
-			FROM
-				reminders r
-				INNER JOIN notification_services ns
-			ON
-				r.notification_service = ns.id
-				AND r.user_id = ?;
+				id,
+				title, text,
+				time,
+				repeat_quantity,
+				repeat_interval,
+				color
+			FROM reminders
+			WHERE user_id = ?;
 			""",
 			(self.user_id,)
-		).fetchall()))
+		)))
 
 		# Sort result
 		reminders.sort(key=sort_function[0], reverse=sort_function[1])
@@ -355,7 +385,7 @@ class Reminders:
 		self,
 		title: str,
 		time: int,
-		notification_service: int,
+		notification_services: List[int],
 		text: str = '',
 		repeat_quantity: Literal["years", "months", "weeks", "days", "hours", "minutes"] = None,
 		repeat_interval: int = None,
@@ -366,11 +396,14 @@ class Reminders:
 		Args:
 			title (str): The title of the entry
 			time (int): The UTC epoch timestamp the the reminder should be send.
-			notification_service (int): The id of the notification service to use to send the reminder.
+			notification_services (List[int]): The id's of the notification services to use to send the reminder.
 			text (str, optional): The body of the reminder. Defaults to ''.
 			repeat_quantity (Literal["years", "months", "weeks", "days", "hours", "minutes"], optional): The quantity of the repeat specified for the reminder. Defaults to None.
 			repeat_interval (int, optional): The amount of repeat_quantity, like "5" (hours). Defaults to None.
 			color (str, optional): The hex code of the color of the reminder, which is shown in the web-ui. Defaults to None.
+
+		Raises:
+			NotificationServiceNotFound: One of the notification services was not found
 
 		Returns:
 			dict: The info about the reminder
@@ -384,29 +417,36 @@ class Reminders:
 		elif repeat_quantity is not None and repeat_interval is None:
 			raise InvalidKeyValue('repeat_interval', repeat_interval)
 
+		cursor = get_db()
+		if repeat_quantity is None and repeat_interval is None:
+			id = cursor.execute("""
+				INSERT INTO reminders(user_id, title, text, time, color)
+				VALUES (?, ?, ?, ?, ?);
+			""", (self.user_id, title, text, time, color)
+			).lastrowid
+		else:
+			id = cursor.execute("""
+				INSERT INTO reminders(user_id, title, text, time, repeat_quantity, repeat_interval, original_time, color)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+			""", (self.user_id, title, text, time, repeat_quantity, repeat_interval, time, color)
+			).lastrowid
+			
 		try:
-			if repeat_quantity is None and repeat_interval is None:
-				id = get_db().execute("""
-					INSERT INTO reminders(user_id, title, text, time, notification_service, color)
-					VALUES (?,?,?,?,?, ?);
-				""", (self.user_id, title, text, time, notification_service, color)
-				).lastrowid
-			else:
-				id = get_db().execute("""
-					INSERT INTO reminders(user_id, title, text, time, notification_service, repeat_quantity, repeat_interval, original_time, color)
-					VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
-				""", (self.user_id, title, text, time, notification_service, repeat_quantity, repeat_interval, time, color)
-				).lastrowid
+			cursor.executemany(
+				"INSERT INTO reminder_services(reminder_id, notification_service_id) VALUES (?, ?);",
+				((id, service) for service in notification_services)
+			)
 		except IntegrityError:
 			raise NotificationServiceNotFound
-		reminder_handler.submit_next_reminder(time)
+		
+		reminder_handler.find_next_reminder(time)
 
 		# Return info
 		return self.fetchone(id)
 
 def test_reminder(
 	title: str,
-	notification_service: int,
+	notification_services: List[int],
 	text: str = ''
 ) -> None:
 	"""Test send a reminder draft
@@ -417,12 +457,14 @@ def test_reminder(
 		text (str, optional): The body of the reminder. Defaults to ''.
 	"""
 	a = Apprise()
-	url = get_db(dict).execute(
-		"SELECT url FROM notification_services WHERE id = ?",
-		(notification_service,)
-	).fetchone()
-	if not url:
-		raise NotificationServiceNotFound
-	a.add(url[0])
+	cursor = get_db(dict)
+	for service in notification_services:
+		url = cursor.execute(
+			"SELECT url FROM notification_services WHERE id = ? LIMIT 1;",
+			(service,)
+		).fetchone()
+		if not url:
+			raise NotificationServiceNotFound
+		a.add(url[0])
 	a.notify(title=title, body=text)
 	return

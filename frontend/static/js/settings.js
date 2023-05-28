@@ -8,18 +8,14 @@ function changePassword() {
 		'body': JSON.stringify(data)
 	})
 	.then(response => {
-		// catch errors
-		if (!response.ok) {
-			return Promise.reject(response.status);
-		};
+		if (!response.ok) return Promise.reject(response.status);
 		window.location.reload();
 	})
 	.catch(e => {
-		if (e === 401) {
-			window.location.href = url_prefix;
-		} else {
+		if (e === 401)
+			window.location.href = `${url_prefix}/`;
+		else
 			console.log(e);
-		};
 	});
 };
 
@@ -28,7 +24,7 @@ function deleteAccount() {
 		'method': 'DELETE'
 	})
 	.then(response => {
-		window.location.href = url_prefix;
+		window.location.href = `${url_prefix}/`;
 	});
 };
 

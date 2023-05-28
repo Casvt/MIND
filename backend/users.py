@@ -6,6 +6,7 @@ from backend.db import get_db
 from backend.notification_service import NotificationServices
 from backend.reminders import Reminders
 from backend.security import generate_salt_hash, get_hash
+from backend.static_reminders import StaticReminders
 from backend.templates import Templates
 
 ONEPASS_USERNAME_CHARACTERS = 'abcedfghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.!@$'
@@ -17,7 +18,7 @@ class User:
 	def __init__(self, username: str, password: str):
 		# Fetch data of user to check if user exists and to check if password is correct
 		result = get_db(dict).execute(
-			"SELECT id, salt, hash FROM users WHERE username = ?", 
+			"SELECT id, salt, hash FROM users WHERE username = ? LIMIT 1;", 
 			(username,)
 		).fetchone()
 		if not result:
@@ -64,6 +65,17 @@ class User:
 			self.templates_instance = Templates(self.user_id)
 		return self.templates_instance
 
+	@property
+	def static_reminders(self) -> StaticReminders:
+		"""Get access to the static reminders of the user account
+
+		Returns:
+			StaticReminders: StaticReminders instance that can be used to access the static reminders of the user account
+		"""	
+		if not hasattr(self, 'static_reminders_instance'):
+			self.static_reminders_instance = StaticReminders(self.user_id)
+		return self.static_reminders_instance
+
 	def edit_password(self, new_password: str) -> None:
 		"""Change the password of the account
 
@@ -85,6 +97,8 @@ class User:
 		"""		
 		cursor = get_db()
 		cursor.execute("DELETE FROM reminders WHERE user_id = ?", (self.user_id,))
+		cursor.execute("DELETE FROM templates WHERE user_id = ?", (self.user_id,))
+		cursor.execute("DELETE FROM static_reminders WHERE user_id = ?", (self.user_id,))
 		cursor.execute("DELETE FROM notification_services WHERE user_id = ?", (self.user_id,))
 		cursor.execute("DELETE FROM users WHERE id = ?", (self.user_id,))
 		return

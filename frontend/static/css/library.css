@@ -47,6 +47,7 @@
 
 /* REMINDER LIST */
 #reminder-list,
+#static-reminder-list,
 #template-list {
 	--gap: 1rem;
 	--entry-width: 13rem;
@@ -61,24 +62,22 @@
 	padding: 1rem;
 }
 
-#add-entry,
-#add-template {
+.entry.add-entry {
 	justify-content: center;
 	align-items: center;
 	gap: .5rem;
 }
 
-#add-entry svg,
-#add-template svg {
+.entry.add-entry svg {
 	height: 2rem;
 	width: 2rem;
 }
 
-#add-entry:not(.error.error-icon) p {
+.entry.add-entry:not(.error.error-icon) p {
 	display: none;
 }
 
-#add-entry.error.error-icon p {
+.entry.add-entry.error.error-icon p {
 	display: block;
 	font-size: .8rem !important;
 }
@@ -115,11 +114,6 @@ button.entry.fit {
 	font-size: 1.25em;
 	line-height: 1.18;
 	font-weight: 500;
-}
-
-#delete-template {
-	border-color: var(--color-error);
-	color: var(--color-error);
 }
 
 @media (max-width: 543px) {

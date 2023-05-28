@@ -2,6 +2,7 @@
 
 from typing import Any, Dict
 
+
 class UsernameTaken(Exception):
 	"""The username is already taken"""
 	api_response = {'error': 'UsernameTaken', 'result': {}, 'code': 400}

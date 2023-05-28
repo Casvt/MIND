@@ -5,6 +5,7 @@ from hashlib import pbkdf2_hmac
 from secrets import token_bytes
 from typing import Tuple
 
+
 def get_hash(salt: bytes, data: str) -> bytes:
 	"""Hash a string using the supplied salt
 

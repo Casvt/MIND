@@ -7,17 +7,17 @@
 	<meta id="url_prefix" data-value="{{url_prefix}}">
 
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/general.css') }}">
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/reminders_templates.css') }}">
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/add_edit.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/info.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/library.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/notification.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
 	<script src="{{ url_for('static', filename='js/general.js') }}" defer></script>
-	<script src="{{ url_for('static', filename='js/reminders.js') }}" defer></script>
-	<script src="{{ url_for('static', filename='js/add.js') }}" defer></script>
-	<script src="{{ url_for('static', filename='js/edit.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='js/library.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='js/window.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='js/templates.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='js/show.js') }}" defer></script>
 	<script src="{{ url_for('static', filename='js/notification.js') }}" defer></script>
 	<script src="{{ url_for('static', filename='js/settings.js') }}" defer></script>
-	<script src="{{ url_for('static', filename='js/templates.js') }}" defer></script>
 
 	<title>Reminders - MIND</title>
 </head>
@@ -64,7 +64,7 @@
 				</button>
 			</div>
 			<div>
-				<button id="logout-button" aria-label="Log out of MIND" tilte="Logout">
+				<button id="logout-button" aria-label="Log out of MIND" title="Logout">
 					<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve">
 						<g>
 							<path d="M11.476,15a1,1,0,0,0-1,1v3a3,3,0,0,1-3,3H5a3,3,0,0,1-3-3V5A3,3,0,0,1,5,2H7.476a3,3,0,0,1,3,3V8a1,1,0,0,0,2,0V5a5.006,5.006,0,0,0-5-5H5A5.006,5.006,0,0,0,0,5V19a5.006,5.006,0,0,0,5,5H7.476a5.006,5.006,0,0,0,5-5V16A1,1,0,0,0,11.476,15Z"></path>
@@ -77,8 +77,9 @@
 		<main class="window-container">
 			<div id="home">
 				<div class="tab-selector">
-					<button id="reminders-selector" data-selected="true">Reminders</button>
-					<button id="templates-selector" data-selected="false">Templates</button>
+					<button data-target="reminder-tab" data-selected="true">Reminders</button>
+					<button data-target="static-reminder-tab">Static Reminders</button>
+					<button data-target="template-tab">Templates</button>
 				</div>
 				<div id="reminder-tab">
 					<div class="search-container">
@@ -108,7 +109,7 @@
 						</form>
 					</div>
 					<div id="reminder-list">
-						<button class="entry" id="add-entry" aria-label="Add reminder" title="Add reminder">
+						<button class="entry add-entry" id="add-reminder" aria-label="Add reminder" title="Add reminder">
 							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
 								<g>
 									<g>
@@ -120,9 +121,22 @@
 						</button>
 					</div>
 				</div>
+				<div id="static-reminder-tab" class="hidden">
+					<div id="static-reminder-list">
+						<button class="entry add-entry" id="add-static-reminder" aria-label="Add static reminder" title="Add static reminder">
+							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
+								<g>
+									<g>
+										<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
+									</g>
+								</g>
+							</svg>
+						</button>
+					</div>
+				</div>
 				<div id="template-tab" class="hidden">
 					<div id="template-list">
-						<button class="entry" id="add-template" aria-label="Add template" title="Add template">
+						<button class="entry add-entry" id="add-template" aria-label="Add template" title="Add template">
 							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
 								<g>
 									<g>
@@ -134,10 +148,11 @@
 					</div>
 				</div>
 			</div>
-			<div id="add">
-				<h2>Add a reminder</h2>
+
+			<div id="info">
+				<h2></h2>
 				<div class="form-container">
-					<form id="add-form">
+					<form id="info-form">
 						<div class="sub-inputs">
 							<select id="template-selection">
 								<option value="0" selected>No template</option>
@@ -148,8 +163,9 @@
 						<input type="text" id="title-input" placeholder="Title" required>
 						<div class="sub-inputs">
 							<input type="datetime-local" id="time-input" required>
-							<select id="notification-service-input" required></select>
+							<button type="button" id="toggle-notification-service-list">Notification Services</button>
 						</div>
+						<div class="notification-service-list hidden"></div>
 						<div class="sub-inputs">
 							<button type="button" id="normal-button" data-selected="true">
 								<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 507.506 507.506" style="enable-background:new 0 0 512 512" xml:space="preserve">
@@ -182,66 +198,19 @@
 						</div>
 						<textarea id="text-input" cols="30" rows="10" placeholder="Text (optional)"></textarea>
 						<div class="options">
-							<button type="button" id="close-add">Cancel</button>
+							<button type="button" id="close-info">Cancel</button>
 							<button type="button" id="test-reminder">
 								<div>Test</div>
 								<div>Sent</div>
 							</button>
+							<button type="button" id="delete-info">Delete</button>
 							<button type="submit">Add</button>
 						</div>
 					</form>
 				</div>
 			</div>
-			<div id="edit">
-				<h2>Edit a reminder</h2>
-				<div class="form-container">
-					<form id="edit-form">
-						<button type="button" id="color-edit-toggle">Color</button>
-						<div class="color-list hidden"></div>
-						<input type="text" id="title-edit-input" placeholder="Title" required>
-						<div class="sub-inputs">
-							<input type="datetime-local" id="time-edit-input" required>
-							<select id="notification-service-edit-input" required></select>
-						</div>
-						<div class="sub-inputs">
-							<button type="button" id="normal-edit-button">
-								<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 507.506 507.506" style="enable-background:new 0 0 512 512" xml:space="preserve">
-									<g>
-										<path d="M163.865 436.934a54.228 54.228 0 0 1-38.4-15.915L9.369 304.966c-12.492-12.496-12.492-32.752 0-45.248 12.496-12.492 32.752-12.492 45.248 0l109.248 109.248L452.889 79.942c12.496-12.492 32.752-12.492 45.248 0 12.492 12.496 12.492 32.752 0 45.248L202.265 421.019a54.228 54.228 0 0 1-38.4 15.915z"></path>
-									</g>
-								</svg>
-								Normal
-							</button>
-							<button type="button" id="repeat-edit-button">
-								<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 507.506 507.506" style="enable-background:new 0 0 512 512" xml:space="preserve">
-									<g>
-										<path d="M163.865 436.934a54.228 54.228 0 0 1-38.4-15.915L9.369 304.966c-12.492-12.496-12.492-32.752 0-45.248 12.496-12.492 32.752-12.492 45.248 0l109.248 109.248L452.889 79.942c12.496-12.492 32.752-12.492 45.248 0 12.492 12.496 12.492 32.752 0 45.248L202.265 421.019a54.228 54.228 0 0 1-38.4 15.915z"></path>
-									</g>
-								</svg>
-								Repeated
-							</button>
-						</div>
-						<div class="repeat-edit-bar">
-							<p>Repeat every </p>
-							<input type="number" id="repeat-edit-interval" placeholder="interval" min="1" step="1" oninput="validity.valid || (value='');">
-							<select id="repeat-edit-quantity">
-								<option value="minutes">Minute(s)</option>
-								<option value="hours">Hour(s)</option>
-								<option value="days" selected>Day(s)</option>
-								<option value="weeks">Week(s)</option>
-								<option value="months">Month(s)</option>
-								<option value="years">Year(s)</option>
-							</select>
-						</div>
-						<textarea id="text-edit-input" cols="30" rows="10" placeholder="Text (optional)"></textarea>
-						<div class="options">
-							<button type="button" id="close-edit">Cancel</button>
-							<button type="button" id="delete-reminder">Delete</button>
-							<button type="submit">Save</button>
-						</div>
-					</form>
-				</div>
-			</div>
+
+
 			<div id="notification">
 				<h2>Notification Services</h2>
 				<p>Setup your notification providers here. See the <a target="_blank" href="https://github.com/caronc/apprise#supported-notifications">Apprise URL documentation</a> to learn how to make a valid Apprise URL.</p>
@@ -293,6 +262,8 @@
 					</div>
 				</div>
 			</div>
+
+
 			<div id="settings">
 				<h2>Settings</h2>
 				<div class="settings-container">
@@ -303,39 +274,6 @@
 					</form>
 					<h3>Delete Account</h3>
 					<button id="delete-account-button">Delete Account</button>
-				</div>
-			</div>
-			<div id="add-template">
-				<h2>Add a template</h2>
-				<div class="form-container">
-					<form id="template-form">
-						<button type="button" id="color-template-toggle">Color</button>
-						<div class="color-list hidden"></div>
-						<input type="text" id="title-template-input" placeholder="Title" required>
-						<select id="notification-service-template-input" required></select>
-						<textarea id="text-template-input" cols="30" rows="10" placeholder="Text (optional)"></textarea>
-						<div class="options">
-							<button type="button" id="close-template">Cancel</button>
-							<button type="submit">Add</button>
-						</div>
-					</form>
-				</div>
-			</div>
-			<div id="edit-template">
-				<h2>Edit a template</h2>
-				<div class="form-container">
-					<form id="template-edit-form">
-						<button type="button" id="color-template-edit-toggle">Color</button>
-						<div class="color-list hidden"></div>
-						<input type="text" id="title-template-edit-input" placeholder="Title" required>
-						<select id="notification-service-template-edit-input" required></select>
-						<textarea id="text-template-edit-input" cols="30" rows="10" placeholder="Text (optional)"></textarea>
-						<div class="options">
-							<button type="button" id="close-edit-template">Cancel</button>
-							<button type="button" id="delete-template">Delete</button>
-							<button type="submit">Save</button>
-						</div>
-					</form>
 				</div>
 			</div>
 		</main>

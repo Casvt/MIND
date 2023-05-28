@@ -8,12 +8,13 @@ from backend.custom_exceptions import (InvalidURL, NotificationServiceInUse,
                                        NotificationServiceNotFound)
 from backend.db import get_db
 
+
 class NotificationService:
 	def __init__(self, notification_service_id: int) -> None:
 		self.id = notification_service_id
 		
 		if not get_db().execute(
-			"SELECT 1 FROM notification_services WHERE id = ? LIMIT 1",
+			"SELECT 1 FROM notification_services WHERE id = ? LIMIT 1;",
 			(self.id,)
 		).fetchone():
 			raise NotificationServiceNotFound
@@ -61,13 +62,15 @@ class NotificationService:
 		# Update database
 		get_db().execute("""
 			UPDATE notification_services
-			SET title=?, url=?
+			SET title = ?, url = ?
 			WHERE id = ?;
-			""", (
+			""",
+			(
 				data["title"],
 				data["url"],
 				self.id
-		))
+			)
+		)
 
 		return self.get()
 		
@@ -79,21 +82,44 @@ class NotificationService:
 		"""		
 		# Check if no reminders exist with this service
 		cursor = get_db()
-		cursor.execute(
-			"SELECT 1 FROM reminders WHERE notification_service = ? LIMIT 1;",
+		cursor.execute("""
+			SELECT 1
+			FROM reminder_services
+			WHERE notification_service_id = ?
+				AND reminder_id IS NOT NULL
+			LIMIT 1;
+			""",
 			(self.id,)
 		)
 		if cursor.fetchone():
 			raise NotificationServiceInUse('reminder')
 			
 		# Check if no templates exist with this service
-		cursor.execute(
-			"SELECT 1 FROM templates WHERE notification_service = ? LIMIT 1;",
+		cursor.execute("""
+			SELECT 1
+			FROM reminder_services
+			WHERE notification_service_id = ?
+				AND template_id IS NOT NULL
+			LIMIT 1;
+			""",
 			(self.id,)
 		)
 		if cursor.fetchone():
 			raise NotificationServiceInUse('template')
-		
+
+		# Check if no static reminders exist with this service
+		cursor.execute("""
+			SELECT 1
+			FROM reminder_services
+			WHERE notification_service_id = ?
+				AND static_reminder_id IS NOT NULL
+			LIMIT 1;
+			""",
+			(self.id,)
+		)
+		if cursor.fetchone():
+			raise NotificationServiceInUse('static reminder')
+
 		cursor.execute(
 			"DELETE FROM notification_services WHERE id = ?",
 			(self.id,)
@@ -103,17 +129,22 @@ class NotificationService:
 class NotificationServices:
 	def __init__(self, user_id: int) -> None:
 		self.user_id = user_id
-	
+
 	def fetchall(self) -> List[dict]:
 		"""Get a list of all notification services
 
 		Returns:
 			List[dict]: The list of all notification services
 		"""		
-		result = list(map(dict, get_db(dict).execute(
-			"SELECT id, title, url FROM notification_services WHERE user_id = ? ORDER BY title, id",
+		result = list(map(dict, get_db(dict).execute("""
+			SELECT
+				id, title, url
+			FROM notification_services
+			WHERE user_id = ?
+			ORDER BY title, id;
+			""",
 			(self.user_id,)
-		).fetchall()))
+		)))
 
 		return result
 		

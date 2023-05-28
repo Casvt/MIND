@@ -8,7 +8,7 @@ from typing import Union
 
 from flask import g
 
-__DATABASE_VERSION__ = 4
+__DATABASE_VERSION__ = 5
 
 class Singleton(type):
 	_instances = {}
@@ -37,15 +37,15 @@ def get_db(output_type: Union[dict, tuple]=tuple):
 		Cursor: The Cursor instance to use
 	"""	
 	try:
-			cursor = g.cursor
+		cursor = g.cursor
 	except AttributeError:
-			db = DBConnection(timeout=20.0)
-			cursor = g.cursor = db.cursor()
+		db = DBConnection(timeout=20.0)
+		cursor = g.cursor = db.cursor()
 
 	if output_type is dict:
-			cursor.row_factory = Row
+		cursor.row_factory = Row
 	else:
-			cursor.row_factory = None
+		cursor.row_factory = None
 
 	return g.cursor
 
@@ -73,10 +73,10 @@ def migrate_db(current_db_version: int) -> None:
 		# V1 -> V2
 		t = time()
 		utc_offset = datetime.fromtimestamp(t) - datetime.utcfromtimestamp(t)
-		reminders = cursor.execute("SELECT time, id FROM reminders;").fetchall()
+		cursor.execute("SELECT time, id FROM reminders;")
 		new_reminders = []
 		new_reminders_append = new_reminders.append
-		for reminder in reminders:
+		for reminder in cursor:
 			new_reminders_append([round((datetime.fromtimestamp(reminder[0]) - utc_offset).timestamp()), reminder[1]])
 		cursor.executemany("UPDATE reminders SET time = ? WHERE id = ?;", new_reminders)
 		current_db_version = 2
@@ -100,6 +100,87 @@ def migrate_db(current_db_version: int) -> None:
 		""")
 		current_db_version = 4
 
+	if current_db_version == 4:
+		# V4 -> V5
+		cursor.executescript("""
+			BEGIN TRANSACTION;
+			PRAGMA defer_foreign_keys = ON;
+
+			-- Reminders
+			INSERT INTO reminder_services(reminder_id, notification_service_id)
+			SELECT id, notification_service
+			FROM reminders;
+			
+			CREATE TEMPORARY TABLE temp_reminders AS
+				SELECT id, user_id, title, text, time, repeat_quantity, repeat_interval, original_time, color
+				FROM reminders;
+			DROP TABLE reminders;
+			CREATE TABLE reminders(
+				id INTEGER PRIMARY KEY,
+				user_id INTEGER NOT NULL,
+				title VARCHAR(255) NOT NULL,
+				text TEXT,
+				time INTEGER NOT NULL,
+
+				repeat_quantity VARCHAR(15),
+				repeat_interval INTEGER,
+				original_time INTEGER,
+				
+				color VARCHAR(7),
+				
+				FOREIGN KEY (user_id) REFERENCES users(id)
+			);
+			INSERT INTO reminders
+				SELECT * FROM temp_reminders;
+			
+			-- Static reminders
+			INSERT INTO reminder_services(static_reminder_id, notification_service_id)
+			SELECT id, notification_service
+			FROM static_reminders;
+
+			CREATE TEMPORARY TABLE temp_static_reminders AS
+				SELECT id, user_id, title, text, color
+				FROM static_reminders;
+			DROP TABLE static_reminders;
+			CREATE TABLE static_reminders(
+				id INTEGER PRIMARY KEY,
+				user_id INTEGER NOT NULL,
+				title VARCHAR(255) NOT NULL,
+				text TEXT,
+				
+				color VARCHAR(7),
+				
+				FOREIGN KEY (user_id) REFERENCES users(id)
+			);
+			INSERT INTO static_reminders
+				SELECT * FROM temp_static_reminders;
+
+			-- Templates
+			INSERT INTO reminder_services(template_id, notification_service_id)
+			SELECT id, notification_service
+			FROM templates;
+
+			CREATE TEMPORARY TABLE temp_templates AS
+				SELECT id, user_id, title, text, color
+				FROM templates;
+			DROP TABLE templates;
+			CREATE TABLE templates(
+				id INTEGER PRIMARY KEY,
+				user_id INTEGER NOT NULL,
+				title VARCHAR(255) NOT NULL,
+				text TEXT,
+				
+				color VARCHAR(7),
+
+				FOREIGN KEY (user_id) REFERENCES users(id)
+			);
+			INSERT INTO templates
+				SELECT * FROM temp_templates;
+
+			COMMIT;
+		""")
+		current_db_version = 5
+	
 	return
 
 def setup_db() -> None:
@@ -128,7 +209,6 @@ def setup_db() -> None:
 			title VARCHAR(255) NOT NULL,
 			text TEXT,
 			time INTEGER NOT NULL,
-			notification_service INTEGER NOT NULL,
 
 			repeat_quantity VARCHAR(15),
 			repeat_interval INTEGER,
@@ -136,20 +216,41 @@ def setup_db() -> None:
 			
 			color VARCHAR(7),
 			
-			FOREIGN KEY (user_id) REFERENCES users(id),
-			FOREIGN KEY (notification_service) REFERENCES notification_services(id)
+			FOREIGN KEY (user_id) REFERENCES users(id)
 		);
 		CREATE TABLE IF NOT EXISTS templates(
 			id INTEGER PRIMARY KEY,
 			user_id INTEGER NOT NULL,
 			title VARCHAR(255) NOT NULL,
 			text TEXT,
-			notification_service INTEGER NOT NULL,
 			
 			color VARCHAR(7),
 
-			FOREIGN KEY (user_id) REFERENCES users(id),
-			FOREIGN KEY (notification_service) REFERENCES notification_services(id)
+			FOREIGN KEY (user_id) REFERENCES users(id)
+		);
+		CREATE TABLE IF NOT EXISTS static_reminders(
+			id INTEGER PRIMARY KEY,
+			user_id INTEGER NOT NULL,
+			title VARCHAR(255) NOT NULL,
+			text TEXT,
+			
+			color VARCHAR(7),
+			
+			FOREIGN KEY (user_id) REFERENCES users(id)
+		);
+		CREATE TABLE IF NOT EXISTS reminder_services(
+			reminder_id INTEGER,
+			static_reminder_id INTEGER,
+			template_id INTEGER,
+			notification_service_id INTEGER NOT NULL,
+			
+			FOREIGN KEY (reminder_id) REFERENCES reminders(id)
+				ON DELETE CASCADE,
+			FOREIGN KEY (static_reminder_id) REFERENCES static_reminders(id)
+				ON DELETE CASCADE,
+			FOREIGN KEY (template_id) REFERENCES templates(id)
+				ON DELETE CASCADE,
+			FOREIGN KEY (notification_service_id) REFERENCES notification_services(id)
 		);
 		CREATE TABLE IF NOT EXISTS config(
 			key VARCHAR(255) PRIMARY KEY,
@@ -163,12 +264,14 @@ def setup_db() -> None:
 		""",
 		(__DATABASE_VERSION__,)
 	)
-	current_db_version = int(cursor.execute("SELECT value FROM config WHERE key = 'database_version' LIMIT 1;").fetchone()[0])
+	current_db_version = int(cursor.execute(
+		"SELECT value FROM config WHERE key = 'database_version' LIMIT 1;"
+	).fetchone()[0])
 	
 	if current_db_version < __DATABASE_VERSION__:
 		migrate_db(current_db_version)
 		cursor.execute(
-			"UPDATE config SET value = ? WHERE key = 'database_version' LIMIT 1;",
+			"UPDATE config SET value = ? WHERE key = 'database_version';",
 			(__DATABASE_VERSION__,)
 		)
 
