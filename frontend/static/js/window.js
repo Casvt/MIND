@@ -4,7 +4,7 @@ const inputs = {
 	'template': document.getElementById('template-selection'),
 	'title': document.getElementById('title-input'),
 	'time': document.getElementById('time-input'),
-	'notification_service': document.getElementById('notification-service-input'),
+	'notification_service': document.querySelector('.notification-service-list'),
 	'text': document.getElementById('text-input'),
 	'color': document.querySelector('.color-list')
 };
@@ -42,6 +42,13 @@ function toggleColor(hide=false) {
 		inputs.color.classList.toggle('hidden');
 	else
 		inputs.color.classList.add('hidden');
+};
+
+function toggleNotificationService(hide=false) {
+	if (!hide)
+		inputs.notification_service.classList.toggle('hidden');
+	else
+		inputs.notification_service.classList.add('hidden');
 };
 
 function toggleNormal() {
@@ -83,9 +90,22 @@ function testReminder() {
 			input.classList.remove('error-input');
 			input.removeAttribute('title');
 		};
+
+		const ns = [...
+			document.querySelectorAll('.notification-service-list input[type="checkbox"]:checked')
+		].map(c => parseInt(c.dataset.id))
+		if (!ns) {
+			input.classList.add('error-input');
+			input.title = 'No notification service set';
+			return
+		} else {
+			input.classList.remove('error-input');
+			input.removeAttribute('title');
+		};
+
 		const data = {
 			'title': inputs.title.value,
-			'notification_service': inputs.notification_service.value,
+			'notification_services': ns,
 			'text': inputs.text.value
 		};
 		headers.body = JSON.stringify(data);
@@ -140,18 +160,29 @@ function deleteInfo() {
 function submitInfo() {
 	inputs.time.classList.remove('error-input');
 	inputs.time.removeAttribute('title');
+	inputs.notification_service.classList.remove('error-input');
+	inputs.notification_service.removeAttribute('title');
 	let fetch_data = {
 		url: null,
-		method: null
+		method: null,
+		call_back: null
 	};
 	const data = {
 		'title': inputs.title.value,
-		'notification_service': inputs.notification_service.value,
+		'notification_services': [...
+				document.querySelectorAll('.notification-service-list input[type="checkbox"]:checked')
+			].map(c => parseInt(c.dataset.id)),
 		'text': inputs.text.value,
 		'color': null
 	};
 	if (!inputs.color.classList.contains('hidden')) {
 		data['color'] = inputs.color.querySelector('button[data-selected="true"]').dataset.color;
+	};
+	
+	if (data.notification_services.length === 0) {
+		inputs.notification_service.classList.add('error-input');
+		inputs.notification_service.title = 'No notification service set';
+		return
 	};
 
 	const e_id = document.getElementById('info').dataset.id;
@@ -165,16 +196,22 @@ function submitInfo() {
 		};
 		fetch_data.url = `${url_prefix}/api/reminders?api_key=${api_key}`;
 		fetch_data.method = 'POST';
+		fetch_data.call_back = fillReminders;
 
 	} else if (cl.contains('show-add-template')) {
 		// Add template
 		fetch_data.url = `${url_prefix}/api/templates?api_key=${api_key}`;
 		fetch_data.method = 'POST';
+		fetch_data.call_back = () => {
+			loadTemplateSelection();
+			fillTemplates();	
+		};
 
 	} else if (cl.contains('show-add-static-reminder')) {
 		// Add static reminder
 		fetch_data.url = `${url_prefix}/api/staticreminders?api_key=${api_key}`;
 		fetch_data.method = 'POST';
+		fetch_data.call_back = fillStaticReminders;
 		
 	} else if (cl.contains('show-edit-reminder')) {
 		// Edit reminder
@@ -185,16 +222,22 @@ function submitInfo() {
 		};
 		fetch_data.url = `${url_prefix}/api/reminders/${e_id}?api_key=${api_key}`;
 		fetch_data.method = 'PUT';
+		fetch_data.call_back = fillReminders;
 
 	} else if (cl.contains('show-edit-template')) {
 		// Edit template
 		fetch_data.url = `${url_prefix}/api/templates/${e_id}?api_key=${api_key}`;
 		fetch_data.method = 'PUT';
+		fetch_data.call_back = () => {
+			loadTemplateSelection();
+			fillTemplates();
+		};
 
 	} else if (cl.contains('show-edit-static-reminder')) {
 		// Edit a static reminder
 		fetch_data.url = `${url_prefix}/api/staticreminders/${e_id}?api_key=${api_key}`;
 		fetch_data.method = 'PUT';
+		fetch_data.call_back = fillStaticReminders;
 		
 	} else return;
 	
@@ -206,9 +249,7 @@ function submitInfo() {
 	.then(response => {
 		if (!response.ok) return Promise.reject(response.status);
 
-		fillReminders();
-		fillStaticReminders();
-		fillTemplates();
+		fetch_data.call_back()
 		hideWindow();
 	})
 	.catch(e => {
@@ -228,6 +269,7 @@ loadColor();
 
 document.getElementById('template-selection').addEventListener('change', e => applyTemplate());
 document.getElementById('color-toggle').addEventListener('click', e => toggleColor());
+document.getElementById('toggle-notification-service-list').addEventListener('click', e => toggleNotificationService());
 document.getElementById('normal-button').addEventListener('click', e => toggleNormal());
 document.getElementById('repeat-button').addEventListener('click', e => toggleRepeated());
 document.getElementById('close-info').addEventListener('click', e => hideWindow());

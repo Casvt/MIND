@@ -82,24 +82,39 @@ class NotificationService:
 		"""		
 		# Check if no reminders exist with this service
 		cursor = get_db()
-		cursor.execute(
-			"SELECT 1 FROM reminders WHERE notification_service = ? LIMIT 1;",
+		cursor.execute("""
+			SELECT 1
+			FROM reminder_services
+			WHERE notification_service_id = ?
+				AND reminder_id IS NOT NULL
+			LIMIT 1;
+			""",
 			(self.id,)
 		)
 		if cursor.fetchone():
 			raise NotificationServiceInUse('reminder')
 			
 		# Check if no templates exist with this service
-		cursor.execute(
-			"SELECT 1 FROM templates WHERE notification_service = ? LIMIT 1;",
+		cursor.execute("""
+			SELECT 1
+			FROM reminder_services
+			WHERE notification_service_id = ?
+				AND template_id IS NOT NULL
+			LIMIT 1;
+			""",
 			(self.id,)
 		)
 		if cursor.fetchone():
 			raise NotificationServiceInUse('template')
 
 		# Check if no static reminders exist with this service
-		cursor.execute(
-			"SELECT 1 FROM static_reminders WHERE notification_service = ? LIMIT 1;",
+		cursor.execute("""
+			SELECT 1
+			FROM reminder_services
+			WHERE notification_service_id = ?
+				AND static_reminder_id IS NOT NULL
+			LIMIT 1;
+			""",
 			(self.id,)
 		)
 		if cursor.fetchone():

@@ -8,7 +8,7 @@ from typing import Union
 
 from flask import g
 
-__DATABASE_VERSION__ = 4
+__DATABASE_VERSION__ = 5
 
 class Singleton(type):
 	_instances = {}
@@ -100,6 +100,87 @@ def migrate_db(current_db_version: int) -> None:
 		""")
 		current_db_version = 4
 
+	if current_db_version == 4:
+		# V4 -> V5
+		cursor.executescript("""
+			BEGIN TRANSACTION;
+			PRAGMA defer_foreign_keys = ON;
+
+			-- Reminders
+			INSERT INTO reminder_services(reminder_id, notification_service_id)
+			SELECT id, notification_service
+			FROM reminders;
+			
+			CREATE TEMPORARY TABLE temp_reminders AS
+				SELECT id, user_id, title, text, time, repeat_quantity, repeat_interval, original_time, color
+				FROM reminders;
+			DROP TABLE reminders;
+			CREATE TABLE reminders(
+				id INTEGER PRIMARY KEY,
+				user_id INTEGER NOT NULL,
+				title VARCHAR(255) NOT NULL,
+				text TEXT,
+				time INTEGER NOT NULL,
+
+				repeat_quantity VARCHAR(15),
+				repeat_interval INTEGER,
+				original_time INTEGER,
+				
+				color VARCHAR(7),
+				
+				FOREIGN KEY (user_id) REFERENCES users(id)
+			);
+			INSERT INTO reminders
+				SELECT * FROM temp_reminders;
+			
+			-- Static reminders
+			INSERT INTO reminder_services(static_reminder_id, notification_service_id)
+			SELECT id, notification_service
+			FROM static_reminders;
+
+			CREATE TEMPORARY TABLE temp_static_reminders AS
+				SELECT id, user_id, title, text, color
+				FROM static_reminders;
+			DROP TABLE static_reminders;
+			CREATE TABLE static_reminders(
+				id INTEGER PRIMARY KEY,
+				user_id INTEGER NOT NULL,
+				title VARCHAR(255) NOT NULL,
+				text TEXT,
+				
+				color VARCHAR(7),
+				
+				FOREIGN KEY (user_id) REFERENCES users(id)
+			);
+			INSERT INTO static_reminders
+				SELECT * FROM temp_static_reminders;
+
+			-- Templates
+			INSERT INTO reminder_services(template_id, notification_service_id)
+			SELECT id, notification_service
+			FROM templates;
+
+			CREATE TEMPORARY TABLE temp_templates AS
+				SELECT id, user_id, title, text, color
+				FROM templates;
+			DROP TABLE templates;
+			CREATE TABLE templates(
+				id INTEGER PRIMARY KEY,
+				user_id INTEGER NOT NULL,
+				title VARCHAR(255) NOT NULL,
+				text TEXT,
+				
+				color VARCHAR(7),
+
+				FOREIGN KEY (user_id) REFERENCES users(id)
+			);
+			INSERT INTO templates
+				SELECT * FROM temp_templates;
+
+			COMMIT;
+		""")
+		current_db_version = 5
+	
 	return
 
 def setup_db() -> None:
@@ -128,7 +209,6 @@ def setup_db() -> None:
 			title VARCHAR(255) NOT NULL,
 			text TEXT,
 			time INTEGER NOT NULL,
-			notification_service INTEGER NOT NULL,
 
 			repeat_quantity VARCHAR(15),
 			repeat_interval INTEGER,
@@ -136,32 +216,41 @@ def setup_db() -> None:
 			
 			color VARCHAR(7),
 			
-			FOREIGN KEY (user_id) REFERENCES users(id),
-			FOREIGN KEY (notification_service) REFERENCES notification_services(id)
+			FOREIGN KEY (user_id) REFERENCES users(id)
 		);
 		CREATE TABLE IF NOT EXISTS templates(
 			id INTEGER PRIMARY KEY,
 			user_id INTEGER NOT NULL,
 			title VARCHAR(255) NOT NULL,
 			text TEXT,
-			notification_service INTEGER NOT NULL,
 			
 			color VARCHAR(7),
 
-			FOREIGN KEY (user_id) REFERENCES users(id),
-			FOREIGN KEY (notification_service) REFERENCES notification_services(id)
+			FOREIGN KEY (user_id) REFERENCES users(id)
 		);
 		CREATE TABLE IF NOT EXISTS static_reminders(
 			id INTEGER PRIMARY KEY,
 			user_id INTEGER NOT NULL,
 			title VARCHAR(255) NOT NULL,
 			text TEXT,
-			notification_service INTEGER NOT NULL,
 			
 			color VARCHAR(7),
 			
-			FOREIGN KEY (user_id) REFERENCES users(id),
-			FOREIGN KEY (notification_service) REFERENCES notification_services(id)
+			FOREIGN KEY (user_id) REFERENCES users(id)
+		);
+		CREATE TABLE IF NOT EXISTS reminder_services(
+			reminder_id INTEGER,
+			static_reminder_id INTEGER,
+			template_id INTEGER,
+			notification_service_id INTEGER NOT NULL,
+			
+			FOREIGN KEY (reminder_id) REFERENCES reminders(id)
+				ON DELETE CASCADE,
+			FOREIGN KEY (static_reminder_id) REFERENCES static_reminders(id)
+				ON DELETE CASCADE,
+			FOREIGN KEY (template_id) REFERENCES templates(id)
+				ON DELETE CASCADE,
+			FOREIGN KEY (notification_service_id) REFERENCES notification_services(id)
 		);
 		CREATE TABLE IF NOT EXISTS config(
 			key VARCHAR(255) PRIMARY KEY,

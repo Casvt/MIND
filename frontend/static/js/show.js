@@ -3,7 +3,8 @@ function showAdd(type) {
 	inputs.title.value = '';
 	inputs.text.value = '';
 	inputs.time.value = '';
-	inputs.notification_service.value = document.querySelector('#notification-service-input option[selected]').value;
+	inputs.notification_service.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+	inputs.notification_service.querySelector('input[type="checkbox"]:first-child').checked = true;
 	toggleNormal();
 	toggleColor(true);
 	document.getElementById('test-reminder').classList.remove('show-sent');
@@ -71,7 +72,9 @@ function showEdit(id, type) {
 			);
 			inputs.time.value = trigger_date.toLocaleString('en-CA').slice(0,10) + 'T' + trigger_date.toTimeString().slice(0,5);
 		};
-		inputs.notification_service.value = json.result.notification_service;
+		inputs.notification_service.querySelectorAll('input[type="checkbox"]').forEach(
+			c => c.checked = json.result.notification_services.includes(parseInt(c.dataset.id))
+		);
 
 		if (type == types.reminder) {
 			if (json.result.repeat_interval === null) {

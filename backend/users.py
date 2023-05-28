@@ -97,6 +97,8 @@ class User:
 		"""		
 		cursor = get_db()
 		cursor.execute("DELETE FROM reminders WHERE user_id = ?", (self.user_id,))
+		cursor.execute("DELETE FROM templates WHERE user_id = ?", (self.user_id,))
+		cursor.execute("DELETE FROM static_reminders WHERE user_id = ?", (self.user_id,))
 		cursor.execute("DELETE FROM notification_services WHERE user_id = ?", (self.user_id,))
 		cursor.execute("DELETE FROM users WHERE id = ?", (self.user_id,))
 		return

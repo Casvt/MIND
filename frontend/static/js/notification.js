@@ -14,15 +14,22 @@ function fillNotificationSelection() {
 		if (json.result.length) {
 			document.getElementById('add-reminder').classList.remove('error', 'error-icon');
 
-			const options = document.getElementById('notification-service-input');
-			options.innerHTML = '';
+			inputs.notification_service.innerHTML = '';
 			json.result.forEach(service => {
-				const entry = document.createElement('option');
-				entry.value = service.id;
-				entry.innerText = service.title;
-				options.appendChild(entry);
+				const entry = document.createElement('div');
+				
+				const select = document.createElement('input');
+				select.dataset.id = service.id;
+				select.type = 'checkbox';
+				entry.appendChild(select);
+
+				const title = document.createElement('p');
+				title.innerText = service.title;
+				entry.appendChild(title);
+				
+				inputs.notification_service.appendChild(entry);
 			});
-			options.querySelector(':nth-child(1)').setAttribute('selected', '');
+			inputs.notification_service.querySelector(':first-child input').checked = true;
 			
 			const table = document.getElementById('services-list');
 			table.querySelectorAll('tr:not(#add-row)').forEach(e => e.remove());

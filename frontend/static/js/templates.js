@@ -26,7 +26,7 @@ function loadTemplateSelection() {
 function applyTemplate() {
 	if (inputs.template.value === '0') {
 		inputs.title.value = '';
-		inputs.notification_service.value = document.querySelector('#notification-service-input option[selected]').value;
+		inputs.notification_service.querySelectorAll('input[type="checkbox"]:checked').forEach(c => c.checked = false)
 		inputs.text.value = '';
 		toggleColor(true);
 	} else {
@@ -37,7 +37,9 @@ function applyTemplate() {
 		})
 		.then(json => {
 			inputs.title.value = json.result.title;
-			inputs.notification_service.value = json.result.notification_service;
+			inputs.notification_service.querySelectorAll('input[type="checkbox"]').forEach(
+				c => c.checked = json.result.notification_services.includes(parseInt(c.dataset.id))
+			);
 			inputs.text.value = json.result.text;
 			if (json.result.color !== null) {
 				if (inputs.color.classList.contains('hidden'))

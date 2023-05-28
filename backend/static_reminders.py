@@ -5,7 +5,8 @@ from typing import List
 
 from apprise import Apprise
 
-from backend.custom_exceptions import NotificationServiceNotFound, ReminderNotFound
+from backend.custom_exceptions import (NotificationServiceNotFound,
+                                       ReminderNotFound)
 from backend.db import get_db
 
 
@@ -30,26 +31,29 @@ class StaticReminder:
 		"""
 		reminder = get_db(dict).execute("""
 			SELECT
-				r.id,
-				r.title, r.text,
-				r.notification_service,
-				ns.title AS notification_service_title,
-				r.color
-			FROM static_reminders r
-			INNER JOIN notification_services ns
-			ON r.notification_service = ns.id
-			WHERE r.id = ?
+				id,
+				title, text,
+				color
+			FROM static_reminders
+			WHERE id = ?
 			LIMIT 1;
 			""",
 			(self.id,)
 		).fetchone()
+		reminder = dict(reminder)
 		
-		return dict(reminder)
+		reminder['notification_services'] = list(map(lambda r: r[0], get_db().execute("""
+			SELECT notification_service_id
+			FROM reminder_services
+			WHERE static_reminder_id = ?;
+		""", (self.id,))))
+
+		return reminder
 	
 	def update(
 		self,
 		title: str = None,
-		notification_service: int = None,
+		notification_services: List[int] = None,
 		text: str = None,
 		color: str = None
 	) -> dict:
@@ -57,12 +61,12 @@ class StaticReminder:
 
 		Args:
 			title (str, optional): The new title of the entry. Defaults to None.
-			notification_service (int, optional): The new id of the notification service to use to send the reminder. Defaults to None.
+			notification_services (List[int], optional): The new id's of the notification services to use to send the reminder. Defaults to None.
 			text (str, optional): The new body of the reminder. Defaults to None.
 			color (str, optional): The new hex code of the color of the reminder, which is shown in the web-ui. Defaults to None.
 
 		Raises:
-			NotificationServiceNotFound: The notification service with the given id was not found
+			NotificationServiceNotFound: One of the notification services was not found
 
 		Returns:
 			dict: The new static reminder info
@@ -71,7 +75,6 @@ class StaticReminder:
 		data = self.get()
 		new_values = {
 			'title': title,
-			'notification_service': notification_service,
 			'text': text,
 			'color': color
 		}
@@ -80,22 +83,32 @@ class StaticReminder:
 				data[k] = v
 				
 		# Update database
-		try:
-			get_db().execute("""
-				UPDATE static_reminders
-				SET
-					title = ?, text = ?,
-					notification_service = ?,
-					color = ?
-				WHERE id = ?;
-				""",
-				(data['title'], data['text'],
-     			data['notification_service'],
-				data['color'],
-				self.id)
-			)
-		except IntegrityError:
-			raise NotificationServiceNotFound
+		cursor = get_db()
+		cursor.execute("""
+			UPDATE static_reminders
+			SET
+				title = ?, text = ?,
+				color = ?
+			WHERE id = ?;
+			""",
+			(data['title'], data['text'],
+			data['color'],
+			self.id)
+		)
+		
+		if notification_services:
+			cursor.connection.isolation_level = None
+			cursor.execute("BEGIN TRANSACTION;")
+			cursor.execute("DELETE FROM reminder_services WHERE static_reminder_id = ?", (self.id,))
+			try:
+				cursor.executemany(
+					"INSERT INTO reminder_services(static_reminder_id, notification_service_id) VALUES (?,?)",
+					((self.id, s) for s in notification_services)
+				)
+				cursor.execute("COMMIT;")
+			except IntegrityError:
+				raise NotificationServiceNotFound
+			cursor.connection.isolation_level = ""
 
 		return self.get()
 
@@ -116,22 +129,18 @@ class StaticReminders:
 		"""Get all static reminders
 
 		Returns:
-			List[dict]: The id, title, text, notification_service, notification_service_title and color of each static reminder
+			List[dict]: The id, title, text and color of each static reminder
 		"""		
 		reminders: list = list(map(
 			dict,
 			get_db(dict).execute("""
 				SELECT
-					r.id,
-					r.title, r.text,
-					r.notification_service,
-					ns.title AS notification_service_title,
-					r.color
-				FROM static_reminders r
-				INNER JOIN notification_services ns
-				ON r.notification_service = ns.id
-				WHERE r.user_id = ?
-				ORDER BY r.title, r.id;
+					id,
+					title, text,
+					color
+				FROM static_reminders
+				WHERE user_id = ?
+				ORDER BY title, id;
 				""",
 				(self.user_id,)
 			)
@@ -153,7 +162,7 @@ class StaticReminders:
 	def add(
 		self,
 		title: str,
-		notification_service: int,
+		notification_services: List[int],
 		text: str = '',
 		color: str = None
 	) -> StaticReminder:
@@ -161,23 +170,29 @@ class StaticReminders:
 
 		Args:
 			title (str): The title of the entry
-			notification_service (int): The id of the notification service to use to send the reminder.
+			notification_services (List[int]): The id's of the notification services to use to send the reminder.
 			text (str, optional): The body of the reminder. Defaults to ''.
 			color (str, optional): The hex code of the color of the reminder, which is shown in the web-ui. Defaults to None.
 
 		Raises:
-			NotificationServiceNotFound: The notification service with the given id was not found
+			NotificationServiceNotFound: One of the notification services was not found
 
 		Returns:
 			StaticReminder: A StaticReminder instance representing the newly created static reminder
 		"""
+		cursor = get_db()
+		id = cursor.execute("""
+			INSERT INTO static_reminders(user_id, title, text, color)
+			VALUES (?,?,?,?);
+			""",
+			(self.user_id, title, text, color)
+		).lastrowid
+		
 		try:
-			id = get_db().execute("""
-				INSERT INTO static_reminders(user_id, title, text, notification_service, color)
-				VALUES (?,?,?,?,?);
-				""",
-				(self.user_id, title, text, notification_service, color)
-			).lastrowid
+			cursor.executemany(
+				"INSERT INTO reminder_services(static_reminder_id, notification_service_id) VALUES (?, ?);",
+				((id, service) for service in notification_services)
+			)
 		except IntegrityError:
 			raise NotificationServiceNotFound
 		
@@ -192,18 +207,26 @@ class StaticReminders:
 		Raises:
 			ReminderNotFound: The static reminder with the given id was not found
 		"""
-		reminder = get_db(dict).execute("""
-			SELECT r.title, r.text, ns.url
-			FROM static_reminders r
-			INNER JOIN notification_services ns
-			ON r.notification_service = ns.id
-			WHERE r.id = ?;
+		cursor = get_db(dict)
+		reminder = cursor.execute("""
+			SELECT title, text
+			FROM static_reminders
+			WHERE id = ?
+			LIMIT 1;
 		""", (id,)).fetchone()
 		if not reminder:
 			raise ReminderNotFound
 		reminder = dict(reminder)
 
 		a = Apprise()
-		a.add(reminder['url'])
+		cursor.execute("""
+			SELECT url
+			FROM reminder_services rs
+			INNER JOIN notification_services ns
+			ON rs.notification_service_id = ns.id
+			WHERE rs.static_reminder_id = ?;
+		""", (id,))
+		for url in cursor:
+			a.add(url['url'])
 		a.notify(title=reminder['title'], body=reminder['text'])
 		return
