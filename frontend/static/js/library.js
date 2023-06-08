@@ -5,7 +5,7 @@ function showTab(button) {
 	);
 
 	// Show desired tab and hide all others
-	document.querySelectorAll('#home > div:not(.tab-selector)').forEach(
+	document.querySelectorAll('#home > div:not(.tab-selector):not(.search-container)').forEach(
 		e => e.classList.add('hidden')
 	);
 	document.getElementById(button.dataset.target).classList.remove('hidden');
@@ -87,13 +87,25 @@ function fillTemplates() {
 // Library search
 // 
 function searchLibrary() {
-	const query = document.querySelector('#search-input').value;
-	fetch(`${url_prefix}/api/reminders/search?api_key=${api_key}&query=${query}`)
+	const query = document.querySelector('#search-input').value,
+		tab = document.getElementById(
+			document.querySelector('.tab-selector > button[data-selected="true"]').dataset.target
+		)
+	let url;
+	if (tab === types.reminder)
+		url = `${url_prefix}/api/reminders/search?api_key=${api_key}&query=${query}`;
+	else if (tab === types.static_reminder)
+		url = `${url_prefix}/api/staticreminders/search?api_key=${api_key}&query=${query}`;
+	else if (tab === types.template)
+		url = `${url_prefix}/api/templates/search?api_key=${api_key}&query=${query}`;
+	else return;
+
+	fetch(url)
 	.then(response => {
 		if (!response.ok) return Promise.reject(response.status);
 		return response.json();
 	})
-	.then(json => fillTable(types.reminder, json.result))
+	.then(json => fillTable(tab, json.result))
 	.catch(e => {
 		if (e === 401)
 			window.location.href = `${url_prefix}/`;
@@ -104,7 +116,16 @@ function searchLibrary() {
 
 function clearSearchLibrary() {
 	document.querySelector('#search-input').value = '';
-	fillReminders();
+	const tab = document.getElementById(
+		document.querySelector('.tab-selector > button[data-selected="true"]').dataset.target
+	)
+	if (tab === types.reminder)
+		fillReminders();
+	else if (tab === types.static_reminder)
+		fillStaticReminders();
+	else if (tab === types.template)
+		fillTemplates();
+	else return;
 };
 
 // code run on load

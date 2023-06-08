@@ -9,6 +9,10 @@ from backend.custom_exceptions import (NotificationServiceNotFound,
                                        ReminderNotFound)
 from backend.db import get_db
 
+filter_function = lambda query, p: (
+	query in p["title"].lower()
+	or query in p["text"].lower()
+)
 
 class StaticReminder:
 	"""Represents a static reminder
@@ -147,7 +151,23 @@ class StaticReminders:
 		))
 		
 		return reminders
-	
+
+	def search(self, query: str) -> List[dict]:
+		"""Search for static reminders
+
+		Args:
+			query (str): The term to search for
+
+		Returns:
+			List[dict]: All static reminders that match. Similar output to self.fetchall
+		"""		
+		query = query.lower()
+		reminders = list(filter(
+			lambda p: filter_function(query, p),
+			self.fetchall()
+		))
+		return reminders
+
 	def fetchone(self, id: int) -> StaticReminder:
 		"""Get one static reminder
 

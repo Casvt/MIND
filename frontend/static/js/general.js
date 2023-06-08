@@ -1,7 +1,7 @@
 const types = {
-	'reminder': document.getElementById('reminder-list'),
-	'static_reminder': document.getElementById('static-reminder-list'),
-	'template': document.getElementById('template-list')
+	'reminder': document.getElementById('reminder-tab'),
+	'static_reminder': document.getElementById('static-reminder-tab'),
+	'template': document.getElementById('template-tab')
 };
 
 const icons = {

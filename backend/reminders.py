@@ -17,7 +17,6 @@ from backend.db import close_db, get_db
 filter_function = lambda query, p: (
 	query in p["title"].lower()
 	or query in p["text"].lower()
-	or query in p["notification_service_title"].lower()
 )
 
 def _find_next_time(

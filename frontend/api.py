@@ -632,6 +632,29 @@ def api_get_templates():
 								color=color)
 		return return_api(result.get(), code=201)
 
+@api.route('/templates/search', methods=['GET'])
+@error_handler
+@auth
+def api_templates_query():
+	"""
+	Endpoint: /templates/search
+	Description: Search through the list of templates
+	Requires being logged in: Yes
+	Methods:
+		GET:
+			Parameters (url):
+				query (required): The search term
+			Returns:
+				200:
+					The search results, listed like GET /templates
+				400:
+					KeyNotFound: One of the required parameters was not given
+	"""
+	query = extract_key(request.values, 'query')
+
+	result = g.user_data.templates.search(query)
+	return return_api(result)
+
 @api.route('/templates/<int:t_id>', methods=['GET', 'PUT', 'DELETE'])
 @error_handler
 @auth
@@ -745,6 +768,29 @@ def api_static_reminders_list():
 								text=text,
 								color=color)
 		return return_api(result.get(), code=201)
+
+@api.route('/staticreminders/search', methods=['GET'])
+@error_handler
+@auth
+def api_static_reminders_query():
+	"""
+	Endpoint: /staticreminders/search
+	Description: Search through the list of staticreminders
+	Requires being logged in: Yes
+	Methods:
+		GET:
+			Parameters (url):
+				query (required): The search term
+			Returns:
+				200:
+					The search results, listed like GET /staticreminders
+				400:
+					KeyNotFound: One of the required parameters was not given
+	"""
+	query = extract_key(request.values, 'query')
+
+	result = g.user_data.static_reminders.search(query)
+	return return_api(result)
 
 @api.route('/staticreminders/<int:r_id>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @error_handler

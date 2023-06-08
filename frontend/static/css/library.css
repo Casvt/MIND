@@ -46,9 +46,9 @@
 }
 
 /* REMINDER LIST */
-#reminder-list,
-#static-reminder-list,
-#template-list {
+#reminder-tab,
+#static-reminder-tab,
+#template-tab {
 	--gap: 1rem;
 	--entry-width: 13rem;
 	max-width: 43rem;
