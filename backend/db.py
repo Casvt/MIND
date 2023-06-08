@@ -106,8 +106,15 @@ def migrate_db(current_db_version: int) -> None:
 			BEGIN TRANSACTION;
 			PRAGMA defer_foreign_keys = ON;
 
+			CREATE TEMPORARY TABLE temp_reminder_services(
+				reminder_id,
+				static_reminder_id,
+				template_id,
+				notification_service_id
+			);
+			
 			-- Reminders
-			INSERT INTO reminder_services(reminder_id, notification_service_id)
+			INSERT INTO temp_reminder_services(reminder_id, notification_service_id)
 			SELECT id, notification_service
 			FROM reminders;
 			
@@ -132,31 +139,9 @@ def migrate_db(current_db_version: int) -> None:
 			);
 			INSERT INTO reminders
 				SELECT * FROM temp_reminders;
-			
-			-- Static reminders
-			INSERT INTO reminder_services(static_reminder_id, notification_service_id)
-			SELECT id, notification_service
-			FROM static_reminders;
-
-			CREATE TEMPORARY TABLE temp_static_reminders AS
-				SELECT id, user_id, title, text, color
-				FROM static_reminders;
-			DROP TABLE static_reminders;
-			CREATE TABLE static_reminders(
-				id INTEGER PRIMARY KEY,
-				user_id INTEGER NOT NULL,
-				title VARCHAR(255) NOT NULL,
-				text TEXT,
-				
-				color VARCHAR(7),
-				
-				FOREIGN KEY (user_id) REFERENCES users(id)
-			);
-			INSERT INTO static_reminders
-				SELECT * FROM temp_static_reminders;
 
 			-- Templates
-			INSERT INTO reminder_services(template_id, notification_service_id)
+			INSERT INTO temp_reminder_services(template_id, notification_service_id)
 			SELECT id, notification_service
 			FROM templates;
 
@@ -176,6 +161,9 @@ def migrate_db(current_db_version: int) -> None:
 			);
 			INSERT INTO templates
 				SELECT * FROM temp_templates;
+
+			INSERT INTO reminder_services
+				SELECT * FROM temp_reminder_services;
 
 			COMMIT;
 		""")

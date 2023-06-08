@@ -47,7 +47,7 @@ function logout() {
 		'method': 'POST'
 	})
 	.then(response => {
-		sessionStorage.removeItem('api_key');
+		localStorage.removeItem('MIND_api_key');
 		window.location.href = `${url_prefix}/`;
 	});
 };
@@ -55,7 +55,7 @@ function logout() {
 // code run on load
 
 const url_prefix = document.getElementById('url_prefix').dataset.value;
-const api_key = sessionStorage.getItem('api_key');
+const api_key = localStorage.getItem('MIND_api_key');
 if (api_key === null) {
 	window.location.href = `${url_prefix}/`;
 };
