@@ -310,24 +310,26 @@ class Reminders:
 	"""Represents the reminder library of the user account
 	"""	
 	sort_functions = {
-		'title': (lambda r: (r['title'], r['time']), False),
-		'title_reversed': (lambda r: (r['title'], r['time']), True),
-		'time': (lambda r: r['time'], False),
-		'time_reversed': (lambda r: r['time'], True)
+		'time': (lambda r: (r['time'], r['title'], r['text'], r['color']), False),
+		'time_reversed': (lambda r: (r['time'], r['title'], r['text'], r['color']), True),
+		'title': (lambda r: (r['title'], r['time'], r['text'], r['color']), False),
+		'title_reversed': (lambda r: (r['title'], r['time'], r['text'], r['color']), True),
+		'date_added': (lambda r: r['id'], False),
+		'date_added_reversed': (lambda r: r['id'], True)
 	}
 	
 	def __init__(self, user_id: int):
 		self.user_id = user_id
 
-	def fetchall(self, sort_by: Literal["time", "time_reversed", "title", "title_reversed"] = "time") -> List[dict]:
+	def fetchall(self, sort_by: Literal["time", "time_reversed", "title", "title_reversed", "date_added", "date_added_reversed"] = "time") -> List[dict]:
 		"""Get all reminders
 
 		Args:
-			sort_by (Literal["time", "time_reversed", "title", "title_reversed"], optional): How to sort the result. Defaults to "time".
+			sort_by (Literal["time", "time_reversed", "title", "title_reversed", "date_added", "date_added_reversed"], optional): How to sort the result. Defaults to "time".
 
 		Returns:
 			List[dict]: The id, title, text, time and color of each reminder
-		"""		
+		"""
 		sort_function = self.sort_functions.get(
 			sort_by,
 			self.sort_functions['time']
@@ -353,11 +355,12 @@ class Reminders:
 
 		return reminders
 
-	def search(self, query: str) -> List[dict]:
+	def search(self, query: str, sort_by: Literal["time", "time_reversed", "title", "title_reversed", "date_added", "date_added_reversed"] = "time") -> List[dict]:
 		"""Search for reminders
 
 		Args:
 			query (str): The term to search for
+			sort_by (Literal["time", "time_reversed", "title", "title_reversed", "date_added", "date_added_reversed"], optional): How to sort the result. Defaults to "time".
 
 		Returns:
 			List[dict]: All reminders that match. Similar output to self.fetchall
@@ -365,7 +368,7 @@ class Reminders:
 		query = query.lower()
 		reminders = list(filter(
 			lambda p: filter_function(query, p),
-			self.fetchall()
+			self.fetchall(sort_by)
 		))
 		return reminders
 

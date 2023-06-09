@@ -74,7 +74,7 @@ def error_handler(method):
 	wrapper.__name__ = method.__name__
 	return wrapper
 
-def extract_key(values: dict, key: str, check_existence: bool=True) -> Any:
+def extract_key(values: dict, key: str, check_existence: bool=True, sort_options: dict=None) -> Any:
 	value: str = values.get(key)
 	if check_existence and value is None:
 		raise KeyNotFound(key)
@@ -96,7 +96,7 @@ def extract_key(values: dict, key: str, check_existence: bool=True) -> Any:
 				raise InvalidKeyValue(key, value)
 			
 		elif key == 'sort_by':
-			if not value in Reminders.sort_functions:
+			if not value in sort_options:
 				raise InvalidKeyValue(key, value)
 				
 		elif key == 'repeat_quantity':
@@ -123,7 +123,7 @@ def extract_key(values: dict, key: str, check_existence: bool=True) -> Any:
 
 	else:
 		if key == 'sort_by':
-			value = 'time'
+			value = next(iter(sort_options))
 		
 		elif key == 'text':
 			value = ''
@@ -409,7 +409,7 @@ def api_reminders_list():
 		GET:
 			Description: Get a list of all reminders
 			Parameters (url):
-				sort_by: how to sort the result. Allowed values are 'title', 'title_reversed', 'time' and 'time_reversed'
+				sort_by: How to sort the result. Allowed values are 'title', 'title_reversed', 'time', 'time_reversed', 'date_added' and 'date_added_reversed'
 			Returns:
 				200:
 					The id, title, text, time, repeat_quantity, repeat_interval and color of each reminder
@@ -434,8 +434,8 @@ def api_reminders_list():
 	reminders: Reminders = g.user_data.reminders
 	
 	if request.method == 'GET':
-		sort_by = extract_key(request.values, 'sort_by', check_existence=False)
-		result = reminders.fetchall(sort_by=sort_by)
+		sort_by = extract_key(request.values, 'sort_by', check_existence=False, sort_options=Reminders.sort_functions)
+		result = reminders.fetchall(sort_by)
 		return return_api(result)
 	
 	elif request.method == 'POST':
@@ -469,6 +469,7 @@ def api_reminders_query():
 		GET:
 			Parameters (url):
 				query (required): The search term
+				sort_by: How to sort the result. Allowed values are 'title', 'title_reversed', 'time', 'time_reversed', 'date_added' and 'date_added_reversed'
 			Returns:
 				200:
 					The search results, listed like GET /reminders
@@ -476,8 +477,9 @@ def api_reminders_query():
 					KeyNotFound: One of the required parameters was not given
 	"""
 	query = extract_key(request.values, 'query')
+	sort_by = extract_key(request.values, 'sort_by', check_existence=False, sort_options=Reminders.sort_functions)
 
-	result = g.user_data.reminders.search(query)
+	result = g.user_data.reminders.search(query, sort_by)
 	return return_api(result)
 
 @api.route('/reminders/test', methods=['POST'])
@@ -595,6 +597,8 @@ def api_get_templates():
 	Methods:
 		GET:
 			Description: Get a list of all templates
+			Parameters (url):
+				sort_by: How to sort the result. Allowed values are 'title', 'title_reversed', 'date_added' and 'date_added_reversed'
 			Returns:
 				200:
 					The id, title, text and color of every template
@@ -616,7 +620,8 @@ def api_get_templates():
 	templates: Templates = g.user_data.templates
 	
 	if request.method == 'GET':
-		result = templates.fetchall()
+		sort_by = extract_key(request.values, 'sort_by', check_existence=False, sort_options=Templates.sort_functions)
+		result = templates.fetchall(sort_by)
 		return return_api(result)
 	
 	elif request.method == 'POST':
@@ -644,6 +649,7 @@ def api_templates_query():
 		GET:
 			Parameters (url):
 				query (required): The search term
+				sort_by: How to sort the result. Allowed values are 'title', 'title_reversed', 'date_added' and 'date_added_reversed'
 			Returns:
 				200:
 					The search results, listed like GET /templates
@@ -651,8 +657,9 @@ def api_templates_query():
 					KeyNotFound: One of the required parameters was not given
 	"""
 	query = extract_key(request.values, 'query')
+	sort_by = extract_key(request.values, 'sort_by', check_existence=False, sort_options=Templates.sort_functions)
 
-	result = g.user_data.templates.search(query)
+	result = g.user_data.templates.search(query, sort_by)
 	return return_api(result)
 
 @api.route('/templates/<int:t_id>', methods=['GET', 'PUT', 'DELETE'])
@@ -732,6 +739,8 @@ def api_static_reminders_list():
 	Methods:
 		GET:
 			Description: Get a list of all static reminders
+			Parameters (url):
+				sort_by: How to sort the result. Allowed values are 'title', 'title_reversed', 'date_added' and 'date_added_reversed'
 			Returns:
 				200:
 					The id, title, text and color of each static reminder
@@ -753,7 +762,8 @@ def api_static_reminders_list():
 	reminders: StaticReminders = g.user_data.static_reminders
 	
 	if request.method == 'GET':
-		result = reminders.fetchall()
+		sort_by = extract_key(request.values, 'sort_by', check_existence=False, sort_options=StaticReminders.sort_functions)
+		result = reminders.fetchall(sort_by)
 		return return_api(result)
 	
 	elif request.method == 'POST':
@@ -781,6 +791,7 @@ def api_static_reminders_query():
 		GET:
 			Parameters (url):
 				query (required): The search term
+				sort_by: How to sort the result. Allowed values are 'title', 'title_reversed', 'date_added' and 'date_added_reversed'
 			Returns:
 				200:
 					The search results, listed like GET /staticreminders
@@ -788,8 +799,9 @@ def api_static_reminders_query():
 					KeyNotFound: One of the required parameters was not given
 	"""
 	query = extract_key(request.values, 'query')
+	sort_by = extract_key(request.values, 'sort_by', check_existence=False, sort_options=StaticReminders.sort_functions)
 
-	result = g.user_data.static_reminders.search(query)
+	result = g.user_data.static_reminders.search(query, sort_by)
 	return return_api(result)
 
 @api.route('/staticreminders/<int:r_id>', methods=['GET', 'POST', 'PUT', 'DELETE'])

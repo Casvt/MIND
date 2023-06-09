@@ -1,9 +1,3 @@
-const inputs_buttons = {
-	'save_button': document.querySelector('#add-row button[data-type="save"]'),
-	'title': document.querySelector('#add-row td.title-column input'),
-	'url': document.querySelector('#add-row td.url-column input')
-};
-
 function fillNotificationSelection() {
 	fetch(`${url_prefix}/api/notificationservices?api_key=${api_key}`)
 	.then(response => {
@@ -32,7 +26,7 @@ function fillNotificationSelection() {
 			inputs.notification_service.querySelector(':first-child input').checked = true;
 			
 			const table = document.getElementById('services-list');
-			table.querySelectorAll('tr:not(#add-row)').forEach(e => e.remove());
+			table.innerHTML = '';
 			json.result.forEach(service => {
 				const entry = document.createElement('tr');
 				entry.dataset.id = service.id;
@@ -157,13 +151,157 @@ function deleteService(id) {
 };
 
 function toggleAddService() {
-	document.getElementById('add-row').classList.toggle('hidden');
+	const cont = document.querySelector('.overflow-container');
+	if (cont.classList.contains('show-add')) {
+		// Hide add
+		cont.classList.remove('show-add');
+		hideAddServiceWindow();
+	} else {
+		// Show add
+		if (notification_services === null) {
+			fetch(`${url_prefix}/api/notificationservices/available?api_key=${api_key}`)
+			.then(response => response.json())
+			.then(json => {
+				notification_services = json.result;
+				const table = document.querySelector('#service-list');
+				json.result.forEach((result, index) => {
+					const entry = document.createElement('button');
+					entry.innerText = result.name;
+					entry.addEventListener('click', e => showAddServiceWindow(index));
+					table.appendChild(entry);
+				});
+			});
+		};
+		cont.classList.add('show-add');
+	};
+};
+
+function showAddServiceWindow(index) {
+	const window = document.getElementById('add-service-window');
+	window.innerHTML = '';
+
+	if (index === -1) {
+		// Custom url
+		const title = document.createElement('h3');
+		title.innerText = 'Custom URL';
+		window.appendChild(title);
+		
+		const desc = document.createElement('p');
+		desc.innerHTML = 'Enter a custom Apprise URL. See the <a target="_blank" href="https://github.com/caronc/apprise#supported-notifications">Apprise URL documentation</a>.';
+		window.appendChild(desc);
+
+		const service_title = document.createElement('input');
+		service_title.id = 'service-title';
+		service_title.type = 'text';
+		service_title.placeholder = 'Service Title';
+		service_title.required = true;
+		window.appendChild(service_title);
+			
+		const url_input = document.createElement('input');
+		url_input.type = 'text';
+		url_input.placeholder = 'Apprise URL';
+		window.appendChild(url_input);
+	} else {
+		const data = notification_services[index];
+		console.log(data);
+		
+		const title = document.createElement('h3');
+		title.innerText = data.name;
+		window.appendChild(title);
+
+		const docs = document.createElement('a');
+		docs.href = data.doc_url;
+		docs.target = '_blank';
+		docs.innerText = 'Documentation';
+		window.appendChild(docs);
+
+		const service_title = document.createElement('input');
+		service_title.id = 'service-title';
+		service_title.type = 'text';
+		service_title.placeholder = 'Service Title';
+		service_title.required = true;
+		window.appendChild(service_title);	
+		
+		data.details.tokens.forEach(token => {
+			if (token.type === 'choice') {
+				const choice = document.createElement('select');
+				choice.dataset.map = token.map_to;
+				choice.dataset.prefix = '';
+				choice.placeholder = token.name;
+				choice.required = token.required;
+				token.options.forEach(option => {
+					const entry = document.createElement('option');
+					entry.value = option;
+					entry.innerText = option;
+					choice.appendChild(entry);
+				});
+				window.appendChild(choice);
+
+			} else if (token.type === 'list') {
+				if (token.content.length === 0) {
+					
+				} else {
+					token.content.forEach(content => {
+						
+					});
+				};
+
+			} else if (token.type === 'string') {
+				const str_input = document.createElement('input');
+				str_input.dataset.map = token.map_to;
+				str_input.dataset.prefix = token.prefix;
+				str_input.dataset.regex = token.regex;
+				str_input.type = 'text';
+				str_input.placeholder = `${token.name}${!token.required ? ' (Optional)' : ''}`;
+				str_input.required = token.required;
+				window.appendChild(str_input);
+
+			} else if (token.type === 'int') {
+				const int_input = document.createElement('input');
+				int_input.dataset.map = token.map_to;
+				int_input.dataset.prefix = token.prefix;
+				int_input.type = 'number';
+				int_input.placeholder = `${token.name}${!token.required ? ' (Optional)' : ''}`;
+				int_input.required = token.required;
+				if (token.min !== null)
+					int_input.min = token.min;
+				if (token.max !== null)
+					int_input.max = token.max;
+				window.appendChild(int_input);
+			};
+		});
+	};
+	
+	// Bottom options
+	const options = document.createElement('div');
+	options.classList.add('options');
+	const cancel = document.createElement('button');
+	cancel.type = 'button';
+	cancel.innerText = 'Cancel';
+	cancel.addEventListener('click', e => toggleAddService());
+	options.appendChild(cancel);
+	const add = document.createElement('button');
+	add.type = 'submit';
+	add.innerText = 'Add';
+	options.appendChild(add);
+	window.appendChild(options);
+	
+	document.getElementById('add-service-container').classList.add('show-add-window');
+};
+
+function hideAddServiceWindow() {
+	document.getElementById('add-service-container').classList.remove('show-add-window');
+};
+
+function buildAppriseURL() {
+	return null;
 };
 
 function addService() {
+	const add_button = document.querySelector('#add-service-window > .options > button[type="submit"]');
 	const data = {
-		'title': inputs_buttons.title.value,
-		'url': inputs_buttons.url.value
+		'title': document.querySelector('#service-title').value,
+		'url': buildAppriseURL()
 	};
 	fetch(`${url_prefix}/api/notificationservices?api_key=${api_key}`, {
 		'method': 'POST',
@@ -173,13 +311,9 @@ function addService() {
 	.then(response => {
 		if (!response.ok) return Promise.reject(response.status);
 		
-		inputs_buttons.title.value = '';
-		inputs_buttons.url.value = '';
+		add_button.classList.remove('error-input');
+		add_button.title = '';
 
-		inputs_buttons.save_button.classList.remove('error-icon');
-		inputs_buttons.save_button.title = 'Add';
-		inputs_buttons.save_button.setAttribute('aria-label', 'Add');
-		
 		toggleAddService();
 		fillNotificationSelection();
 	})
@@ -187,9 +321,8 @@ function addService() {
 		if (e === 401)
 			window.location.href = `${url_prefix}/`;
 		else if (e === 400) {
-			inputs_buttons.save_button.classList.add('error-icon');
-			inputs_buttons.save_button.title = 'Invalid Apprise URL';
-			inputs_buttons.save_button.setAttribute('aria-label', 'Invalid Apprise URL');
+			add_button.classList.add('error-input');
+			add_button.title = 'Invalid Apprise URL';
 		} else
 			console.log(e);
 	});
@@ -199,5 +332,8 @@ function addService() {
 
 fillNotificationSelection();
 
+let notification_services = null;
+
 document.getElementById('add-service-button').addEventListener('click', e => toggleAddService());
-document.querySelector('#add-row button[data-type="save"]').addEventListener('click', e => addService());
+document.querySelector('#service-list button').addEventListener('click', e => showAddServiceWindow(-1));
+document.getElementById('add-service-window').setAttribute('action', 'javascript:addService();');

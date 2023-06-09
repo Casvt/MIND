@@ -143,10 +143,17 @@ function deleteInfo() {
 	.then(response => {
 		if (!response.ok) return Promise.reject(response.status);
 
-		fillNotificationSelection();
-		fillReminders();
-		fillStaticReminders();
-		fillTemplates();
+		if (cl.contains('show-edit-reminder')) {
+			// Delete reminder
+			fillReminders();
+		} else if (cl.contains('show-edit-template')) {
+			// Delete template
+			fillTemplates();
+			loadTemplateSelection();
+		} else if (cl.contains('show-edit-static-reminder')) {
+			// Delete static reminder
+			fillStaticReminders();
+		};
 		hideWindow();
 	})
 	.catch(e => {

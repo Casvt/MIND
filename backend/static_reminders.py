@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 
 from sqlite3 import IntegrityError
-from typing import List
+from typing import List, Literal
 
 from apprise import Apprise
 
@@ -125,16 +125,30 @@ class StaticReminder:
 class StaticReminders:
 	"""Represents the static reminder library of the user account
 	"""
-	
+	sort_functions = {
+		'title': (lambda r: (r['title'], r['text'], r['color']), False),
+		'title_reversed': (lambda r: (r['title'], r['text'], r['color']), True),
+		'date_added': (lambda r: r['id'], False),
+		'date_added_reversed': (lambda r: r['id'], True)
+	}
+
 	def __init__(self, user_id: int) -> None:
 		self.user_id = user_id
 		
-	def fetchall(self) -> List[dict]:
+	def fetchall(self, sort_by: Literal["title", "title_reversed", "date_added", "date_added_reversed"] = "title") -> List[dict]:
 		"""Get all static reminders
+
+		Args:
+			sort_by (Literal["title", "title_reversed", "date_added", "date_added_reversed"], optional): How to sort the result. Defaults to "title".
 
 		Returns:
 			List[dict]: The id, title, text and color of each static reminder
-		"""		
+		"""
+		sort_function = self.sort_functions.get(
+			sort_by,
+			self.sort_functions['title']
+		)
+
 		reminders: list = list(map(
 			dict,
 			get_db(dict).execute("""
@@ -150,13 +164,17 @@ class StaticReminders:
 			)
 		))
 		
+		# Sort result
+		reminders.sort(key=sort_function[0], reverse=sort_function[1])
+
 		return reminders
 
-	def search(self, query: str) -> List[dict]:
+	def search(self, query: str, sort_by: Literal["title", "title_reversed", "date_added", "date_added_reversed"] = "title") -> List[dict]:
 		"""Search for static reminders
 
 		Args:
 			query (str): The term to search for
+			sort_by (Literal["title", "title_reversed", "date_added", "date_added_reversed"], optional): How to sort the result. Defaults to "title".
 
 		Returns:
 			List[dict]: All static reminders that match. Similar output to self.fetchall
@@ -164,7 +182,7 @@ class StaticReminders:
 		query = query.lower()
 		reminders = list(filter(
 			lambda p: filter_function(query, p),
-			self.fetchall()
+			self.fetchall(sort_by)
 		))
 		return reminders
 

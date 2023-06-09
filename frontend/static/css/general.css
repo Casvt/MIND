@@ -275,10 +275,6 @@ nav > div > button svg {
 	text-align: center;
 }
 
-.window-container > div:not(#home) > p > a {
-	color: var(--color-light);
-}
-
 .tab-selector {
 	width: 100%;
 	display: flex;
