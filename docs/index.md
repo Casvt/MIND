@@ -15,9 +15,11 @@ General Information:
 - [API Docs](./api.md)
 
 ## Workings
+
 MIND can be used for sending notifications at the desired time. This can be a set time, like a yearly reminder for a birthday, or at a button click, to easily send a predefined notification when you want to.
 
 ## Features
+
 - Works cross-timezone
 - Notifications are sent with second-precision
 - Uses the [apprise library](https://github.com/caronc/apprise), giving you 80+ platforms to send notifications to
@@ -27,8 +29,10 @@ MIND can be used for sending notifications at the desired time. This can be a se
 - API available
 
 ### Planned Features
+
 You can see the planned features in the [Project board](https://github.com/users/Casvt/projects/3).
 
 ## Contact
+
 - For support, a [discord server](https://discord.gg/nMNdgG7vsE) is available
 - Alternatively, [make an issue](https://github.com/Casvt/MIND/issues)
