@@ -151,3 +151,9 @@ LICENSE
 
 # Tests
 tests/
+
+# Project management files
+release.sh
+docs/
+docs-requirements.txt
+mkdocs.yml

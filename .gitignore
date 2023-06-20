@@ -133,3 +133,6 @@ dmypy.json
 
 # VS code
 *.code-workspace
+
+# Project management files
+release.sh
