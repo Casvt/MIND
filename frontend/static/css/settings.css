@@ -40,3 +40,29 @@
 #delete-account-button {
 	background-color: var(--color-error);
 }
+
+.contact-list {
+	width: min(100%, 31rem);
+	margin: auto;
+	
+	display: flex;
+	justify-content: center;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
+.contact-list > a {
+	height: 5rem;
+	width: 15rem;
+	
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	
+	border-radius: 6px;
+	background-color: var(--color-gray);
+	color: var(--color-light);
+
+	text-decoration: none;
+	font-size: 1.2rem;
+}

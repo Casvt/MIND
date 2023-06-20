@@ -271,6 +271,10 @@ nav > div > button svg {
 	margin-bottom: 2rem;
 }
 
+.window-container > div:not(#home) > h2:not(:first-of-type) {
+	margin-top: 1.5rem;
+}
+
 .window-container > div:not(#home) > p {
 	text-align: center;
 }
