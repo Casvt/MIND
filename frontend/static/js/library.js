@@ -1,5 +1,5 @@
 const sorting_options = {};
-sorting_options[types.reminder] = [
+sorting_options[types.reminder.id] = [
 	['time', 'Time'],
 	['time_reversed', 'Time Reversed'],
 	['title', 'Title'],
@@ -7,13 +7,13 @@ sorting_options[types.reminder] = [
 	['date_added', 'Date Added'],
 	['date_added_reversed', 'Date Added Reversed']
 ];
-sorting_options[types.static_reminder] = [
+sorting_options[types.static_reminder.id] = [
 	['title', 'Title'],
 	['title_reversed', 'Title Reversed'],
 	['date_added', 'Date Added'],
 	['date_added_reversed', 'Date Added Reversed']
 ];
-sorting_options[types.template] = [
+sorting_options[types.template.id] = [
 	['title', 'Title'],
 	['title_reversed', 'Title Reversed'],
 	['date_added', 'Date Added'],
@@ -104,7 +104,7 @@ function fillReminders() {
 function fillStaticReminders(assume_sorting=false) {
 	let sorting;
 	if (assume_sorting)
-		sorting = sorting_options[types.static_reminder][0][0];
+		sorting = sorting_options[types.static_reminder.id][0][0];
 	else
 		sorting = document.querySelector('#sort-input').value;
 	fillLibrary(`/api/staticreminders?api_key=${api_key}&sort_by=${sorting}`, types.static_reminder);
@@ -113,7 +113,7 @@ function fillStaticReminders(assume_sorting=false) {
 function fillTemplates(assume_sorting=false) {
 	let sorting;
 	if (assume_sorting)
-		sorting = sorting_options[types.template][0][0];
+		sorting = sorting_options[types.template.id][0][0];
 	else
 		sorting = document.querySelector('#sort-input').value;
 	fillLibrary(`/api/templates?api_key=${api_key}&sort_by=${sorting}`, types.template);
@@ -160,8 +160,8 @@ function clearSearchLibrary() {
 function fillSortOptions() {
 	const tab = document.getElementById(
 		document.querySelector('.tab-selector > button[data-selected="true"]').dataset.target
-	),
-	sort_options = sorting_options[tab];
+	)
+	const sort_options = sorting_options[tab.id];
 	
 	const select = document.getElementById('sort-input');
 	select.innerHTML = '';
