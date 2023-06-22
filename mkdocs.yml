@@ -1,13 +1,13 @@
 # Site Details
 site_name: MIND Docs
 site_description: The official guide for MIND 
-site_author: MrCas
-#edit_uri: https://github.com/??
+site_author: Casvt
 repo_url: https://github.com/Casvt/MIND
+edit_uri: blob/Development/docs/
 repo_name: Casvt/MIND
 
 extra_css:
-  - stylesheets/extra.css
+  - assets/css/extra.css
 
 # Site appearance (logos, colours, icons)
 theme:
@@ -26,8 +26,8 @@ theme:
     - navigation.tabs.sticky
     - navigation.top
     - navigation.tracking
-  #favicon: assets/logo/favicon.ico
-  #logo: assets/logo/kapowarr-logo.png?
+  favicon: assets/img/favicon.svg
+  logo: assets/img/favicon.svg
   palette:
     # Light mode
     - media: "(prefers-color-scheme: light)"

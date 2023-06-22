@@ -6,6 +6,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta id="url_prefix" data-value="{{url_prefix}}">
 
+	<link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/x-icon">
+
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/general.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/info.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/library.css') }}">
@@ -33,7 +35,7 @@
 					</g>
 				</svg>
 			</button>
-			<h1>MIND Reminders</h1>
+			<img src="{{ url_for('static', filename='img/favicon.svg') }}" alt="">
 		</div>
 	</header>
 	<div class="nav-divider">
