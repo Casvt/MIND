@@ -3,7 +3,7 @@ import unittest
 from flask import Blueprint
 
 from backend.custom_exceptions import *
-from frontend.api import api, auth, error_handler, extract_key, return_api
+from frontend.api import api, auth, error_handler, return_api
 
 class Test_API(unittest.TestCase):
 	def test_blueprint(self):
@@ -48,14 +48,4 @@ class Test_API(unittest.TestCase):
 			result(TypeError)
 		with self.assertRaises(KeyError):
 			result(KeyError)
-
-	def test_extract_key(self):
-		with self.assertRaises(KeyNotFound):
-			extract_key({'test': 'value'}, 'no_key')
-		self.assertIsNone(extract_key({'test': 'value'}, 'no_key', check_existence=False))
-		with self.assertRaises(InvalidKeyValue):
-			extract_key({'time': ''}, 'time')
-		self.assertIsInstance(extract_key({'time': '1'}, 'time'), int)
-		
-	
 	
