@@ -142,13 +142,13 @@ reminder_handler = ReminderHandler(handler_context.app_context)
 class Reminder:
 	"""Represents a reminder
 	"""	
-	def __init__(self, reminder_id: int):
+	def __init__(self, user_id: int, reminder_id: int):
 		self.id = reminder_id
 
 		# Check if reminder exists
 		if not get_db().execute(
-			"SELECT 1 FROM reminders WHERE id = ? LIMIT 1",
-			(self.id,)
+			"SELECT 1 FROM reminders WHERE id = ? AND user_id = ? LIMIT 1",
+			(self.id, user_id)
 		).fetchone():
 			raise ReminderNotFound
 
@@ -381,7 +381,7 @@ class Reminders:
 		Returns:
 			Reminder: A Reminder instance
 		"""		
-		return Reminder(id)
+		return Reminder(self.user_id, id)
 
 	def add(
 		self,
@@ -420,6 +420,13 @@ class Reminders:
 			raise InvalidKeyValue('repeat_interval', repeat_interval)
 
 		cursor = get_db()
+		for service in notification_services:
+			if not cursor.execute(
+				"SELECT 1 FROM notification_services WHERE id = ? AND user_id = ? LIMIT 1;",
+				(service, self.user_id)
+			).fetchone():
+				raise NotificationServiceNotFound
+
 		if repeat_quantity is None and repeat_interval is None:
 			id = cursor.execute("""
 				INSERT INTO reminders(user_id, title, text, time, color)
@@ -446,27 +453,28 @@ class Reminders:
 		# Return info
 		return self.fetchone(id)
 
-def test_reminder(
-	title: str,
-	notification_services: List[int],
-	text: str = ''
-) -> None:
-	"""Test send a reminder draft
+	def test_reminder(
+		self,
+		title: str,
+		notification_services: List[int],
+		text: str = ''
+	) -> None:
+		"""Test send a reminder draft
 
-	Args:
-		title (str): Title title of the entry
-		notification_service (int): The id of the notification service to use to send the reminder
-		text (str, optional): The body of the reminder. Defaults to ''.
-	"""
-	a = Apprise()
-	cursor = get_db(dict)
-	for service in notification_services:
-		url = cursor.execute(
-			"SELECT url FROM notification_services WHERE id = ? LIMIT 1;",
-			(service,)
-		).fetchone()
-		if not url:
-			raise NotificationServiceNotFound
-		a.add(url[0])
-	a.notify(title=title, body=text)
-	return
+		Args:
+			title (str): Title title of the entry
+			notification_service (int): The id of the notification service to use to send the reminder
+			text (str, optional): The body of the reminder. Defaults to ''.
+		"""
+		a = Apprise()
+		cursor = get_db(dict)
+		for service in notification_services:
+			url = cursor.execute(
+				"SELECT url FROM notification_services WHERE id = ? AND user_id = ? LIMIT 1;",
+				(service, self.user_id)
+			).fetchone()
+			if not url:
+				raise NotificationServiceNotFound
+			a.add(url[0])
+		a.notify(title=title, body=text)
+		return

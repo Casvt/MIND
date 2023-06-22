@@ -41,10 +41,6 @@ class InvalidTime(Exception):
 	"""The time given is in the past"""
 	api_response = {'error': 'InvalidTime', 'result': {}, 'code': 400}
 
-class InvalidURL(Exception):
-	"""The apprise url is invalid"""
-	api_response = {'error': 'InvalidURL', 'result': {}, 'code': 400}
-
 class KeyNotFound(Exception):
 	"""A key was not found in the input that is required to be given"""	
 	def __init__(self, key: str=''):

@@ -94,7 +94,7 @@ function testReminder() {
 		const ns = [...
 			document.querySelectorAll('.notification-service-list input[type="checkbox"]:checked')
 		].map(c => parseInt(c.dataset.id))
-		if (!ns) {
+		if (!ns.length) {
 			input.classList.add('error-input');
 			input.title = 'No notification service set';
 			return

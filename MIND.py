@@ -12,7 +12,7 @@ from waitress.server import create_server
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 from backend.db import DBConnection, close_db, setup_db
-from frontend.api import api, reminder_handler
+from frontend.api import api, api_prefix, reminder_handler
 from frontend.ui import ui
 
 HOST = '0.0.0.0'
@@ -65,7 +65,7 @@ def _create_app() -> Flask:
 		return render_template('page_not_found.html', url_prefix=logging.URL_PREFIX)
 
 	app.register_blueprint(ui)
-	app.register_blueprint(api, url_prefix="/api")
+	app.register_blueprint(api, url_prefix=api_prefix)
 
 	# Setup closing database
 	app.teardown_appcontext(close_db)

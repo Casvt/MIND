@@ -17,13 +17,13 @@ filter_function = lambda query, p: (
 class StaticReminder:
 	"""Represents a static reminder
 	"""
-	def __init__(self, reminder_id: int) -> None:
+	def __init__(self, user_id: int, reminder_id: int) -> None:
 		self.id = reminder_id
 		
 		# Check if reminder exists
 		if not get_db().execute(
-			"SELECT 1 FROM static_reminders WHERE id = ? LIMIT 1;",
-			(self.id,)
+			"SELECT 1 FROM static_reminders WHERE id = ? AND user_id = ? LIMIT 1;",
+			(self.id, user_id)
 		).fetchone():
 			raise ReminderNotFound
 		
@@ -195,7 +195,7 @@ class StaticReminders:
 		Returns:
 			StaticReminder: A StaticReminder instance
 		"""
-		return StaticReminder(id)
+		return StaticReminder(self.user_id, id)
 	
 	def add(
 		self,
@@ -249,9 +249,11 @@ class StaticReminders:
 		reminder = cursor.execute("""
 			SELECT title, text
 			FROM static_reminders
-			WHERE id = ?
+			WHERE
+				id = ?
+				AND user_id = ?
 			LIMIT 1;
-		""", (id,)).fetchone()
+		""", (id, self.user_id)).fetchone()
 		if not reminder:
 			raise ReminderNotFound
 		reminder = dict(reminder)

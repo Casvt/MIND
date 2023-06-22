@@ -41,7 +41,6 @@ class Test_API(unittest.TestCase):
 		self.assertEqual(result(ReminderNotFound), return_api(**ReminderNotFound.api_response))
 		self.assertEqual(result(NotificationServiceNotFound), return_api(**NotificationServiceNotFound.api_response))
 		self.assertEqual(result(InvalidTime), return_api(**InvalidTime.api_response))
-		self.assertEqual(result(InvalidURL), return_api(**InvalidURL.api_response))
 		self.assertEqual(result(NotificationServiceInUse, 'test'), return_api(**NotificationServiceInUse('test').api_response))
 		self.assertEqual(result(KeyNotFound, 'test'), return_api(**KeyNotFound('test').api_response))
 		self.assertEqual(result(InvalidKeyValue, 'test', 'value'), return_api(**InvalidKeyValue('test', 'value').api_response))

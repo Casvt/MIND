@@ -15,12 +15,12 @@ filter_function = lambda query, p: (
 class Template:
 	"""Represents a template
 	"""	
-	def __init__(self, template_id: int):
+	def __init__(self, user_id: int, template_id: int):
 		self.id = template_id
 		
 		exists = get_db().execute(
-			"SELECT 1 FROM templates WHERE id = ? LIMIT 1;",
-			(self.id,)
+			"SELECT 1 FROM templates WHERE id = ? AND user_id = ? LIMIT 1;",
+			(self.id, user_id)
 		).fetchone()
 		if not exists:
 			raise TemplateNotFound
@@ -184,7 +184,7 @@ class Templates:
 		Returns:
 			Template: A Template instance
 		"""		
-		return Template(id)
+		return Template(self.user_id, id)
 		
 	def add(
 		self,
