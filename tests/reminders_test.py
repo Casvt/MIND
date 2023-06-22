@@ -11,10 +11,9 @@ class Test_Reminder_Handler(unittest.TestCase):
 	def test_filter_function(self):
 		p = {
 			'title': 'TITLE',
-			'text': 'TEXT',
-			'notification_service_title': 'NOTIFICATION_SERVICE_TITLE'
+			'text': 'TEXT'
 		}
-		for test_case in ('', 'title', 'service', 'ex'):
+		for test_case in ('', 'title', 'ex'):
 			self.assertTrue(filter_function(test_case, p))
 		for test_case in (' ', 'Hello'):
 			self.assertFalse(filter_function(test_case, p))
