@@ -12,7 +12,7 @@ class UsernameInvalid(Exception):
 	api_response = {'error': 'UsernameInvalid', 'result': {}, 'code': 400}
 
 class UserNotFound(Exception):
-	"""The user requested by id or username can not be found"""
+	"""The user requested can not be found"""
 	api_response = {'error': 'UserNotFound', 'result': {}, 'code': 404}
 
 class AccessUnauthorized(Exception):
@@ -65,3 +65,11 @@ class InvalidKeyValue(Exception):
 class TemplateNotFound(Exception):
 	"""The template was not found"""
 	api_response = {'error': 'TemplateNotFound', 'result': {}, 'code': 404}
+
+class APIKeyInvalid(Exception):
+	"""The API key is not correct"""
+	api_response = {'error': 'APIKeyInvalid', 'result': {}, 'code': 401}
+
+class APIKeyExpired(Exception):
+	"""The API key has expired"""
+	api_response = {'error': 'APIKeyExpired', 'result': {}, 'code': 401}

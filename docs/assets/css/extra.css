@@ -21,6 +21,14 @@
 	color: var(--color-light);
 }
 
+.md-typeset table:not([class]) {
+	border-radius: 6px;
+}
+
+.md-typeset a:not(.headerlink) {
+	text-decoration: underline;
+}
+
 /*  */
 /* Light mode */
 /*  */
@@ -76,7 +84,7 @@
     --md-typeset-kbd-color: #fafafa;
     --md-typeset-kbd-accent-color: #fff;
     --md-typeset-kbd-border-color: #b8b8b8;
-    --md-typeset-table-color: #0000001f;
+    --md-typeset-table-color: var(--color-gray);
     --md-typeset-table-color--light: rgba(0,0,0,.035);
 
 	--md-admonition-fg-color: var(--color-dark);
@@ -180,7 +188,7 @@
     --md-typeset-kbd-color: #fafafa;
     --md-typeset-kbd-accent-color: #fff;
     --md-typeset-kbd-border-color: #b8b8b8;
-    --md-typeset-table-color: #0000001f;
+    --md-typeset-table-color: var(--color-gray);
     --md-typeset-table-color--light: rgba(0,0,0,.035);
 
 	--md-admonition-fg-color: var(--color-light);
