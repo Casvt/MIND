@@ -58,7 +58,7 @@ function fillTable(table, results) {
 			const time = document.createElement('p');
 			var offset = new Date(r.time * 1000).getTimezoneOffset() * -60;
 			var d = new Date((r.time + offset) * 1000);
-			var formatted_date = d.toLocaleString('en-CA').slice(0,10) + ' ' + d.toTimeString().slice(0,5);
+			var formatted_date = d.toLocaleString(JSON.parse(localStorage.getItem('MIND')).locale);
 			if (r.repeat_interval !== null) {
 				if (r.repeat_interval === 1) {
 					var quantity = r.repeat_quantity.endsWith('s') ? r.repeat_quantity.slice(0, -1) : r.repeat_quantity;

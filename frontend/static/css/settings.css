@@ -25,16 +25,18 @@
 	box-shadow: var(--default-shadow);
 }
 
+.settings-container input,
+.settings-container textarea,
+.settings-container select {
+	max-width: 20rem;
+}
+
 #change-password-form {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 	gap: 1rem;
-}
-
-#change-password-form > input {
-	max-width: 20rem;
 }
 
 #delete-account-button {

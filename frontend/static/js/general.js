@@ -47,15 +47,20 @@ function logout() {
 		'method': 'POST'
 	})
 	.then(response => {
-		localStorage.removeItem('MIND_api_key');
+		const new_stor = JSON.parse(localStorage.getItem('MIND'))
+		new_stor.api_key = null
+		localStorage.setItem('MIND', JSON.stringify(new_stor));
 		window.location.href = `${url_prefix}/`;
 	});
 };
 
 // code run on load
 
+if (localStorage.getItem('MIND') === null)
+	localStorage.setItem('MIND', JSON.stringify({'api_key': null, 'locale': 'en-GB'}))
+
 const url_prefix = document.getElementById('url_prefix').dataset.value;
-const api_key = localStorage.getItem('MIND_api_key');
+const api_key = JSON.parse(localStorage.getItem('MIND')).api_key;
 if (api_key === null) {
 	window.location.href = `${url_prefix}/`;
 };
