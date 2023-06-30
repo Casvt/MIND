@@ -1,5 +1,5 @@
 # Byte-compiled / optimized / DLL files
-__pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 
@@ -129,14 +129,13 @@ dmypy.json
 .pyre/
 
 # Database
-*.db
+**/*.db
 
 # VS code
 *.code-workspace
 .vscode/
 
 # Docker
-Dockerfile
 .dockerignore
 docker-compose.yml
 
@@ -146,7 +145,7 @@ docker-compose.yml
 .github/
 
 # Various files
-*.md
+**/*.md
 LICENSE
 
 # Tests

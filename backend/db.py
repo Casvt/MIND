@@ -7,8 +7,11 @@ from time import time
 from typing import Union
 
 from flask import g
+from waitress.task import ThreadedTaskDispatcher as OldThreadedTaskDispatcher
 
-__DATABASE_VERSION__ = 5
+from backend.custom_exceptions import AccessUnauthorized, UserNotFound
+
+__DATABASE_VERSION__ = 6
 
 class Singleton(type):
 	_instances = {}
@@ -19,6 +22,18 @@ class Singleton(type):
 			cls._instances[i] = super(Singleton, cls).__call__(*args, **kwargs)
 
 		return cls._instances[i]
+
+class ThreadedTaskDispatcher(OldThreadedTaskDispatcher):
+	def handler_thread(self, thread_no: int) -> None:
+		super().handler_thread(thread_no)
+		i = f'{DBConnection}{current_thread()}'
+		if i in Singleton._instances and not Singleton._instances[i].closed:
+			Singleton._instances[i].close()
+			
+	def shutdown(self, cancel_pending: bool = True, timeout: int = 5) -> bool:
+		print('Shutting down MIND...')
+		super().shutdown(cancel_pending, timeout)
+		DBConnection(20.0).close()
 
 class DBConnection(Connection, metaclass=Singleton):
 	file = ''
@@ -177,13 +192,22 @@ def migrate_db(current_db_version: int) -> None:
 			COMMIT;
 		""")
 		current_db_version = 5
-	
+
+	if current_db_version == 5:
+		# V5 -> V6
+		from backend.users import User
+		try:
+			User('User1', 'Password1').delete()
+		except (UserNotFound, AccessUnauthorized):
+			pass
+
 	return
 
 def setup_db() -> None:
 	"""Setup the database
 	"""
 	cursor = get_db()
+	cursor.execute("PRAGMA journal_mode = wal;")
 
 	cursor.executescript("""
 		CREATE TABLE IF NOT EXISTS users(

@@ -11,7 +11,7 @@ from flask import Flask, render_template, request
 from waitress.server import create_server
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
-from backend.db import DBConnection, close_db, setup_db
+from backend.db import DBConnection, ThreadedTaskDispatcher, close_db, setup_db
 from frontend.api import api, api_prefix, reminder_handler
 from frontend.ui import ui
 
@@ -90,7 +90,7 @@ def MIND() -> None:
 	app = _create_app()
 	with app.app_context():
 		if isfile(_folder_path('db', 'Noted.db')):
-			move(_folder_path('db', 'Noted.db'), _folder_path('db', 'MIND.db'))
+			move(_folder_path('db', 'Noted.db'), _folder_path(*DB_FILENAME))
 		db_location = _folder_path(*DB_FILENAME)
 		makedirs(dirname(db_location), exist_ok=True)
 		DBConnection.file = db_location
@@ -98,10 +98,11 @@ def MIND() -> None:
 		reminder_handler.find_next_reminder()
 
 	# Create waitress server and run
-	server = create_server(app, host=HOST, port=PORT, threads=THREADS)
+	dispatcher = ThreadedTaskDispatcher()
+	dispatcher.set_thread_count(THREADS)
+	server = create_server(app, _dispatcher=dispatcher, host=HOST, port=PORT, threads=THREADS)
 	print(f'MIND running on http://{HOST}:{PORT}{URL_PREFIX}')
 	server.run()
-	print(f'\nShutting down MIND...')
 	
 	# Stopping thread
 	reminder_handler.stop_handling()
