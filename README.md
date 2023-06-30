@@ -43,4 +43,4 @@ docker run -d \
 
 - Click the home icon and create a reminder!
 
-You can see the [wiki](https://github.com/Casvt/MIND/wiki) for instructions on how to install MIND on other OS'es.
+You can see the [wiki](https://casvt.github.io/MIND/x) for instructions on how to install MIND on other OS'es.
