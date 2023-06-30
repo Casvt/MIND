@@ -130,6 +130,8 @@ dmypy.json
 
 # Database
 **/*.db
+**/*.db-shm
+**/*.db-wal
 
 # VS code
 *.code-workspace
