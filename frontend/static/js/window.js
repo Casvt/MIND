@@ -199,7 +199,7 @@ function submitInfo() {
 		data['time'] = (new Date(inputs.time.value) / 1000) + (new Date(inputs.time.value).getTimezoneOffset() * 60)
 		if (type_buttons.repeat_button.dataset.selected === 'true') {
 			data['repeat_quantity'] = type_buttons.repeat_quantity.value;
-			data['repeat_interval'] = type_buttons.repeat_interval.value
+			data['repeat_interval'] = parseInt(type_buttons.repeat_interval.value)
 		};
 		fetch_data.url = `${url_prefix}/api/reminders?api_key=${api_key}`;
 		fetch_data.method = 'POST';
@@ -225,7 +225,7 @@ function submitInfo() {
 		data['time'] = (new Date(inputs.time.value) / 1000) + (new Date(inputs.time.value).getTimezoneOffset() * 60)
 		if (type_buttons.repeat_button.dataset.selected === 'true') {
 			data['repeat_quantity'] = type_buttons.repeat_quantity.value;
-			data['repeat_interval'] = type_buttons.repeat_interval.value
+			data['repeat_interval'] = parseInt(type_buttons.repeat_interval.value)
 		};
 		fetch_data.url = `${url_prefix}/api/reminders/${e_id}?api_key=${api_key}`;
 		fetch_data.method = 'PUT';
