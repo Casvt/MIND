@@ -110,6 +110,9 @@ function checkLogin() {
 
 // code run on load
 
+if (localStorage.getItem('MIND') === null)
+	localStorage.setItem('MIND', JSON.stringify({'api_key': null, 'locale': 'en-GB'}))
+
 const url_prefix = document.getElementById('url_prefix').dataset.value;
 
 checkLogin();

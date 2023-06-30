@@ -287,7 +287,8 @@ nav > div > button svg {
 	align-items: center;
 	flex-wrap: wrap;
 	gap: 1rem;
-	
+
+	padding-inline: .5rem;
 	padding-top: 1rem;
 }
 
