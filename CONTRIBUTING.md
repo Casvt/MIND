@@ -20,6 +20,7 @@ Once your request is accepted, you can start your local development.
 python3 -m unittest discover -v -s './tests' -p '*_test.py'
 ```
 6. Test your version thoroughly to catch as many bugs as possible (if any).
+7. If anything is changed about the API, run the `generate_api_docs.py` script to generate the new API docs. Commit the changes that were made by the script.
 
 ## Styling guide
 The code of MIND is written in such way that it follows the following rules. Your code should too.
@@ -28,7 +29,8 @@ The code of MIND is written in such way that it follows the following rules. You
 2. Tabs (4 space size) are used for indentation.
 3. Use type hints as much as possible, though don't if it requires importing extra functions or classes (except for the `typing` library).
 4. Each function in the backend needs a doc string describing the function, what the inputs are, what errors could be raised from within the function and what the output is.
-5. Each function in the `api.py` file should have a doc string describing the api endpoint. For the formatting, look at the doc strings of the other functions in the file.
-6. The imports need to be sorted (the extension `isort` is used in VS Code).
-7. The code needs to be compatible with Linux, MacOS and Windows.
-8. The code should, though not strictly enforced, reasonably comply with the rule of 80 characters per line.
+5. The imports need to be sorted (the extension `isort` is used in VS Code).
+6. The code needs to be compatible with Linux, MacOS, Windows and Docker.
+7. The code should, though not strictly enforced, reasonably comply with the rule of 80 characters per line.
+
+If you just code in the same style as the current code, you'll follow most of these rules automatically.
