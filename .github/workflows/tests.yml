@@ -25,4 +25,4 @@ jobs:
           pip install -r requirements.txt
       
       - name: Run Tests
-        run: python -m unittest discover -s ./tests -p '*.py'
+        run: sudo python -m unittest discover -s ./tests -p '*.py'
