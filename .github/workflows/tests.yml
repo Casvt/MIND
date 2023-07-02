@@ -6,7 +6,7 @@ on:
       - Development
 
 jobs:
-  p3.7:
+  p3_7:
     name: Python 3.7
     runs-on: ubuntu-latest
     steps:
@@ -16,7 +16,7 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python3 -m unittest discover -s ./tests -p '*.py'
 
-  p3.8:
+  p3_8:
     name: Python 3.8
     runs-on: ubuntu-latest
     steps:
@@ -26,7 +26,7 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python3 -m unittest discover -s ./tests -p '*.py'
 
-  p3.9:
+  p3_9:
     name: Python 3.9
     runs-on: ubuntu-latest
     steps:
@@ -36,7 +36,7 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python3 -m unittest discover -s ./tests -p '*.py'
 
-  p3.10:
+  p3_10:
     name: Python 3.10
     runs-on: ubuntu-latest
     steps:
@@ -46,7 +46,7 @@ jobs:
       - run: pip install -r requirements.txt
       - run: python3 -m unittest discover -s ./tests -p '*.py'
 
-  p3.11:
+  p3_11:
     name: Python 3.11
     runs-on: ubuntu-latest
     steps:
