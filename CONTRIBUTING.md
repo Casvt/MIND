@@ -25,7 +25,7 @@ python3 -m unittest discover -v -s './tests' -p '*_test.py'
 ## Styling guide
 The code of MIND is written in such way that it follows the following rules. Your code should too.
 
-1. Compatible with python 3.7 .
+1. Compatible with python 3.8 .
 2. Tabs (4 space size) are used for indentation.
 3. Use type hints as much as possible, though don't if it requires importing extra functions or classes (except for the `typing` library).
 4. Each function in the backend needs a doc string describing the function, what the inputs are, what errors could be raised from within the function and what the output is.
