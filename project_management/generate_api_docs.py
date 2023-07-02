@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 #-*- coding: utf-8 -*-
 
+from sys import path
+from os.path import dirname
+
+path.insert(0, dirname(path[0]))
+
+from subprocess import run
 from typing import Union
 from frontend.api import (DataSource, NotificationServiceNotFound,
                           ReminderNotFound, TemplateNotFound, api_docs)
@@ -114,3 +120,9 @@ if current_content == result:
 else:
 	with open(_folder_path('docs', 'api.md'), 'w+') as f:
 		f.write(result)
+	
+	run(["git", "checkout", "Development"])
+	run(["git", "add", _folder_path('docs', 'api.md')])
+	run(["git", "commit", "-m", "Updated API docs"])
+	run(["git", "push"])
+	

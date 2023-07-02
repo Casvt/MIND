@@ -1,0 +1,33 @@
+name: Update and build docs
+
+on:
+  push:
+    branches:
+      - Development
+
+jobs:
+  update:
+    name: Update API docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - run: pip install -r requirements.txt
+      - run: python3 project_management/generate_api_docs.py
+
+  deploy:
+    name: Build docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+      - run: pip install -r project_management/docs-requirements.txt
+      - run: mkdocs gh-deploy --force -f project_management/mkdocs.yml
