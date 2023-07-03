@@ -128,6 +128,8 @@ else:
 	with open(_folder_path('docs', 'api.md'), 'w+') as f:
 		f.write(result)
 	
+	run(["git", "config", "--global", "user.email", '"casvantijn@gmail.com"'])
+	run(["git", "config", "--global", "user.name", '"CasVT"'])
 	run(["git", "checkout", "Development"])
 	run(["git", "add", _folder_path('docs', 'api.md')])
 	run(["git", "commit", "-m", "Updated API docs"])
