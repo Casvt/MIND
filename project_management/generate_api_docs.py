@@ -26,27 +26,34 @@ All endpoints have the `{api_prefix}` prefix. That means, for example, that `/au
 
 ## Authentication
 
-Authentication is done using an API key. To log in, make a POST request to the [`/api/auth/login`](#authlogin) endpoint. You'll receive an API key, which you can then use in your requests to authenticate. Supply it as a url parameter with the key `api_key`. This API key is valid for one hour, after which the key expires, any further requests return 401 'APIKeyExpired' and you are required to log in again. If no `api_key` is supplied or it is invalid, 401 `APIKeyInvalid` is returned.
+Authentication is done using an API key.
+To log in, make a POST request to the [`{api_prefix}/auth/login`](#authlogin) endpoint.
+You'll receive an API key, which you can then use in your requests to authenticate.
+Supply it via the url parameter `api_key`.
+This API key is valid for one hour after which the key expires, any further requests return 401 'APIKeyExpired' and you are required to log in again.
+If no `api_key` is supplied or it is invalid, 401 `APIKeyInvalid` is returned.
 
 For example:
 ```bash
-curl -sSL 'http://192.168.2.15:8080/api/reminders?api_key=ABCDEFG'
+curl -sSL 'http://192.168.2.15:8080{api_prefix}/reminders?api_key=ABCDEFG'
 ```
 
 ## Supplying data
 
-Often, data needs to be supplied with a request. If the parameters need to be supplied via `url`, add them to the url as url parameters. If the parameters need to be supplied via `body`, add them to the body as a json object and supply the `Content-Type: application/json` header.
+Often, data needs to be supplied with a request.
+If the parameters need to be supplied via `url`, add them to the url as url parameters.
+If the parameters need to be supplied via `body`, add them to the body as a json object and supply the `Content-Type: application/json` header.
 
 For example:
 ```bash
 # URL parameter
-curl -sSL 'http://192.168.2.15:8080/api/reminders/search?api_key=ABCDEFG&query=Fountain&sort_by=time_reversed'
+curl -sSL 'http://192.168.2.15:8080{api_prefix}/reminders/search?api_key=ABCDEFG&query=Fountain&sort_by=time_reversed'
 
 # Body parameter
 curl -sSLX POST \\
 	-H 'Content-Type: application/json' \\
 	-d '{{"title": "Test service", "url": "test://fake/url"}}' \\
-	'http://192.168.2.15:8080/api/notificationservices?api_key=ABCDEFG'
+	'http://192.168.2.15:8080{api_prefix}/notificationservices?api_key=ABCDEFG'
 ```
 
 ## Endpoints
@@ -125,4 +132,3 @@ else:
 	run(["git", "add", _folder_path('docs', 'api.md')])
 	run(["git", "commit", "-m", "Updated API docs"])
 	run(["git", "push"])
-	

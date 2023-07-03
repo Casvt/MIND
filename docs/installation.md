@@ -6,8 +6,35 @@ NOTE: Make sure to set all time related settings (time, date, timezone, etc.) co
 
 ## Docker
 
+### Database location
+
+We first need to create a named volume, or a folder, to store the database file of MIND in.
+
 === "Docker CLI"
-	The command to get the docker container running can be found below. Replace the timezone value (`TZ=`) to the [TZ database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) of your timezone.
+	```bash
+	docker volume create mind-db
+	```
+
+=== "Portainer"
+	- Open `Volumes`
+	- Click `Add Volume`
+	- Enter name matching the one you'll use in compose (`mind-db`, in the above provided command)
+	- Click `Create the volume`
+	- Open `Stacks`
+	- Create the stack with the named volume in it.
+	
+=== "Folder"
+	Linux standards suggest to put the database in `/opt/application_name`, as the `/opt` directory is where program options should be stored. In this case, you'd create the desired folder using the following command:
+	```bash
+	mkdir /opt/MIND/db
+	```
+
+### Run the container
+
+Now that we can store the database somewhere, we can get the container running.
+
+=== "Docker CLI"
+	The command to get the docker container running can be found below. Replace the timezone value (`TZ=`) with the [TZ database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) of your timezone (value of `TZ identifier` on webpage).
 	```bash
 	docker run -d \
 		--name mind \
@@ -16,8 +43,9 @@ NOTE: Make sure to set all time related settings (time, date, timezone, etc.) co
 		-p 8080:8080 \
 		mrcas/mind:latest
 	```
+
 === "Docker Compose"
-	The contents of the `docker-compose.yml` file would look like below. Replace the timezone value (`TZ=`) to the [TZ database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) of your timezone.
+	The contents of the `docker-compose.yml` file would look like below. Replace the timezone value (`TZ=`) with the [TZ database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) of your timezone (value of `TZ identifier` on webpage).
 	```yml
 	version: '3.3'
 	services:
@@ -31,29 +59,14 @@ NOTE: Make sure to set all time related settings (time, date, timezone, etc.) co
 				- '8080:8080'
 			image: 'mrcas/mind:latest'
 	```
+	Now run the compose by running the following command in the root folder:
+	```bash
+	docker compose up -d
+	```
+
+If you didn't name your docker volume `mind-db` (see [Database location](#database-location)), replace `mind-db` in the command with the name of your volume. If you created a folder, replace `mind-db` with `/opt/MIND/db` or the folder you want.
 
 Information on how to change the port can be found on the [Setup After Installation page](setup_after_installation.md#port).
-
-Using a named volume in docker requires you to create the volume before you can use it (see [Named Volumes](#named-volumes)).
-
-### Named Volumes
-
-=== "Docker CLI"
-    ```bash
-    docker volume create mind-db
-    ```
-
-=== "Portainer"
-    - Open `Volumes`
-    - Click `Add Volume`
-    - Enter name matching the one you'll use in compose (`mind-db`, in the above provided command)
-    - Click `Create the volume`
-    - Open `Stacks`
-    - Create the stack with the named volume in it.
-
-Both of these options will create a named volume that you can then use in the command above.  
-If you'd prefer to use a local folder on the host machine for storing config, Linux standards would suggest putting that in `/opt/application_name`, as the `/opt` directory is where program options should be stored. 
-In this case, you'd create the desired folder with something like `mkdir /opt/MIND/db`, and replace 'mind-db:/app/db' with '/opt/MIND/db:/app/db'.
 
 ## Manual Install
 
@@ -67,6 +80,7 @@ See below for installation instructions for your OS if you want to install it ma
 	python3 -m pip install -r requirements.txt
 	python3 MIND.py
 	```
+
 === "Windows"
 	1. Install python [in the Microsoft Store](https://www.microsoft.com/store/productId/9PJPW5LDXLZ5)
 	2. Install pip [using these instructions](https://www.liquidweb.com/kb/install-pip-windows/)
@@ -75,9 +89,9 @@ See below for installation instructions for your OS if you want to install it ma
 	5. With the folder open, right click and select `Open in Terminal`
 	6. Type the following command:
 	```bash
-	python3 -m pip install -r requirements.txt
+	python -m pip install -r requirements.txt
 	```
 	7. Type the following command:
 	```bash
-	python3 MIND.py
+	python MIND.py
 	```
