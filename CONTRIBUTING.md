@@ -1,6 +1,6 @@
 # Contributing to MIND
 ## General steps
-Contributing to MIND consists of 5 steps, listed hereunder. 
+Contributing to MIND consists of 5 steps:
 
 1. Make a [contributing request](https://github.com/Casvt/MIND/issues/new?template=contribute-request.md), where you describe what you plan on doing. This request needs to get approved before you can start, or your pull request won't be accepted. This is to avoid multiple people from doing the same thing and to avoid you wasting your time if we do not wish the changes. This is also where discussions can be held about how something will be implemented.
 2. When the request is accepted, start your local development (more info about this below).
@@ -11,16 +11,15 @@ Contributing to MIND consists of 5 steps, listed hereunder.
 ## Local development steps
 Once your request is accepted, you can start your local development.
 
-1. Clone the repository onto your computer and open it using your prefered IDE (Visual Studio Code is used by us).
+1. Fork the repository and clone the fork onto your computer and open it using your preferred IDE (Visual Studio Code is used by us).
 2. Make the changes needed and write accompanying tests.
 3. Check if the code written follows the styling guide below.
-4. Run the finished version, using python 3.7, to check if you've made any errors.
-5. Run the tests (unittest is used). This can be done with a button click within VS Code, or with the following command where you need to be inside the root folder of the project:
+4. If you want to run the tests manually before committing, use the command below in the root folder of the project:
 ```bash
 python3 -m unittest discover -v -s './tests' -p '*_test.py'
 ```
-6. Test your version thoroughly to catch as many bugs as possible (if any).
-7. If anything is changed about the API, run the `generate_api_docs.py` script to generate the new API docs. Commit the changes that were made by the script.
+5. Update the docs if needed.
+6. Commit and push to your fork. When you push, GitHub Actions will do a lot of work for you: the tests are run again on python versions 3.8 - 3.11, the API documentation is updated if any changes have been made to the API and the docs are updated if any changes have been made to the docs. All GitHub Actions need to succeed before you're allowed to make a PR (you'll see a green checkmark next to the commit in GitHub).
 
 ## Styling guide
 The code of MIND is written in such way that it follows the following rules. Your code should too.
