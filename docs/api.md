@@ -5,7 +5,8 @@ All endpoints have the `/api` prefix. That means, for example, that `/auth/login
 
 ## Authentication
 
-Authentication is done using an API key. To log in, make a POST request to the [`/api/auth/login`](#authlogin) endpoint. You'll receive an API key, which you can then use in your requests to authenticate. Supply it as a url parameter with the key `api_key`. This API key is valid for one hour, after which the key expires, any further requests return 401 'APIKeyExpired' and you are required to log in again. If no `api_key` is supplied or it is invalid, 401 `APIKeyInvalid` is returned.
+Authentication is done using an API key.
+To log in, make a POST request to the [`/api/auth/login`](#authlogin) endpoint. You'll receive an API key, which you can then use in your requests to authenticate. Supply it as a url parameter with the key `api_key`. This API key is valid for one hour, after which the key expires, any further requests return 401 'APIKeyExpired' and you are required to log in again. If no `api_key` is supplied or it is invalid, 401 `APIKeyInvalid` is returned.
 
 For example:
 ```bash
