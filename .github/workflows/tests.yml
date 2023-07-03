@@ -14,16 +14,17 @@ jobs:
         
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        name: Set up checkout
+      - uses: actions/setup-python@v4
+        name: Set up Python ${{ matrix.python-version }}
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
-      
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      
-      - name: Run Tests
-        run: |
+
+      - run: pip install -r requirements.txt
+        name: Install dependencies
+
+      - run: |
           mkdir db
           python -m unittest discover -s ./tests -p '*.py'
+        name: Run Tests
