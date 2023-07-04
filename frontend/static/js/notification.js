@@ -26,7 +26,8 @@ function fillNotificationSelection() {
 			inputs.notification_service.querySelector(':first-child input').checked = true;
 			
 			const table = document.getElementById('services-list');
-			table.innerHTML = '';
+			table.querySelectorAll('tr:not(#add-row)').forEach(e => e.remove());
+			// table.innerHTML = '';
 			json.result.forEach(service => {
 				const entry = document.createElement('tr');
 				entry.dataset.id = service.id;
@@ -151,6 +152,9 @@ function deleteService(id) {
 };
 
 function toggleAddService() {
+	document.getElementById('add-row').classList.toggle('hidden');
+	return;
+	
 	const cont = document.querySelector('.overflow-container');
 	if (cont.classList.contains('show-add')) {
 		// Hide add
@@ -298,11 +302,16 @@ function buildAppriseURL() {
 };
 
 function addService() {
-	const add_button = document.querySelector('#add-service-window > .options > button[type="submit"]');
+	const add_button = document.querySelector('#add-row > .action-column > button');
 	const data = {
-		'title': document.querySelector('#service-title').value,
-		'url': buildAppriseURL()
+		'title': document.querySelector('#add-row > .title-column > input').value,
+		'url': document.querySelector('#add-row > .url-column > input').value
 	};
+	// const add_button = document.querySelector('#add-service-window > .options > button[type="submit"]');
+	// const data = {
+	// 	'title': document.querySelector('#service-title').value,
+	// 	'url': buildAppriseURL()
+	// };
 	fetch(`${url_prefix}/api/notificationservices?api_key=${api_key}`, {
 		'method': 'POST',
 		'headers': {'Content-Type': 'application/json'},
@@ -321,7 +330,8 @@ function addService() {
 		if (e === 401)
 			window.location.href = `${url_prefix}/`;
 		else if (e === 400) {
-			add_button.classList.add('error-input');
+			// add_button.classList.add('error-input');
+			add_button.classList.add('error-icon');
 			add_button.title = 'Invalid Apprise URL';
 		} else
 			console.log(e);
@@ -335,5 +345,6 @@ fillNotificationSelection();
 let notification_services = null;
 
 document.getElementById('add-service-button').addEventListener('click', e => toggleAddService());
-document.querySelector('#service-list button').addEventListener('click', e => showAddServiceWindow(-1));
-document.getElementById('add-service-window').setAttribute('action', 'javascript:addService();');
+// document.querySelector('#service-list button').addEventListener('click', e => showAddServiceWindow(-1));
+// document.getElementById('add-service-window').setAttribute('action', 'javascript:addService();');
+document.querySelector('#add-row > .action-column > button').addEventListener('click', e => addService());
