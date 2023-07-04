@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 
+import logging
 from sqlite3 import IntegrityError
 from typing import List, Literal
 
@@ -74,7 +75,12 @@ class StaticReminder:
 
 		Returns:
 			dict: The new static reminder info
-		"""		
+		"""
+		logging.info(
+			f'Updating static reminder {self.id}: '
+			+ f'{title=}, {notification_services=}, {text=}, {color=}'
+		)
+
 		# Get current data and update it with new values
 		data = self.get()
 		new_values = {
@@ -119,6 +125,7 @@ class StaticReminder:
 	def delete(self) -> None:
 		"""Delete the static reminder
 		"""
+		logging.info(f'Deleting static reminder {self.id}')
 		get_db().execute("DELETE FROM static_reminders WHERE id = ?", (self.id,))
 		return
 
@@ -218,6 +225,10 @@ class StaticReminders:
 		Returns:
 			StaticReminder: A StaticReminder instance representing the newly created static reminder
 		"""
+		logging.info(
+			f'Adding static reminder with {title=}, {notification_services=}, {text=}, {color=}'
+		)
+
 		cursor = get_db()
 		id = cursor.execute("""
 			INSERT INTO static_reminders(user_id, title, text, color)
@@ -245,6 +256,7 @@ class StaticReminders:
 		Raises:
 			ReminderNotFound: The static reminder with the given id was not found
 		"""
+		logging.info(f'Triggering static reminder {self.id}')
 		cursor = get_db(dict)
 		reminder = cursor.execute("""
 			SELECT title, text

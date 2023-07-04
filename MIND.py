@@ -18,8 +18,15 @@ from frontend.ui import ui
 HOST = '0.0.0.0'
 PORT = '8080'
 URL_PREFIX = '' # Must either be empty or start with '/' e.g. '/mind' 
+LOGGING_LEVEL = logging.INFO
 THREADS = 10
 DB_FILENAME = 'db', 'MIND.db'
+
+logging.basicConfig(
+	level=LOGGING_LEVEL,
+	format='[%(asctime)s][%(threadName)s][%(levelname)s] %(message)s',
+	datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 def _folder_path(*folders) -> str:
 	"""Turn filepaths relative to the project folder into absolute paths
@@ -32,7 +39,7 @@ def _create_app() -> Flask:
 	"""Create a Flask app instance
 	Returns:
 		Flask: The created app instance
-	""" 
+	"""	
 	app = Flask(
 		__name__,
 		template_folder=_folder_path('frontend','templates'),
@@ -79,7 +86,7 @@ def MIND() -> None:
 	"""
 	# Check python version
 	if (version_info.major < 3) or (version_info.major == 3 and version_info.minor < 7):
-		print('Error: the minimum python version required is python3.7 (currently ' + version_info.major + '.' + version_info.minor + '.' + version_info.micro + ')')
+		logging.error('Error: the minimum python version required is python3.7 (currently ' + version_info.major + '.' + version_info.minor + '.' + version_info.micro + ')')
 		exit(1)
 
 	# Register web server
@@ -91,8 +98,11 @@ def MIND() -> None:
 	with app.app_context():
 		if isfile(_folder_path('db', 'Noted.db')):
 			move(_folder_path('db', 'Noted.db'), _folder_path(*DB_FILENAME))
+
 		db_location = _folder_path(*DB_FILENAME)
+		logging.debug(f'Database location: {db_location}')
 		makedirs(dirname(db_location), exist_ok=True)
+
 		DBConnection.file = db_location
 		setup_db()
 		reminder_handler.find_next_reminder()
@@ -101,7 +111,7 @@ def MIND() -> None:
 	dispatcher = ThreadedTaskDispatcher()
 	dispatcher.set_thread_count(THREADS)
 	server = create_server(app, _dispatcher=dispatcher, host=HOST, port=PORT, threads=THREADS)
-	print(f'MIND running on http://{HOST}:{PORT}{URL_PREFIX}')
+	logging.info(f'MIND running on http://{HOST}:{PORT}{URL_PREFIX}')
 	server.run()
 	
 	# Stopping thread

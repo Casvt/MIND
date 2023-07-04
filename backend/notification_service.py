@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 
+import logging
 from typing import List
 
 from backend.custom_exceptions import (NotificationServiceInUse,
@@ -44,6 +45,7 @@ class NotificationService:
 		Returns:
 			dict: The new info about the service
 		"""	
+		logging.info(f'Updating notification service {self.id}: {title=}, {url=}')
 
 		# Get current data and update it with new values
 		data = self.get()
@@ -75,7 +77,9 @@ class NotificationService:
 
 		Raises:
 			NotificationServiceInUse: The service is still used by a reminder
-		"""		
+		"""	
+		logging.info(f'Deleting notification service {self.id}')
+		
 		# Check if no reminders exist with this service
 		cursor = get_db()
 		cursor.execute("""
@@ -164,7 +168,8 @@ class NotificationServices:
 
 		Returns:
 			dict: The info about the new service
-		"""		
+		"""	
+		logging.info(f'Adding notification service with {title=}, {url=}')
 
 		new_id = get_db().execute("""
 			INSERT INTO notification_services(user_id, title, url)

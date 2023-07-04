@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 
 from datetime import datetime
+import logging
 from sqlite3 import Connection, ProgrammingError, Row
 from threading import current_thread, main_thread
 from time import time
@@ -19,6 +20,7 @@ class Singleton(type):
 		i = f'{cls}{current_thread()}'
 		if (i not in cls._instances
       	or cls._instances[i].closed):
+			logging.debug(f'Creating singleton instance: {i}')
 			cls._instances[i] = super(Singleton, cls).__call__(*args, **kwargs)
 
 		return cls._instances[i]
@@ -28,10 +30,12 @@ class ThreadedTaskDispatcher(OldThreadedTaskDispatcher):
 		super().handler_thread(thread_no)
 		i = f'{DBConnection}{current_thread()}'
 		if i in Singleton._instances and not Singleton._instances[i].closed:
+			logging.debug(f'Closing singleton instance: {i}')
 			Singleton._instances[i].close()
 			
 	def shutdown(self, cancel_pending: bool = True, timeout: int = 5) -> bool:
-		print('Shutting down MIND...')
+		print()
+		logging.info('Shutting down MIND...')
 		super().shutdown(cancel_pending, timeout)
 		DBConnection(20.0).close()
 
@@ -39,12 +43,14 @@ class DBConnection(Connection, metaclass=Singleton):
 	file = ''
 	
 	def __init__(self, timeout: float) -> None:
+		logging.debug(f'Opening database connection for {current_thread()}')
 		super().__init__(self.file, timeout=timeout)
 		super().cursor().execute("PRAGMA foreign_keys = ON;")
 		self.closed = False
 		return
 
 	def close(self) -> None:
+		logging.debug(f'Closing database connection for {current_thread()}')
 		self.closed = True
 		super().close()
 		return
@@ -91,7 +97,7 @@ def migrate_db(current_db_version: int) -> None:
 	Migrate a MIND database from it's current version 
 	to the newest version supported by the MIND version installed.
 	"""
-	print('Migrating database to newer version...')
+	logging.info('Migrating database to newer version...')
 	cursor = get_db()
 	if current_db_version == 1:
 		# V1 -> V2
@@ -289,6 +295,7 @@ def setup_db() -> None:
 		"SELECT value FROM config WHERE key = 'database_version' LIMIT 1;"
 	).fetchone()[0])
 	
+	logging.debug(f'Current database version {current_db_version} and desired database version {__DATABASE_VERSION__}')
 	if current_db_version < __DATABASE_VERSION__:
 		migrate_db(current_db_version)
 		cursor.execute(

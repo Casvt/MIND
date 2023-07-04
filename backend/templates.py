@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 
+import logging
 from sqlite3 import IntegrityError
 from typing import List, Literal
 
@@ -69,6 +70,11 @@ class Template:
 		Returns:
 			dict: The new template info
 		"""
+		logging.info(
+			f'Updating template {self.id}: '
+			+ f'{title=}, {notification_services=}, {text=}, {color=}'
+		)
+
 		cursor = get_db()
 		
 		data = self.get()
@@ -111,6 +117,7 @@ class Template:
 	def delete(self) -> None:
 		"""Delete the template
 		"""
+		logging.info(f'Deleting template {self.id}')
 		get_db().execute("DELETE FROM templates WHERE id = ?;", (self.id,))
 		return
 
@@ -203,7 +210,11 @@ class Templates:
 
 		Returns:
 			Template: The info about the template
-		"""	
+		"""
+		logging.info(
+			f'Adding template with {title=}, {notification_services=}, {text=}, {color=}'
+		)
+
 		cursor = get_db()
 		id = cursor.execute("""
 			INSERT INTO templates(user_id, title, text, color)

@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 
 from datetime import datetime
+import logging
 from sqlite3 import IntegrityError
 from threading import Timer
 from typing import List, Literal
@@ -29,7 +30,11 @@ def _find_next_time(
 	current_time = datetime.fromtimestamp(datetime.utcnow().timestamp())
 	while new_time <= current_time:
 		new_time += td
-	return int(new_time.timestamp())
+	result = int(new_time.timestamp())
+	logging.debug(
+		f'{original_time=}, {current_time=} and interval of {repeat_interval} {repeat_quantity} leads to {result}'
+	)
+	return result
 
 class ReminderHandler:
 	"""Handle set reminders
@@ -82,6 +87,7 @@ class ReminderHandler:
 						"DELETE FROM reminders WHERE id = ?;",
 						(reminder['id'],)
 					)
+					logging.info(f'Deleted reminder {reminder["id"]}')
 				else:
 					# Set next time
 					new_time = _find_next_time(
@@ -123,8 +129,14 @@ class ReminderHandler:
 		or time < self.next_trigger['time']):
 			if self.next_trigger['thread'] is not None:
 				self.next_trigger['thread'].cancel()
+
 			t = time - datetime.utcnow().timestamp()
-			self.next_trigger['thread'] = Timer(t, self.__trigger_reminders, (time,))
+			self.next_trigger['thread'] = Timer(
+				t,
+				self.__trigger_reminders,
+				(time,)
+			)
+			self.next_trigger['thread'].name = "ReminderHandler"
 			self.next_trigger['thread'].start()
 			self.next_trigger['time'] = time
 	
@@ -209,6 +221,10 @@ class Reminder:
 		Returns:
 			dict: The new reminder info
 		"""
+		logging.info(
+			f'Updating notification service {self.id}: '
+			+ f'{title=}, {time=}, {notification_services=}, {text=}, {repeat_quantity=}, {repeat_interval=}, {color=}'
+		)
 		cursor = get_db()
 
 		# Validate data
@@ -301,7 +317,8 @@ class Reminder:
 
 	def delete(self) -> None:
 		"""Delete the reminder
-		"""		
+		"""
+		logging.info(f'Deleting reminder {self.id}')
 		get_db().execute("DELETE FROM reminders WHERE id = ?", (self.id,))
 		reminder_handler.find_next_reminder()
 		return
@@ -410,6 +427,11 @@ class Reminders:
 		Returns:
 			dict: The info about the reminder
 		"""
+		logging.info(
+			f'Adding reminder with {title=}, {time=}, {notification_services=}, '
+			+ f'{text=}, {repeat_quantity=}, {repeat_interval=}, {color=}'
+		)
+		
 		if time < datetime.utcnow().timestamp():
 			raise InvalidTime
 		time = round(time)
@@ -466,6 +488,7 @@ class Reminders:
 			notification_service (int): The id of the notification service to use to send the reminder
 			text (str, optional): The body of the reminder. Defaults to ''.
 		"""
+		logging.info(f'Testing reminder with {title=}, {notification_services=}, {text=}')
 		a = Apprise()
 		cursor = get_db(dict)
 		for service in notification_services:
