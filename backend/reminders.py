@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 
 from datetime import datetime
+import logging
 from sqlite3 import IntegrityError
 from threading import Timer
 from typing import List, Literal
@@ -17,7 +18,6 @@ from backend.db import close_db, get_db
 filter_function = lambda query, p: (
 	query in p["title"].lower()
 	or query in p["text"].lower()
-	or query in p["notification_service_title"].lower()
 )
 
 def _find_next_time(
@@ -30,7 +30,11 @@ def _find_next_time(
 	current_time = datetime.fromtimestamp(datetime.utcnow().timestamp())
 	while new_time <= current_time:
 		new_time += td
-	return int(new_time.timestamp())
+	result = int(new_time.timestamp())
+	logging.debug(
+		f'{original_time=}, {current_time=} and interval of {repeat_interval} {repeat_quantity} leads to {result}'
+	)
+	return result
 
 class ReminderHandler:
 	"""Handle set reminders
@@ -83,6 +87,7 @@ class ReminderHandler:
 						"DELETE FROM reminders WHERE id = ?;",
 						(reminder['id'],)
 					)
+					logging.info(f'Deleted reminder {reminder["id"]}')
 				else:
 					# Set next time
 					new_time = _find_next_time(
@@ -124,8 +129,14 @@ class ReminderHandler:
 		or time < self.next_trigger['time']):
 			if self.next_trigger['thread'] is not None:
 				self.next_trigger['thread'].cancel()
+
 			t = time - datetime.utcnow().timestamp()
-			self.next_trigger['thread'] = Timer(t, self.__trigger_reminders, (time,))
+			self.next_trigger['thread'] = Timer(
+				t,
+				self.__trigger_reminders,
+				(time,)
+			)
+			self.next_trigger['thread'].name = "ReminderHandler"
 			self.next_trigger['thread'].start()
 			self.next_trigger['time'] = time
 	
@@ -143,13 +154,13 @@ reminder_handler = ReminderHandler(handler_context.app_context)
 class Reminder:
 	"""Represents a reminder
 	"""	
-	def __init__(self, reminder_id: int):
+	def __init__(self, user_id: int, reminder_id: int):
 		self.id = reminder_id
 
 		# Check if reminder exists
 		if not get_db().execute(
-			"SELECT 1 FROM reminders WHERE id = ? LIMIT 1",
-			(self.id,)
+			"SELECT 1 FROM reminders WHERE id = ? AND user_id = ? LIMIT 1",
+			(self.id, user_id)
 		).fetchone():
 			raise ReminderNotFound
 
@@ -210,6 +221,10 @@ class Reminder:
 		Returns:
 			dict: The new reminder info
 		"""
+		logging.info(
+			f'Updating notification service {self.id}: '
+			+ f'{title=}, {time=}, {notification_services=}, {text=}, {repeat_quantity=}, {repeat_interval=}, {color=}'
+		)
 		cursor = get_db()
 
 		# Validate data
@@ -302,7 +317,8 @@ class Reminder:
 
 	def delete(self) -> None:
 		"""Delete the reminder
-		"""		
+		"""
+		logging.info(f'Deleting reminder {self.id}')
 		get_db().execute("DELETE FROM reminders WHERE id = ?", (self.id,))
 		reminder_handler.find_next_reminder()
 		return
@@ -311,24 +327,26 @@ class Reminders:
 	"""Represents the reminder library of the user account
 	"""	
 	sort_functions = {
-		'title': (lambda r: (r['title'], r['time']), False),
-		'title_reversed': (lambda r: (r['title'], r['time']), True),
-		'time': (lambda r: r['time'], False),
-		'time_reversed': (lambda r: r['time'], True)
+		'time': (lambda r: (r['time'], r['title'], r['text'], r['color']), False),
+		'time_reversed': (lambda r: (r['time'], r['title'], r['text'], r['color']), True),
+		'title': (lambda r: (r['title'], r['time'], r['text'], r['color']), False),
+		'title_reversed': (lambda r: (r['title'], r['time'], r['text'], r['color']), True),
+		'date_added': (lambda r: r['id'], False),
+		'date_added_reversed': (lambda r: r['id'], True)
 	}
 	
 	def __init__(self, user_id: int):
 		self.user_id = user_id
 
-	def fetchall(self, sort_by: Literal["time", "time_reversed", "title", "title_reversed"] = "time") -> List[dict]:
+	def fetchall(self, sort_by: Literal["time", "time_reversed", "title", "title_reversed", "date_added", "date_added_reversed"] = "time") -> List[dict]:
 		"""Get all reminders
 
 		Args:
-			sort_by (Literal["time", "time_reversed", "title", "title_reversed"], optional): How to sort the result. Defaults to "time".
+			sort_by (Literal["time", "time_reversed", "title", "title_reversed", "date_added", "date_added_reversed"], optional): How to sort the result. Defaults to "time".
 
 		Returns:
 			List[dict]: The id, title, text, time and color of each reminder
-		"""		
+		"""
 		sort_function = self.sort_functions.get(
 			sort_by,
 			self.sort_functions['time']
@@ -354,11 +372,12 @@ class Reminders:
 
 		return reminders
 
-	def search(self, query: str) -> List[dict]:
+	def search(self, query: str, sort_by: Literal["time", "time_reversed", "title", "title_reversed", "date_added", "date_added_reversed"] = "time") -> List[dict]:
 		"""Search for reminders
 
 		Args:
 			query (str): The term to search for
+			sort_by (Literal["time", "time_reversed", "title", "title_reversed", "date_added", "date_added_reversed"], optional): How to sort the result. Defaults to "time".
 
 		Returns:
 			List[dict]: All reminders that match. Similar output to self.fetchall
@@ -366,7 +385,7 @@ class Reminders:
 		query = query.lower()
 		reminders = list(filter(
 			lambda p: filter_function(query, p),
-			self.fetchall()
+			self.fetchall(sort_by)
 		))
 		return reminders
 
@@ -379,7 +398,7 @@ class Reminders:
 		Returns:
 			Reminder: A Reminder instance
 		"""		
-		return Reminder(id)
+		return Reminder(self.user_id, id)
 
 	def add(
 		self,
@@ -408,6 +427,11 @@ class Reminders:
 		Returns:
 			dict: The info about the reminder
 		"""
+		logging.info(
+			f'Adding reminder with {title=}, {time=}, {notification_services=}, '
+			+ f'{text=}, {repeat_quantity=}, {repeat_interval=}, {color=}'
+		)
+		
 		if time < datetime.utcnow().timestamp():
 			raise InvalidTime
 		time = round(time)
@@ -418,6 +442,13 @@ class Reminders:
 			raise InvalidKeyValue('repeat_interval', repeat_interval)
 
 		cursor = get_db()
+		for service in notification_services:
+			if not cursor.execute(
+				"SELECT 1 FROM notification_services WHERE id = ? AND user_id = ? LIMIT 1;",
+				(service, self.user_id)
+			).fetchone():
+				raise NotificationServiceNotFound
+
 		if repeat_quantity is None and repeat_interval is None:
 			id = cursor.execute("""
 				INSERT INTO reminders(user_id, title, text, time, color)
@@ -444,27 +475,29 @@ class Reminders:
 		# Return info
 		return self.fetchone(id)
 
-def test_reminder(
-	title: str,
-	notification_services: List[int],
-	text: str = ''
-) -> None:
-	"""Test send a reminder draft
+	def test_reminder(
+		self,
+		title: str,
+		notification_services: List[int],
+		text: str = ''
+	) -> None:
+		"""Test send a reminder draft
 
-	Args:
-		title (str): Title title of the entry
-		notification_service (int): The id of the notification service to use to send the reminder
-		text (str, optional): The body of the reminder. Defaults to ''.
-	"""
-	a = Apprise()
-	cursor = get_db(dict)
-	for service in notification_services:
-		url = cursor.execute(
-			"SELECT url FROM notification_services WHERE id = ? LIMIT 1;",
-			(service,)
-		).fetchone()
-		if not url:
-			raise NotificationServiceNotFound
-		a.add(url[0])
-	a.notify(title=title, body=text)
-	return
+		Args:
+			title (str): Title title of the entry
+			notification_service (int): The id of the notification service to use to send the reminder
+			text (str, optional): The body of the reminder. Defaults to ''.
+		"""
+		logging.info(f'Testing reminder with {title=}, {notification_services=}, {text=}')
+		a = Apprise()
+		cursor = get_db(dict)
+		for service in notification_services:
+			url = cursor.execute(
+				"SELECT url FROM notification_services WHERE id = ? AND user_id = ? LIMIT 1;",
+				(service, self.user_id)
+			).fetchone()
+			if not url:
+				raise NotificationServiceNotFound
+			a.add(url[0])
+		a.notify(title=title, body=text)
+		return

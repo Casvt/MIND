@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 
+import logging
 from backend.custom_exceptions import (AccessUnauthorized, UsernameInvalid,
                                        UsernameTaken, UserNotFound)
 from backend.db import get_db
@@ -27,7 +28,7 @@ class User:
 		self.salt = result['salt']
 		self.user_id = result['id']
 
-		# check password
+		# Check password
 		hash_password = get_hash(result['salt'], password)
 		if not hash_password == result['hash']:
 			raise AccessUnauthorized
@@ -90,11 +91,14 @@ class User:
 			"UPDATE users SET hash = ? WHERE id = ?",
 			(hash_password, self.user_id)
 		)
+		logging.info(f'The user {self.username} ({self.user_id}) changed their password')
 		return
 
 	def delete(self) -> None:
 		"""Delete the user account
-		"""		
+		"""
+		logging.info(f'Deleting the user {self.username} ({self.user_id})')
+		
 		cursor = get_db()
 		cursor.execute("DELETE FROM reminders WHERE user_id = ?", (self.user_id,))
 		cursor.execute("DELETE FROM templates WHERE user_id = ?", (self.user_id,))
@@ -111,7 +115,8 @@ def _check_username(username: str) -> None:
 
 	Raises:
 		UsernameInvalid: The username is not valid
-	"""	
+	"""
+	logging.debug(f'Checking the username {username}')
 	if username in ONEPASS_INVALID_USERNAMES or username.isdigit():
 		raise UsernameInvalid
 	if list(filter(lambda c: not c in ONEPASS_USERNAME_CHARACTERS, username)):
@@ -132,6 +137,8 @@ def register_user(username: str, password: str) -> int:
 	Returns:
 		user_id (int): The id of the new user. User registered successful
 	"""
+	logging.info(f'Registering user with username {username}')
+	
 	# Check if username is valid
 	_check_username(username)
 
@@ -156,4 +163,5 @@ def register_user(username: str, password: str) -> int:
 		(username, salt, hashed_password)
 	).lastrowid
 
+	logging.debug(f'Newly registered user has id {user_id}')
 	return user_id

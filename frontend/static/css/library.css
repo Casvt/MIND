@@ -45,10 +45,16 @@
 	opacity: 1;
 }
 
+#sort-input {
+	width: min-content;
+	border: 0;
+	box-shadow: none;
+}
+
 /* REMINDER LIST */
-#reminder-list,
-#static-reminder-list,
-#template-list {
+#reminder-tab,
+#static-reminder-tab,
+#template-tab {
 	--gap: 1rem;
 	--entry-width: 13rem;
 	max-width: 43rem;

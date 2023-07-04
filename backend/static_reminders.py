@@ -1,7 +1,8 @@
 #-*- coding: utf-8 -*-
 
+import logging
 from sqlite3 import IntegrityError
-from typing import List
+from typing import List, Literal
 
 from apprise import Apprise
 
@@ -9,17 +10,21 @@ from backend.custom_exceptions import (NotificationServiceNotFound,
                                        ReminderNotFound)
 from backend.db import get_db
 
+filter_function = lambda query, p: (
+	query in p["title"].lower()
+	or query in p["text"].lower()
+)
 
 class StaticReminder:
 	"""Represents a static reminder
 	"""
-	def __init__(self, reminder_id: int) -> None:
+	def __init__(self, user_id: int, reminder_id: int) -> None:
 		self.id = reminder_id
 		
 		# Check if reminder exists
 		if not get_db().execute(
-			"SELECT 1 FROM static_reminders WHERE id = ? LIMIT 1;",
-			(self.id,)
+			"SELECT 1 FROM static_reminders WHERE id = ? AND user_id = ? LIMIT 1;",
+			(self.id, user_id)
 		).fetchone():
 			raise ReminderNotFound
 		
@@ -70,7 +75,12 @@ class StaticReminder:
 
 		Returns:
 			dict: The new static reminder info
-		"""		
+		"""
+		logging.info(
+			f'Updating static reminder {self.id}: '
+			+ f'{title=}, {notification_services=}, {text=}, {color=}'
+		)
+
 		# Get current data and update it with new values
 		data = self.get()
 		new_values = {
@@ -115,22 +125,37 @@ class StaticReminder:
 	def delete(self) -> None:
 		"""Delete the static reminder
 		"""
+		logging.info(f'Deleting static reminder {self.id}')
 		get_db().execute("DELETE FROM static_reminders WHERE id = ?", (self.id,))
 		return
 
 class StaticReminders:
 	"""Represents the static reminder library of the user account
 	"""
-	
+	sort_functions = {
+		'title': (lambda r: (r['title'], r['text'], r['color']), False),
+		'title_reversed': (lambda r: (r['title'], r['text'], r['color']), True),
+		'date_added': (lambda r: r['id'], False),
+		'date_added_reversed': (lambda r: r['id'], True)
+	}
+
 	def __init__(self, user_id: int) -> None:
 		self.user_id = user_id
 		
-	def fetchall(self) -> List[dict]:
+	def fetchall(self, sort_by: Literal["title", "title_reversed", "date_added", "date_added_reversed"] = "title") -> List[dict]:
 		"""Get all static reminders
+
+		Args:
+			sort_by (Literal["title", "title_reversed", "date_added", "date_added_reversed"], optional): How to sort the result. Defaults to "title".
 
 		Returns:
 			List[dict]: The id, title, text and color of each static reminder
-		"""		
+		"""
+		sort_function = self.sort_functions.get(
+			sort_by,
+			self.sort_functions['title']
+		)
+
 		reminders: list = list(map(
 			dict,
 			get_db(dict).execute("""
@@ -146,8 +171,28 @@ class StaticReminders:
 			)
 		))
 		
+		# Sort result
+		reminders.sort(key=sort_function[0], reverse=sort_function[1])
+
 		return reminders
-	
+
+	def search(self, query: str, sort_by: Literal["title", "title_reversed", "date_added", "date_added_reversed"] = "title") -> List[dict]:
+		"""Search for static reminders
+
+		Args:
+			query (str): The term to search for
+			sort_by (Literal["title", "title_reversed", "date_added", "date_added_reversed"], optional): How to sort the result. Defaults to "title".
+
+		Returns:
+			List[dict]: All static reminders that match. Similar output to self.fetchall
+		"""		
+		query = query.lower()
+		reminders = list(filter(
+			lambda p: filter_function(query, p),
+			self.fetchall(sort_by)
+		))
+		return reminders
+
 	def fetchone(self, id: int) -> StaticReminder:
 		"""Get one static reminder
 
@@ -157,7 +202,7 @@ class StaticReminders:
 		Returns:
 			StaticReminder: A StaticReminder instance
 		"""
-		return StaticReminder(id)
+		return StaticReminder(self.user_id, id)
 	
 	def add(
 		self,
@@ -180,6 +225,10 @@ class StaticReminders:
 		Returns:
 			StaticReminder: A StaticReminder instance representing the newly created static reminder
 		"""
+		logging.info(
+			f'Adding static reminder with {title=}, {notification_services=}, {text=}, {color=}'
+		)
+
 		cursor = get_db()
 		id = cursor.execute("""
 			INSERT INTO static_reminders(user_id, title, text, color)
@@ -207,13 +256,16 @@ class StaticReminders:
 		Raises:
 			ReminderNotFound: The static reminder with the given id was not found
 		"""
+		logging.info(f'Triggering static reminder {self.id}')
 		cursor = get_db(dict)
 		reminder = cursor.execute("""
 			SELECT title, text
 			FROM static_reminders
-			WHERE id = ?
+			WHERE
+				id = ?
+				AND user_id = ?
 			LIMIT 1;
-		""", (id,)).fetchone()
+		""", (id, self.user_id)).fetchone()
 		if not reminder:
 			raise ReminderNotFound
 		reminder = dict(reminder)

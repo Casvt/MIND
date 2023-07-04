@@ -1,21 +1,20 @@
 #-*- coding: utf-8 -*-
 
+import logging
 from typing import List
 
-from apprise import Apprise
-
-from backend.custom_exceptions import (InvalidURL, NotificationServiceInUse,
+from backend.custom_exceptions import (NotificationServiceInUse,
                                        NotificationServiceNotFound)
 from backend.db import get_db
 
 
 class NotificationService:
-	def __init__(self, notification_service_id: int) -> None:
+	def __init__(self, user_id: int, notification_service_id: int) -> None:
 		self.id = notification_service_id
 		
 		if not get_db().execute(
-			"SELECT 1 FROM notification_services WHERE id = ? LIMIT 1;",
-			(self.id,)
+			"SELECT 1 FROM notification_services WHERE id = ? AND user_id = ? LIMIT 1;",
+			(self.id, user_id)
 		).fetchone():
 			raise NotificationServiceNotFound
 			
@@ -46,9 +45,8 @@ class NotificationService:
 		Returns:
 			dict: The new info about the service
 		"""	
-		if not Apprise().add(url):
-			raise InvalidURL
-		
+		logging.info(f'Updating notification service {self.id}: {title=}, {url=}')
+
 		# Get current data and update it with new values
 		data = self.get()
 		new_values = {
@@ -79,7 +77,9 @@ class NotificationService:
 
 		Raises:
 			NotificationServiceInUse: The service is still used by a reminder
-		"""		
+		"""	
+		logging.info(f'Deleting notification service {self.id}')
+		
 		# Check if no reminders exist with this service
 		cursor = get_db()
 		cursor.execute("""
@@ -157,7 +157,7 @@ class NotificationServices:
 		Returns:
 			NotificationService: Instance of NotificationService
 		"""		
-		return NotificationService(notification_service_id)
+		return NotificationService(self.user_id, notification_service_id)
 		
 	def add(self, title: str, url: str) -> NotificationService:
 		"""Add a notification service
@@ -166,15 +166,11 @@ class NotificationServices:
 			title (str): The title of the service
 			url (str): The apprise url of the service
 
-		Raises:
-			InvalidURL: The apprise url is invalid
-
 		Returns:
 			dict: The info about the new service
-		"""		
-		if not Apprise().add(url):
-			raise InvalidURL
-		
+		"""	
+		logging.info(f'Adding notification service with {title=}, {url=}')
+
 		new_id = get_db().execute("""
 			INSERT INTO notification_services(user_id, title, url)
 			VALUES (?,?,?)

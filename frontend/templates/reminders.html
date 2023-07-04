@@ -6,6 +6,8 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta id="url_prefix" data-value="{{url_prefix}}">
 
+	<link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/x-icon">
+
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/general.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/info.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/library.css') }}">
@@ -33,7 +35,7 @@
 					</g>
 				</svg>
 			</button>
-			<h1>MIND Reminders</h1>
+			<img src="{{ url_for('static', filename='img/favicon.svg') }}" alt="">
 		</div>
 	</header>
 	<div class="nav-divider">
@@ -81,71 +83,66 @@
 					<button data-target="static-reminder-tab">Static Reminders</button>
 					<button data-target="template-tab">Templates</button>
 				</div>
-				<div id="reminder-tab">
-					<div class="search-container">
-						<noscript>Javascript is disabled. The web-ui of MIND does not work with JavaScript disabled.</noscript>
-						<form id="search-form">
-							<div class="search-bar">
-								<button type="submit">
-									<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 513.749 513.749" style="enable-background:new 0 0 512 512" xml:space="preserve">
-										<g>
-											<g>
-												<path d="M504.352,459.061l-99.435-99.477c74.402-99.427,54.115-240.344-45.312-314.746S119.261-9.277,44.859,90.15   S-9.256,330.494,90.171,404.896c79.868,59.766,189.565,59.766,269.434,0l99.477,99.477c12.501,12.501,32.769,12.501,45.269,0   c12.501-12.501,12.501-32.769,0-45.269L504.352,459.061z M225.717,385.696c-88.366,0-160-71.634-160-160s71.634-160,160-160   s160,71.634,160,160C385.623,314.022,314.044,385.602,225.717,385.696z"></path>
-											</g>
-										</g>
-									</svg>
-								</button>
-								<input type="text" id="search-input" required placeholder="Search..." aria-placeholder="Search for reminders">
-								<button type="button" id="clear-button">
-									<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512.021 512.021" style="enable-background:new 0 0 512 512" xml:space="preserve">
-										<g>
-											<g>
-												<path d="M301.258,256.01L502.645,54.645c12.501-12.501,12.501-32.769,0-45.269c-12.501-12.501-32.769-12.501-45.269,0l0,0   L256.01,210.762L54.645,9.376c-12.501-12.501-32.769-12.501-45.269,0s-12.501,32.769,0,45.269L210.762,256.01L9.376,457.376   c-12.501,12.501-12.501,32.769,0,45.269s32.769,12.501,45.269,0L256.01,301.258l201.365,201.387   c12.501,12.501,32.769,12.501,45.269,0c12.501-12.501,12.501-32.769,0-45.269L301.258,256.01z"></path>
-											</g>
-										</g>
-									</svg>
-								</button>
-							</div>
-						</form>
-					</div>
-					<div id="reminder-list">
-						<button class="entry add-entry" id="add-reminder" aria-label="Add reminder" title="Add reminder">
-							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
-								<g>
+				<div class="search-container">
+					<noscript>Javascript is disabled. The web-ui of MIND does not work with JavaScript disabled.</noscript>
+					<form id="search-form">
+						<div class="search-bar">
+							<button type="submit">
+								<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 513.749 513.749" style="enable-background:new 0 0 512 512" xml:space="preserve">
 									<g>
-										<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
+										<g>
+											<path d="M504.352,459.061l-99.435-99.477c74.402-99.427,54.115-240.344-45.312-314.746S119.261-9.277,44.859,90.15   S-9.256,330.494,90.171,404.896c79.868,59.766,189.565,59.766,269.434,0l99.477,99.477c12.501,12.501,32.769,12.501,45.269,0   c12.501-12.501,12.501-32.769,0-45.269L504.352,459.061z M225.717,385.696c-88.366,0-160-71.634-160-160s71.634-160,160-160   s160,71.634,160,160C385.623,314.022,314.044,385.602,225.717,385.696z"></path>
+										</g>
 									</g>
+								</svg>
+							</button>
+							<input type="text" id="search-input" required placeholder="Search..." aria-placeholder="Search for reminders">
+							<button type="button" id="clear-button">
+								<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512.021 512.021" style="enable-background:new 0 0 512 512" xml:space="preserve">
+									<g>
+										<g>
+											<path d="M301.258,256.01L502.645,54.645c12.501-12.501,12.501-32.769,0-45.269c-12.501-12.501-32.769-12.501-45.269,0l0,0   L256.01,210.762L54.645,9.376c-12.501-12.501-32.769-12.501-45.269,0s-12.501,32.769,0,45.269L210.762,256.01L9.376,457.376   c-12.501,12.501-12.501,32.769,0,45.269s32.769,12.501,45.269,0L256.01,301.258l201.365,201.387   c12.501,12.501,32.769,12.501,45.269,0c12.501-12.501,12.501-32.769,0-45.269L301.258,256.01z"></path>
+										</g>
+									</g>
+								</svg>
+							</button>
+							<select id="sort-input"></select>
+						</div>
+					</form>
+				</div>
+				<div id="reminder-tab">
+					<button class="entry add-entry" id="add-reminder" aria-label="Add reminder" title="Add reminder">
+						<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
+							<g>
+								<g>
+									<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
 								</g>
-							</svg>
-							<p>Add a notification service first!</p>
-						</button>
-					</div>
+							</g>
+						</svg>
+						<p>Add a notification service first!</p>
+					</button>
 				</div>
 				<div id="static-reminder-tab" class="hidden">
-					<div id="static-reminder-list">
-						<button class="entry add-entry" id="add-static-reminder" aria-label="Add static reminder" title="Add static reminder">
-							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
+					<button class="entry add-entry" id="add-static-reminder" aria-label="Add static reminder" title="Add static reminder">
+						<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
+							<g>
 								<g>
-									<g>
-										<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
-									</g>
+									<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
 								</g>
-							</svg>
-						</button>
-					</div>
+							</g>
+						</svg>
+					</button>
 				</div>
 				<div id="template-tab" class="hidden">
-					<div id="template-list">
-						<button class="entry add-entry" id="add-template" aria-label="Add template" title="Add template">
-							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
+					<button class="entry add-entry" id="add-template" aria-label="Add template" title="Add template">
+						<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
+							<g>
 								<g>
-									<g>
-										<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
-									</g>
+									<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
 								</g>
-							</svg>
-						</button>
-					</div>
+							</g>
+						</svg>
+					</button>
 				</div>
 			</div>
 
@@ -272,8 +269,71 @@
 						<input type="password" id="password-input" autocomplete="new-password" required>
 						<button type="submit">Change</button>
 					</form>
+					<h3>Locale</h3>
+					<select id="locale-input">
+						<option value="ar-SA">ar-SA</option>
+						<option value="bn-BD">bn-BD</option>
+						<option value="bn-IN">bn-IN</option>
+						<option value="cs-CZ">cs-CZ</option>
+						<option value="da-DK">da-DK</option>
+						<option value="de-AT">de-AT</option>
+						<option value="de-CH">de-CH</option>
+						<option value="de-DE">de-DE</option>
+						<option value="el-GR">el-GR</option>
+						<option value="en-AU">en-AU</option>
+						<option value="en-CA">en-CA</option>
+						<option value="en-GB" selected>en-GB</option>
+						<option value="en-IE">en-IE</option>
+						<option value="en-IN">en-IN</option>
+						<option value="en-NZ">en-NZ</option>
+						<option value="en-US">en-US</option>
+						<option value="en-ZA">en-ZA</option>
+						<option value="es-AR">es-AR</option>
+						<option value="es-CL">es-CL</option>
+						<option value="es-CO">es-CO</option>
+						<option value="es-ES">es-ES</option>
+						<option value="es-MX">es-MX</option>
+						<option value="es-US">es-US</option>
+						<option value="fi-FI">fi-FI</option>
+						<option value="fr-BE">fr-BE</option>
+						<option value="fr-CA">fr-CA</option>
+						<option value="fr-CH">fr-CH</option>
+						<option value="fr-FR">fr-FR</option>
+						<option value="he-IL">he-IL</option>
+						<option value="hi-IN">hi-IN</option>
+						<option value="hu-HU">hu-HU</option>
+						<option value="id-ID">id-ID</option>
+						<option value="it-CH">it-CH</option>
+						<option value="it-IT">it-IT</option>
+						<option value="ja-JP">ja-JP</option>
+						<option value="ko-KR">ko-KR</option>
+						<option value="nl-BE">nl-BE</option>
+						<option value="nl-NL">nl-NL</option>
+						<option value="no-NO">no-NO</option>
+						<option value="pl-PL">pl-PL</option>
+						<option value="pt-BR">pt-BR</option>
+						<option value="pt-PT">pt-PT</option>
+						<option value="ro-RO">ro-RO</option>
+						<option value="ru-RU">ru-RU</option>
+						<option value="sk-SK">sk-SK</option>
+						<option value="sv-SE">sv-SE</option>
+						<option value="ta-IN">ta-IN</option>
+						<option value="ta-LK">ta-LK</option>
+						<option value="th-TH">th-TH</option>
+						<option value="tr-TR">tr-TR</option>
+						<option value="zh-CN">zh-CN</option>
+						<option value="zh-HK">zh-HK</option>
+						<option value="zh-TW">zh-TW</option>
+					</select>
 					<h3>Delete Account</h3>
 					<button id="delete-account-button">Delete Account</button>
+				</div>
+				<h2>Contact and Donation</h2>
+				<div class="contact-list">
+					<a href="https://ko-fi.com/casvt">Donate to MIND</a>
+					<a href="https://casvt.github.io/MIND/">Documentation</a>
+					<a href="https://github.com/Casvt/MIND/issues">Report an issue</a>
+					<a href="https://discord.gg/nMNdgG7vsE">Discord server</a>
 				</div>
 			</div>
 		</main>

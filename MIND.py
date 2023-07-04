@@ -11,15 +11,22 @@ from flask import Flask, render_template, request
 from waitress.server import create_server
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
-from backend.db import DBConnection, close_db, setup_db
-from frontend.api import api, reminder_handler
+from backend.db import DBConnection, ThreadedTaskDispatcher, close_db, setup_db
+from frontend.api import api, api_prefix, reminder_handler
 from frontend.ui import ui
 
 HOST = '0.0.0.0'
 PORT = '8080'
 URL_PREFIX = '' # Must either be empty or start with '/' e.g. '/mind' 
+LOGGING_LEVEL = logging.INFO
 THREADS = 10
 DB_FILENAME = 'db', 'MIND.db'
+
+logging.basicConfig(
+	level=LOGGING_LEVEL,
+	format='[%(asctime)s][%(threadName)s][%(levelname)s] %(message)s',
+	datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 def _folder_path(*folders) -> str:
 	"""Turn filepaths relative to the project folder into absolute paths
@@ -32,7 +39,7 @@ def _create_app() -> Flask:
 	"""Create a Flask app instance
 	Returns:
 		Flask: The created app instance
-	""" 
+	"""	
 	app = Flask(
 		__name__,
 		template_folder=_folder_path('frontend','templates'),
@@ -65,7 +72,7 @@ def _create_app() -> Flask:
 		return render_template('page_not_found.html', url_prefix=logging.URL_PREFIX)
 
 	app.register_blueprint(ui)
-	app.register_blueprint(api, url_prefix="/api")
+	app.register_blueprint(api, url_prefix=api_prefix)
 
 	# Setup closing database
 	app.teardown_appcontext(close_db)
@@ -79,7 +86,7 @@ def MIND() -> None:
 	"""
 	# Check python version
 	if (version_info.major < 3) or (version_info.major == 3 and version_info.minor < 7):
-		print('Error: the minimum python version required is python3.7 (currently ' + version_info.major + '.' + version_info.minor + '.' + version_info.micro + ')')
+		logging.error('Error: the minimum python version required is python3.7 (currently ' + version_info.major + '.' + version_info.minor + '.' + version_info.micro + ')')
 		exit(1)
 
 	# Register web server
@@ -90,18 +97,22 @@ def MIND() -> None:
 	app = _create_app()
 	with app.app_context():
 		if isfile(_folder_path('db', 'Noted.db')):
-			move(_folder_path('db', 'Noted.db'), _folder_path('db', 'MIND.db'))
+			move(_folder_path('db', 'Noted.db'), _folder_path(*DB_FILENAME))
+
 		db_location = _folder_path(*DB_FILENAME)
+		logging.debug(f'Database location: {db_location}')
 		makedirs(dirname(db_location), exist_ok=True)
+
 		DBConnection.file = db_location
 		setup_db()
 		reminder_handler.find_next_reminder()
 
 	# Create waitress server and run
-	server = create_server(app, host=HOST, port=PORT, threads=THREADS)
-	print(f'MIND running on http://{HOST}:{PORT}{URL_PREFIX}')
+	dispatcher = ThreadedTaskDispatcher()
+	dispatcher.set_thread_count(THREADS)
+	server = create_server(app, _dispatcher=dispatcher, host=HOST, port=PORT, threads=THREADS)
+	logging.info(f'MIND running on http://{HOST}:{PORT}{URL_PREFIX}')
 	server.run()
-	print(f'\nShutting down MIND...')
 	
 	# Stopping thread
 	reminder_handler.stop_handling()

@@ -1,3 +1,25 @@
+const sorting_options = {};
+sorting_options[types.reminder.id] = [
+	['time', 'Time'],
+	['time_reversed', 'Time Reversed'],
+	['title', 'Title'],
+	['title_reversed', 'Title Reversed'],
+	['date_added', 'Date Added'],
+	['date_added_reversed', 'Date Added Reversed']
+];
+sorting_options[types.static_reminder.id] = [
+	['title', 'Title'],
+	['title_reversed', 'Title Reversed'],
+	['date_added', 'Date Added'],
+	['date_added_reversed', 'Date Added Reversed']
+];
+sorting_options[types.template.id] = [
+	['title', 'Title'],
+	['title_reversed', 'Title Reversed'],
+	['date_added', 'Date Added'],
+	['date_added_reversed', 'Date Added Reversed']
+];
+
 function showTab(button) {
 	// Apply styling to selected button
 	document.querySelectorAll('.tab-selector > button').forEach(
@@ -5,10 +27,13 @@ function showTab(button) {
 	);
 
 	// Show desired tab and hide all others
-	document.querySelectorAll('#home > div:not(.tab-selector)').forEach(
+	document.querySelectorAll('#home > div:not(.tab-selector):not(.search-container)').forEach(
 		e => e.classList.add('hidden')
 	);
 	document.getElementById(button.dataset.target).classList.remove('hidden');
+	
+	fillSortOptions();
+	document.querySelector('#search-input').value = '';
 };
 
 // 
@@ -33,7 +58,7 @@ function fillTable(table, results) {
 			const time = document.createElement('p');
 			var offset = new Date(r.time * 1000).getTimezoneOffset() * -60;
 			var d = new Date((r.time + offset) * 1000);
-			var formatted_date = d.toLocaleString('en-CA').slice(0,10) + ' ' + d.toTimeString().slice(0,5);
+			var formatted_date = d.toLocaleString(JSON.parse(localStorage.getItem('MIND')).locale);
 			if (r.repeat_interval !== null) {
 				if (r.repeat_interval === 1) {
 					var quantity = r.repeat_quantity.endsWith('s') ? r.repeat_quantity.slice(0, -1) : r.repeat_quantity;
@@ -72,28 +97,110 @@ function fillLibrary(url, type) {
 };
 
 function fillReminders() {
-	fillLibrary(`/api/reminders?api_key=${api_key}`, types.reminder);
+	const sorting = document.querySelector('#sort-input').value;
+	fillLibrary(`/api/reminders?api_key=${api_key}&sort_by=${sorting}`, types.reminder);
 };
 
-function fillStaticReminders() {
-	fillLibrary(`/api/staticreminders?api_key=${api_key}`, types.static_reminder);
+function fillStaticReminders(assume_sorting=false) {
+	let sorting;
+	if (assume_sorting)
+		sorting = sorting_options[types.static_reminder.id][0][0];
+	else
+		sorting = document.querySelector('#sort-input').value;
+	fillLibrary(`/api/staticreminders?api_key=${api_key}&sort_by=${sorting}`, types.static_reminder);
 }
 
-function fillTemplates() {
-	fillLibrary(`/api/templates?api_key=${api_key}`, types.template);
+function fillTemplates(assume_sorting=false) {
+	let sorting;
+	if (assume_sorting)
+		sorting = sorting_options[types.template.id][0][0];
+	else
+		sorting = document.querySelector('#sort-input').value;
+	fillLibrary(`/api/templates?api_key=${api_key}&sort_by=${sorting}`, types.template);
 };
 
 // 
 // Library search
 // 
 function searchLibrary() {
+	const query = document.querySelector('#search-input').value,
+		tab = document.getElementById(
+			document.querySelector('.tab-selector > button[data-selected="true"]').dataset.target
+		)
+	const sorting = document.querySelector('#sort-input').value;
+	let url;
+	if (tab === types.reminder)
+		url = `${url_prefix}/api/reminders/search?api_key=${api_key}&query=${query}&sort_by=${sorting}`;
+	else if (tab === types.static_reminder)
+		url = `${url_prefix}/api/staticreminders/search?api_key=${api_key}&query=${query}&sort_by=${sorting}`;
+	else if (tab === types.template)
+		url = `${url_prefix}/api/templates/search?api_key=${api_key}&query=${query}&sort_by=${sorting}`;
+	else return;
+
+	fillLibrary(url, tab);
+};
+
+function clearSearchLibrary() {
+	document.querySelector('#search-input').value = '';
+	const tab = document.getElementById(
+		document.querySelector('.tab-selector > button[data-selected="true"]').dataset.target
+	)
+	if (tab === types.reminder)
+		fillReminders();
+	else if (tab === types.static_reminder)
+		fillStaticReminders();
+	else if (tab === types.template)
+		fillTemplates();
+	else return;
+};
+
+// 
+// Library sort
+// 
+function fillSortOptions() {
+	const tab = document.getElementById(
+		document.querySelector('.tab-selector > button[data-selected="true"]').dataset.target
+	)
+	const sort_options = sorting_options[tab.id];
+	
+	const select = document.getElementById('sort-input');
+	select.innerHTML = '';
+	sort_options.forEach(o => {
+		const entry = document.createElement('option');
+		entry.value = o[0]
+		entry.innerText = o[1]
+		select.appendChild(entry);
+	});
+	select.querySelector(':first-child').setAttribute('selected', '');
+};
+
+function applySorting() {
 	const query = document.querySelector('#search-input').value;
-	fetch(`${url_prefix}/api/reminders/search?api_key=${api_key}&query=${query}`)
+	if (query !== '') {
+		searchLibrary();
+		return;
+	};
+
+	const sorting = document.getElementById('sort-input').value,
+		tab = document.getElementById(
+			document.querySelector('.tab-selector > button[data-selected="true"]').dataset.target
+		)
+
+	let url;
+	if (tab === types.reminder)
+		url = `${url_prefix}/api/reminders?api_key=${api_key}&sort_by=${sorting}`;
+	else if (tab === types.static_reminder)
+		url = `${url_prefix}/api/staticreminders?api_key=${api_key}&sort_by=${sorting}`;
+	else if (tab === types.template)
+		url = `${url_prefix}/api/templates?api_key=${api_key}&sort_by=${sorting}`;
+	else return;
+
+	fetch(url)
 	.then(response => {
 		if (!response.ok) return Promise.reject(response.status);
 		return response.json();
 	})
-	.then(json => fillTable(types.reminder, json.result))
+	.then(json => fillTable(tab, json.result))
 	.catch(e => {
 		if (e === 401)
 			window.location.href = `${url_prefix}/`;
@@ -102,21 +209,18 @@ function searchLibrary() {
 	});
 };
 
-function clearSearchLibrary() {
-	document.querySelector('#search-input').value = '';
-	fillReminders();
-};
-
 // code run on load
 
 document.querySelectorAll('.tab-selector > button').forEach(b => {
 	b.addEventListener('click', e => showTab(b));
 });
 
+fillSortOptions();
 fillReminders();
-fillStaticReminders();
-fillTemplates();
+fillStaticReminders(assume_sorting=true);
+fillTemplates(assume_sorting=true);
 setInterval(fillReminders, 60000);
 
 document.querySelector('#search-form').setAttribute('action', 'javascript:searchLibrary();');
 document.querySelector('#clear-button').addEventListener('click', e => clearSearchLibrary());
+document.querySelector('#sort-input').addEventListener('change', e => applySorting());

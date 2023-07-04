@@ -107,6 +107,7 @@
 
 .notification-service-list > div > input {
 	width: fit-content;
+	box-shadow: none;
 }
 
 .repeat-bar,

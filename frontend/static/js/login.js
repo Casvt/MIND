@@ -44,7 +44,9 @@ function login(data=null) {
 		return response.json();
 	})
 	.then(json => {
-		localStorage.setItem('MIND_api_key', json.result.api_key);
+		const new_stor = JSON.parse(localStorage.getItem('MIND'));
+		new_stor.api_key = json.result.api_key;
+		localStorage.setItem('MIND', JSON.stringify(new_stor));
 		window.location.href = `${url_prefix}/reminders`;
 	})
 	.catch(e => {
@@ -93,7 +95,7 @@ function create() {
 };
 
 function checkLogin() {
-	fetch(`${url_prefix}/api/auth/status?api_key=${localStorage.getItem('MIND_api_key')}`)
+	fetch(`${url_prefix}/api/auth/status?api_key=${JSON.parse(localStorage.getItem('MIND')).api_key}`)
 	.then(response => {
 		if (!response.ok) return Promise.reject(response.status);
 		window.location.href = '/reminders';
@@ -107,6 +109,9 @@ function checkLogin() {
 };
 
 // code run on load
+
+if (localStorage.getItem('MIND') === null)
+	localStorage.setItem('MIND', JSON.stringify({'api_key': null, 'locale': 'en-GB'}))
 
 const url_prefix = document.getElementById('url_prefix').dataset.value;
 

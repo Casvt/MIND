@@ -1,30 +1,58 @@
 #-*- coding: utf-8 -*-
 
 from datetime import datetime
-from sqlite3 import Connection, Row
-from threading import current_thread
+import logging
+from sqlite3 import Connection, ProgrammingError, Row
+from threading import current_thread, main_thread
 from time import time
 from typing import Union
 
 from flask import g
+from waitress.task import ThreadedTaskDispatcher as OldThreadedTaskDispatcher
 
-__DATABASE_VERSION__ = 5
+from backend.custom_exceptions import AccessUnauthorized, UserNotFound
+
+__DATABASE_VERSION__ = 6
 
 class Singleton(type):
 	_instances = {}
 	def __call__(cls, *args, **kwargs):
 		i = f'{cls}{current_thread()}'
-		if i not in cls._instances:
+		if (i not in cls._instances
+      	or cls._instances[i].closed):
+			logging.debug(f'Creating singleton instance: {i}')
 			cls._instances[i] = super(Singleton, cls).__call__(*args, **kwargs)
 
 		return cls._instances[i]
+
+class ThreadedTaskDispatcher(OldThreadedTaskDispatcher):
+	def handler_thread(self, thread_no: int) -> None:
+		super().handler_thread(thread_no)
+		i = f'{DBConnection}{current_thread()}'
+		if i in Singleton._instances and not Singleton._instances[i].closed:
+			logging.debug(f'Closing singleton instance: {i}')
+			Singleton._instances[i].close()
+			
+	def shutdown(self, cancel_pending: bool = True, timeout: int = 5) -> bool:
+		print()
+		logging.info('Shutting down MIND...')
+		super().shutdown(cancel_pending, timeout)
+		DBConnection(20.0).close()
 
 class DBConnection(Connection, metaclass=Singleton):
 	file = ''
 	
 	def __init__(self, timeout: float) -> None:
+		logging.debug(f'Opening database connection for {current_thread()}')
 		super().__init__(self.file, timeout=timeout)
 		super().cursor().execute("PRAGMA foreign_keys = ON;")
+		self.closed = False
+		return
+
+	def close(self) -> None:
+		logging.debug(f'Closing database connection for {current_thread()}')
+		self.closed = True
+		super().close()
 		return
 
 def get_db(output_type: Union[dict, tuple]=tuple):
@@ -54,11 +82,13 @@ def close_db(e=None) -> None:
 	"""	
 	try:
 		cursor = g.cursor
-		db = cursor.connection
+		db: DBConnection = cursor.connection
 		cursor.close()
 		delattr(g, 'cursor')
 		db.commit()
-	except AttributeError:
+		if current_thread() is main_thread():
+			db.close()
+	except (AttributeError, ProgrammingError):
 		pass
 	return
 
@@ -67,7 +97,7 @@ def migrate_db(current_db_version: int) -> None:
 	Migrate a MIND database from it's current version 
 	to the newest version supported by the MIND version installed.
 	"""
-	print('Migrating database to newer version...')
+	logging.info('Migrating database to newer version...')
 	cursor = get_db()
 	if current_db_version == 1:
 		# V1 -> V2
@@ -168,13 +198,22 @@ def migrate_db(current_db_version: int) -> None:
 			COMMIT;
 		""")
 		current_db_version = 5
-	
+
+	if current_db_version == 5:
+		# V5 -> V6
+		from backend.users import User
+		try:
+			User('User1', 'Password1').delete()
+		except (UserNotFound, AccessUnauthorized):
+			pass
+
 	return
 
 def setup_db() -> None:
 	"""Setup the database
 	"""
 	cursor = get_db()
+	cursor.execute("PRAGMA journal_mode = wal;")
 
 	cursor.executescript("""
 		CREATE TABLE IF NOT EXISTS users(
@@ -256,6 +295,7 @@ def setup_db() -> None:
 		"SELECT value FROM config WHERE key = 'database_version' LIMIT 1;"
 	).fetchone()[0])
 	
+	logging.debug(f'Current database version {current_db_version} and desired database version {__DATABASE_VERSION__}')
 	if current_db_version < __DATABASE_VERSION__:
 		migrate_db(current_db_version)
 		cursor.execute(

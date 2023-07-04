@@ -1,0 +1,25 @@
+name: Update and build docs
+
+on:
+  push:
+    branches:
+      - Development
+
+jobs:
+  update_build:
+    name: Update API docs and build docs
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        name: Setup checkout
+      - uses: actions/setup-python@v4
+        name: Setup python 3.8
+        with:
+          python-version: 3.8
+          cache: 'pip'
+      - run: pip install -r requirements.txt -r project_management/docs-requirements.txt
+        name: Install dependencies
+      - run: python3 project_management/generate_api_docs.py
+        name: Generate API docs
+      - run: mkdocs gh-deploy --force -f project_management/mkdocs.yml
+        name: Build docs
