@@ -181,6 +181,20 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 
+### `/notificationservices/available`
+
+| Requires being logged in | Description |
+| ------------------------ | ----------- |
+| Yes | Get all available notification services and their url layout | 
+
+??? GET
+
+	**Returns**
+	
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 200| N/A | Success |
+
 ### `/notificationservices/<int:n_id>`
 
 | Requires being logged in | Description |
