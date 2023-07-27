@@ -26,8 +26,7 @@ function fillNotificationSelection() {
 			inputs.notification_service.querySelector(':first-child input').checked = true;
 			
 			const table = document.getElementById('services-list');
-			table.querySelectorAll('tr:not(#add-row)').forEach(e => e.remove());
-			// table.innerHTML = '';
+			table.innerHTML = '';
 			json.result.forEach(service => {
 				const entry = document.createElement('tr');
 				entry.dataset.id = service.id;
@@ -47,6 +46,10 @@ function fillNotificationSelection() {
 				url.setAttribute('readonly', '');
 				url.setAttribute('type', 'text');
 				url.value = service.url;
+				url.addEventListener('keydown', e => {
+					if (e.key === 'Enter')
+						saveService(service.id);
+				});
 				url_container.appendChild(url);
 				entry.appendChild(url_container);
 				
@@ -152,9 +155,6 @@ function deleteService(id) {
 };
 
 function toggleAddService() {
-	document.getElementById('add-row').classList.toggle('hidden');
-	return;
-	
 	const cont = document.querySelector('.overflow-container');
 	if (cont.classList.contains('show-add')) {
 		// Hide add
@@ -180,101 +180,167 @@ function toggleAddService() {
 	};
 };
 
+function createTitle() {
+	const service_title = document.createElement('input');
+	service_title.id = 'service-title';
+	service_title.type = 'text';
+	service_title.placeholder = 'Service Title';
+	service_title.required = true;
+	return service_title;
+};
+
+function createChoice(token) {
+	const choice = document.createElement('select');
+	choice.dataset.map = token.map_to || '';
+	choice.dataset.prefix = '';
+	choice.placeholder = token.name;
+	choice.required = token.required;
+	token.options.forEach(option => {
+		const entry = document.createElement('option');
+		entry.value = option;
+		entry.innerText = option;
+		choice.appendChild(entry);
+	});
+	if (token.default)
+		choice.querySelector(`option[value="${token.default}"]`).setAttribute('selected', '');
+
+	return choice;
+};
+
+function createString(token) {
+	const str_input = document.createElement('input');
+	str_input.dataset.map = token.map_to || '';
+	str_input.dataset.prefix = token.prefix || '';
+	str_input.dataset.regex = token.regex || '';
+	str_input.type = 'text';
+	str_input.placeholder = `${token.name}${!token.required ? ' (Optional)' : ''}`;
+	str_input.required = token.required;
+	return str_input;
+};
+
+function createInt(token) {
+	const int_input = document.createElement('input');
+	int_input.dataset.map = token.map_to || '';
+	int_input.dataset.prefix = token.prefix || '';
+	int_input.type = 'number';
+	int_input.placeholder = `${token.name}${!token.required ? ' (Optional)' : ''}`;
+	int_input.required = token.required;
+	if (token.min !== null)
+		int_input.min = token.min;
+	if (token.max !== null)
+		int_input.max = token.max;
+	return int_input;
+};
+
+function createEntriesList(token) {
+	const entries_list = document.createElement('div');
+	entries_list.classList.add('entries-list');
+	entries_list.dataset.map = token.map_to || '';
+	entries_list.dataset.delim = token.delim || '';
+	entries_list.dataset.prefix = token.prefix || '';
+
+	const entries_desc = document.createElement('p');
+	entries_desc.innerText = token.name;
+	entries_list.appendChild(entries_desc);
+
+	const entries = document.createElement('div');
+	entries.classList.add('input-entries');
+	entries_list.appendChild(entries);
+
+	const add_row = document.createElement('div');
+	add_row.classList.add('add-row', 'hidden');
+	const add_input = document.createElement('input');
+	add_input.type = 'text';
+	add_input.addEventListener('keydown', e => {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			e.stopImmediatePropagation();
+			addEntry(entries_list);
+		};
+	});
+	add_row.appendChild(add_input);
+	const add_entry_button = document.createElement('button');
+	add_entry_button.type = 'button';
+	add_entry_button.innerText = 'Add';
+	add_entry_button.addEventListener('click', e => addEntry(entries_list));
+	add_row.appendChild(add_entry_button);
+	entries_list.appendChild(add_row);
+
+	const add_button = document.createElement('button');
+	add_button.type = 'button';
+	add_button.innerHTML = icons.add;
+	add_button.addEventListener('click', e => toggleAddRow(add_row));
+	entries_list.appendChild(add_button);
+	
+	return entries_list;
+};
+
+function toggleAddRow(row) {
+	if (row.classList.contains('hidden')) {
+		// Show row
+		row.querySelector('input').value = '';
+		row.classList.remove('hidden');
+	} else {
+		// Hide row
+		row.classList.add('hidden');
+	};
+};
+
+function addEntry(entries_list) {
+	const value = entries_list.querySelector('.add-row > input').value;
+	const entry = document.createElement('div');
+	entry.innerText = value;
+	entries_list.querySelector('.input-entries').appendChild(entry);
+	toggleAddRow(entries_list.querySelector('.add-row'));
+};
+
 function showAddServiceWindow(index) {
 	const window = document.getElementById('add-service-window');
 	window.innerHTML = '';
+	window.dataset.index = index;
 
-	if (index === -1) {
-		// Custom url
-		const title = document.createElement('h3');
-		title.innerText = 'Custom URL';
-		window.appendChild(title);
+	const data = notification_services[index];
+	console.log(data);
+	
+	const title = document.createElement('h3');
+	title.innerText = data.name;
+	window.appendChild(title);
+
+	const docs = document.createElement('a');
+	docs.href = data.doc_url;
+	docs.target = '_blank';
+	docs.innerText = 'Documentation';
+	window.appendChild(docs);
+
+	window.appendChild(createTitle());	
+	
+	data.details.tokens.forEach(token => {
+		if (token.type === 'choice')
+			window.appendChild(createChoice(token));
+
+		else if (token.type === 'list') {
+			const joint_list = document.createElement('div');
+			joint_list.dataset.map = token.map_to;
+			joint_list.dataset.delim = token.delim;
+
+			const desc = document.createElement('p');
+			desc.innerText = `${token.name}${!token.required ? ' (Optional)' : ''}`;
+			joint_list.appendChild(desc);
 		
-		const desc = document.createElement('p');
-		desc.innerHTML = 'Enter a custom Apprise URL. See the <a target="_blank" href="https://github.com/caronc/apprise#supported-notifications">Apprise URL documentation</a>.';
-		window.appendChild(desc);
+			if (token.content.length === 0)
+				joint_list.appendChild(createEntriesList(token));
+			else
+				token.content.forEach(content =>
+					joint_list.appendChild(createEntriesList(content))
+				);
 
-		const service_title = document.createElement('input');
-		service_title.id = 'service-title';
-		service_title.type = 'text';
-		service_title.placeholder = 'Service Title';
-		service_title.required = true;
-		window.appendChild(service_title);
-			
-		const url_input = document.createElement('input');
-		url_input.type = 'text';
-		url_input.placeholder = 'Apprise URL';
-		window.appendChild(url_input);
-	} else {
-		const data = notification_services[index];
-		console.log(data);
-		
-		const title = document.createElement('h3');
-		title.innerText = data.name;
-		window.appendChild(title);
+			window.appendChild(joint_list);
 
-		const docs = document.createElement('a');
-		docs.href = data.doc_url;
-		docs.target = '_blank';
-		docs.innerText = 'Documentation';
-		window.appendChild(docs);
-
-		const service_title = document.createElement('input');
-		service_title.id = 'service-title';
-		service_title.type = 'text';
-		service_title.placeholder = 'Service Title';
-		service_title.required = true;
-		window.appendChild(service_title);	
-		
-		data.details.tokens.forEach(token => {
-			if (token.type === 'choice') {
-				const choice = document.createElement('select');
-				choice.dataset.map = token.map_to;
-				choice.dataset.prefix = '';
-				choice.placeholder = token.name;
-				choice.required = token.required;
-				token.options.forEach(option => {
-					const entry = document.createElement('option');
-					entry.value = option;
-					entry.innerText = option;
-					choice.appendChild(entry);
-				});
-				window.appendChild(choice);
-
-			} else if (token.type === 'list') {
-				if (token.content.length === 0) {
-					
-				} else {
-					token.content.forEach(content => {
-						
-					});
-				};
-
-			} else if (token.type === 'string') {
-				const str_input = document.createElement('input');
-				str_input.dataset.map = token.map_to;
-				str_input.dataset.prefix = token.prefix;
-				str_input.dataset.regex = token.regex;
-				str_input.type = 'text';
-				str_input.placeholder = `${token.name}${!token.required ? ' (Optional)' : ''}`;
-				str_input.required = token.required;
-				window.appendChild(str_input);
-
-			} else if (token.type === 'int') {
-				const int_input = document.createElement('input');
-				int_input.dataset.map = token.map_to;
-				int_input.dataset.prefix = token.prefix;
-				int_input.type = 'number';
-				int_input.placeholder = `${token.name}${!token.required ? ' (Optional)' : ''}`;
-				int_input.required = token.required;
-				if (token.min !== null)
-					int_input.min = token.min;
-				if (token.max !== null)
-					int_input.max = token.max;
-				window.appendChild(int_input);
-			};
-		});
-	};
+		} else if (token.type === 'string')
+			window.appendChild(createString(token));
+		else if (token.type === 'int')
+			window.appendChild(createInt(token));
+	});
 	
 	// Bottom options
 	const options = document.createElement('div');
@@ -298,20 +364,64 @@ function hideAddServiceWindow() {
 };
 
 function buildAppriseURL() {
-	return null;
+	const data = notification_services[document.querySelector('#add-service-window').dataset.index];
+	const inputs = document.querySelectorAll('#add-service-window > [data-map]');
+	const values = {};
+
+	// Gather all values and format
+	inputs.forEach(i => {
+		if (['INPUT', 'SELECT'].includes(i.nodeName)) {
+			// Standard input
+			let value = `${i.dataset.prefix || ''}${i.value}`;
+			if (value)
+				values[i.dataset.map] = value;
+		} else if (i.nodeName === 'DIV') {
+			let value =
+				[...i.querySelectorAll('.entries-list')]
+				.map(l => 
+					[...l.querySelectorAll('.input-entries > div')]
+					.map(e => `${l.dataset.prefix || ''}${e.innerText}`)
+				)
+				.flat()
+				.join(i.dataset.delim)
+
+			if (value)
+				values[i.dataset.map] = value;
+		};
+	});
+
+	// Find template(s) that match the given tokens
+	const input_keys = Object.keys(values).sort().join();
+	const matching_templates = data.details.templates.filter(template =>
+		input_keys === template.replaceAll('}', '{').split('{').filter((e, i) => i % 2).sort().join()
+	);
+	
+	if (!matching_templates.length)
+		return null;
+
+	// Build URL with template and values
+	let template = matching_templates[0];
+
+	for (const [key, value] of Object.entries(values))
+		template = template.replace(`{${key}}`, value);
+
+	console.debug(matching_templates);
+	console.debug(template);
+
+	return template;
 };
 
 function addService() {
-	const add_button = document.querySelector('#add-row > .action-column > button');
+	const add_button = document.querySelector('#add-service-window > .options > button[type="submit"]');
 	const data = {
-		'title': document.querySelector('#add-row > .title-column > input').value,
-		'url': document.querySelector('#add-row > .url-column > input').value
+		'title': document.querySelector('#service-title').value,
+		'url': buildAppriseURL()
 	};
-	// const add_button = document.querySelector('#add-service-window > .options > button[type="submit"]');
-	// const data = {
-	// 	'title': document.querySelector('#service-title').value,
-	// 	'url': buildAppriseURL()
-	// };
+	if (!data.url) {
+		add_button.classList.add('error-input');
+		add_button.title = 'Required field missing';
+		return;
+	}
 	fetch(`${url_prefix}/api/notificationservices?api_key=${api_key}`, {
 		'method': 'POST',
 		'headers': {'Content-Type': 'application/json'},
@@ -330,8 +440,7 @@ function addService() {
 		if (e === 401)
 			window.location.href = `${url_prefix}/`;
 		else if (e === 400) {
-			// add_button.classList.add('error-input');
-			add_button.classList.add('error-icon');
+			add_button.classList.add('error-input');
 			add_button.title = 'Invalid Apprise URL';
 		} else
 			console.log(e);
@@ -345,6 +454,4 @@ fillNotificationSelection();
 let notification_services = null;
 
 document.getElementById('add-service-button').addEventListener('click', e => toggleAddService());
-// document.querySelector('#service-list button').addEventListener('click', e => showAddServiceWindow(-1));
-// document.getElementById('add-service-window').setAttribute('action', 'javascript:addService();');
-document.querySelector('#add-row > .action-column > button').addEventListener('click', e => addService());
+document.getElementById('add-service-window').setAttribute('action', 'javascript:addService();');

@@ -1,12 +1,135 @@
 #-*- coding: utf-8 -*-
 
 import logging
-from typing import List
+from typing import Dict, List, Union
+
+from apprise import Apprise
 
 from backend.custom_exceptions import (NotificationServiceInUse,
                                        NotificationServiceNotFound)
 from backend.db import get_db
 
+
+def _sort_tokens(t: dict) -> int:
+	result = [
+		int(not t['required'])
+	]
+
+	if t['type'] == 'choice':
+		result.append(0)
+	elif t['type'] != 'list':
+		result.append(1)
+	else:
+		result.append(2)
+	
+	return result
+
+def get_apprise_services() -> List[Dict[str, Union[str, Dict[str, list]]]]:
+	apprise_services = []
+	raw = Apprise().details()
+	for entry in raw['schemas']:
+		entry: Dict[str, Union[str, dict]]
+		result: Dict[str, Union[str, Dict[str, list]]] = {
+			'name': str(entry['service_name']),
+			'doc_url': entry['setup_url'],
+			'details': {
+				'templates': entry['details']['templates'],
+				'tokens': [],
+				'args': []
+			}
+		}
+
+		schema = entry['details']['tokens']['schema']
+		result['details']['tokens'].append({
+			'name': schema['name'],
+			'map_to': 'schema',
+			'required': schema['required'],
+			'type': 'choice',
+			'options': schema['values'],
+			'default': schema.get('default')
+		})
+
+		handled_tokens = {'schema'}
+		result['details']['tokens'] += [
+			{
+				'name': v['name'],
+				'map_to': k,
+				'required': v['required'],
+				'type': 'list',
+				'delim': v['delim'][0],
+				'content': [
+					{
+						'name': content['name'],
+						'required': content['required'],
+						'type': content['type'],
+						'prefix': content.get('prefix'),
+						'regex': content.get('regex')
+					}
+					for content, _ in ((entry['details']['tokens'][e], handled_tokens.add(e)) for e in v['group'])
+				]
+			}
+			for k, v in 
+				filter(
+					lambda t: t[1]['type'].startswith('list:'), 
+	   				entry['details']['tokens'].items()
+				)
+		]
+		handled_tokens.update(
+			set(map(lambda e: e[0],
+	   			filter(lambda e: e[1]['type'].startswith('list:'),
+	      				entry['details']['tokens'].items())
+			))
+		)
+
+		result['details']['tokens'] += [
+			{
+				'name': v['name'],
+				'map_to': k,
+				'required': v['required'],
+				'type': v['type'].split(':')[0],
+				**({
+					'prefix': v.get('prefix'),
+					'min': v.get('min'),
+					'max': v.get('max'),
+					'regex': v.get('regex')
+				} if not v['type'].startswith('choice') else {
+					'options': v.get('values'),
+					'default': v.get('default')
+				})
+			}
+			for k, v in
+				filter(
+					lambda t: not t[0] in handled_tokens,
+					entry['details']['tokens'].items()
+				)
+		]
+
+		result['details']['tokens'].sort(key=_sort_tokens)
+
+		apprise_services.append(result)
+
+	apprise_services.sort(key=lambda s: s['name'].lower())
+
+	apprise_services.insert(0, {
+		'name': 'Custom URL',
+		'doc_url': 'https://github.com/caronc/apprise#supported-notifications',
+		'details': {
+			'templates': ['{url}'],
+			'tokens': [{
+				'name': 'Apprise URL',
+				'map_to': 'url',
+				'required': True,
+				'type': 'string',
+				'prefix': None,
+				'min': None,
+				'max': None,
+				'regex': None
+			}],
+			'args': []
+		}
+	})
+
+	return apprise_services
 
 class NotificationService:
 	def __init__(self, user_id: int, notification_service_id: int) -> None:

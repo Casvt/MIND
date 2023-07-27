@@ -19,7 +19,8 @@ from backend.custom_exceptions import (AccessUnauthorized, APIKeyExpired,
                                        UsernameInvalid, UsernameTaken,
                                        UserNotFound)
 from backend.notification_service import (NotificationService,
-                                          NotificationServices)
+                                          NotificationServices,
+                                          get_apprise_services)
 from backend.reminders import Reminders, reminder_handler
 from backend.static_reminders import StaticReminders
 from backend.templates import Template, Templates
@@ -479,6 +480,16 @@ def api_notification_services_list(inputs: Dict[str, str]):
 		result = services.add(title=inputs['title'],
 							url=inputs['url']).get()
 		return return_api(result, code=201)
+
+@api.route(
+	'/notificationservices/available',
+	'Get all available notification services and their url layout',
+	methods=['GET']
+)
+@endpoint_wrapper
+def api_notification_service_available():
+	result = get_apprise_services()
+	return return_api(result)
 
 @api.route(
 	'/notificationservices/<int:n_id>',
