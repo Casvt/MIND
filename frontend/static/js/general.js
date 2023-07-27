@@ -48,20 +48,71 @@ function logout() {
 		'method': 'POST'
 	})
 	.then(response => {
-		const new_stor = JSON.parse(localStorage.getItem('MIND'))
-		new_stor.api_key = null
-		localStorage.setItem('MIND', JSON.stringify(new_stor));
+		setLocalStorage({'api_key': null});
 		window.location.href = `${url_prefix}/`;
 	});
 };
 
+// 
+// LocalStorage
+// 
+const default_values = {
+	'api_key': null,
+	'locale': 'en-GB',
+	'default_service': null
+};
+
+function setupLocalStorage() {
+	if (!localStorage.getItem('MIND'))
+		localStorage.setItem('MIND', JSON.stringify(default_values));
+	
+	const missing_keys = [
+		...Object.keys(default_values)
+	].filter(e =>
+		![...Object.keys(JSON.parse(localStorage.getItem('MIND')))].includes(e)
+	)
+
+	if (missing_keys.length) {
+		const storage = JSON.parse(localStorage.getItem('MIND'));
+
+		missing_keys.forEach(missing_key => {
+			storage[missing_key] = default_values[missing_key]
+		})
+
+		localStorage.setItem('MIND', JSON.stringify(storage));
+	};
+	return;
+};
+
+function getLocalStorage(keys) {
+	const storage = JSON.parse(localStorage.getItem('MIND'));
+	const result = {};
+	if (typeof keys === 'string')
+		result[keys] = storage[keys];
+		
+	else if (typeof keys === 'object')
+		for (const key in keys)
+			result[key] = storage[key];
+
+	return result;
+};
+
+function setLocalStorage(keys_values) {
+	const storage = JSON.parse(localStorage.getItem('MIND'));
+
+	for (const [key, value] of Object.entries(keys_values))
+		storage[key] = value;
+	
+	localStorage.setItem('MIND', JSON.stringify(storage));
+	return;
+};
+
 // code run on load
 
-if (localStorage.getItem('MIND') === null)
-	localStorage.setItem('MIND', JSON.stringify({'api_key': null, 'locale': 'en-GB'}))
+setupLocalStorage();
 
 const url_prefix = document.getElementById('url_prefix').dataset.value;
-const api_key = JSON.parse(localStorage.getItem('MIND')).api_key;
+const api_key = getLocalStorage('api_key')['api_key'];
 if (api_key === null) {
 	window.location.href = `${url_prefix}/`;
 };

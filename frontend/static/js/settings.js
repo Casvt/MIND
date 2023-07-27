@@ -1,5 +1,14 @@
 function loadSettings() {
-	document.getElementById('locale-input').value = JSON.parse(localStorage.getItem('MIND')).locale;
+	document.getElementById('locale-input').value = getLocalStorage('locale')['locale'];
+};
+
+function updateLocale(e) {
+	setLocalStorage({'locale': e.target.value});
+	window.location.reload();
+};
+
+function updateDefaultService(e) {
+	setLocalStorage({'default_service': parseInt(e.target.value)});
 };
 
 function changePassword() {
@@ -23,13 +32,6 @@ function changePassword() {
 	});
 };
 
-function updateLocale(e) {
-	const new_stor = JSON.parse(localStorage.getItem('MIND'));
-	new_stor.locale = e.target.value;
-	localStorage.setItem('MIND', JSON.stringify(new_stor));
-	window.location.reload();
-};
-
 function deleteAccount() {
 	fetch(`${url_prefix}/api/user?api_key=${api_key}`, {
 		'method': 'DELETE'
@@ -43,6 +45,7 @@ function deleteAccount() {
 
 loadSettings();
 
-document.getElementById('change-password-form').setAttribute('action', 'javascript:changePassword()');
 document.getElementById('locale-input').addEventListener('change', updateLocale);
+document.querySelector('#default-service-input').addEventListener('change', updateDefaultService);
+document.getElementById('change-password-form').setAttribute('action', 'javascript:changePassword()');
 document.getElementById('delete-account-button').addEventListener('click', e => deleteAccount());

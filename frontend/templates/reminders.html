@@ -252,11 +252,6 @@
 			<div id="settings">
 				<h2>Settings</h2>
 				<div class="settings-container">
-					<h3>Change Password</h3>
-					<form id="change-password-form">
-						<input type="password" id="password-input" autocomplete="new-password" required>
-						<button type="submit">Change</button>
-					</form>
 					<h3>Locale</h3>
 					<select id="locale-input">
 						<option value="ar-SA">ar-SA</option>
@@ -313,6 +308,16 @@
 						<option value="zh-HK">zh-HK</option>
 						<option value="zh-TW">zh-TW</option>
 					</select>
+
+					<h3>Default Notification Service</h3>
+					<select id="default-service-input"></select>
+
+					<h3>Change Password</h3>
+					<form id="change-password-form">
+						<input type="password" id="password-input" autocomplete="new-password" required>
+						<button type="submit">Change</button>
+					</form>
+
 					<h3>Delete Account</h3>
 					<button id="delete-account-button">Delete Account</button>
 				</div>

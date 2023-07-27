@@ -8,6 +8,24 @@ function fillNotificationSelection() {
 		if (json.result.length) {
 			document.getElementById('add-reminder').classList.remove('error', 'error-icon');
 
+			const default_select = document.querySelector('#default-service-input');
+			default_select.innerHTML = '';
+			let default_service = getLocalStorage('default_service')['default_service'];
+			json.result.forEach(service => {
+				const entry = document.createElement('option');
+				entry.value = service.id;
+				entry.innerText = service.title;
+				if (default_service === service.id)
+					entry.setAttribute('selected', '');
+				default_select.appendChild(entry);
+			});
+			if (!document.querySelector(`#default-service-input > option[value="${default_service}"]`))
+				setLocalStorage({'default_service': 
+					parseInt(document.querySelector('#default-service-input > option')?.value)
+					|| null
+				});
+				default_service = getLocalStorage('default_service')['default_service'];
+
 			inputs.notification_service.innerHTML = '';
 			json.result.forEach(service => {
 				const entry = document.createElement('div');
@@ -85,6 +103,18 @@ function fillNotificationSelection() {
 			});	
 		} else {
 			document.getElementById('add-reminder').classList.add('error', 'error-icon');
+
+			inputs.notification_service.innerHTML = '';
+
+			const default_select = document.querySelector('#default-service-input');
+			default_select.innerHTML = '';
+
+			const default_service = getLocalStorage('default_service')['default_service'];
+			if (!document.querySelector(`#default-service-input > option[value="${default_service}"]`))
+				setLocalStorage({'default_service': 
+					parseInt(document.querySelector('#default-service-input > option')?.value)
+					|| null
+				});
 		};
 	})
 	.catch(e => {
@@ -139,8 +169,9 @@ function deleteService(id) {
 		if (json.error !== null) return Promise.reject(json);
 		
 		row.remove();
-		if (document.querySelectorAll('#services-list > tr:not(#add-row)').length === 0)
-			document.getElementById('add-entry').classList.add('error', 'error-icon');
+		fillNotificationSelection();
+		if (document.querySelectorAll('#services-list > tr').length === 0)
+			document.getElementById('add-reminder').classList.add('error', 'error-icon');
 	})
 	.catch(e => {
 		if (e.error === 'ApiKeyExpired' || e.error === 'ApiKeyInvalid')

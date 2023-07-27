@@ -1,10 +1,11 @@
 function showAdd(type) {
+	const default_service = getLocalStorage('default_service')['default_service'];
 	inputs.template.value = '0';
 	inputs.title.value = '';
 	inputs.text.value = '';
 	inputs.time.value = '';
 	inputs.notification_service.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
-	inputs.notification_service.querySelector('input[type="checkbox"]:first-child').checked = true;
+	inputs.notification_service.querySelector(`input[type="checkbox"][data-id="${default_service}"]`).checked = true;
 	toggleNormal();
 	toggleColor(true);
 	document.getElementById('test-reminder').classList.remove('show-sent');
