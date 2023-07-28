@@ -195,6 +195,28 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	| ---- | ----- | ----------- |
 	| 200| N/A | Success |
 
+### `/notificationservices/test`
+
+| Requires being logged in | Description |
+| ------------------------ | ----------- |
+| Yes | Send a test notification using the supplied Apprise URL | 
+
+??? POST
+
+	**Parameters (body)**
+
+	| Name | Required | Description | Allowed values |
+	| ---- | -------- | ----------- | -------------- |
+	| url | Yes | The Apprise URL of the notification service | N/A |
+
+	**Returns**
+	
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 201| N/A | Success |
+	| 400 | InvalidKeyValue | The value of a key is invalid |
+	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
+
 ### `/notificationservices/<int:n_id>`
 
 | Requires being logged in | Description |
