@@ -508,7 +508,8 @@ function buildAppriseURL() {
 		})
 		.filter(el => el !== null)
 		.join('&')
-	template += (template.includes('?') ? '&' : '?') + args;
+	if (args)
+		template += (template.includes('?') ? '&' : '?') + args;
 	template = template.replaceAll(' ', '%20');
 
 	console.debug(matching_templates);
@@ -519,6 +520,24 @@ function buildAppriseURL() {
 
 function addService() {
 	const add_button = document.querySelector('#add-service-window > .options > button[type="submit"]');
+	
+	// Check regexes for input's
+	[...document.querySelectorAll('#add-service-window > input:not([data-regex=""])[data-regex]')]
+		.forEach(el => el.classList.remove('error-input'));
+
+	const faulty_inputs =
+		[...document.querySelectorAll('#add-service-window > input:not([data-regex=""])[data-regex]')]
+			.filter(el => !new RegExp
+				(
+					el.dataset.regex.split('').reverse().join('').split(',').slice(1).join(',').split('').reverse().join(''),
+					el.dataset.regex.split('').reverse().join('').split(',')[0]
+				).test(el.value)
+			);
+	if (faulty_inputs.length > 0) {
+		faulty_inputs.forEach(el => el.classList.add('error-input'));
+		return;
+	};
+
 	const data = {
 		'title': document.querySelector('#service-title').value,
 		'url': buildAppriseURL()
