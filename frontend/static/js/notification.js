@@ -263,6 +263,23 @@ function createInt(token) {
 	return int_input;
 };
 
+function createBool(token) {
+	const bool_input = document.createElement('select');
+	bool_input.dataset.map = token.map_to || '';
+	bool_input.dataset.prefix = '';
+	bool_input.placeholder = token.name;
+	bool_input.required = token.required;
+	[['Yes', 'true'], ['No', 'false']].forEach(option => {
+		const entry = document.createElement('option');
+		entry.value = option[1];
+		entry.innerText = option[0];
+		bool_input.appendChild(entry);
+	});
+	bool_input.querySelector(`option[value="${token.default}"]`).setAttribute('selected', '');
+	
+	return bool_input;
+};
+
 function createEntriesList(token) {
 	const entries_list = document.createElement('div');
 	entries_list.classList.add('entries-list');
@@ -345,33 +362,65 @@ function showAddServiceWindow(index) {
 
 	window.appendChild(createTitle());	
 	
-	data.details.tokens.forEach(token => {
-		if (token.type === 'choice')
-			window.appendChild(createChoice(token));
+	[[data.details.tokens, 'tokens'], [data.details.args, 'args']].forEach(vars => {
+		if (vars[1] === 'args' && vars[0].length > 0) {
+			// The args are hidden behind a "Show Advanced Settings" button
+			const show_args = document.createElement('button');
+			show_args.type = 'button';
+			show_args.innerText = 'Show Advanced Settings';
+			show_args.addEventListener('click', e => {
+				window.querySelectorAll('[data-is_arg="true"]').forEach(el => el.classList.toggle('hidden'));
+				show_args.innerText = show_args.innerText === 'Show Advanced Settings' ? 'Hide Advanced Settings' : 'Show Advanced Settings';
+			});
+			window.appendChild(show_args);
+		};
 
-		else if (token.type === 'list') {
-			const joint_list = document.createElement('div');
-			joint_list.dataset.map = token.map_to;
-			joint_list.dataset.delim = token.delim;
+		vars[0].forEach(token => {
+			let result = null;
+			if (token.type === 'choice') {
+				const desc = document.createElement('p');
+				desc.innerText = `${token.name}${!token.required ? ' (Optional)' : ''}`;
+				desc.dataset.is_arg = vars[1] === 'args';
+				window.appendChild(desc);
+				result = createChoice(token);
+	
+			} else if (token.type === 'list') {
+				const joint_list = document.createElement('div');
+				joint_list.dataset.map = token.map_to;
+				joint_list.dataset.delim = token.delim;
+	
+				const desc = document.createElement('p');
+				desc.innerText = `${token.name}${!token.required ? ' (Optional)' : ''}`;
+				joint_list.appendChild(desc);
+			
+				if (token.content.length === 0)
+					joint_list.appendChild(createEntriesList(token));
+				else
+					token.content.forEach(content =>
+						joint_list.appendChild(createEntriesList(content))
+					);
+	
+				result = joint_list;
+	
+			} else if (token.type === 'string')
+				result = createString(token);
+			else if (token.type === 'int')
+				result = createInt(token);
+			else if (token.type === 'bool') {
+				const desc = document.createElement('p');
+				desc.innerText = `${token.name}${!token.required ? ' (Optional)' : ''}`;
+				desc.dataset.is_arg = vars[1] === 'args';
+				window.appendChild(desc);
+				result = createBool(token);
+			};
 
-			const desc = document.createElement('p');
-			desc.innerText = `${token.name}${!token.required ? ' (Optional)' : ''}`;
-			joint_list.appendChild(desc);
+			result.dataset.is_arg = vars[1] === 'args';
+			window.appendChild(result);
+		});
 		
-			if (token.content.length === 0)
-				joint_list.appendChild(createEntriesList(token));
-			else
-				token.content.forEach(content =>
-					joint_list.appendChild(createEntriesList(content))
-				);
-
-			window.appendChild(joint_list);
-
-		} else if (token.type === 'string')
-			window.appendChild(createString(token));
-		else if (token.type === 'int')
-			window.appendChild(createInt(token));
-	});
+		if (vars[1] === 'args' && vars[0].length > 0)
+			window.querySelectorAll('[data-is_arg="true"]').forEach(el => el.classList.toggle('hidden'));
+	})
 	
 	// Bottom options
 	const options = document.createElement('div');
@@ -396,7 +445,7 @@ function hideAddServiceWindow() {
 
 function buildAppriseURL() {
 	const data = notification_services[document.querySelector('#add-service-window').dataset.index];
-	const inputs = document.querySelectorAll('#add-service-window > [data-map]');
+	const inputs = document.querySelectorAll('#add-service-window > [data-map][data-is_arg="false"]');
 	const values = {};
 
 	// Gather all values and format
@@ -435,6 +484,32 @@ function buildAppriseURL() {
 
 	for (const [key, value] of Object.entries(values))
 		template = template.replace(`{${key}}`, value);
+
+	// Add args
+	const args = [...document.querySelectorAll('#add-service-window > [data-map][data-is_arg="true"]')]
+		.map(el => {
+			if (['INPUT', 'SELECT'].includes(el.nodeName) && el.value)
+				return `${el.dataset.map}=${el.value}`;
+			else if (el.nodeName == 'DIV') {
+				let value = 
+					[...el.querySelectorAll('.entries-list')]
+					.map(l => 
+						[...l.querySelectorAll('.input-entries > div')]
+						.map(e => `${l.dataset.prefix || ''}${e.innerText}`)
+					)
+					.flat()
+					.join(el.dataset.delim)
+
+				if (value)
+					return `${el.dataset.map}=${value}`;
+			};
+
+			return null;
+		})
+		.filter(el => el !== null)
+		.join('&')
+	template += (template.includes('?') ? '&' : '?') + args;
+	template = template.replaceAll(' ', '%20');
 
 	console.debug(matching_templates);
 	console.debug(template);

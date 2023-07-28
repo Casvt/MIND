@@ -88,13 +88,13 @@ def get_apprise_services() -> List[Dict[str, Union[str, Dict[str, list]]]]:
 				'required': v['required'],
 				'type': v['type'].split(':')[0],
 				**({
+					'options': v.get('values'),
+					'default': v.get('default')
+				} if v['type'].startswith('choice') else {
 					'prefix': v.get('prefix'),
 					'min': v.get('min'),
 					'max': v.get('max'),
 					'regex': v.get('regex')
-				} if not v['type'].startswith('choice') else {
-					'options': v.get('values'),
-					'default': v.get('default')
 				})
 			}
 			for k, v in
@@ -105,6 +105,37 @@ def get_apprise_services() -> List[Dict[str, Union[str, Dict[str, list]]]]:
 		]
 
 		result['details']['tokens'].sort(key=_sort_tokens)
+
+		result['details']['args'] += [
+			{
+				'name': v.get('name', k),
+				'map_to': k,
+				'required': v.get('required', False),
+				'type': v['type'].split(':')[0],
+				**({
+					'delim': v['delim'][0],
+					'content': []
+				} if v['type'].startswith('list') else {
+					'options': v['values'],
+					'default': v.get('default')
+				} if v['type'].startswith('choice') else {
+					'default': v['default']
+				} if v['type'] == 'bool' else {
+					'min': v.get('min'),
+					'max': v.get('max'),
+					'regex': v.get('regex')
+				})
+			}
+			for k, v in
+				filter(
+					lambda a: (
+						a[1].get('alias_of') is None
+						and not a[0] in ('cto', 'format', 'overflow', 'rto', 'verify')
+					),
+					entry['details']['args'].items()
+				)
+		]
+		result['details']['args'].sort(key=_sort_tokens)
 
 		apprise_services.append(result)
 
