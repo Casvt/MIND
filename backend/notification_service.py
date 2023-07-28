@@ -333,4 +333,19 @@ class NotificationServices:
 		).lastrowid
 
 		return self.fetchone(new_id)
-		
+	
+	def test_service(
+		self,
+		url: str
+	) -> None:
+		"""Send a test notification using the supplied Apprise URL
+
+		Args:
+			url (str): The Apprise URL to use to send the test notification
+		"""
+		logging.info(f'Testing service with {url=}')
+		a = Apprise()
+		a.add(url)
+		a.notify(title='MIND: Test title', body='MIND: Test body')
+		return
+	

@@ -168,14 +168,16 @@ div.options > button {
 	color: var(--color-error);
 }
 
-#test-reminder {
+#test-reminder,
+#test-service {
 	display: flex;
 	gap: 1rem;
 	
 	overflow-x: hidden;
 }
 
-#test-reminder > div {
+#test-reminder > div,
+#test-service > div {
 	width: 100%;
 	flex: 0 0 auto;
 	
@@ -184,7 +186,8 @@ div.options > button {
 	transition: transform .1s linear;
 }
 
-#test-reminder.show-sent > div {
+#test-reminder.show-sent > div,
+#test-service.show-sent > div {
 	transform: translateX(calc(-100% - 1rem));
 }
 

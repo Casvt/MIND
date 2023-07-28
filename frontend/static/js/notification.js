@@ -185,6 +185,57 @@ function deleteService(id) {
 	});
 };
 
+function testService() {
+	const test_button = document.querySelector('#test-service');
+
+	// Check regexes for input's
+	[...document.querySelectorAll('#add-service-window > input:not([data-regex=""])[data-regex]')]
+		.forEach(el => el.classList.remove('error-input'));
+
+	const faulty_inputs =
+		[...document.querySelectorAll('#add-service-window > input:not([data-regex=""])[data-regex]')]
+			.filter(el => !new RegExp
+				(
+					el.dataset.regex.split('').reverse().join('').split(',').slice(1).join(',').split('').reverse().join(''),
+					el.dataset.regex.split('').reverse().join('').split(',')[0]
+				).test(el.value)
+			);
+	if (faulty_inputs.length > 0) {
+		faulty_inputs.forEach(el => el.classList.add('error-input'));
+		return;
+	};
+
+	const data = {
+		'url': buildAppriseURL()
+	};
+	if (!data.url) {
+		test_button.classList.add('error-input');
+		test_button.title = 'Required field missing';
+		return;
+	};
+	fetch(`${url_prefix}/api/notificationservices/test?api_key=${api_key}`, {
+		'method': 'POST',
+		'headers': {'Content-Type': 'application/json'},
+		'body': JSON.stringify(data)
+	})
+	.then(response => {
+		if (!response.ok) return Promise.reject(response.status);
+		
+		test_button.classList.remove('error-input');
+		test_button.title = '';
+		test_button.classList.add('show-sent');
+	})
+	.catch(e => {
+		if (e === 401)
+			window.location.href = `${url_prefix}/`;
+		else if (e === 400) {
+			test_button.classList.add('error-input');
+			test_button.title = 'Invalid Apprise URL';
+		} else
+			console.log(e);
+	});
+};
+
 function toggleAddService() {
 	const cont = document.querySelector('.overflow-container');
 	if (cont.classList.contains('show-add')) {
@@ -425,11 +476,25 @@ function showAddServiceWindow(index) {
 	// Bottom options
 	const options = document.createElement('div');
 	options.classList.add('options');
+
 	const cancel = document.createElement('button');
 	cancel.type = 'button';
 	cancel.innerText = 'Cancel';
 	cancel.addEventListener('click', e => toggleAddService());
 	options.appendChild(cancel);
+
+	const test = document.createElement('button');
+	test.id = 'test-service';
+	test.type = 'button';
+	test.addEventListener('click', e => testService());
+	options.appendChild(test);
+	const test_text = document.createElement('div');
+	test_text.innerText = 'Test';
+	test.appendChild(test_text);
+	const test_sent_text = document.createElement('div');
+	test_sent_text.innerText = 'Sent';
+	test.appendChild(test_sent_text);
+
 	const add = document.createElement('button');
 	add.type = 'submit';
 	add.innerText = 'Add';
@@ -546,7 +611,7 @@ function addService() {
 		add_button.classList.add('error-input');
 		add_button.title = 'Required field missing';
 		return;
-	}
+	};
 	fetch(`${url_prefix}/api/notificationservices?api_key=${api_key}`, {
 		'method': 'POST',
 		'headers': {'Content-Type': 'application/json'},

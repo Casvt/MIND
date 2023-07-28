@@ -492,6 +492,17 @@ def api_notification_service_available():
 	return return_api(result)
 
 @api.route(
+	'/notificationservices/test',
+	'Send a test notification using the supplied Apprise URL',
+	{'POST': [[URLVariable]]}, 
+	methods=['POST']
+)
+@endpoint_wrapper
+def api_test_service(inputs: Dict[str, Any]):
+	g.user_data.notification_services.test_service(inputs['url'])
+	return return_api({}, code=201)
+
+@api.route(
 	'/notificationservices/<int:n_id>',
 	'Manage a specific notification service',
 	{'PUT': [[EditTitleVariable, EditURLVariable],
