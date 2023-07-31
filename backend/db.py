@@ -12,7 +12,7 @@ from waitress.task import ThreadedTaskDispatcher as OldThreadedTaskDispatcher
 
 from backend.custom_exceptions import AccessUnauthorized, UserNotFound
 
-__DATABASE_VERSION__ = 6
+__DATABASE_VERSION__ = 7
 
 class Singleton(type):
 	_instances = {}
@@ -206,6 +206,16 @@ def migrate_db(current_db_version: int) -> None:
 			User('User1', 'Password1').delete()
 		except (UserNotFound, AccessUnauthorized):
 			pass
+		
+		current_db_version = 6
+
+	if current_db_version == 6:
+		# V6 -> V7
+		cursor.executescript("""
+			ALTER TABLE reminders
+			ADD weekdays VARCHAR(13);
+		""")
+		current_db_version = 7
 
 	return
 
@@ -240,6 +250,7 @@ def setup_db() -> None:
 			repeat_quantity VARCHAR(15),
 			repeat_interval INTEGER,
 			original_time INTEGER,
+			weekdays VARCHAR(13),
 			
 			color VARCHAR(7),
 			

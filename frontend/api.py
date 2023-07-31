@@ -232,6 +232,21 @@ class RepeatIntervalVariable(DefaultInputVariable):
 	def validate(self) -> bool:
 		return self.value is None or (isinstance(self.value, int) and self.value > 0)
 
+class WeekDaysVariable(DefaultInputVariable):
+	name = 'weekdays'
+	description = 'On which days of the weeks to run the reminder'
+	required = False
+	default = None
+	related_exceptions = [InvalidKeyValue]
+	_options = {0, 1, 2, 3, 4, 5, 6}
+	
+	def validate(self) -> bool:
+		return self.value is None or (
+			isinstance(self.value, list)
+			and len(self.value) > 0
+			and all(v in self._options for v in self.value)
+		)
+
 class ColorVariable(DefaultInputVariable):
 	name = 'color'
 	description = 'The hex code of the color of the entry, which is shown in the web-ui'
@@ -540,6 +555,7 @@ def api_notification_service(inputs: Dict[str, str], n_id: int):
 	'POST': [[TitleVariable, TimeVariable,
 			NotificationServicesVariable, TextVariable,
 			RepeatQuantityVariable, RepeatIntervalVariable,
+			WeekDaysVariable,
 			ColorVariable],
 			'Add a reminder']
 	},
@@ -560,6 +576,7 @@ def api_reminders_list(inputs: Dict[str, Any]):
 								text=inputs['text'],
 								repeat_quantity=inputs['repeat_quantity'],
 								repeat_interval=inputs['repeat_interval'],
+								weekdays=inputs['weekdays'],
 								color=inputs['color'])
 		return return_api(result.get(), code=201)
 
@@ -592,6 +609,7 @@ def api_test_reminder(inputs: Dict[str, Any]):
 	{'PUT': [[EditTitleVariable, EditTimeVariable,
 			EditNotificationServicesVariable, TextVariable,
 			RepeatQuantityVariable, RepeatIntervalVariable,
+			WeekDaysVariable,
 			ColorVariable],
 			'Edit the reminder'],
 	'DELETE': [[],
@@ -612,6 +630,7 @@ def api_get_reminder(inputs: Dict[str, Any], r_id: int):
 												text=inputs['text'],
 												repeat_quantity=inputs['repeat_quantity'],
 												repeat_interval=inputs['repeat_interval'],
+												weekdays=inputs['weekdays'],
 												color=inputs['color'])
 		return return_api(result)
 

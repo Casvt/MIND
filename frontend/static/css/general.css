@@ -38,7 +38,7 @@ button:hover {
 	cursor: pointer;
 }
 
-input,
+input:not([type="checkbox"]),
 select,
 textarea {
 	width: 100%;

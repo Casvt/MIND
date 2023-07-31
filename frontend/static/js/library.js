@@ -39,6 +39,19 @@ function showTab(button) {
 // 
 // Filling library
 // 
+function getWeekDays(locale)
+{
+	let baseDate = new Date(Date.UTC(2017, 0, 2)); // just a Monday
+	let weekDays = [];
+	for(i = 0; i < 7; i++)
+	{
+		weekDays.push(baseDate.toLocaleDateString(locale, { weekday: 'short' }));
+		baseDate.setDate(baseDate.getDate() + 1);
+	}
+	return weekDays;
+};
+const week_days = getWeekDays(getLocalStorage('locale')['locale']);
+
 function fillTable(table, results) {
 	table.querySelectorAll('button.entry:not(.add-entry)').forEach(e => e.remove());
 
@@ -56,19 +69,22 @@ function fillTable(table, results) {
 
 		if (table === types.reminder) {
 			const time = document.createElement('p');
-			var offset = new Date(r.time * 1000).getTimezoneOffset() * -60;
-			var d = new Date((r.time + offset) * 1000);
-			var formatted_date = d.toLocaleString(getLocalStorage('locale')['locale']);
+			let offset = new Date(r.time * 1000).getTimezoneOffset() * -60;
+			let d = new Date((r.time + offset) * 1000);
+			let formatted_date = d.toLocaleString(getLocalStorage('locale')['locale']);
+
 			if (r.repeat_interval !== null) {
 				if (r.repeat_interval === 1) {
-					var quantity = r.repeat_quantity.endsWith('s') ? r.repeat_quantity.slice(0, -1) : r.repeat_quantity;
+					let quantity = r.repeat_quantity.slice(0, -1)
 					var interval_text = ` (each ${quantity})`;
 				} else {
-					var quantity = r.repeat_quantity.endsWith('s') ? r.repeat_quantity : r.repeat_quantity + 's';
-					var interval_text = ` (every ${r.repeat_interval} ${quantity})`;
+					var interval_text = ` (every ${r.repeat_interval} ${r.repeat_quantity})`;
 				};
 				formatted_date += interval_text;
-			};
+
+			} else if (r.weekdays !== null)
+				formatted_date += ` (each ${r.weekdays.split(',').map(d => week_days[parseInt(d)]).join(', ')})`;
+
 			time.innerText = formatted_date;
 			entry.appendChild(time);
 		};
