@@ -301,6 +301,7 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 	| text | No | The body of the entry | N/A |
 	| repeat_quantity | No | The quantity of the repeat_interval | `years`, `months`, `weeks`, `days`, `hours`, `minutes` |
 	| repeat_interval | No | The number of the interval | N/A |
+	| weekdays | No | On which days of the weeks to run the reminder | N/A |
 	| color | No | The hex code of the color of the entry, which is shown in the web-ui | N/A |
 
 	**Returns**
@@ -391,6 +392,7 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 	| text | No | The body of the entry | N/A |
 	| repeat_quantity | No | The quantity of the repeat_interval | `years`, `months`, `weeks`, `days`, `hours`, `minutes` |
 	| repeat_interval | No | The number of the interval | N/A |
+	| weekdays | No | On which days of the weeks to run the reminder | N/A |
 	| color | No | The hex code of the color of the entry, which is shown in the web-ui | N/A |
 
 	**Returns**
