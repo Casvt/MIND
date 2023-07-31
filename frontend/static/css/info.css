@@ -105,13 +105,12 @@
 	border-top: 1px solid var(--color-gray);
 }
 
-.notification-service-list > div > input {
-	width: fit-content;
-	box-shadow: none;
+.form-container > form .repeat-options > button {
+	width: calc((100% / 3) - (var(--gap) / 1.5));
+	min-width: min-content;
 }
 
-.repeat-bar,
-.repeat-edit-bar {
+.repeat-bar {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -122,30 +121,50 @@
 	box-shadow: var(--default-shadow);
 }
 
-.repeat-bar > *,
-.repeat-edit-bar > * {
+.repeat-bar > input,
+.repeat-bar > select {
 	border: 0;
 	box-shadow: none;
 }
 
-.repeat-bar > p,
-.repeat-edit-bar > p {
+.repeat-bar > p {
 	min-width: 7rem;
 
 	padding: 1rem;
 	padding-right: .25rem;
 }
 
-.repeat-bar > input[type="number"],
-.repeat-edit-bar > input[type="number"] {
+.repeat-bar > input[type="number"] {
 	min-width: 5rem;
 	
 	padding-left: .25rem;
 }
 
-.repeat-bar > select,
-.repeat-edit-bar > select {
+.repeat-bar > select {
 	min-width: 8rem;
+}
+
+.weekday-bar {
+	display: grid;
+	grid-template-columns: auto auto auto auto auto auto auto;
+	row-gap: .6rem;
+
+	border: 2px solid var(--color-gray);
+	border-radius: 4px;
+	padding: 1rem;
+
+	box-shadow: var(--default-shadow);
+}
+
+.weekday-bar > p {
+	text-align: center;
+	grid-row: 1 / 2;
+}
+
+.weekday-bar > input {
+	margin: auto;
+	width: 1.3rem;
+	aspect-ratio: 1/1;
 }
 
 div.options > button {
@@ -168,14 +187,16 @@ div.options > button {
 	color: var(--color-error);
 }
 
-#test-reminder {
+#test-reminder,
+#test-service {
 	display: flex;
 	gap: 1rem;
 	
 	overflow-x: hidden;
 }
 
-#test-reminder > div {
+#test-reminder > div,
+#test-service > div {
 	width: 100%;
 	flex: 0 0 auto;
 	
@@ -184,15 +205,34 @@ div.options > button {
 	transition: transform .1s linear;
 }
 
-#test-reminder.show-sent > div {
+#test-reminder.show-sent > div,
+#test-service.show-sent > div {
 	transform: translateX(calc(-100% - 1rem));
 }
 
 @media (max-width: 460px) {
 	.sub-inputs > input,
 	.sub-inputs > select,
-	.sub-inputs > button {
+	.sub-inputs > button,
+	.form-container > form .repeat-options > button {
 		width: 100%;
+	}
+	
+	.weekday-bar {
+		grid-template-columns: auto auto;
+		grid-auto-flow: dense;
+		column-gap: 1rem;
+		row-gap: .8rem;
+	}
+	
+	.weekday-bar > p {
+		grid-row: unset;
+		text-align: right;
+	}
+	
+	.weekday-bar > input {
+		margin: unset;
+		width: min-content;
 	}
 }
 
@@ -206,7 +246,9 @@ div.options > button {
 #info.show-add-static-reminder #time-input,
 #info.show-add-static-reminder #normal-button,
 #info.show-add-static-reminder #repeat-button,
+#info.show-add-static-reminder #weekday-button,
 #info.show-add-static-reminder .repeat-bar,
+#info.show-add-static-reminder .weekday-bar,
 #info.show-add-static-reminder #delete-info {
 	display: none;
 }
@@ -225,7 +267,9 @@ div.options > button {
 #info.show-add-template #time-input,
 #info.show-add-template #normal-button,
 #info.show-add-template #repeat-button,
+#info.show-add-template #weekday-button,
 #info.show-add-template .repeat-bar,
+#info.show-add-template .weekday-bar,
 #info.show-add-template #test-reminder,
 #info.show-add-template #delete-info {
 	display: none;
@@ -256,7 +300,9 @@ div.options > button {
 #info.show-edit-static-reminder #time-input,
 #info.show-edit-static-reminder #normal-button,
 #info.show-edit-static-reminder #repeat-button,
-#info.show-edit-static-reminder .repeat-bar {
+#info.show-edit-static-reminder #weekday-button,
+#info.show-edit-static-reminder .repeat-bar,
+#info.show-edit-static-reminder .weekday-bar {
 	display: none;
 }
 
@@ -273,7 +319,9 @@ div.options > button {
 #info.show-edit-template #time-input,
 #info.show-edit-template #normal-button,
 #info.show-edit-template #repeat-button,
+#info.show-edit-template #weekday-button,
 #info.show-edit-template .repeat-bar,
+#info.show-edit-template .weekday-bar,
 #info.show-edit-template #test-reminder {
 	display: none;
 }

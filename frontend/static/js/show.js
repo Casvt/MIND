@@ -1,10 +1,12 @@
 function showAdd(type) {
+	const default_service = getLocalStorage('default_service')['default_service'];
 	inputs.template.value = '0';
 	inputs.title.value = '';
 	inputs.text.value = '';
 	inputs.time.value = '';
 	inputs.notification_service.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
-	inputs.notification_service.querySelector('input[type="checkbox"]:first-child').checked = true;
+	inputs.notification_service.querySelector(`input[type="checkbox"][data-id="${default_service}"]`).checked = true;
+	document.querySelectorAll('.weekday-bar > input[type="checkbox"]').forEach(el => el.checked = false);
 	toggleNormal();
 	toggleColor(true);
 	document.getElementById('test-reminder').classList.remove('show-sent');
@@ -77,13 +79,18 @@ function showEdit(id, type) {
 		);
 
 		if (type == types.reminder) {
-			if (json.result.repeat_interval === null) {
-				toggleNormal();
-			} else {
+			if (json.result.repeat_interval !== null) {
 				toggleRepeated();
 				type_buttons.repeat_interval.value = json.result.repeat_interval;
 				type_buttons.repeat_quantity.value = json.result.repeat_quantity;
-			};
+			}
+			else if (json.result.weekdays !== null) {
+				toggleWeekDay();
+				[...document.querySelectorAll('.weekday-bar > input[type="checkbox"]')]
+					.map((el, index) => [el, index])
+					.forEach(el => el[0].checked = json.result.weekdays.includes(el[1]))
+			} else
+				toggleNormal();
 		};
 
 		inputs.text.value = json.result.text;

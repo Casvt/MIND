@@ -12,10 +12,13 @@ const inputs = {
 const type_buttons = {
 	'normal_button': document.getElementById('normal-button'),
 	'repeat_button': document.getElementById('repeat-button'),
+	'weekday_button': document.getElementById('weekday-button'),
 	
 	'repeat_bar': document.querySelector('.repeat-bar'),
 	'repeat_interval': document.getElementById('repeat-interval'),
-	'repeat_quantity': document.getElementById('repeat-quantity')
+	'repeat_quantity': document.getElementById('repeat-quantity'),
+	
+	'weekday_bar': document.querySelector('.weekday-bar')
 };
 
 function loadColor() {
@@ -54,18 +57,38 @@ function toggleNotificationService(hide=false) {
 function toggleNormal() {
 	type_buttons.normal_button.dataset.selected = 'true';
 	type_buttons.repeat_button.dataset.selected = 'false';
+	type_buttons.weekday_button.dataset.selected = 'false';
 
 	type_buttons.repeat_bar.classList.add('hidden');
 	type_buttons.repeat_interval.removeAttribute('required');
 	type_buttons.repeat_interval.value = '';
+	
+	type_buttons.weekday_bar.classList.add('hidden');
+	type_buttons.weekday_bar.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
 };
 
 function toggleRepeated() {
 	type_buttons.normal_button.dataset.selected = 'false';
 	type_buttons.repeat_button.dataset.selected = 'true';
+	type_buttons.weekday_button.dataset.selected = 'false';
 
 	type_buttons.repeat_bar.classList.remove('hidden');
 	type_buttons.repeat_interval.setAttribute('required', '');
+	
+	type_buttons.weekday_bar.classList.add('hidden');
+	type_buttons.weekday_bar.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+};
+
+function toggleWeekDay() {
+	type_buttons.normal_button.dataset.selected = 'false';
+	type_buttons.repeat_button.dataset.selected = 'false';
+	type_buttons.weekday_button.dataset.selected = 'true';
+
+	type_buttons.repeat_bar.classList.add('hidden');
+	type_buttons.repeat_interval.removeAttribute('required');
+	type_buttons.repeat_interval.value = '';
+	
+	type_buttons.weekday_bar.classList.remove('hidden');
 };
 
 function testReminder() {
@@ -169,6 +192,8 @@ function submitInfo() {
 	inputs.time.removeAttribute('title');
 	inputs.notification_service.classList.remove('error-input');
 	inputs.notification_service.removeAttribute('title');
+	type_buttons.weekday_bar.classList.remove('error-input');
+	type_buttons.weekday_bar.removeAttribute('title');
 	let fetch_data = {
 		url: null,
 		method: null,
@@ -189,7 +214,7 @@ function submitInfo() {
 	if (data.notification_services.length === 0) {
 		inputs.notification_service.classList.add('error-input');
 		inputs.notification_service.title = 'No notification service set';
-		return
+		return;
 	};
 
 	const e_id = document.getElementById('info').dataset.id;
@@ -200,7 +225,21 @@ function submitInfo() {
 		if (type_buttons.repeat_button.dataset.selected === 'true') {
 			data['repeat_quantity'] = type_buttons.repeat_quantity.value;
 			data['repeat_interval'] = parseInt(type_buttons.repeat_interval.value)
+
+		} else if (type_buttons.weekday_button.dataset.selected === 'true') {
+			data['weekdays'] = 
+				[...document.querySelectorAll('.weekday-bar > input[type="checkbox"]')]
+					.map((el, index) => [el, index])
+					.filter(el => el[0].checked)
+					.map(el => el[1]);
+
+			if (data['weekdays'].length === 0) {
+				type_buttons.weekday_bar.classList.add('error-input');
+				type_buttons.weekday_bar.title = 'No day of the week is selected';
+				return;
+			};
 		};
+
 		fetch_data.url = `${url_prefix}/api/reminders?api_key=${api_key}`;
 		fetch_data.method = 'POST';
 		fetch_data.call_back = fillReminders;
@@ -226,7 +265,21 @@ function submitInfo() {
 		if (type_buttons.repeat_button.dataset.selected === 'true') {
 			data['repeat_quantity'] = type_buttons.repeat_quantity.value;
 			data['repeat_interval'] = parseInt(type_buttons.repeat_interval.value)
+
+		} else if (type_buttons.weekday_button.dataset.selected === 'true') {
+			data['weekdays'] = 
+				[...document.querySelectorAll('.weekday-bar > input[type="checkbox"]')]
+					.map((el, index) => [el, index])
+					.filter(el => el[0].checked)
+					.map(el => el[1]);
+
+			if (data['weekdays'].length === 0) {
+				type_buttons.weekday_bar.classList.add('error-input');
+				type_buttons.weekday_bar.title = 'No day of the week is selected';
+				return;
+			};
 		};
+
 		fetch_data.url = `${url_prefix}/api/reminders/${e_id}?api_key=${api_key}`;
 		fetch_data.method = 'PUT';
 		fetch_data.call_back = fillReminders;
@@ -279,6 +332,7 @@ document.getElementById('color-toggle').addEventListener('click', e => toggleCol
 document.getElementById('toggle-notification-service-list').addEventListener('click', e => toggleNotificationService());
 document.getElementById('normal-button').addEventListener('click', e => toggleNormal());
 document.getElementById('repeat-button').addEventListener('click', e => toggleRepeated());
+document.getElementById('weekday-button').addEventListener('click', e => toggleWeekDay());
 document.getElementById('close-info').addEventListener('click', e => hideWindow());
 document.getElementById('delete-info').addEventListener('click', e => deleteInfo());
 document.getElementById('test-reminder').addEventListener('click', e => testReminder());

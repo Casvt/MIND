@@ -181,6 +181,42 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 
+### `/notificationservices/available`
+
+| Requires being logged in | Description |
+| ------------------------ | ----------- |
+| Yes | Get all available notification services and their url layout | 
+
+??? GET
+
+	**Returns**
+	
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 200| N/A | Success |
+
+### `/notificationservices/test`
+
+| Requires being logged in | Description |
+| ------------------------ | ----------- |
+| Yes | Send a test notification using the supplied Apprise URL | 
+
+??? POST
+
+	**Parameters (body)**
+
+	| Name | Required | Description | Allowed values |
+	| ---- | -------- | ----------- | -------------- |
+	| url | Yes | The Apprise URL of the notification service | N/A |
+
+	**Returns**
+	
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 201| N/A | Success |
+	| 400 | InvalidKeyValue | The value of a key is invalid |
+	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
+
 ### `/notificationservices/<int:n_id>`
 
 | Requires being logged in | Description |
@@ -265,6 +301,7 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 	| text | No | The body of the entry | N/A |
 	| repeat_quantity | No | The quantity of the repeat_interval | `years`, `months`, `weeks`, `days`, `hours`, `minutes` |
 	| repeat_interval | No | The number of the interval | N/A |
+	| weekdays | No | On which days of the weeks to run the reminder | N/A |
 	| color | No | The hex code of the color of the entry, which is shown in the web-ui | N/A |
 
 	**Returns**
@@ -355,6 +392,7 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 	| text | No | The body of the entry | N/A |
 	| repeat_quantity | No | The quantity of the repeat_interval | `years`, `months`, `weeks`, `days`, `hours`, `minutes` |
 	| repeat_interval | No | The number of the interval | N/A |
+	| weekdays | No | On which days of the weeks to run the reminder | N/A |
 	| color | No | The hex code of the color of the entry, which is shown in the web-ui | N/A |
 
 	**Returns**

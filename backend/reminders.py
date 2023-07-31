@@ -1,13 +1,13 @@
 #-*- coding: utf-8 -*-
 
-from datetime import datetime
 import logging
+from datetime import datetime
 from sqlite3 import IntegrityError
 from threading import Timer
 from typing import List, Literal
 
 from apprise import Apprise
-from dateutil.relativedelta import relativedelta
+from dateutil.relativedelta import relativedelta, weekday
 from flask import Flask
 
 from backend.custom_exceptions import (InvalidKeyValue, InvalidTime,
@@ -23,13 +23,34 @@ filter_function = lambda query, p: (
 def _find_next_time(
 	original_time: int,
 	repeat_quantity: Literal["years", "months", "weeks", "days", "hours", "minutes"],
-	repeat_interval: int
+	repeat_interval: int,
+	weekdays: List[int]
 ) -> int:
-	td = relativedelta(**{repeat_quantity: repeat_interval})
+	if weekdays is not None:
+		weekdays.sort()
+
 	new_time = datetime.fromtimestamp(original_time)
 	current_time = datetime.fromtimestamp(datetime.utcnow().timestamp())
-	while new_time <= current_time:
-		new_time += td
+
+	if repeat_quantity is not None:
+		td = relativedelta(**{repeat_quantity: repeat_interval})
+		while new_time <= current_time:
+			new_time += td
+
+	else:
+		next_day = ([d for d in weekdays if new_time.weekday() < d] or weekdays)[0]
+		proposed_time = new_time + relativedelta(weekday=weekday(next_day))
+		if proposed_time == new_time:
+			proposed_time += relativedelta(weekday=weekday(next_day, 2))
+		new_time = proposed_time
+
+		while new_time <= current_time:
+			next_day = ([d for d in weekdays if new_time.weekday() < d] or weekdays)[0]
+			proposed_time = new_time + relativedelta(weekday=weekday(next_day))
+			if proposed_time == new_time:
+				proposed_time += relativedelta(weekday=weekday(next_day, 2))
+			new_time = proposed_time
+
 	result = int(new_time.timestamp())
 	logging.debug(
 		f'{original_time=}, {current_time=} and interval of {repeat_interval} {repeat_quantity} leads to {result}'
@@ -60,7 +81,9 @@ class ReminderHandler:
 				SELECT
 					r.id,
 					r.title, r.text,
-					r.repeat_quantity, r.repeat_interval, r.original_time
+					r.repeat_quantity, r.repeat_interval,
+					r.weekdays,
+					r.original_time
 				FROM reminders r
 				WHERE time = ?;
 			""", (time,))
@@ -81,7 +104,7 @@ class ReminderHandler:
 					a.add(url['url'])
 				a.notify(title=reminder["title"], body=reminder["text"])
 
-				if reminder['repeat_quantity'] is None:
+				if reminder['repeat_quantity'] is None and reminder['weekdays'] is None:
 					# Delete the reminder from the database
 					cursor.execute(
 						"DELETE FROM reminders WHERE id = ?;",
@@ -93,7 +116,8 @@ class ReminderHandler:
 					new_time = _find_next_time(
 						reminder['original_time'],
 						reminder['repeat_quantity'],
-						reminder['repeat_interval']
+						reminder['repeat_interval'],
+						[int(d) for d in reminder['weekdays'].split(',')] if reminder['weekdays'] is not None else None
 					)
 					cursor.execute(
 						"UPDATE reminders SET time = ? WHERE id = ?;",
@@ -177,6 +201,7 @@ class Reminder:
 				time,
 				repeat_quantity,
 				repeat_interval,
+				weekdays,
 				color
 			FROM reminders
 			WHERE id = ?
@@ -202,6 +227,7 @@ class Reminder:
 		text: str = None,
 		repeat_quantity: Literal["years", "months", "weeks", "days", "hours", "minutes"] = None,
 		repeat_interval: int = None,
+		weekdays: List[int] = None,
 		color: str = None
 	) -> dict:
 		"""Edit the reminder
@@ -213,17 +239,23 @@ class Reminder:
 			text (str, optional): The new body of the reminder. Defaults to None.
 			repeat_quantity (Literal["years", "months", "weeks", "days", "hours", "minutes"], optional): The new quantity of the repeat specified for the reminder. Defaults to None.
 			repeat_interval (int, optional): The new amount of repeat_quantity, like "5" (hours). Defaults to None.
+			weekdays (List[int], optional): The new indexes of the days of the week that the reminder should run. Defaults to None.
 			color (str, optional): The new hex code of the color of the reminder, which is shown in the web-ui. Defaults to None.
+
+		Note about args:
+			Either repeat_quantity and repeat_interval are given, weekdays is given or neither, but not both.
 
 		Raises:
 			NotificationServiceNotFound: One of the notification services was not found
+			InvalidKeyValue: The value of one of the keys is not valid or the "Note about args" is violated
 
 		Returns:
 			dict: The new reminder info
 		"""
 		logging.info(
 			f'Updating notification service {self.id}: '
-			+ f'{title=}, {time=}, {notification_services=}, {text=}, {repeat_quantity=}, {repeat_interval=}, {color=}'
+			+ f'{title=}, {time=}, {notification_services=}, {text=}, '
+			+ f'{repeat_quantity=}, {repeat_interval=}, {weekdays=}, {color=}'
 		)
 		cursor = get_db()
 
@@ -232,7 +264,12 @@ class Reminder:
 			raise InvalidKeyValue('repeat_quantity', repeat_quantity)
 		elif repeat_quantity is not None and repeat_interval is None:
 			raise InvalidKeyValue('repeat_interval', repeat_interval)
-		repeated_reminder = repeat_quantity is not None and repeat_interval is not None
+		elif weekdays is not None and repeat_quantity is not None and repeat_interval is not None:
+			raise InvalidKeyValue('weekdays', weekdays)
+		repeated_reminder = (
+			(repeat_quantity is not None and repeat_interval is not None)
+			or weekdays is not None
+		)
 
 		if time is not None:
 			if not repeated_reminder:
@@ -248,43 +285,28 @@ class Reminder:
 			'text': text,
 			'repeat_quantity': repeat_quantity,
 			'repeat_interval': repeat_interval,
+			'weekdays': ",".join(map(str, sorted(weekdays))) if weekdays is not None else None,
 			'color': color
 		}
 		for k, v in new_values.items():
-			if k in ('repeat_quantity', 'repeat_interval', 'color') or v is not None:
+			if k in ('repeat_quantity', 'repeat_interval', 'weekdays', 'color') or v is not None:
 				data[k] = v
 
 		# Update database
-		if not repeated_reminder:
-			next_time = data["time"]
-			cursor.execute("""
-				UPDATE reminders
-				SET
-					title=?, text=?,
-					time=?,
-					repeat_quantity=?, repeat_interval=?,
-					color=?
-				WHERE id = ?;
-				""", (
-					data["title"],
-					data["text"],
-					data["time"],
-					data["repeat_quantity"],
-					data["repeat_interval"],
-					data["color"],
-					self.id
-			))
-		else:
+		if repeated_reminder:
 			next_time = _find_next_time(
 				data["time"],
-				data["repeat_quantity"], data["repeat_interval"]
+				data["repeat_quantity"], data["repeat_interval"],
+				weekdays
 			)
 			cursor.execute("""
 				UPDATE reminders
 				SET
 					title=?, text=?,
 					time=?,
-					repeat_quantity=?, repeat_interval=?, original_time=?,
+					repeat_quantity=?, repeat_interval=?,
+					weekdays=?,
+					original_time=?,
 					color=?
 				WHERE id = ?;
 				""", (
@@ -293,7 +315,30 @@ class Reminder:
 					next_time,
 					data["repeat_quantity"],
 					data["repeat_interval"],
+					data["weekdays"],
 					data["time"],
+					data["color"],
+					self.id
+			))
+
+		else:
+			next_time = data["time"]
+			cursor.execute("""
+				UPDATE reminders
+				SET
+					title=?, text=?,
+					time=?,
+					repeat_quantity=?, repeat_interval=?,
+					weekdays=?,
+					color=?
+				WHERE id = ?;
+				""", (
+					data["title"],
+					data["text"],
+					data["time"],
+					data["repeat_quantity"],
+					data["repeat_interval"],
+					data["weekdays"],
 					data["color"],
 					self.id
 			))
@@ -360,6 +405,7 @@ class Reminders:
 				time,
 				repeat_quantity,
 				repeat_interval,
+				weekdays,
 				color
 			FROM reminders
 			WHERE user_id = ?;
@@ -408,6 +454,7 @@ class Reminders:
 		text: str = '',
 		repeat_quantity: Literal["years", "months", "weeks", "days", "hours", "minutes"] = None,
 		repeat_interval: int = None,
+		weekdays: List[int] = None,
 		color: str = None
 	) -> Reminder:
 		"""Add a reminder
@@ -419,17 +466,22 @@ class Reminders:
 			text (str, optional): The body of the reminder. Defaults to ''.
 			repeat_quantity (Literal["years", "months", "weeks", "days", "hours", "minutes"], optional): The quantity of the repeat specified for the reminder. Defaults to None.
 			repeat_interval (int, optional): The amount of repeat_quantity, like "5" (hours). Defaults to None.
+			weekdays (List[int], optional): The indexes of the days of the week that the reminder should run. Defaults to None.
 			color (str, optional): The hex code of the color of the reminder, which is shown in the web-ui. Defaults to None.
+
+		Note about args:
+			Either repeat_quantity and repeat_interval are given, weekdays is given or neither, but not both.
 
 		Raises:
 			NotificationServiceNotFound: One of the notification services was not found
+			InvalidKeyValue: The value of one of the keys is not valid or the "Note about args" is violated
 
 		Returns:
 			dict: The info about the reminder
 		"""
 		logging.info(
 			f'Adding reminder with {title=}, {time=}, {notification_services=}, '
-			+ f'{text=}, {repeat_quantity=}, {repeat_interval=}, {color=}'
+			+ f'{text=}, {repeat_quantity=}, {repeat_interval=}, {weekdays=}, {color=}'
 		)
 		
 		if time < datetime.utcnow().timestamp():
@@ -440,6 +492,8 @@ class Reminders:
 			raise InvalidKeyValue('repeat_quantity', repeat_quantity)
 		elif repeat_quantity is not None and repeat_interval is None:
 			raise InvalidKeyValue('repeat_interval', repeat_interval)
+		elif weekdays is not None and repeat_quantity is not None and repeat_interval is not None:
+			raise InvalidKeyValue('weekdays', weekdays)
 
 		cursor = get_db()
 		for service in notification_services:
@@ -449,17 +503,26 @@ class Reminders:
 			).fetchone():
 				raise NotificationServiceNotFound
 
-		if repeat_quantity is None and repeat_interval is None:
-			id = cursor.execute("""
-				INSERT INTO reminders(user_id, title, text, time, color)
-				VALUES (?, ?, ?, ?, ?);
-			""", (self.user_id, title, text, time, color)
-			).lastrowid
-		else:
+		if repeat_quantity is not None and repeat_interval is not None:
 			id = cursor.execute("""
 				INSERT INTO reminders(user_id, title, text, time, repeat_quantity, repeat_interval, original_time, color)
 				VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 			""", (self.user_id, title, text, time, repeat_quantity, repeat_interval, time, color)
+			).lastrowid
+
+		elif weekdays is not None:
+			weekdays = ",".join(map(str, sorted(weekdays)))
+			id = cursor.execute("""
+				INSERT INTO reminders(user_id, title, text, time, weekdays, original_time, color)
+				VALUES (?, ?, ?, ?, ?, ?, ?);
+			""", (self.user_id, title, text, time, weekdays, time, color)
+			).lastrowid
+		
+		else:
+			id = cursor.execute("""
+				INSERT INTO reminders(user_id, title, text, time, color)
+				VALUES (?, ?, ?, ?, ?);
+			""", (self.user_id, title, text, time, color)
 			).lastrowid
 			
 		try:
