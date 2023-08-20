@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 
 import logging
+from re import compile
 from typing import Dict, List, Union
 
 from apprise import Apprise
@@ -9,6 +10,14 @@ from backend.custom_exceptions import (NotificationServiceInUse,
                                        NotificationServiceNotFound)
 from backend.db import get_db
 
+remove_named_groups = compile(r'(?<=\()\?P<\w+>')
+
+def process_regex(regex: Union[List[str], None]):
+	return (
+		[remove_named_groups.sub('', regex[0]), regex[1]]
+		if regex is not None else
+		None
+	)
 
 def _sort_tokens(t: dict) -> int:
 	result = [
@@ -63,7 +72,7 @@ def get_apprise_services() -> List[Dict[str, Union[str, Dict[str, list]]]]:
 						'required': content['required'],
 						'type': content['type'],
 						'prefix': content.get('prefix'),
-						'regex': content.get('regex')
+						'regex': process_regex(content.get('regex'))
 					}
 					for content, _ in ((entry['details']['tokens'][e], handled_tokens.add(e)) for e in v['group'])
 				]
@@ -94,7 +103,7 @@ def get_apprise_services() -> List[Dict[str, Union[str, Dict[str, list]]]]:
 					'prefix': v.get('prefix'),
 					'min': v.get('min'),
 					'max': v.get('max'),
-					'regex': v.get('regex')
+					'regex': process_regex(v.get('regex'))
 				})
 			}
 			for k, v in
@@ -123,7 +132,7 @@ def get_apprise_services() -> List[Dict[str, Union[str, Dict[str, list]]]]:
 				} if v['type'] == 'bool' else {
 					'min': v.get('min'),
 					'max': v.get('max'),
-					'regex': v.get('regex')
+					'regex': process_regex(v.get('regex'))
 				})
 			}
 			for k, v in

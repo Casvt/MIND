@@ -196,8 +196,8 @@ function testService() {
 		[...document.querySelectorAll('#add-service-window > input:not([data-regex=""])[data-regex]')]
 			.filter(el => !new RegExp
 				(
-					el.dataset.regex.split('').reverse().join('').split(',').slice(1).join(',').split('').reverse().join(''),
-					el.dataset.regex.split('').reverse().join('').split(',')[0]
+					el.dataset.regex.split(',').slice(0, el.dataset.regex.split(',').length-1).join(','),
+					el.dataset.regex.split(',')[el.dataset.regex.split(',').length-1]
 				).test(el.value)
 			);
 	if (faulty_inputs.length > 0) {
@@ -594,8 +594,8 @@ function addService() {
 		[...document.querySelectorAll('#add-service-window > input:not([data-regex=""])[data-regex]')]
 			.filter(el => !new RegExp
 				(
-					el.dataset.regex.split('').reverse().join('').split(',').slice(1).join(',').split('').reverse().join(''),
-					el.dataset.regex.split('').reverse().join('').split(',')[0]
+					el.dataset.regex.split(',').slice(0, el.dataset.regex.split(',').length-1).join(','),
+					el.dataset.regex.split(',')[el.dataset.regex.split(',').length-1]
 				).test(el.value)
 			);
 	if (faulty_inputs.length > 0) {
