@@ -275,6 +275,7 @@ function createChoice(token) {
 	const choice = document.createElement('select');
 	choice.dataset.map = token.map_to || '';
 	choice.dataset.prefix = '';
+	choice.dataset.default = token.default || '';
 	choice.placeholder = token.name;
 	choice.required = token.required;
 	token.options.forEach(option => {
@@ -294,6 +295,7 @@ function createString(token) {
 	str_input.dataset.map = token.map_to || '';
 	str_input.dataset.prefix = token.prefix || '';
 	str_input.dataset.regex = token.regex || '';
+	str_input.dataset.default = token.default || '';
 	str_input.type = 'text';
 	str_input.placeholder = `${token.name}${!token.required ? ' (Optional)' : ''}`;
 	str_input.required = token.required;
@@ -304,6 +306,7 @@ function createInt(token) {
 	const int_input = document.createElement('input');
 	int_input.dataset.map = token.map_to || '';
 	int_input.dataset.prefix = token.prefix || '';
+	int_input.dataset.default = token.default || '';
 	int_input.type = 'number';
 	int_input.placeholder = `${token.name}${!token.required ? ' (Optional)' : ''}`;
 	int_input.required = token.required;
@@ -318,6 +321,7 @@ function createBool(token) {
 	const bool_input = document.createElement('select');
 	bool_input.dataset.map = token.map_to || '';
 	bool_input.dataset.prefix = '';
+	bool_input.dataset.default = token.default || '';
 	bool_input.placeholder = token.name;
 	bool_input.required = token.required;
 	[['Yes', 'true'], ['No', 'false']].forEach(option => {
@@ -553,7 +557,7 @@ function buildAppriseURL() {
 	// Add args
 	const args = [...document.querySelectorAll('#add-service-window > [data-map][data-is_arg="true"]')]
 		.map(el => {
-			if (['INPUT', 'SELECT'].includes(el.nodeName) && el.value)
+			if (['INPUT', 'SELECT'].includes(el.nodeName) && el.value && el.value !== el.dataset.default)
 				return `${el.dataset.map}=${el.value}`;
 			else if (el.nodeName == 'DIV') {
 				let value = 
