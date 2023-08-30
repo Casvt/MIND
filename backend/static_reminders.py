@@ -256,7 +256,7 @@ class StaticReminders:
 		Raises:
 			ReminderNotFound: The static reminder with the given id was not found
 		"""
-		logging.info(f'Triggering static reminder {self.id}')
+		logging.info(f'Triggering static reminder {id}')
 		cursor = get_db(dict)
 		reminder = cursor.execute("""
 			SELECT title, text
