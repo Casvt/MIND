@@ -12,7 +12,7 @@ from waitress.task import ThreadedTaskDispatcher as OldThreadedTaskDispatcher
 
 from backend.custom_exceptions import AccessUnauthorized, UserNotFound
 
-__DATABASE_VERSION__ = 7
+__DATABASE_VERSION__ = 8
 
 class Singleton(type):
 	_instances = {}
@@ -217,6 +217,27 @@ def migrate_db(current_db_version: int) -> None:
 		""")
 		current_db_version = 7
 
+	if current_db_version == 7:
+		# V7 -> V8
+		from backend.users import register_user
+		
+		cursor.executescript("""
+			ALTER TABLE users
+			ADD admin BOOL NOT NULL DEFAULT 0;
+					   
+			UPDATE users
+			SET username = 'admin_old'
+			WHERE username = 'admin';
+		""")
+		
+		register_user('admin', 'admin')
+		
+		cursor.execute("""
+			UPDATE users
+			SET admin = 1
+			WHERE username = 'admin';
+		""")
+
 	return
 
 def setup_db() -> None:
@@ -230,7 +251,8 @@ def setup_db() -> None:
 			id INTEGER PRIMARY KEY,
 			username VARCHAR(255) UNIQUE NOT NULL,
 			salt VARCHAR(40) NOT NULL,
-			hash VARCHAR(100) NOT NULL
+			hash VARCHAR(100) NOT NULL,
+			admin BOOL NOT NULL DEFAULT 0
 		);
 		CREATE TABLE IF NOT EXISTS notification_services(
 			id INTEGER PRIMARY KEY,

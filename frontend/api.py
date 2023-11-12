@@ -274,9 +274,15 @@ def input_validation() -> Union[None, Dict[str, Any]]:
 		Otherwise `Dict[str, Any]` with the input variables, checked and formatted.
 	"""
 	inputs = {}
-	input_variables = api_docs[request.url_rule.rule.split(api_prefix)[1]]['input_variables']
+
+	if request.path.startswith(admin_api_prefix):
+		input_variables = api_docs[request.url_rule.rule.split(admin_api_prefix)[1]]['input_variables']
+	else:
+		input_variables = api_docs[request.url_rule.rule.split(api_prefix)[1]]['input_variables']
+
 	if not input_variables:
 		return
+
 	if input_variables.get(request.method) is None:
 		return inputs
 	
@@ -325,7 +331,9 @@ class APIBlueprint(Blueprint):
 		return super().route(rule, **options)
 
 api_prefix = "/api"
+admin_api_prefix = api_prefix + "/admin"
 api = APIBlueprint('api', __name__)
+admin_api = APIBlueprint('admin_api', __name__)
 api_key_map = {}
 
 def return_api(result: Any, error: str=None, code: int=200) -> Tuple[dict, int]:
@@ -341,11 +349,24 @@ def auth() -> None:
 	hashed_api_key = hash(request.values.get('api_key',''))
 	if not hashed_api_key in api_key_map:
 		raise APIKeyInvalid
-	
+
+	if not (
+		(
+			api_key_map[hashed_api_key]['user_data'].admin
+			and request.path.startswith((admin_api_prefix, api_prefix + '/auth'))
+		)
+		or 
+		(
+			not api_key_map[hashed_api_key]['user_data'].admin
+			and not request.path.startswith(admin_api_prefix)
+		)
+	):
+		raise APIKeyInvalid
+
 	exp = api_key_map[hashed_api_key]['exp']
 	if exp <= epoch_time():
 		raise APIKeyExpired
-	
+
 	# Api key valid
 	g.hashed_api_key = hashed_api_key
 	g.exp = exp
@@ -354,7 +375,10 @@ def auth() -> None:
 
 def endpoint_wrapper(method: Callable) -> Callable:
 	def wrapper(*args, **kwargs):
-		requires_auth = api_docs[request.url_rule.rule.split(api_prefix)[1]]['requires_auth']
+		if request.path.startswith(admin_api_prefix):
+			requires_auth = api_docs[request.url_rule.rule.split(admin_api_prefix)[1]]['requires_auth']
+		else:
+			requires_auth = api_docs[request.url_rule.rule.split(api_prefix)[1]]['requires_auth']
 		try:
 			if requires_auth:
 				auth()
@@ -408,7 +432,7 @@ def api_login(inputs: Dict[str, str]):
 		}
 	})
 
-	result = {'api_key': api_key, 'expires': exp}
+	result = {'api_key': api_key, 'expires': exp, 'admin': user.admin}
 	return return_api(result, code=201)
 
 @api.route(
@@ -430,7 +454,8 @@ def api_logout():
 def api_status():
 	result = {
 		'expires': api_key_map[g.hashed_api_key]['exp'],
-		'username': api_key_map[g.hashed_api_key]['user_data'].username
+		'username': api_key_map[g.hashed_api_key]['user_data'].username,
+		'admin': api_key_map[g.hashed_api_key]['user_data'].admin
 	}
 	return return_api(result)
 
@@ -449,7 +474,7 @@ def api_status():
 def api_add_user(inputs: Dict[str, str]):
 	register_user(inputs['username'], inputs['password'])
 	return return_api({}, code=201)
-		
+
 @api.route(
 	'/user',
 	'Manage a user account',

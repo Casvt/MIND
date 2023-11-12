@@ -12,7 +12,8 @@ from waitress.server import create_server
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 from backend.db import DBConnection, ThreadedTaskDispatcher, close_db, setup_db
-from frontend.api import api, api_prefix, reminder_handler
+from frontend.api import (admin_api, admin_api_prefix, api, api_prefix,
+                          reminder_handler)
 from frontend.ui import ui
 
 HOST = '0.0.0.0'
@@ -73,6 +74,7 @@ def _create_app() -> Flask:
 
 	app.register_blueprint(ui)
 	app.register_blueprint(api, url_prefix=api_prefix)
+	app.register_blueprint(admin_api, url_prefix=admin_api_prefix)
 
 	# Setup closing database
 	app.teardown_appcontext(close_db)

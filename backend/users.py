@@ -11,7 +11,7 @@ from backend.static_reminders import StaticReminders
 from backend.templates import Templates
 
 ONEPASS_USERNAME_CHARACTERS = 'abcedfghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.!@$'
-ONEPASS_INVALID_USERNAMES = ['reminders','api']
+ONEPASS_INVALID_USERNAMES = ['reminders', 'api']
 
 class User:
 	"""Represents an user account
@@ -19,7 +19,7 @@ class User:
 	def __init__(self, username: str, password: str):
 		# Fetch data of user to check if user exists and to check if password is correct
 		result = get_db(dict).execute(
-			"SELECT id, salt, hash FROM users WHERE username = ? LIMIT 1;", 
+			"SELECT id, salt, hash, admin FROM users WHERE username = ? LIMIT 1;", 
 			(username,)
 		).fetchone()
 		if not result:
@@ -27,6 +27,7 @@ class User:
 		self.username = username
 		self.salt = result['salt']
 		self.user_id = result['id']
+		self.admin = result['admin'] == 1
 
 		# Check password
 		hash_password = get_hash(result['salt'], password)

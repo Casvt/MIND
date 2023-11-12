@@ -47,7 +47,10 @@ function login(data=null) {
 		const new_stor = JSON.parse(localStorage.getItem('MIND'));
 		new_stor.api_key = json.result.api_key;
 		localStorage.setItem('MIND', JSON.stringify(new_stor));
-		window.location.href = `${url_prefix}/reminders`;
+		if (json.result.admin)
+			window.location.href = `${url_prefix}/admin`;
+		else
+			window.location.href = `${url_prefix}/reminders`;
 	})
 	.catch(e => {
 		if (e === 401) {
@@ -98,7 +101,13 @@ function checkLogin() {
 	fetch(`${url_prefix}/api/auth/status?api_key=${JSON.parse(localStorage.getItem('MIND')).api_key}`)
 	.then(response => {
 		if (!response.ok) return Promise.reject(response.status);
-		window.location.href = '/reminders';
+		return response.json();
+	})
+	.then(json => {
+		if (json.result.admin)
+			window.location.href = `${url_prefix}/admin`;
+		else
+			window.location.href = `${url_prefix}/reminders`;
 	})
 	.catch(e => {
 		if (e === 401)
@@ -111,7 +120,7 @@ function checkLogin() {
 // code run on load
 
 if (localStorage.getItem('MIND') === null)
-	localStorage.setItem('MIND', JSON.stringify({'api_key': null, 'locale': 'en-GB'}))
+	localStorage.setItem('MIND', JSON.stringify({'api_key': null, 'locale': 'en-GB', 'default_service': null}))
 
 const url_prefix = document.getElementById('url_prefix').dataset.value;
 
