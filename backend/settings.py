@@ -1,11 +1,12 @@
 #-*- coding: utf-8 -*-
 
-import logging
 from backend.custom_exceptions import InvalidKeyValue, KeyNotFound
 from backend.db import __DATABASE_VERSION__, get_db
 
 default_settings = {
 	'allow_new_accounts': True,
+	'login_time': 3600,
+	'login_time_reset': True,
 	'database_version': __DATABASE_VERSION__
 }
 
@@ -28,10 +29,15 @@ def _format_setting(key: str, value):
 		except ValueError:
 			raise InvalidKeyValue(key, value)
 
-	elif key == 'allow_new_accounts':
+	elif key in ('allow_new_accounts', 'login_time_reset'):
 		if not isinstance(value, bool):
 			raise InvalidKeyValue(key, value)
 		value = int(value)
+
+	elif key == 'login_time':
+		if not isinstance(value, int) or not 60 <= value <= 2592000:
+			raise InvalidKeyValue(key, value)
+
 	return value
 
 def _reverse_format_setting(key: str, value):
@@ -44,7 +50,7 @@ def _reverse_format_setting(key: str, value):
 	Returns:
 		Any: The converted value
 	"""
-	if key == 'allow_new_accounts':
+	if key in ('allow_new_accounts', 'login_time_reset'):
 		value = value == 1
 	return value
 
@@ -82,7 +88,10 @@ def get_admin_settings() -> dict:
 		for (key, value) in get_db().execute("""
 			SELECT key, value
 			FROM config
-			WHERE key = 'allow_new_accounts';
+			WHERE
+				key = 'allow_new_accounts'
+				OR key = 'login_time'
+				OR key = 'login_time_reset';
 			"""
 		)
 	))

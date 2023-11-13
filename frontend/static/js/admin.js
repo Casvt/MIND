@@ -1,5 +1,7 @@
 const setting_inputs = {
-	'allow_new_accounts': document.querySelector('#allow-new-accounts-input')
+	'allow_new_accounts': document.querySelector('#allow-new-accounts-input'),
+	'login_time': document.querySelector('#login-time-input'),
+	'login_time_reset': document.querySelector('#login-time-reset-input')
 };
 
 function checkLogin() {
@@ -25,12 +27,16 @@ function loadSettings() {
 	.then(response => response.json())
 	.then(json => {
 		setting_inputs.allow_new_accounts.checked = json.result.allow_new_accounts;
+		setting_inputs.login_time.value = Math.round(json.result.login_time / 60);
+		setting_inputs.login_time_reset.value = json.result.login_time_reset.toString();
 	});
 };
 
 function submitSettings() {
 	const data = {
-		'allow_new_accounts': setting_inputs.allow_new_accounts.checked
+		'allow_new_accounts': setting_inputs.allow_new_accounts.checked,
+		'login_time': setting_inputs.login_time.value * 60,
+		'login_time_reset': setting_inputs.login_time_reset.value === 'true'
 	};
 	console.log(data);
 	fetch(`${url_prefix}/api/admin/settings?api_key=${api_key}`, {

@@ -108,6 +108,32 @@ h2 {
 	font-size: .9rem;
 }
 
+.number-input {
+	width: fit-content;
+	display: flex;
+	align-items: center;
+	
+	border: 2px solid var(--color-gray);
+	border-radius: 4px;
+	
+	box-shadow: var(--default-shadow);
+}
+
+.number-input > input {
+	width: auto;
+	border: none;
+	box-shadow: none;
+	text-align: right;
+}
+
+.number-input > p {
+	padding: .75rem .75rem .75rem 0rem;
+}
+
+.settings-table select {
+	width: auto;
+}
+
 @media (max-width: 40rem) {
 	#settings-form,
 	.table-container {

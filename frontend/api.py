@@ -24,7 +24,8 @@ from backend.notification_service import (NotificationService,
                                           NotificationServices,
                                           get_apprise_services)
 from backend.reminders import Reminders, reminder_handler
-from backend.settings import _format_setting, get_admin_settings, set_setting
+from backend.settings import (_format_setting, get_admin_settings, get_setting,
+                              set_setting)
 from backend.static_reminders import StaticReminders
 from backend.templates import Template, Templates
 from backend.users import User, register_user
@@ -284,6 +285,15 @@ class AllowNewAccountsVariable(AdminSettingsVariable):
 	description = ('Whether or not to allow users to register a new account. '
 	+ 'The admin can always add a new account.')
 
+class LoginTimeVariable(AdminSettingsVariable):
+	name = 'login_time'
+	description = ('How long a user stays logged in, in seconds. '
+	+ 'Between 1 min and 1 month (60 <= sec <= 2592000)')
+
+class LoginTimeResetVariable(AdminSettingsVariable):
+	name = 'login_time_reset'
+	description = 'If the Login Time timer should reset with each API request.'
+
 def input_validation() -> Union[None, Dict[str, Any]]:
 	"""Checks, extracts and transforms inputs
 
@@ -414,6 +424,12 @@ def auth() -> None:
 		raise APIKeyExpired
 
 	# Api key valid
+	
+	if get_setting('login_time_reset'):
+		api_key_map[hashed_api_key]['exp'] = exp = (
+			epoch_time() + get_setting('login_time')
+		)
+
 	g.hashed_api_key = hashed_api_key
 	g.exp = exp
 	g.user_data = api_key_map[hashed_api_key]['user_data']
@@ -475,7 +491,8 @@ def api_login(inputs: Dict[str, str]):
 		if not hashed_api_key in api_key_map:
 			break
 
-	exp = epoch_time() + 3600
+	login_time = get_setting('login_time')
+	exp = epoch_time() + login_time
 	api_key_map.update({
 		hashed_api_key: {
 			'exp': exp,
@@ -876,7 +893,8 @@ def api_settings():
 	'Interact with the admin settings',
 	{'GET': [[],
 			'Get the admin settings'],
-	'PUT': [[AllowNewAccountsVariable],
+	'PUT': [[AllowNewAccountsVariable, LoginTimeVariable,
+			LoginTimeResetVariable],
 			'Edit the admin settings']},
 	methods=['GET', 'PUT']
 )
@@ -887,7 +905,9 @@ def api_admin_settings(inputs: Dict[str, Any]):
 
 	elif request.method == 'PUT':
 		values = {
-			'allow_new_accounts': inputs['allow_new_accounts']
+			'allow_new_accounts': inputs['allow_new_accounts'],
+			'login_time': inputs['login_time'],
+			'login_time_reset': inputs['login_time_reset']
 		}
 		logging.info(f'Submitting admin settings: {values}')
 		for k, v in values.items():

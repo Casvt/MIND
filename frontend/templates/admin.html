@@ -49,6 +49,27 @@
 									<p>Allow users to register a new account. The admin can always add a new account from this panel.</p>
 								</td>
 							</tr>
+							<tr>
+								<td><label for="login-time-input">Login Time</label></td>
+								<td>
+									<div class="number-input">
+										<input type="number" id="login-time-input" min="1" max="43200">
+										<p>Min</p>
+									</div>
+									<p>For how long users stay logged in before having to authenticate again. Between 1 minute and 1 month.</p>
+									<p>New values are applied for newly authenticated users.</p>
+								</td>
+							</tr>
+							<tr>
+								<td><label for="login-time-reset-input">Login Time Trigger</label></td>
+								<td>
+									<select id="login-time-reset-input">
+										<option value="true">After Last Use</option>
+										<option value="false">After Login</option>
+									</select>
+									<p>For when the login timer should start: starting from the last time MIND was used or from when the user has authenticated.</p>
+								</td>
+							</tr>
 						</tbody>
 					</table>
 				</div>
