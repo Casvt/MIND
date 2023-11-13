@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 
+import logging
 from abc import ABC, abstractmethod
 from os import urandom
 from re import compile
@@ -13,6 +14,7 @@ from flask.scaffold import T_route
 from backend.custom_exceptions import (AccessUnauthorized, APIKeyExpired,
                                        APIKeyInvalid, InvalidKeyValue,
                                        InvalidTime, KeyNotFound,
+                                       NewAccountsNotAllowed,
                                        NotificationServiceInUse,
                                        NotificationServiceNotFound,
                                        ReminderNotFound, TemplateNotFound,
@@ -22,6 +24,7 @@ from backend.notification_service import (NotificationService,
                                           NotificationServices,
                                           get_apprise_services)
 from backend.reminders import Reminders, reminder_handler
+from backend.settings import _format_setting, get_admin_settings, set_setting
 from backend.static_reminders import StaticReminders
 from backend.templates import Template, Templates
 from backend.users import User, register_user
@@ -111,7 +114,11 @@ class NewPasswordVariable(PasswordVariable):
 	related_exceptions = [KeyNotFound]
 
 class UsernameCreateVariable(UsernameVariable):
-	related_exceptions = [KeyNotFound, UsernameInvalid, UsernameTaken]
+	related_exceptions = [
+		KeyNotFound,
+		UsernameInvalid, UsernameTaken,
+		NewAccountsNotAllowed
+	]
 
 class PasswordCreateVariable(PasswordVariable):
 	related_exceptions = [KeyNotFound]
@@ -254,13 +261,28 @@ class ColorVariable(DefaultInputVariable):
 	default = None
 	related_exceptions = [InvalidKeyValue]
 	
-	def validate(self) -> None:
+	def validate(self) -> bool:
 		return self.value is None or color_regex.search(self.value)
 
 class QueryVariable(DefaultInputVariable):
 	name = 'query'
 	description = 'The search term'
 	source = DataSource.VALUES
+
+class AdminSettingsVariable(DefaultInputVariable):
+	related_exceptions = [KeyNotFound, InvalidKeyValue]
+	
+	def validate(self) -> bool:
+		try:
+			_format_setting(self.name, self.value)
+		except InvalidKeyValue:
+			return False
+		return True
+
+class AllowNewAccountsVariable(AdminSettingsVariable):
+	name = 'allow_new_accounts'
+	description = ('Whether or not to allow users to register a new account. '
+	+ 'The admin can always add a new account.')
 
 def input_validation() -> Union[None, Dict[str, Any]]:
 	"""Checks, extracts and transforms inputs
@@ -275,10 +297,15 @@ def input_validation() -> Union[None, Dict[str, Any]]:
 	"""
 	inputs = {}
 
+	input_variables: Dict[str, List[Union[List[InputVariable], str]]]
 	if request.path.startswith(admin_api_prefix):
-		input_variables = api_docs[request.url_rule.rule.split(admin_api_prefix)[1]]['input_variables']
+		input_variables = api_docs[
+			_admin_api_prefix + request.url_rule.rule.split(admin_api_prefix)[1]
+		]['input_variables']
 	else:
-		input_variables = api_docs[request.url_rule.rule.split(api_prefix)[1]]['input_variables']
+		input_variables = api_docs[
+			request.url_rule.rule.split(api_prefix)[1]
+		]['input_variables']
 
 	if not input_variables:
 		return
@@ -296,8 +323,11 @@ def input_validation() -> Union[None, Dict[str, Any]]:
 		):
 			raise KeyNotFound(input_variable.name)
 
-		input_value = given_variables[input_variable.source].get(input_variable.name, input_variable.default)
-		
+		input_value = given_variables[input_variable.source].get(
+			input_variable.name,
+			input_variable.default
+		)
+
 		if not input_variable(input_value).validate():
 			raise InvalidKeyValue(input_variable.name, input_value)
 		
@@ -319,19 +349,35 @@ class APIBlueprint(Blueprint):
 		**options: Any
 	) -> Callable[[T_route], T_route]:
 
-		api_docs[rule] = {
-			'endpoint': rule,
+		if self == api:
+			processed_rule = rule
+		elif self == admin_api:
+			processed_rule = _admin_api_prefix + rule
+		else:
+			raise NotImplementedError
+
+		api_docs[processed_rule] = {
+			'endpoint': processed_rule,
 			'description': description,
 			'requires_auth': requires_auth,
 			'methods': options['methods'],
-			'input_variables': {k: v[0] for k, v in input_variables.items() if v and v[0]},
-			'method_descriptions': {k: v[1] for k, v in input_variables.items() if v and len(v) == 2 and v[1]}
+			'input_variables': {
+				k: v[0]
+				for k, v in input_variables.items()
+				if v and v[0]
+			},
+			'method_descriptions': {
+				k: v[1]
+				for k, v in input_variables.items()
+				if v and len(v) == 2 and v[1]
+			}
 		}
 
 		return super().route(rule, **options)
 
 api_prefix = "/api"
-admin_api_prefix = api_prefix + "/admin"
+_admin_api_prefix = '/admin'
+admin_api_prefix = api_prefix + _admin_api_prefix
 api = APIBlueprint('api', __name__)
 admin_api = APIBlueprint('admin_api', __name__)
 api_key_map = {}
@@ -376,9 +422,13 @@ def auth() -> None:
 def endpoint_wrapper(method: Callable) -> Callable:
 	def wrapper(*args, **kwargs):
 		if request.path.startswith(admin_api_prefix):
-			requires_auth = api_docs[request.url_rule.rule.split(admin_api_prefix)[1]]['requires_auth']
+			requires_auth = api_docs[
+				_admin_api_prefix + request.url_rule.rule.split(admin_api_prefix)[1]
+			]['requires_auth']
 		else:
-			requires_auth = api_docs[request.url_rule.rule.split(api_prefix)[1]]['requires_auth']
+			requires_auth = api_docs[
+				request.url_rule.rule.split(api_prefix)[1]
+			]['requires_auth']
 		try:
 			if requires_auth:
 				auth()
@@ -395,7 +445,8 @@ def endpoint_wrapper(method: Callable) -> Callable:
 				NotificationServiceInUse, InvalidTime,
 				KeyNotFound, InvalidKeyValue,
 				APIKeyInvalid, APIKeyExpired,
-				TemplateNotFound) as e:
+				TemplateNotFound,
+				NewAccountsNotAllowed) as e:
 			return return_api(**e.api_response)
 	
 	wrapper.__name__ = method.__name__
@@ -804,4 +855,41 @@ def api_get_static_reminder(inputs: Dict[str, Any], s_id: int):
 
 	elif request.method == 'DELETE':
 		reminders.fetchone(s_id).delete()
+		return return_api({})
+
+#===================
+# Admin panel endpoints
+#===================
+
+@api.route(
+	'/settings',
+	'Get the admin settings',
+	requires_auth=False,
+	methods=['GET']
+)
+@endpoint_wrapper
+def api_settings():
+	return return_api(get_admin_settings())
+
+@admin_api.route(
+	'/settings',
+	'Interact with the admin settings',
+	{'GET': [[],
+			'Get the admin settings'],
+	'PUT': [[AllowNewAccountsVariable],
+			'Edit the admin settings']},
+	methods=['GET', 'PUT']
+)
+@endpoint_wrapper
+def api_admin_settings(inputs: Dict[str, Any]):
+	if request.method == 'GET':
+		return return_api(get_admin_settings())
+
+	elif request.method == 'PUT':
+		values = {
+			'allow_new_accounts': inputs['allow_new_accounts']
+		}
+		logging.info(f'Submitting admin settings: {values}')
+		for k, v in values.items():
+			set_setting(k, v)
 		return return_api({})

@@ -117,6 +117,15 @@ function checkLogin() {
 	});
 };
 
+function checkAllowNewAccounts() {
+	fetch(`${url_prefix}/api/settings`)
+	.then(response => response.json())
+	.then(json => {
+		if (!json.result.allow_new_accounts)
+			document.querySelector('.switch-button').classList.add('hidden');
+	});
+};
+
 // code run on load
 
 if (localStorage.getItem('MIND') === null)
@@ -125,6 +134,7 @@ if (localStorage.getItem('MIND') === null)
 const url_prefix = document.getElementById('url_prefix').dataset.value;
 
 checkLogin();
+checkAllowNewAccounts();
 
 document.getElementById('login-form').setAttribute('action', 'javascript:login();');
 document.getElementById('create-form').setAttribute('action', 'javascript:create();');

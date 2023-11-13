@@ -1,12 +1,15 @@
 #-*- coding: utf-8 -*-
 
 import logging
-from backend.custom_exceptions import (AccessUnauthorized, UsernameInvalid,
+
+from backend.custom_exceptions import (AccessUnauthorized,
+                                       NewAccountsNotAllowed, UsernameInvalid,
                                        UsernameTaken, UserNotFound)
 from backend.db import get_db
 from backend.notification_service import NotificationServices
 from backend.reminders import Reminders
 from backend.security import generate_salt_hash, get_hash
+from backend.settings import get_setting
 from backend.static_reminders import StaticReminders
 from backend.templates import Templates
 
@@ -134,11 +137,16 @@ def register_user(username: str, password: str) -> int:
 	Raises:
 		UsernameInvalid: Username not allowed or contains invalid characters
 		UsernameTaken: Username is already taken; usernames must be unique
+		NewAccountsNotAllowed: In the admin panel, new accounts are set to be
+		not allowed.
 
 	Returns:
 		user_id (int): The id of the new user. User registered successful
 	"""
 	logging.info(f'Registering user with username {username}')
+	
+	if not get_setting('allow_new_accounts'):
+		raise NewAccountsNotAllowed
 	
 	# Check if username is valid
 	_check_username(username)

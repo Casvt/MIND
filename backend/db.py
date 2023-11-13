@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 
-from datetime import datetime
 import logging
+from datetime import datetime
 from sqlite3 import Connection, ProgrammingError, Row
 from threading import current_thread, main_thread
 from time import time
@@ -219,7 +219,26 @@ def migrate_db(current_db_version: int) -> None:
 
 	if current_db_version == 7:
 		# V7 -> V8
+		from backend.settings import _format_setting, default_settings
 		from backend.users import register_user
+
+		cursor.executescript("""
+			DROP TABLE config;
+			CREATE TABLE IF NOT EXISTS config(
+				key VARCHAR(255) PRIMARY KEY,
+				value BLOB NOT NULL
+			);
+			"""
+		)
+		cursor.executemany("""
+			INSERT OR IGNORE INTO config(key, value)
+			VALUES (?, ?);
+			""",
+			map(
+				lambda kv: (kv[0], _format_setting(*kv)),
+				default_settings.items()
+			)
+		)
 		
 		cursor.executescript("""
 			ALTER TABLE users
@@ -243,6 +262,8 @@ def migrate_db(current_db_version: int) -> None:
 def setup_db() -> None:
 	"""Setup the database
 	"""
+	from backend.settings import (_format_setting, default_settings, get_setting,
+	                              set_setting)
 	cursor = get_db()
 	cursor.execute("PRAGMA journal_mode = wal;")
 
@@ -314,26 +335,24 @@ def setup_db() -> None:
 		);
 		CREATE TABLE IF NOT EXISTS config(
 			key VARCHAR(255) PRIMARY KEY,
-			value TEXT NOT NULL
+			value BLOB NOT NULL
 		);
 	""")
 
-	cursor.execute("""
+	cursor.executemany("""
 		INSERT OR IGNORE INTO config(key, value)
-		VALUES ('database_version', ?);
+		VALUES (?, ?);
 		""",
-		(__DATABASE_VERSION__,)
+		map(
+			lambda kv: (kv[0], _format_setting(*kv)),
+			default_settings.items()
+		)
 	)
-	current_db_version = int(cursor.execute(
-		"SELECT value FROM config WHERE key = 'database_version' LIMIT 1;"
-	).fetchone()[0])
 	
+	current_db_version = get_setting('database_version')
 	logging.debug(f'Current database version {current_db_version} and desired database version {__DATABASE_VERSION__}')
 	if current_db_version < __DATABASE_VERSION__:
 		migrate_db(current_db_version)
-		cursor.execute(
-			"UPDATE config SET value = ? WHERE key = 'database_version';",
-			(__DATABASE_VERSION__,)
-		)
+		set_setting('database_version', __DATABASE_VERSION__)
 
 	return

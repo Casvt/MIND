@@ -17,12 +17,43 @@
 </head>
 <body>
 	<header>
-		<div>
-			<img src="{{ url_for('static', filename='img/favicon.svg') }}" alt="">
-		</div>
+		<img src="{{ url_for('static', filename='img/favicon.svg') }}" alt="">
 	</header>
 	<main>
-		<h1>Test</h1>
+		<section class="action-buttons">
+			<button id="save-button" title="Save Settings" type="submit" form="settings-form">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512">
+					<path d="M12,10a4,4,0,1,0,4,4A4,4,0,0,0,12,10Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,16Z"/>
+					<path d="M22.536,4.122,19.878,1.464A4.966,4.966,0,0,0,16.343,0H5A5.006,5.006,0,0,0,0,5V19a5.006,5.006,0,0,0,5,5H19a5.006,5.006,0,0,0,5-5V7.657A4.966,4.966,0,0,0,22.536,4.122ZM17,2.08V3a3,3,0,0,1-3,3H10A3,3,0,0,1,7,3V2h9.343A2.953,2.953,0,0,1,17,2.08ZM22,19a3,3,0,0,1-3,3H5a3,3,0,0,1-3-3V5A3,3,0,0,1,5,2V3a5.006,5.006,0,0,0,5,5h4a4.991,4.991,0,0,0,4.962-4.624l2.16,2.16A3.02,3.02,0,0,1,22,7.657Z"/>
+				</svg>
+			</button>
+			<button id="logout-button" aria-label="Log out of MIND" title="Logout">
+				<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve">
+					<g>
+						<path d="M11.476,15a1,1,0,0,0-1,1v3a3,3,0,0,1-3,3H5a3,3,0,0,1-3-3V5A3,3,0,0,1,5,2H7.476a3,3,0,0,1,3,3V8a1,1,0,0,0,2,0V5a5.006,5.006,0,0,0-5-5H5A5.006,5.006,0,0,0,0,5V19a5.006,5.006,0,0,0,5,5H7.476a5.006,5.006,0,0,0,5-5V16A1,1,0,0,0,11.476,15Z"></path>
+						<path d="M22.867,9.879,18.281,5.293a1,1,0,1,0-1.414,1.414l4.262,4.263L6,11a1,1,0,0,0,0,2H6l15.188-.031-4.323,4.324a1,1,0,1,0,1.414,1.414l4.586-4.586A3,3,0,0,0,22.867,9.879Z"></path>
+					</g>
+				</svg>
+			</button>
+		</section>
+		<div class="form-container">
+			<form id="settings-form">
+				<h2>Authentication</h2>
+				<div class="table-container">
+					<table class="settings-table">
+						<tbody>
+							<tr>
+								<td><label for="allow-new-accounts-input">Allow New Accounts</label></td>
+								<td>
+									<input type="checkbox" id="allow-new-accounts-input">
+									<p>Allow users to register a new account. The admin can always add a new account from this panel.</p>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</form>
+		</div>
 	</main>
 </body>
 </html>
