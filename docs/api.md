@@ -112,6 +112,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 	| 400 | UsernameInvalid | The username contains invalid characters |
 	| 400 | UsernameTaken | The username is already taken |
+	| 403 | NewAccountsNotAllowed | It's not allowed to create a new account |
 
 ### `/user`
 
@@ -660,4 +661,140 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	| ---- | ----- | ----------- |
 	| 200| N/A | Success |
 	| 404 | ReminderNotFound | The reminder with the id can not be found |
+
+### `/settings`
+
+| Requires being logged in | Description |
+| ------------------------ | ----------- |
+| No | Get the admin settings | 
+
+??? GET
+
+	**Returns**
+	
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 200| N/A | Success |
+
+### `/admin/settings`
+
+| Requires being logged in | Description |
+| ------------------------ | ----------- |
+| Yes | Interact with the admin settings | 
+
+??? GET
+
+	Get the admin settings
+
+	**Returns**
+	
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 200| N/A | Success |
+
+??? PUT
+
+	Edit the admin settings
+
+	**Parameters (body)**
+
+	| Name | Required | Description | Allowed values |
+	| ---- | -------- | ----------- | -------------- |
+	| allow_new_accounts | Yes | Whether or not to allow users to register a new account. The admin can always add a new account. | N/A |
+	| login_time | Yes | How long a user stays logged in, in seconds. Between 1 min and 1 month (60 <= sec <= 2592000) | N/A |
+	| login_time_reset | Yes | If the Login Time timer should reset with each API request. | N/A |
+
+	**Returns**
+	
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 200| N/A | Success |
+	| 400 | InvalidKeyValue | The value of a key is invalid |
+	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
+
+### `/admin/users`
+
+| Requires being logged in | Description |
+| ------------------------ | ----------- |
+| Yes | Get all users or add one | 
+
+??? GET
+
+	Get all users
+
+	**Returns**
+	
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 200| N/A | Success |
+
+??? POST
+
+	Add a new user
+
+	**Parameters (body)**
+
+	| Name | Required | Description | Allowed values |
+	| ---- | -------- | ----------- | -------------- |
+	| username | Yes | The username of the user account | N/A |
+	| password | Yes | The password of the user account | N/A |
+
+	**Returns**
+	
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 201| N/A | Success |
+	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
+	| 400 | UsernameInvalid | The username contains invalid characters |
+	| 400 | UsernameTaken | The username is already taken |
+	| 403 | NewAccountsNotAllowed | It's not allowed to create a new account |
+
+### `/admin/users/<int:u_id>`
+
+| Requires being logged in | Description |
+| ------------------------ | ----------- |
+| Yes | Manage a specific user | 
+
+Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
+
+??? PUT
+
+	Change the password of the user account
+
+	**Parameters (body)**
+
+	| Name | Required | Description | Allowed values |
+	| ---- | -------- | ----------- | -------------- |
+	| new_password | Yes | The new password of the user account | N/A |
+
+	**Returns**
+	
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 200| N/A | Success |
+	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
+
+??? DELETE
+
+	Delete the user account
+
+	**Returns**
+	
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 200| N/A | Success |
+
+### `/admin/database`
+
+| Requires being logged in | Description |
+| ------------------------ | ----------- |
+| Yes | Download the database | 
+
+??? GET
+
+	**Returns**
+	
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 200| N/A | Success |
 
