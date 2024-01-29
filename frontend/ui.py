@@ -14,3 +14,7 @@ def ui_login():
 @ui.route('/reminders', methods=methods)
 def ui_reminders():
 	return render_template('reminders.html', url_prefix=logging.URL_PREFIX)
+
+@ui.route('/admin', methods=methods)
+def ui_admin():
+	return render_template('admin.html', url_prefixx=logging.URL_PREFIX)

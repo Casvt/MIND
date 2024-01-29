@@ -116,10 +116,3 @@ const api_key = getLocalStorage('api_key')['api_key'];
 if (api_key === null) {
 	window.location.href = `${url_prefix}/`;
 };
-
-document.getElementById('toggle-nav').addEventListener('click', e => toggleNav());
-
-document.getElementById('home-button').addEventListener('click', e => hideWindow());
-document.getElementById('notification-services-button').addEventListener('click', e => showWindow('notification'));
-document.getElementById('settings-button').addEventListener('click', e => showWindow('settings'));
-document.getElementById('logout-button').addEventListener('click', e => logout());

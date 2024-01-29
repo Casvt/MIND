@@ -1,5 +1,7 @@
 #-*- coding: utf-8 -*-
 
+from io import BytesIO
+import logging
 from abc import ABC, abstractmethod
 from os import urandom
 from re import compile
@@ -7,24 +9,29 @@ from time import time as epoch_time
 from typing import Any, Callable, Dict, List, Tuple, Union
 
 from apprise import Apprise
-from flask import Blueprint, g, request
+from flask import Blueprint, g, request, send_file
 from flask.scaffold import T_route
 
 from backend.custom_exceptions import (AccessUnauthorized, APIKeyExpired,
                                        APIKeyInvalid, InvalidKeyValue,
                                        InvalidTime, KeyNotFound,
+                                       NewAccountsNotAllowed,
                                        NotificationServiceInUse,
                                        NotificationServiceNotFound,
                                        ReminderNotFound, TemplateNotFound,
                                        UsernameInvalid, UsernameTaken,
                                        UserNotFound)
+from backend.db import DBConnection
 from backend.notification_service import (NotificationService,
                                           NotificationServices,
                                           get_apprise_services)
 from backend.reminders import Reminders, reminder_handler
+from backend.settings import (_format_setting, get_admin_settings, get_setting,
+                              set_setting)
 from backend.static_reminders import StaticReminders
 from backend.templates import Template, Templates
-from backend.users import User, register_user
+from backend.users import (User, delete_user, edit_user_password, get_users,
+                           register_user)
 
 #===================
 # Input validation
@@ -111,7 +118,11 @@ class NewPasswordVariable(PasswordVariable):
 	related_exceptions = [KeyNotFound]
 
 class UsernameCreateVariable(UsernameVariable):
-	related_exceptions = [KeyNotFound, UsernameInvalid, UsernameTaken]
+	related_exceptions = [
+		KeyNotFound,
+		UsernameInvalid, UsernameTaken,
+		NewAccountsNotAllowed
+	]
 
 class PasswordCreateVariable(PasswordVariable):
 	related_exceptions = [KeyNotFound]
@@ -254,13 +265,37 @@ class ColorVariable(DefaultInputVariable):
 	default = None
 	related_exceptions = [InvalidKeyValue]
 	
-	def validate(self) -> None:
+	def validate(self) -> bool:
 		return self.value is None or color_regex.search(self.value)
 
 class QueryVariable(DefaultInputVariable):
 	name = 'query'
 	description = 'The search term'
 	source = DataSource.VALUES
+
+class AdminSettingsVariable(DefaultInputVariable):
+	related_exceptions = [KeyNotFound, InvalidKeyValue]
+	
+	def validate(self) -> bool:
+		try:
+			_format_setting(self.name, self.value)
+		except InvalidKeyValue:
+			return False
+		return True
+
+class AllowNewAccountsVariable(AdminSettingsVariable):
+	name = 'allow_new_accounts'
+	description = ('Whether or not to allow users to register a new account. '
+	+ 'The admin can always add a new account.')
+
+class LoginTimeVariable(AdminSettingsVariable):
+	name = 'login_time'
+	description = ('How long a user stays logged in, in seconds. '
+	+ 'Between 1 min and 1 month (60 <= sec <= 2592000)')
+
+class LoginTimeResetVariable(AdminSettingsVariable):
+	name = 'login_time_reset'
+	description = 'If the Login Time timer should reset with each API request.'
 
 def input_validation() -> Union[None, Dict[str, Any]]:
 	"""Checks, extracts and transforms inputs
@@ -274,9 +309,20 @@ def input_validation() -> Union[None, Dict[str, Any]]:
 		Otherwise `Dict[str, Any]` with the input variables, checked and formatted.
 	"""
 	inputs = {}
-	input_variables = api_docs[request.url_rule.rule.split(api_prefix)[1]]['input_variables']
+
+	input_variables: Dict[str, List[Union[List[InputVariable], str]]]
+	if request.path.startswith(admin_api_prefix):
+		input_variables = api_docs[
+			_admin_api_prefix + request.url_rule.rule.split(admin_api_prefix)[1]
+		]['input_variables']
+	else:
+		input_variables = api_docs[
+			request.url_rule.rule.split(api_prefix)[1]
+		]['input_variables']
+
 	if not input_variables:
 		return
+
 	if input_variables.get(request.method) is None:
 		return inputs
 	
@@ -290,8 +336,11 @@ def input_validation() -> Union[None, Dict[str, Any]]:
 		):
 			raise KeyNotFound(input_variable.name)
 
-		input_value = given_variables[input_variable.source].get(input_variable.name, input_variable.default)
-		
+		input_value = given_variables[input_variable.source].get(
+			input_variable.name,
+			input_variable.default
+		)
+
 		if not input_variable(input_value).validate():
 			raise InvalidKeyValue(input_variable.name, input_value)
 		
@@ -313,19 +362,37 @@ class APIBlueprint(Blueprint):
 		**options: Any
 	) -> Callable[[T_route], T_route]:
 
-		api_docs[rule] = {
-			'endpoint': rule,
+		if self == api:
+			processed_rule = rule
+		elif self == admin_api:
+			processed_rule = _admin_api_prefix + rule
+		else:
+			raise NotImplementedError
+
+		api_docs[processed_rule] = {
+			'endpoint': processed_rule,
 			'description': description,
 			'requires_auth': requires_auth,
 			'methods': options['methods'],
-			'input_variables': {k: v[0] for k, v in input_variables.items() if v and v[0]},
-			'method_descriptions': {k: v[1] for k, v in input_variables.items() if v and len(v) == 2 and v[1]}
+			'input_variables': {
+				k: v[0]
+				for k, v in input_variables.items()
+				if v and v[0]
+			},
+			'method_descriptions': {
+				k: v[1]
+				for k, v in input_variables.items()
+				if v and len(v) == 2 and v[1]
+			}
 		}
 
 		return super().route(rule, **options)
 
 api_prefix = "/api"
+_admin_api_prefix = '/admin'
+admin_api_prefix = api_prefix + _admin_api_prefix
 api = APIBlueprint('api', __name__)
+admin_api = APIBlueprint('admin_api', __name__)
 api_key_map = {}
 
 def return_api(result: Any, error: str=None, code: int=200) -> Tuple[dict, int]:
@@ -341,12 +408,31 @@ def auth() -> None:
 	hashed_api_key = hash(request.values.get('api_key',''))
 	if not hashed_api_key in api_key_map:
 		raise APIKeyInvalid
-	
+
+	if not (
+		(
+			api_key_map[hashed_api_key]['user_data'].admin
+			and request.path.startswith((admin_api_prefix, api_prefix + '/auth'))
+		)
+		or 
+		(
+			not api_key_map[hashed_api_key]['user_data'].admin
+			and not request.path.startswith(admin_api_prefix)
+		)
+	):
+		raise APIKeyInvalid
+
 	exp = api_key_map[hashed_api_key]['exp']
 	if exp <= epoch_time():
 		raise APIKeyExpired
-	
+
 	# Api key valid
+	
+	if get_setting('login_time_reset'):
+		api_key_map[hashed_api_key]['exp'] = exp = (
+			epoch_time() + get_setting('login_time')
+		)
+
 	g.hashed_api_key = hashed_api_key
 	g.exp = exp
 	g.user_data = api_key_map[hashed_api_key]['user_data']
@@ -354,7 +440,14 @@ def auth() -> None:
 
 def endpoint_wrapper(method: Callable) -> Callable:
 	def wrapper(*args, **kwargs):
-		requires_auth = api_docs[request.url_rule.rule.split(api_prefix)[1]]['requires_auth']
+		if request.path.startswith(admin_api_prefix):
+			requires_auth = api_docs[
+				_admin_api_prefix + request.url_rule.rule.split(admin_api_prefix)[1]
+			]['requires_auth']
+		else:
+			requires_auth = api_docs[
+				request.url_rule.rule.split(api_prefix)[1]
+			]['requires_auth']
 		try:
 			if requires_auth:
 				auth()
@@ -371,7 +464,8 @@ def endpoint_wrapper(method: Callable) -> Callable:
 				NotificationServiceInUse, InvalidTime,
 				KeyNotFound, InvalidKeyValue,
 				APIKeyInvalid, APIKeyExpired,
-				TemplateNotFound) as e:
+				TemplateNotFound,
+				NewAccountsNotAllowed) as e:
 			return return_api(**e.api_response)
 	
 	wrapper.__name__ = method.__name__
@@ -400,7 +494,8 @@ def api_login(inputs: Dict[str, str]):
 		if not hashed_api_key in api_key_map:
 			break
 
-	exp = epoch_time() + 3600
+	login_time = get_setting('login_time')
+	exp = epoch_time() + login_time
 	api_key_map.update({
 		hashed_api_key: {
 			'exp': exp,
@@ -408,7 +503,7 @@ def api_login(inputs: Dict[str, str]):
 		}
 	})
 
-	result = {'api_key': api_key, 'expires': exp}
+	result = {'api_key': api_key, 'expires': exp, 'admin': user.admin}
 	return return_api(result, code=201)
 
 @api.route(
@@ -430,7 +525,8 @@ def api_logout():
 def api_status():
 	result = {
 		'expires': api_key_map[g.hashed_api_key]['exp'],
-		'username': api_key_map[g.hashed_api_key]['user_data'].username
+		'username': api_key_map[g.hashed_api_key]['user_data'].username,
+		'admin': api_key_map[g.hashed_api_key]['user_data'].admin
 	}
 	return return_api(result)
 
@@ -449,7 +545,7 @@ def api_status():
 def api_add_user(inputs: Dict[str, str]):
 	register_user(inputs['username'], inputs['password'])
 	return return_api({}, code=201)
-		
+
 @api.route(
 	'/user',
 	'Manage a user account',
@@ -780,3 +876,101 @@ def api_get_static_reminder(inputs: Dict[str, Any], s_id: int):
 	elif request.method == 'DELETE':
 		reminders.fetchone(s_id).delete()
 		return return_api({})
+
+#===================
+# Admin panel endpoints
+#===================
+
+@api.route(
+	'/settings',
+	'Get the admin settings',
+	requires_auth=False,
+	methods=['GET']
+)
+@endpoint_wrapper
+def api_settings():
+	return return_api(get_admin_settings())
+
+@admin_api.route(
+	'/settings',
+	'Interact with the admin settings',
+	{'GET': [[],
+			'Get the admin settings'],
+	'PUT': [[AllowNewAccountsVariable, LoginTimeVariable,
+			LoginTimeResetVariable],
+			'Edit the admin settings']},
+	methods=['GET', 'PUT']
+)
+@endpoint_wrapper
+def api_admin_settings(inputs: Dict[str, Any]):
+	if request.method == 'GET':
+		return return_api(get_admin_settings())
+
+	elif request.method == 'PUT':
+		values = {
+			'allow_new_accounts': inputs['allow_new_accounts'],
+			'login_time': inputs['login_time'],
+			'login_time_reset': inputs['login_time_reset']
+		}
+		logging.info(f'Submitting admin settings: {values}')
+		for k, v in values.items():
+			set_setting(k, v)
+		return return_api({})
+
+@admin_api.route(
+	'/users',
+	'Get all users or add one',
+	{'GET': [[],
+			'Get all users'],
+	'POST': [[UsernameCreateVariable, PasswordCreateVariable],
+			'Add a new user']},
+	methods=['GET', 'POST']
+)
+@endpoint_wrapper
+def api_admin_users(inputs: Dict[str, Any]):
+	if request.method == 'GET':
+		result = get_users()
+		return return_api(result)
+
+	elif request.method == 'POST':
+		register_user(inputs['username'], inputs['password'], True)
+		return return_api({}, code=201)
+
+@admin_api.route(
+	'/users/<int:u_id>',
+	'Manage a specific user',
+	{'PUT': [[NewPasswordVariable],
+			'Change the password of the user account'],
+	'DELETE': [[],
+			'Delete the user account']},
+	methods=['PUT', 'DELETE']
+)
+@endpoint_wrapper
+def api_admin_user(inputs: Dict[str, Any], u_id: int):
+	if request.method == 'PUT':
+		edit_user_password(u_id, inputs['new_password'])
+		return return_api({})
+	
+	elif request.method == 'DELETE':
+		delete_user(u_id)
+		for key, value in api_key_map.items():
+			if value['user_data'].user_id == u_id:
+				del api_key_map[key]
+				break
+		return return_api({})
+
+@admin_api.route(
+	'/database',
+	'Download the database',
+	{'GET': [[]]},
+	methods=['GET']
+)
+@endpoint_wrapper
+def api_admin_database():
+	with open(DBConnection.file, 'rb') as database_file:
+		return send_file(
+			BytesIO(database_file.read()),
+			'application/x-sqlite3',
+			download_name='MIND.db'
+		), 200
+	

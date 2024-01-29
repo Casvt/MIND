@@ -231,6 +231,13 @@ document.querySelectorAll('.tab-selector > button').forEach(b => {
 	b.addEventListener('click', e => showTab(b));
 });
 
+document.getElementById('toggle-nav').addEventListener('click', e => toggleNav());
+
+document.getElementById('home-button').addEventListener('click', e => hideWindow());
+document.getElementById('notification-services-button').addEventListener('click', e => showWindow('notification'));
+document.getElementById('settings-button').addEventListener('click', e => showWindow('settings'));
+document.getElementById('logout-button').addEventListener('click', e => logout());
+
 fillSortOptions();
 fillReminders();
 fillStaticReminders(assume_sorting=true);

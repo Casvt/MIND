@@ -85,3 +85,7 @@ class APIKeyExpired(CustomException):
 
 	def __init__(self, e=None) -> None:
 		return
+
+class NewAccountsNotAllowed(CustomException):
+	"""It's not allowed to create a new account"""
+	api_response = {'error': 'NewAccountsNotAllowed', 'result': {}, 'code': 403}
