@@ -10,7 +10,7 @@ from typing import Any, Callable, Dict, List, Tuple, Union
 
 from apprise import Apprise
 from flask import Blueprint, g, request, send_file
-from flask.scaffold import T_route
+from flask.sansio.scaffold import T_route
 
 from backend.custom_exceptions import (AccessUnauthorized, APIKeyExpired,
                                        APIKeyInvalid, InvalidKeyValue,
