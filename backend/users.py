@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 
 import logging
+from typing import List, Union
 
 from backend.custom_exceptions import (AccessUnauthorized,
                                        NewAccountsNotAllowed, UsernameInvalid,
@@ -19,7 +20,7 @@ ONEPASS_INVALID_USERNAMES = ['reminders', 'api']
 class User:
 	"""Represents an user account
 	"""	
-	def __init__(self, username: str, password: str):
+	def __init__(self, username: str, password: Union[str, None]=None):
 		# Fetch data of user to check if user exists and to check if password is correct
 		result = get_db(dict).execute(
 			"SELECT id, salt, hash, admin FROM users WHERE username = ? LIMIT 1;", 
@@ -33,9 +34,10 @@ class User:
 		self.admin = result['admin'] == 1
 
 		# Check password
-		hash_password = get_hash(result['salt'], password)
-		if not hash_password == result['hash']:
-			raise AccessUnauthorized
+		if password is not None:
+			hash_password = get_hash(result['salt'], password)
+			if not hash_password == result['hash']:
+				raise AccessUnauthorized
 			
 	@property
 	def reminders(self) -> Reminders:
@@ -127,12 +129,14 @@ def _check_username(username: str) -> None:
 		raise UsernameInvalid
 	return
 
-def register_user(username: str, password: str) -> int:
+def register_user(username: str, password: str, from_admin: bool=False) -> int:
 	"""Add a user
 
 	Args:
 		username (str): The username of the new user
 		password (str): The password of the new user
+		from_admin (bool, optional): Skip check if new accounts are allowed.
+			Defaults to False.
 
 	Raises:
 		UsernameInvalid: Username not allowed or contains invalid characters
@@ -145,7 +149,7 @@ def register_user(username: str, password: str) -> int:
 	"""
 	logging.info(f'Registering user with username {username}')
 	
-	if not get_setting('allow_new_accounts'):
+	if not from_admin and not get_setting('allow_new_accounts'):
 		raise NewAccountsNotAllowed
 	
 	# Check if username is valid
@@ -174,3 +178,46 @@ def register_user(username: str, password: str) -> int:
 
 	logging.debug(f'Newly registered user has id {user_id}')
 	return user_id
+
+def get_users() -> List[dict]:
+	"""Get all user info for the admin
+
+	Returns:
+		List[dict]: The info about all users
+	"""
+	result = [
+		dict(u)
+		for u in get_db(dict).execute(
+			"SELECT id, username, admin FROM users ORDER BY username;"
+		)
+	]
+	return result
+
+def edit_user_password(id: int, new_password: str) -> None:
+	"""Change the password of a user for the admin
+
+	Args:
+		id (int): The ID of the user to change the password of
+		new_password (str): The new password to set for the user
+	"""
+	username = (get_db().execute(
+		"SELECT username FROM users WHERE id = ? LIMIT 1;",
+		(id,)
+	).fetchone() or [''])[0]
+	User(username).edit_password(new_password)
+	return
+
+def delete_user(id: int) -> None:
+	"""Delete a user for the admin
+
+	Args:
+		id (int): The ID of the user to delete
+	"""
+	username = (get_db().execute(
+		"SELECT username FROM users WHERE id = ? LIMIT 1;",
+		(id,)
+	).fetchone() or [''])[0]
+	if username == 'admin':
+		raise UserNotFound
+	User(username).delete()
+	return

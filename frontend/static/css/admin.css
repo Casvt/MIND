@@ -134,6 +134,92 @@ h2 {
 	width: auto;
 }
 
+.add-user-container,
+.database-container {
+	margin-bottom: 1rem;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#add-user-button,
+#download-db-button {
+	margin-top: 2rem;
+
+	width: min(15rem, 100%);
+	height: 2rem;
+	
+	padding: .5rem 1rem;
+	border-radius: 4px;
+	background-color: var(--color-gray);
+	
+	box-shadow: var(--default-shadow);
+}
+
+#download-db-button {
+	height: unset;
+}
+
+#add-user-button > svg {
+	aspect-ratio: 1/1;
+	height: 1rem;
+	width: min-content;
+}
+
+#user-table {
+	min-width: 25rem;
+	border-spacing: 0px;
+	margin-bottom: 2rem;
+}
+
+#user-table th,
+#user-table td {
+	padding: .25rem .5rem;
+	text-align: left;
+}
+
+#user-table tr td {
+	border-top: 1px solid var(--color-gray);
+}
+
+#user-table th:first-child,
+#user-table td:first-child {
+	padding-left: 2rem;
+}
+
+#user-table th:last-child,
+#user-table td:last-child {
+	display: flex;
+	gap: 1rem;
+	padding-right: 2rem;
+}
+
+#user-table td:first-child {
+	width: 100%;
+}
+
+#user-table svg {
+	aspect-ratio: 1/1;
+	width: 1.25rem;
+	height: 1.25rem;
+}
+
+#new-username-input,
+#new-password-input {
+	width: 40%;
+	padding: .25rem;
+}
+
+#user-list form {
+	margin-top: .5rem;
+	width: 75%;
+}
+
+#user-list input[type="password"] {
+	padding: .25rem;
+}
+
 @media (max-width: 40rem) {
 	#settings-form,
 	.table-container {
@@ -165,5 +251,9 @@ h2 {
 	
 	.settings-table td:nth-child(2) {
 		min-width: 0;
+	}
+	
+	#user-table {
+		width: 100%;
 	}
 }

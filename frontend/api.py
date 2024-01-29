@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 
+from io import BytesIO
 import logging
 from abc import ABC, abstractmethod
 from os import urandom
@@ -8,7 +9,7 @@ from time import time as epoch_time
 from typing import Any, Callable, Dict, List, Tuple, Union
 
 from apprise import Apprise
-from flask import Blueprint, g, request
+from flask import Blueprint, g, request, send_file
 from flask.scaffold import T_route
 
 from backend.custom_exceptions import (AccessUnauthorized, APIKeyExpired,
@@ -20,6 +21,7 @@ from backend.custom_exceptions import (AccessUnauthorized, APIKeyExpired,
                                        ReminderNotFound, TemplateNotFound,
                                        UsernameInvalid, UsernameTaken,
                                        UserNotFound)
+from backend.db import DBConnection
 from backend.notification_service import (NotificationService,
                                           NotificationServices,
                                           get_apprise_services)
@@ -28,7 +30,8 @@ from backend.settings import (_format_setting, get_admin_settings, get_setting,
                               set_setting)
 from backend.static_reminders import StaticReminders
 from backend.templates import Template, Templates
-from backend.users import User, register_user
+from backend.users import (User, delete_user, edit_user_password, get_users,
+                           register_user)
 
 #===================
 # Input validation
@@ -913,3 +916,61 @@ def api_admin_settings(inputs: Dict[str, Any]):
 		for k, v in values.items():
 			set_setting(k, v)
 		return return_api({})
+
+@admin_api.route(
+	'/users',
+	'Get all users or add one',
+	{'GET': [[],
+			'Get all users'],
+	'POST': [[UsernameCreateVariable, PasswordCreateVariable],
+			'Add a new user']},
+	methods=['GET', 'POST']
+)
+@endpoint_wrapper
+def api_admin_users(inputs: Dict[str, Any]):
+	if request.method == 'GET':
+		result = get_users()
+		return return_api(result)
+
+	elif request.method == 'POST':
+		register_user(inputs['username'], inputs['password'], True)
+		return return_api({}, code=201)
+
+@admin_api.route(
+	'/users/<int:u_id>',
+	'Manage a specific user',
+	{'PUT': [[NewPasswordVariable],
+			'Change the password of the user account'],
+	'DELETE': [[],
+			'Delete the user account']},
+	methods=['PUT', 'DELETE']
+)
+@endpoint_wrapper
+def api_admin_user(inputs: Dict[str, Any], u_id: int):
+	if request.method == 'PUT':
+		edit_user_password(u_id, inputs['new_password'])
+		return return_api({})
+	
+	elif request.method == 'DELETE':
+		delete_user(u_id)
+		for key, value in api_key_map.items():
+			if value['user_data'].user_id == u_id:
+				del api_key_map[key]
+				break
+		return return_api({})
+
+@admin_api.route(
+	'/database',
+	'Download the database',
+	{'GET': [[]]},
+	methods=['GET']
+)
+@endpoint_wrapper
+def api_admin_database():
+	with open(DBConnection.file, 'rb') as database_file:
+		return send_file(
+			BytesIO(database_file.read()),
+			'application/x-sqlite3',
+			download_name='MIND.db'
+		), 200
+	
