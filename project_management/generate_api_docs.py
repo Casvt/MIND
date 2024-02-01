@@ -21,6 +21,15 @@ url_var_map = {
 	'int:s_id': ReminderNotFound
 }
 
+def make_exception_instance(cls: Exception) -> Exception:
+	try:
+		return cls()
+	except TypeError:
+		try:
+			return cls('1')
+		except TypeError:
+			return cls('1', '2')
+
 result = f"""# API
 Below is the API documentation. Report an issue on [GitHub](https://github.com/Casvt/MIND/issues).
 
@@ -112,7 +121,7 @@ Replace `<{url_var}>` with the ID of the entry. For example: `{rule.replace(f'<{
 		url_exception = [url_var_map[url_var]] if url_var in url_var_map else []
 		variable_exceptions = [e for v in data['input_variables'].get(method, []) for e in v.related_exceptions]
 		related_exceptions = sorted(
-			(e() for e in set(variable_exceptions + url_exception)),
+			(make_exception_instance(e) for e in set(variable_exceptions + url_exception)),
 			key=lambda e: (e.api_response['code'], e.api_response['error'])
 		)
 		for related_exception in related_exceptions:
