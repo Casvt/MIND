@@ -4,16 +4,15 @@
 from os.path import dirname
 from sys import path
 
-from frontend.input_validation import DataSource
-
 path.insert(0, dirname(path[0]))
 
 from subprocess import run
 from typing import Union
 
+from backend.helpers import folder_path
 from frontend.api import (NotificationServiceNotFound, ReminderNotFound,
-                          TemplateNotFound, api_docs)
-from MIND import _folder_path, api_prefix
+                          TemplateNotFound, api_docs, api_prefix)
+from frontend.input_validation import DataSource
 
 url_var_map = {
 	'int:n_id': NotificationServiceNotFound,
@@ -122,18 +121,18 @@ Replace `<{url_var}>` with the ID of the entry. For example: `{rule.replace(f'<{
 
 	result += '\n'
 
-with open(_folder_path('docs', 'api.md'), 'r') as f:
+with open(folder_path('docs', 'api.md'), 'r') as f:
 	current_content = f.read()
 
 if current_content == result:
 	print('Nothing changed')
 else:
-	with open(_folder_path('docs', 'api.md'), 'w+') as f:
+	with open(folder_path('docs', 'api.md'), 'w+') as f:
 		f.write(result)
-	
+
 	run(["git", "config", "--global", "user.email", '"casvantijn@gmail.com"'])
 	run(["git", "config", "--global", "user.name", '"CasVT"'])
 	run(["git", "checkout", "Development"])
-	run(["git", "add", _folder_path('docs', 'api.md')])
+	run(["git", "add", folder_path('docs', 'api.md')])
 	run(["git", "commit", "-m", "Updated API docs"])
 	run(["git", "push"])
