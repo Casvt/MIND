@@ -72,7 +72,7 @@ def _create_app() -> Flask:
 	def not_found(e):
 		if request.path.startswith(api_prefix):
 			return {'error': 'Not Found', 'result': {}}, 404
-		return render_template('page_not_found.html', url_prefix=logging.URL_PREFIX)
+		return render_template('page_not_found.html', url_prefix=UIVariables.url_prefix)
 
 	app.register_blueprint(ui)
 	app.register_blueprint(api, url_prefix=api_prefix)
