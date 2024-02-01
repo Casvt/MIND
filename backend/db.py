@@ -1,11 +1,15 @@
 #-*- coding: utf-8 -*-
 
+"""
+Setting up and interacting with the database.
+"""
+
 import logging
 from datetime import datetime
 from sqlite3 import Connection, ProgrammingError, Row
 from threading import current_thread, main_thread
 from time import time
-from typing import Union
+from typing import Type, Union
 
 from flask import g
 from waitress.task import ThreadedTaskDispatcher as OldThreadedTaskDispatcher
@@ -14,14 +18,14 @@ from backend.custom_exceptions import AccessUnauthorized, UserNotFound
 
 __DATABASE_VERSION__ = 8
 
-class Singleton(type):
+class DB_Singleton(type):
 	_instances = {}
 	def __call__(cls, *args, **kwargs):
 		i = f'{cls}{current_thread()}'
 		if (i not in cls._instances
       	or cls._instances[i].closed):
 			logging.debug(f'Creating singleton instance: {i}')
-			cls._instances[i] = super(Singleton, cls).__call__(*args, **kwargs)
+			cls._instances[i] = super(DB_Singleton, cls).__call__(*args, **kwargs)
 
 		return cls._instances[i]
 
@@ -29,19 +33,21 @@ class ThreadedTaskDispatcher(OldThreadedTaskDispatcher):
 	def handler_thread(self, thread_no: int) -> None:
 		super().handler_thread(thread_no)
 		i = f'{DBConnection}{current_thread()}'
-		if i in Singleton._instances and not Singleton._instances[i].closed:
+		if i in DB_Singleton._instances and not DB_Singleton._instances[i].closed:
 			logging.debug(f'Closing singleton instance: {i}')
-			Singleton._instances[i].close()
-			
+			DB_Singleton._instances[i].close()
+		return
+
 	def shutdown(self, cancel_pending: bool = True, timeout: int = 5) -> bool:
 		print()
 		logging.info('Shutting down MIND...')
 		super().shutdown(cancel_pending, timeout)
 		DBConnection(20.0).close()
+		return
 
-class DBConnection(Connection, metaclass=Singleton):
+class DBConnection(Connection, metaclass=DB_Singleton):
 	file = ''
-	
+
 	def __init__(self, timeout: float) -> None:
 		logging.debug(f'Opening database connection for {current_thread()}')
 		super().__init__(self.file, timeout=timeout)
@@ -55,11 +61,13 @@ class DBConnection(Connection, metaclass=Singleton):
 		super().close()
 		return
 
-def get_db(output_type: Union[dict, tuple]=tuple):
+def get_db(output_type: Union[Type[dict], Type[tuple]]=tuple):
 	"""Get a database cursor instance. Coupled to Flask's g.
 
 	Args:
-		output_type (Union[dict, tuple], optional): The type of output: a tuple or dictionary with the row values. Defaults to tuple.
+		output_type (Union[Type[dict], Type[tuple]], optional):
+		The type of output: a tuple or dictionary with the row values.
+			Defaults to tuple.
 
 	Returns:
 		Cursor: The Cursor instance to use
@@ -220,7 +228,7 @@ def migrate_db(current_db_version: int) -> None:
 	if current_db_version == 7:
 		# V7 -> V8
 		from backend.settings import _format_setting, default_settings
-		from backend.users import register_user
+		from backend.users import Users
 
 		cursor.executescript("""
 			DROP TABLE config;
@@ -239,7 +247,7 @@ def migrate_db(current_db_version: int) -> None:
 				default_settings.items()
 			)
 		)
-		
+
 		cursor.executescript("""
 			ALTER TABLE users
 			ADD admin BOOL NOT NULL DEFAULT 0;
@@ -248,9 +256,9 @@ def migrate_db(current_db_version: int) -> None:
 			SET username = 'admin_old'
 			WHERE username = 'admin';
 		""")
-		
-		register_user('admin', 'admin')
-		
+
+		Users().add('admin', 'admin', True)
+
 		cursor.execute("""
 			UPDATE users
 			SET admin = 1
@@ -264,6 +272,8 @@ def setup_db() -> None:
 	"""
 	from backend.settings import (_format_setting, default_settings, get_setting,
 	                              set_setting)
+	from backend.users import Users
+
 	cursor = get_db()
 	cursor.execute("PRAGMA journal_mode = wal;")
 
@@ -348,11 +358,22 @@ def setup_db() -> None:
 			default_settings.items()
 		)
 	)
-	
+
 	current_db_version = get_setting('database_version')
-	logging.debug(f'Current database version {current_db_version} and desired database version {__DATABASE_VERSION__}')
 	if current_db_version < __DATABASE_VERSION__:
+		logging.debug(
+			f'Database migration: {current_db_version} -> {__DATABASE_VERSION__}'
+		)
 		migrate_db(current_db_version)
 		set_setting('database_version', __DATABASE_VERSION__)
+
+	users = Users()
+	if not 'admin' in users:
+		users.add('admin', 'admin', True)
+		cursor.execute("""
+			UPDATE users
+			SET admin = 1
+			WHERE username = 'admin';
+		""")
 
 	return

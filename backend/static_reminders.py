@@ -2,23 +2,30 @@
 
 import logging
 from sqlite3 import IntegrityError
-from typing import List, Literal
+from typing import List, Union
 
 from apprise import Apprise
 
 from backend.custom_exceptions import (NotificationServiceNotFound,
                                        ReminderNotFound)
 from backend.db import get_db
+from backend.helpers import TimelessSortingMethod, search_filter
 
-filter_function = lambda query, p: (
-	query in p["title"].lower()
-	or query in p["text"].lower()
-)
 
 class StaticReminder:
 	"""Represents a static reminder
 	"""
 	def __init__(self, user_id: int, reminder_id: int) -> None:
+		"""Create an instance.
+
+		Args:
+			user_id (int): The ID of the user.
+			reminder_id (int): The ID of the reminder.
+
+		Raises:
+			ReminderNotFound: Reminder with given ID does not exist or is not
+			owned by user.
+		"""
 		self.id = reminder_id
 		
 		# Check if reminder exists
@@ -27,12 +34,32 @@ class StaticReminder:
 			(self.id, user_id)
 		).fetchone():
 			raise ReminderNotFound
-		
+
+		return
+
+	def _get_notification_services(self) -> List[int]:
+		"""Get ID's of notification services linked to the static reminder.
+
+		Returns:
+			List[int]: The list with ID's.
+		"""
+		result = [
+			r[0]
+			for r in get_db().execute("""
+				SELECT notification_service_id
+				FROM reminder_services
+				WHERE static_reminder_id = ?;
+				""",
+				(self.id,)
+			)
+		]
+		return result
+
 	def get(self) -> dict:
 		"""Get info about the static reminder
 
 		Returns:
-			dict: The info about the reminder
+			dict: The info about the static reminder
 		"""
 		reminder = get_db(dict).execute("""
 			SELECT
@@ -47,28 +74,33 @@ class StaticReminder:
 		).fetchone()
 		reminder = dict(reminder)
 		
-		reminder['notification_services'] = list(map(lambda r: r[0], get_db().execute("""
-			SELECT notification_service_id
-			FROM reminder_services
-			WHERE static_reminder_id = ?;
-		""", (self.id,))))
+		reminder['notification_services'] = self._get_notification_services()
 
 		return reminder
 	
 	def update(
 		self,
-		title: str = None,
-		notification_services: List[int] = None,
-		text: str = None,
-		color: str = None
+		title: Union[str, None] = None,
+		notification_services: Union[List[int], None] = None,
+		text: Union[str, None] = None,
+		color: Union[str, None] = None
 	) -> dict:
-		"""Edit the static reminder
+		"""Edit the static reminder.
 
 		Args:
-			title (str, optional): The new title of the entry. Defaults to None.
-			notification_services (List[int], optional): The new id's of the notification services to use to send the reminder. Defaults to None.
-			text (str, optional): The new body of the reminder. Defaults to None.
-			color (str, optional): The new hex code of the color of the reminder, which is shown in the web-ui. Defaults to None.
+			title (Union[str, None], optional): The new title of the entry.
+				Defaults to None.
+
+			notification_services (Union[List[int], None], optional):
+			The new id's of the notification services to use to send the reminder.
+				Defaults to None.
+
+			text (Union[str, None], optional): The new body of the reminder.
+				Defaults to None.
+
+			color (Union[str, None], optional): The new hex code of the color
+			of the reminder, which is shown in the web-ui.
+				Defaults to None.
 
 		Raises:
 			NotificationServiceNotFound: One of the notification services was not found
@@ -109,16 +141,27 @@ class StaticReminder:
 		if notification_services:
 			cursor.connection.isolation_level = None
 			cursor.execute("BEGIN TRANSACTION;")
-			cursor.execute("DELETE FROM reminder_services WHERE static_reminder_id = ?", (self.id,))
+			cursor.execute(
+				"DELETE FROM reminder_services WHERE static_reminder_id = ?",
+				(self.id,)
+			)
 			try:
-				cursor.executemany(
-					"INSERT INTO reminder_services(static_reminder_id, notification_service_id) VALUES (?,?)",
+				cursor.executemany("""
+					INSERT INTO reminder_services(
+						static_reminder_id,
+						notification_service_id
+					)
+					VALUES (?,?);
+					""",
 					((self.id, s) for s in notification_services)
 				)
 				cursor.execute("COMMIT;")
+
 			except IntegrityError:
 				raise NotificationServiceNotFound
-			cursor.connection.isolation_level = ""
+
+			finally:
+				cursor.connection.isolation_level = ""
 
 		return self.get()
 
@@ -132,33 +175,32 @@ class StaticReminder:
 class StaticReminders:
 	"""Represents the static reminder library of the user account
 	"""
-	sort_functions = {
-		'title': (lambda r: (r['title'], r['text'], r['color']), False),
-		'title_reversed': (lambda r: (r['title'], r['text'], r['color']), True),
-		'date_added': (lambda r: r['id'], False),
-		'date_added_reversed': (lambda r: r['id'], True)
-	}
 
 	def __init__(self, user_id: int) -> None:
+		"""Create an instance.
+
+		Args:
+			user_id (int): The ID of the user.
+		"""
 		self.user_id = user_id
+		return
 		
-	def fetchall(self, sort_by: Literal["title", "title_reversed", "date_added", "date_added_reversed"] = "title") -> List[dict]:
+	def fetchall(
+		self,
+		sort_by: TimelessSortingMethod = TimelessSortingMethod.TITLE
+	) -> List[dict]:
 		"""Get all static reminders
 
 		Args:
-			sort_by (Literal["title", "title_reversed", "date_added", "date_added_reversed"], optional): How to sort the result. Defaults to "title".
+			sort_by (TimelessSortingMethod, optional): How to sort the result.
+				Defaults to TimelessSortingMethod.TITLE.
 
 		Returns:
-			List[dict]: The id, title, text and color of each static reminder
+			List[dict]: The id, title, text and color of each static reminder.
 		"""
-		sort_function = self.sort_functions.get(
-			sort_by,
-			self.sort_functions['title']
-		)
-
-		reminders: list = list(map(
-			dict,
-			get_db(dict).execute("""
+		reminders = [
+			dict(r)
+			for r in get_db(dict).execute("""
 				SELECT
 					id,
 					title, text,
@@ -169,29 +211,36 @@ class StaticReminders:
 				""",
 				(self.user_id,)
 			)
-		))
-		
+		]
+
 		# Sort result
-		reminders.sort(key=sort_function[0], reverse=sort_function[1])
+		reminders.sort(key=sort_by.value[0], reverse=sort_by.value[1])
 
 		return reminders
 
-	def search(self, query: str, sort_by: Literal["title", "title_reversed", "date_added", "date_added_reversed"] = "title") -> List[dict]:
+	def search(
+		self,
+		query: str,
+		sort_by: TimelessSortingMethod = TimelessSortingMethod.TITLE
+	) -> List[dict]:
 		"""Search for static reminders
 
 		Args:
-			query (str): The term to search for
-			sort_by (Literal["title", "title_reversed", "date_added", "date_added_reversed"], optional): How to sort the result. Defaults to "title".
+			query (str): The term to search for.
+
+			sort_by (TimelessSortingMethod, optional): The sorting method of
+			the resulting list.
+				Defaults to TimelessSortingMethod.TITLE.
 
 		Returns:
-			List[dict]: All static reminders that match. Similar output to self.fetchall
-		"""		
-		query = query.lower()
-		reminders = list(filter(
-			lambda p: filter_function(query, p),
-			self.fetchall(sort_by)
-		))
-		return reminders
+			List[dict]: All static reminders that match.
+			Similar output to `self.fetchall`
+		"""
+		static_reminders = [
+			r for r in self.fetchall(sort_by)
+			if search_filter(query, r)
+		]
+		return static_reminders
 
 	def fetchone(self, id: int) -> StaticReminder:
 		"""Get one static reminder
@@ -214,22 +263,32 @@ class StaticReminders:
 		"""Add a static reminder
 
 		Args:
-			title (str): The title of the entry
-			notification_services (List[int]): The id's of the notification services to use to send the reminder.
-			text (str, optional): The body of the reminder. Defaults to ''.
-			color (str, optional): The hex code of the color of the reminder, which is shown in the web-ui. Defaults to None.
+			title (str): The title of the entry.
+
+			notification_services (List[int]): The id's of the
+			notification services to use to send the reminder.
+
+			text (str, optional): The body of the reminder.
+				Defaults to ''.
+
+			color (str, optional): The hex code of the color of the template,
+			which is shown in the web-ui.
+				Defaults to None.
 
 		Raises:
 			NotificationServiceNotFound: One of the notification services was not found
 
 		Returns:
-			StaticReminder: A StaticReminder instance representing the newly created static reminder
+			StaticReminder: The info about the static reminder
 		"""
 		logging.info(
 			f'Adding static reminder with {title=}, {notification_services=}, {text=}, {color=}'
 		)
 
 		cursor = get_db()
+		cursor.connection.isolation_level = None
+		cursor.execute("BEGIN TRANSACTION;")
+
 		id = cursor.execute("""
 			INSERT INTO static_reminders(user_id, title, text, color)
 			VALUES (?,?,?,?);
@@ -238,13 +297,22 @@ class StaticReminders:
 		).lastrowid
 		
 		try:
-			cursor.executemany(
-				"INSERT INTO reminder_services(static_reminder_id, notification_service_id) VALUES (?, ?);",
+			cursor.executemany("""
+				INSERT INTO reminder_services(
+					static_reminder_id,
+					notification_service_id
+				)
+				VALUES (?, ?);
+				""",
 				((id, service) for service in notification_services)
 			)
+			cursor.execute("COMMIT;")
+
 		except IntegrityError:
 			raise NotificationServiceNotFound
-		
+		finally:
+			cursor.connection.isolation_level = ""
+
 		return self.fetchone(id)
 
 	def trigger_reminder(self, id: int) -> None:
@@ -265,7 +333,9 @@ class StaticReminders:
 				id = ?
 				AND user_id = ?
 			LIMIT 1;
-		""", (id, self.user_id)).fetchone()
+			""",
+			(id, self.user_id)
+		).fetchone()
 		if not reminder:
 			raise ReminderNotFound
 		reminder = dict(reminder)
@@ -277,7 +347,9 @@ class StaticReminders:
 			INNER JOIN notification_services ns
 			ON rs.notification_service_id = ns.id
 			WHERE rs.static_reminder_id = ?;
-		""", (id,))
+			""",
+			(id,)
+		)
 		for url in cursor:
 			a.add(url['url'])
 		a.notify(title=reminder['title'], body=reminder['text'])

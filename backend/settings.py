@@ -1,5 +1,9 @@
 #-*- coding: utf-8 -*-
 
+"""
+Getting and setting settings
+"""
+
 from backend.custom_exceptions import InvalidKeyValue, KeyNotFound
 from backend.db import __DATABASE_VERSION__, get_db
 
@@ -85,7 +89,7 @@ def get_admin_settings() -> dict:
 	"""
 	return dict((
 		(key, _reverse_format_setting(key, value))
-		for (key, value) in get_db().execute("""
+		for key, value in get_db().execute("""
 			SELECT key, value
 			FROM config
 			WHERE

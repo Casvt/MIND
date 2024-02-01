@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 #-*- coding: utf-8 -*-
 
-from sys import path
 from os.path import dirname
+from sys import path
+
+from frontend.input_validation import DataSource
 
 path.insert(0, dirname(path[0]))
 
 from subprocess import run
 from typing import Union
-from frontend.api import (DataSource, NotificationServiceNotFound,
-                          ReminderNotFound, TemplateNotFound, api_docs)
+
+from frontend.api import (NotificationServiceNotFound, ReminderNotFound,
+                          TemplateNotFound, api_docs)
 from MIND import _folder_path, api_prefix
 
 url_var_map = {

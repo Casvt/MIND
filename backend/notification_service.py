@@ -74,7 +74,10 @@ def get_apprise_services() -> List[Dict[str, Union[str, Dict[str, list]]]]:
 						'prefix': content.get('prefix'),
 						'regex': process_regex(content.get('regex'))
 					}
-					for content, _ in ((entry['details']['tokens'][e], handled_tokens.add(e)) for e in v['group'])
+					for content, _ in (
+						(entry['details']['tokens'][e], handled_tokens.add(e))
+						for e in v['group']
+					)
 				]
 			}
 			for k, v in 
@@ -175,8 +178,13 @@ class NotificationService:
 	def __init__(self, user_id: int, notification_service_id: int) -> None:
 		self.id = notification_service_id
 		
-		if not get_db().execute(
-			"SELECT 1 FROM notification_services WHERE id = ? AND user_id = ? LIMIT 1;",
+		if not get_db().execute("""
+			SELECT 1
+			FROM notification_services
+			WHERE id = ?
+				AND user_id = ?
+			LIMIT 1;
+			""",
 			(self.id, user_id)
 		).fetchone():
 			raise NotificationServiceNotFound
@@ -187,8 +195,12 @@ class NotificationService:
 		Returns:
 			dict: The info about the notification service
 		"""		
-		result = dict(get_db(dict).execute(
-			"SELECT id, title, url FROM notification_services WHERE id = ? LIMIT 1",
+		result = dict(get_db(dict).execute("""
+			SELECT id, title, url
+			FROM notification_services
+			WHERE id = ?
+			LIMIT 1
+			""",
 			(self.id,)
 		).fetchone())
 	
@@ -330,7 +342,7 @@ class NotificationServices:
 			url (str): The apprise url of the service
 
 		Returns:
-			dict: The info about the new service
+			NotificationService: The instance representing the new service
 		"""	
 		logging.info(f'Adding notification service with {title=}, {url=}')
 
