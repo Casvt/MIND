@@ -1,37 +1,36 @@
-const login_inputs = {
-	'username': document.querySelector('#login-form > input[type="text"]'),
-	'password': document.querySelector('#login-form > input[type="password"]')
-};
-
-const login_errors = {
-	'username': document.getElementById('username-error'),
-	'password': document.getElementById('password-error')
-};
-
-const create_inputs = {
-	'username': document.querySelector('#create-form > input[type="text"]'),
-	'password': document.querySelector('#create-form > input[type="password"]')
-}
-
-const create_errors = {
-	'username_invalid': document.getElementById('new-username-error'),
-	'username_taken': document.getElementById('taken-username-error'),
-};
-
-function toggleWindow() {
-	document.querySelector('main').classList.toggle('show-create');
+const forms = {
+	'login': {
+		'form': document.querySelector('#login-form'),
+		'inputs': {
+			'username': document.querySelector('#login-form input[type="text"]'),
+			'password': document.querySelector('#login-form input[type="password"]')
+		},
+		'errors': {
+			'username': document.querySelector("#username-error-container"),
+			'password': document.querySelector("#password-error-container")
+		}
+	},
+	'create': {
+		'form': document.querySelector('#create-form'),
+		'inputs': {
+			'username': document.querySelector('#create-form input[type="text"]'),
+			'password': document.querySelector('#create-form input[type="password"]')
+		},
+		'errors': {
+			'username_invalid': document.querySelector('#new-username-error'),
+			'username_taken': document.querySelector('#taken-username-error')
+		}
+	}
 };
 
 function login(data=null) {
-	login_inputs.username.classList.remove('error-input');
-	login_errors.username.classList.add('hidden');
-	login_inputs.password.classList.remove('error-input');
-	login_errors.password.classList.add('hidden');
+	forms.login.errors.username.classList.remove('error-container');
+	forms.login.errors.password.classList.remove('error-container');
 
 	if (data === null)
 		data = {
-			'username': login_inputs.username.value,
-			'password': login_inputs.password.value
+			'username': forms.login.inputs.username.value,
+			'password': forms.login.inputs.password.value
 		};
 
 	fetch(`${url_prefix}/api/auth/login`, {
@@ -53,26 +52,23 @@ function login(data=null) {
 			window.location.href = `${url_prefix}/reminders`;
 	})
 	.catch(e => {
-		if (e === 401) {
-			login_inputs.password.classList.add('error-input');
-			login_errors.password.classList.remove('hidden');
-		} else if (e === 404) {
-			login_inputs.username.classList.add('error-input');
-			login_errors.username.classList.remove('hidden');
-		} else {
+		if (e === 404)
+			forms.login.errors.username.classList.add('error-container');
+		else if (e === 401)
+			forms.login.errors.password.classList.add('error-container');
+		else
 			console.log(e);
-		};
 	});
 };
 
 function create() {
-	create_inputs.username.classList.remove('error-input');
-	create_errors.username_invalid.classList.add('hidden');
-	create_errors.username_taken.classList.add('hidden');
+	forms.create.inputs.username.classList.remove('error-input');
+	forms.create.errors.username_invalid.classList.add('hidden');
+	forms.create.errors.username_taken.classList.add('hidden');
 
 	const data = {
-		'username': create_inputs.username.value,
-		'password': create_inputs.password.value
+		'username': forms.create.inputs.username.value,
+		'password': forms.create.inputs.password.value
 	};
 	fetch(`${url_prefix}/api/user/add`, {
 		'method': 'POST',
@@ -86,11 +82,11 @@ function create() {
 	})
 	.catch(e => {
 		if (e === 'UsernameInvalid') {
-			create_inputs.username.classList.add('error-input');
-			create_errors.username_invalid.classList.remove('hidden');
+			forms.create.inputs.username.classList.add('error-input');
+			forms.create.errors.username_invalid.classList.remove('hidden');
 		} else if (e === 'UsernameTaken') {
-			create_inputs.username.classList.add('error-input');
-			create_errors.username_taken.classList.remove('hidden');
+			forms.create.inputs.username.classList.add('error-input');
+			forms.create.errors.username_taken.classList.remove('hidden');
 		} else {
 			console.log(e);
 		};
@@ -98,7 +94,7 @@ function create() {
 };
 
 function checkLogin() {
-	fetch(`${url_prefix}/api/auth/status?api_key=${JSON.parse(localStorage.getItem('MIND')).api_key}`)
+	fetch(`${url_prefix}/api/auth/status?api_key=${api_key}`)
 	.then(response => {
 		if (!response.ok) return Promise.reject(response.status);
 		return response.json();
@@ -129,13 +125,15 @@ function checkAllowNewAccounts() {
 // code run on load
 
 if (localStorage.getItem('MIND') === null)
-	localStorage.setItem('MIND', JSON.stringify({'api_key': null, 'locale': 'en-GB', 'default_service': null}))
+	localStorage.setItem('MIND', JSON.stringify(
+		{'api_key': null, 'locale': 'en-GB', 'default_service': null}
+	))
 
 const url_prefix = document.getElementById('url_prefix').dataset.value;
+const api_key = JSON.parse(localStorage.getItem('MIND')).api_key;
 
 checkLogin();
 checkAllowNewAccounts();
 
-document.getElementById('login-form').setAttribute('action', 'javascript:login();');
-document.getElementById('create-form').setAttribute('action', 'javascript:create();');
-document.querySelectorAll('.switch-button').forEach(e => e.addEventListener('click', e => toggleWindow()));
+forms.login.form.action = 'javascript:login();';
+forms.create.form.action = 'javascript:create();';

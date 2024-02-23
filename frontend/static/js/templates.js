@@ -26,9 +26,12 @@ function loadTemplateSelection() {
 function applyTemplate() {
 	if (inputs.template.value === '0') {
 		inputs.title.value = '';
-		inputs.notification_service.querySelectorAll('input[type="checkbox"]:checked').forEach(c => c.checked = false)
+		inputs.notification_service.querySelectorAll(
+			'input[type="checkbox"]:checked'
+		).forEach(c => c.checked = false)
 		inputs.text.value = '';
-		toggleColor(true);
+		selectColor(colors[0]);
+
 	} else {
 		fetch(`${url_prefix}/api/templates/${inputs.template.value}?api_key=${api_key}`)
 		.then(response => {
@@ -41,12 +44,7 @@ function applyTemplate() {
 				c => c.checked = json.result.notification_services.includes(parseInt(c.dataset.id))
 			);
 			inputs.text.value = json.result.text;
-			if (json.result.color !== null) {
-				if (inputs.color.classList.contains('hidden'))
-					toggleColor();
-				selectColor(json.result.color);
-			} else
-				toggleColor(true);
+			selectColor(json.result.color || colors[0]);
 		})
 		.catch(e => {
 			if (e === 401)

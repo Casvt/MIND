@@ -1,7 +1,12 @@
 const setting_inputs = {
-	'allow_new_accounts': document.querySelector('#allow-new-accounts-input'),
-	'login_time': document.querySelector('#login-time-input'),
-	'login_time_reset': document.querySelector('#login-time-reset-input')
+	allow_new_accounts: document.querySelector('#allow-new-accounts-input'),
+	login_time: document.querySelector('#login-time-input'),
+	login_time_reset: document.querySelector('#login-time-reset-input')
+};
+
+const user_inputs = {
+	username: document.querySelector('#new-username-input'),
+	password: document.querySelector('#new-password-input')
 };
 
 function checkLogin() {
@@ -58,8 +63,8 @@ function toggleAddUser() {
 	const el = document.querySelector('#add-user-row');
 	if (el.classList.contains('hidden')) {
 		// Show row
-		document.querySelector('#new-username-input').value = '';
-		document.querySelector('#new-password-input').value = '';
+		user_inputs.username.value = '';
+		user_inputs.password.value = '';
 		el.classList.remove('hidden');
 	} else {
 		// Hide row
@@ -68,9 +73,11 @@ function toggleAddUser() {
 };
 
 function addUser() {
+	user_inputs.username.classList.remove('error-input');
+	user_inputs.username.title = '';
 	const data = {
-		'username': document.querySelector('#new-username-input').value,
-		'password': document.querySelector('#new-password-input').value
+		'username': user_inputs.username.value,
+		'password': user_inputs.password.value
 	};
 	fetch(`${url_prefix}/api/admin/users?api_key=${api_key}`, {
 		'method': 'POST',
@@ -85,12 +92,23 @@ function addUser() {
 		loadUsers();
 	})
 	.catch(e => {
-		console.log(e);
+		if (e === "UsernameTaken") {
+			user_inputs.username.classList.add('error-input');
+			user_inputs.username.title = 'Username already taken';
+
+		} else if (e === "UsernameInvalid") {
+			user_inputs.username.classList.add('error-input');
+			user_inputs.username.title = 'Username contains invalid characters';
+
+		} else
+			console.log(e);
 	});
 };
 
 function editUser(id) {
-	const new_password = document.querySelector(`#user-table tr[data-id="${id}"] input`).value;
+	const new_password = document.querySelector(
+		`#user-table tr[data-id="${id}"] input`
+	).value;
 	fetch(`${url_prefix}/api/admin/users/${id}?api_key=${api_key}`, {
 		'method': 'PUT',
 		'headers': {'Content-Type': 'application/json'},
@@ -103,7 +121,7 @@ function deleteUser(id) {
 	document.querySelector(`#user-table tr[data-id="${id}"]`).remove();
 	fetch(`${url_prefix}/api/admin/users/${id}?api_key=${api_key}`, {
 		'method': 'DELETE'
-	})
+	});
 };
 
 function loadUsers() {
@@ -117,9 +135,10 @@ function loadUsers() {
 			entry.dataset.id = user.id;
 
 			const username = document.createElement('td');
-			const username_text = document.createElement('p');
-			username_text.innerText = user.username;
-			username.appendChild(username_text);
+			username.innerText = user.username;
+			entry.appendChild(username);
+
+			const password = document.createElement('td');
 			const new_password_form = document.createElement('form');
 			new_password_form.classList.add('hidden');
 			new_password_form.action = `javascript:editUser(${user.id})`;
@@ -127,23 +146,29 @@ function loadUsers() {
 			new_password.type = 'password';
 			new_password.placeholder = 'New password';
 			new_password_form.appendChild(new_password);
-			username.appendChild(new_password_form);
-			entry.appendChild(username);
+			password.appendChild(new_password_form);
+			entry.appendChild(password);
 
 			const actions = document.createElement('td');
 			entry.appendChild(actions);
 
 			const edit_user = document.createElement('button');
-			edit_user.onclick = e => e.currentTarget.parentNode.previousSibling.querySelector('form').classList.toggle('hidden');
-			edit_user.innerHTML = icons.edit;
+			edit_user.onclick = e => e
+				.currentTarget
+				.parentNode
+				.previousSibling
+				.querySelector('form')
+				.classList
+				.toggle('hidden');
+			edit_user.innerHTML = Icons.edit;
 			actions.appendChild(edit_user);
 
 			if (user.username !== 'admin') {
 				const delete_user = document.createElement('button');
 				delete_user.onclick = e => deleteUser(user.id);
-				delete_user.innerHTML = icons.delete;
+				delete_user.innerHTML = Icons.delete;
 				actions.appendChild(delete_user);
-			}
+			};
 
 			table.appendChild(entry);
 		});
@@ -156,9 +181,9 @@ checkLogin();
 loadSettings();
 loadUsers();
 
-document.querySelector('#logout-button').onclick = (e) => logout();
+document.querySelector('#logout-button').onclick = e => logout();
 document.querySelector('#settings-form').action = 'javascript:submitSettings();';
 document.querySelector('#add-user-button').onclick = e => toggleAddUser();
 document.querySelector('#add-user-form').action = 'javascript:addUser()';
 document.querySelector('#download-db-button').onclick = e => 
-	window.location.href = `${url_prefix}/api/admin/database?api_key=${api_key}`
+	window.location.href = `${url_prefix}/api/admin/database?api_key=${api_key}`;

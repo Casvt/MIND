@@ -4,7 +4,7 @@ main {
 	overflow-y: hidden;
 }
 
-main.show-create > .form-container {
+main:has(#form-switch:checked) .form-container {
 	transform: translateY(-100%);
 }
 
@@ -16,7 +16,7 @@ main.show-create > .form-container {
 	align-items: center;
 
 	padding: 1rem;
-	
+
 	transition: transform .25s ease-in-out;
 }
 
@@ -40,8 +40,24 @@ form h2 {
 	font-size: clamp(1.2rem, 7vw, 2rem);
 }
 
+#username-error-container,
+#password-error-container {
+	width: 100%;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: .5rem;
+}
+
 form input {
-	max-width: 20rem;
+	width: min(100%, 20rem);
+}
+
+#username-error-container p,
+#password-error-container p {
+	width: min(100%, 19rem);
 }
 
 .switch-button {
@@ -50,20 +66,15 @@ form input {
 	color: var(--color-light);
 
 	text-decoration: underline;
+	text-align: center;
+}
+
+.switch-button:hover {
+	cursor: pointer;
 }
 
 button[type="submit"] {
 	padding: .5rem 1rem;
 
 	font-size: 1.1rem;
-}
-
-p.error {
-	width: 100%;
-	max-width: 20rem;
-	margin-top: -.5rem;
-
-	padding-inline: .5rem;
-
-	text-align: left;
 }

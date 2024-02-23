@@ -8,25 +8,40 @@
 }
 
 #add-service-button {
-	padding: .5rem 8rem;
+	width: min(100%, 17rem);
+	height: 2rem;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	border-radius: 4px;
 	background-color: var(--color-gray);
 }
 
 #add-service-button > svg {
 	height: 1rem;
 	width: 1rem;
+	transition: transform .125s linear;
+}
+
+.table-container:has(#service-list-toggle:checked) #add-service-button > svg {
+	transform: rotate(45deg);
 }
 
 .overflow-container {
 	margin-inline: auto;
-	width: 100%;
-	max-width: 50rem;
+	width: min(100%, 50rem);
 
 	overflow-x: auto;
 }
 
 .overflow-container > table {
 	border-spacing: 0px;
+}
+
+.overflow-container > table:not(:has(tbody > tr)) {
+	display: none;
 }
 
 .overflow-container > table th,
@@ -38,7 +53,7 @@
 	padding: .5rem;
 }
 
-#services-list > tr > td {
+.overflow-container td {
 	border-top: 1px solid var(--color-gray);
 	padding: .25rem;
 }
@@ -46,7 +61,7 @@
 .title-column {
 	min-width: 9.5rem;
 	width: 25%;
-	
+
 	padding-left: 1.5rem;
 	padding-right: 1rem;
 }
@@ -56,17 +71,18 @@
 	width: 65%;
 }
 
-#services-list input {
-	border-radius: 2px;
+.overflow-container table input {
+	width: 100%;
+	border-radius: 4px;
 	padding: .25rem;
 	box-shadow: none;
 }
 
-#services-list input:read-only {
+.overflow-container input:read-only {
 	border-color: transparent;
 }
 
-#services-list > tr > td.action-column {
+.overflow-container .action-column {
 	min-width: 4rem;
 	width: 20%;
 	
@@ -77,18 +93,24 @@
 	padding-right: 1.5rem;
 }
 
-.action-column svg {
-	width: 1rem;
-	height: 1rem;
+.action-column > button {
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
-#services-list > tr:not(.edit) > td.action-column > button[data-type="edit"],
-#services-list > tr.edit > td.action-column > button[data-type="save"] {
-	display: inline-block;
+.overflow-container .action-column svg {
+	width: 1.25rem;
+	height: 1.25rem;
 }
 
-#services-list > tr.edit > td.action-column > button[data-type="edit"],
-#services-list > tr:not(.edit):not(#add-row) > td.action-column > button[data-type="save"] {
+tr:has(input:not(:read-only)) button[data-type="save"],
+tr:has(input:read-only) button[data-type="edit"] {
+	display: flex;
+}
+
+tr:has(input:not(:read-only)) button[data-type="edit"],
+tr:has(input:read-only) button[data-type="save"] {
 	display: none;
 }
 
@@ -99,12 +121,20 @@
 	display: none;
 }
 
-.overflow-container.show-add #add-service-container {
+.overflow-container:has(#service-list-toggle:checked) table {
+	display: none;
+}
+
+.overflow-container:has(#service-list-toggle:checked) #add-service-container {
 	display: block;
 }
 
-.overflow-container.show-add > table {
+.overflow-container:has(#add-service-toggle:checked) #service-list {
 	display: none;
+}
+
+.overflow-container:has(#add-service-toggle:checked) #add-service-window {
+	display: flex;
 }
 
 #service-list {
@@ -128,14 +158,6 @@
 	
 	text-align: center;
 	font-size: 1.1rem;
-}
-
-#add-service-container.show-add-window #add-service-window {
-	display: flex;
-}
-
-#add-service-container.show-add-window #service-list {
-	display: none;
 }
 
 /*  */
@@ -205,7 +227,7 @@
 	min-height: 5rem;
 	max-height: 15rem;
 	overflow-y: auto;
-	
+
 	align-items: center;
 
 	background-color: var(--color-dark);
@@ -228,19 +250,23 @@
 }
 
 .add-row {
-	height: 2rem;
-	width: 80%;
+	width: min(100%, 21rem);
 
 	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
 	gap: 1rem;
 }
 
 .add-row input {
 	flex-grow: 1;
+	height: 2rem;
+	min-width: 0rem;
 	font-size: .8rem;
 }
 
 .add-row button {
+	height: 2rem;
 	padding: .35rem .75rem;
 	background-color: var(--color-gray);
 	border-radius: 4px;
@@ -264,4 +290,10 @@
 .entries-list > button path {
 	height: inherit;
 	fill: var(--color-dark);
+}
+
+@media (max-width: 543px) {
+	#service-list button {
+		flex-grow: 1;
+	}
 }

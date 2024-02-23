@@ -1,14 +1,24 @@
+const SettingsEls = {
+	locale_input: document.querySelector('#locale-input'),
+	default_service_input: document.querySelector('#default-service-input'),
+	change_password_form: document.querySelector('#change-password-form'),
+	delete_account_button: document.querySelector('#delete-account-button')
+};
+
 function loadSettings() {
-	document.getElementById('locale-input').value = getLocalStorage('locale')['locale'];
+	// Default Service is handled by notification.fillNotificationSelection()
+	document.getElementById('locale-input').value =
+		getLocalStorage('locale')['locale'];
 };
 
 function updateLocale(e) {
 	setLocalStorage({'locale': e.target.value});
-	window.location.reload();
+	fillLibrary(Types.reminder);
 };
 
 function updateDefaultService(e) {
 	setLocalStorage({'default_service': parseInt(e.target.value)});
+	// Add window is handled by show.showAdd()
 };
 
 function changePassword() {
@@ -45,7 +55,7 @@ function deleteAccount() {
 
 loadSettings();
 
-document.getElementById('locale-input').addEventListener('change', updateLocale);
-document.querySelector('#default-service-input').addEventListener('change', updateDefaultService);
-document.getElementById('change-password-form').setAttribute('action', 'javascript:changePassword()');
-document.getElementById('delete-account-button').addEventListener('click', e => deleteAccount());
+SettingsEls.locale_input.onchange = updateLocale;
+SettingsEls.default_service_input.onchange = updateDefaultService;
+SettingsEls.change_password_form.action = 'javascript:changePassword();';
+SettingsEls.delete_account_button.onclick = e => deleteAccount();

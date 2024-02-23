@@ -1,0 +1,11 @@
+{
+	"configurations": [
+		{
+			"name": "Main File",
+			"type": "debugpy",
+			"request": "launch",
+			"python": "/bin/python3",
+			"program": "${workspaceFolder}/MIND.py"
+		}
+	]
+}

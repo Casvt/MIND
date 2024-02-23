@@ -1,45 +1,39 @@
-.settings-container {
-	max-width: 50rem;
+#settings-table {
 	margin-inline: auto;
-
-	text-align: center;
+	width: min(100%, 50rem);
 }
 
-.settings-container > h3 {
-	margin-bottom: 1.25rem;
-
-	padding-bottom: .5rem;
-	border-bottom: 2px solid var(--color-gray);
-
-	font-size: 1.4rem;
+#settings-table td {
+	padding: .5rem;
+	width: 50%;
 }
 
-.settings-container > h3:not(:first-of-type) {
-	margin-top: 2.5rem;
+#settings-table tr > td:first-child {
+	text-align: right;
+	font-weight: 500;
 }
 
-.settings-container button {
+#settings-table button {
 	padding: .5rem 2rem;
 	background-color: var(--color-gray);
 	
 	box-shadow: var(--default-shadow);
 }
 
-.settings-container input,
-.settings-container textarea,
-.settings-container select {
-	max-width: 20rem;
+#settings-table tr:has(#default-service-input) {
+	display: none;
+}
+
+#settings-table tr:has(#default-service-input option) {
+	display: table-row;
 }
 
 #change-password-form {
 	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
 	gap: 1rem;
 }
 
-#delete-account-button {
+#settings-table #delete-account-button {
 	background-color: var(--color-error);
 }
 

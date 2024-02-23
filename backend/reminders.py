@@ -166,6 +166,11 @@ class Reminder:
 		).fetchone()
 		reminder = dict(reminder)
 
+		reminder["weekdays"] = [
+			int(n)
+			for n in reminder["weekdays"].split(",")
+			if n
+		] if reminder["weekdays"] else None
 		reminder['notification_services'] = self._get_notification_services()
 
 		return reminder
@@ -277,7 +282,7 @@ class Reminder:
 		if repeated_reminder:
 			next_time = _find_next_time(
 				data["time"],
-				RepeatQuantity(data["repeat_quantity"]),
+				RepeatQuantity(data["repeat_quantity"]) if data["repeat_quantity"] else None,
 				data["repeat_interval"],
 				weekdays
 			)
@@ -408,6 +413,12 @@ class Reminders:
 				(self.user_id,)
 			)
 		]
+		for r in reminders:
+			r["weekdays"] = [
+				int(n)
+				for n in r["weekdays"].split(",")
+				if n
+			] if r["weekdays"] else None
 
 		# Sort result
 		reminders.sort(key=sort_by.value[0], reverse=sort_by.value[1])

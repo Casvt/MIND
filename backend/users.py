@@ -23,7 +23,7 @@ class User:
 
 	def __init__(self, id: int) -> None:
 		result = get_db(dict).execute(
-			"SELECT username, admin FROM users WHERE id = ? LIMIT 1;", 
+			"SELECT username, admin, salt FROM users WHERE id = ? LIMIT 1;", 
 			(id,)
 		).fetchone()
 		if not result:
@@ -32,6 +32,7 @@ class User:
 		self.username: str = result['username']
 		self.user_id = id
 		self.admin: bool = result['admin'] == 1
+		self.salt: bytes = result['salt']
 		return
 
 	@property

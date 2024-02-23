@@ -10,10 +10,9 @@
 	gap: 1rem;
 }
 
-.form-container > form input,
-.form-container > form select,
-.form-container > form textarea,
-.form-container > form button {
+.form-container > form :where(
+	input, select, textarea, button, label
+) {
 	padding: 1rem;
 }
 
@@ -27,14 +26,14 @@
 	gap: var(--gap);
 }
 
-.sub-inputs > input,
-.sub-inputs > select,
-.sub-inputs > button {
+.sub-inputs > :where(
+	input, select, button, label
+) {
 	width: calc(50% - (var(--gap) / 2));
 }
 
 .form-container > form > button,
-.sub-inputs > button {
+.sub-inputs > :where(button, label) {
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -55,8 +54,17 @@
 	opacity: 0;
 }
 
-.color-list {
+#color-button {
+	--color: var(--color-dark);
+	background-color: var(--color);
+}
+
+#info-form:has(#color-toggle:checked) .color-list {
 	display: flex;
+}
+
+.color-list {
+	display: none;
 	justify-content: center;
 	align-items: center;
 	gap: 1rem;
@@ -68,25 +76,26 @@
 	box-shadow: var(--default-shadow);
 }
 
-.color-list > button {
-	height: 1.5rem;
-	width: 1.5rem;
-
+.color-list > label {
 	padding: 1rem;
 	border: 1px solid transparent;
 	background-color: var(--color);
 }
 
-.color-list > button[data-selected='true'] {
+.color-list > label:has(input:checked) {
 	border-color: var(--color-white);
 }
 
-.notification-service-list {
+#info-form:has(#notification-service-selection-toggle:checked) .notification-service-selection {
+	display: flex;
+}
+
+.notification-service-selection {
 	width: 100%;
 	max-height: 10rem;
 	overflow-y: auto;
 
-	display: flex;
+	display: none;
 	flex-direction: column;
 	
 	border: 2px solid var(--color-gray);
@@ -95,19 +104,20 @@
 	box-shadow: var(--default-shadow);
 }
 
-.notification-service-list > div {
+.notification-service-selection > div {
 	display: flex;
 	gap: 1rem;
 	padding: .5rem .75rem;
 }
 
-.notification-service-list > div:not(:first-child) {
+.notification-service-selection > div:not(:first-child) {
 	border-top: 1px solid var(--color-gray);
 }
 
 .form-container > form .repeat-options > button {
 	width: calc((100% / 3) - (var(--gap) / 1.5));
 	min-width: min-content;
+	padding: 1rem 0rem;
 }
 
 .repeat-bar {
@@ -214,6 +224,7 @@ div.options > button {
 	.sub-inputs > input,
 	.sub-inputs > select,
 	.sub-inputs > button,
+	.sub-inputs > label,
 	.form-container > form .repeat-options > button {
 		width: 100%;
 	}
@@ -258,8 +269,8 @@ div.options > button {
 }
 
 #info.show-add-static-reminder #template-selection,
-#info.show-add-static-reminder #color-toggle,
-#info.show-add-static-reminder #toggle-notification-service-list {
+#info.show-add-static-reminder #color-button,
+#info.show-add-static-reminder #notification-service-selection-button {
 	width: 100%;
 }
 
@@ -279,8 +290,8 @@ div.options > button {
 	margin-top: -1rem;
 }
 
-#info.show-add-template #color-toggle,
-#info.show-add-template #toggle-notification-service-list {
+#info.show-add-template #color-button,
+#info.show-add-template #notification-service-selection-button {
 	width: 100%;
 }
 
@@ -292,7 +303,7 @@ div.options > button {
 	display: none;
 }
 
-#info.show-edit-reminder #color-toggle {
+#info.show-edit-reminder #color-button {
 	width: 100%;
 }
 
@@ -310,8 +321,8 @@ div.options > button {
 	margin-top: -1rem;
 }
 
-#info.show-edit-static-reminder #color-toggle,
-#info.show-edit-static-reminder #toggle-notification-service-list {
+#info.show-edit-static-reminder #color-button,
+#info.show-edit-static-reminder #notification-service-selection-button {
 	width: 100%;
 }
 
@@ -330,7 +341,7 @@ div.options > button {
 	margin-top: -1rem;
 }
 
-#info.show-edit-template #color-toggle,
-#info.show-edit-template #toggle-notification-service-list {
+#info.show-edit-template #color-button,
+#info.show-edit-template #notification-service-selection-button {
 	width: 100%;
 }
