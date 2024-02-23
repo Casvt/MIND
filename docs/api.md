@@ -662,6 +662,34 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	| 200| N/A | Success |
 	| 404 | ReminderNotFound | The reminder with the id can not be found |
 
+### `/admin/shutdown`
+
+| Requires being logged in | Description |
+| ------------------------ | ----------- |
+| Yes | Shut down the application | 
+
+??? POST
+
+	**Returns**
+	
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 201| N/A | Success |
+
+### `/admin/restart`
+
+| Requires being logged in | Description |
+| ------------------------ | ----------- |
+| Yes | Restart the application | 
+
+??? POST
+
+	**Returns**
+	
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 201| N/A | Success |
+
 ### `/settings`
 
 | Requires being logged in | Description |
