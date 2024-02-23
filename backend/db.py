@@ -23,8 +23,7 @@ class DB_Singleton(type):
 	def __call__(cls, *args, **kwargs):
 		i = f'{cls}{current_thread()}'
 		if (i not in cls._instances
-      	or cls._instances[i].closed):
-			logging.debug(f'Creating singleton instance: {i}')
+		or cls._instances[i].closed):
 			cls._instances[i] = super(DB_Singleton, cls).__call__(*args, **kwargs)
 
 		return cls._instances[i]
@@ -34,32 +33,33 @@ class ThreadedTaskDispatcher(OldThreadedTaskDispatcher):
 		super().handler_thread(thread_no)
 		i = f'{DBConnection}{current_thread()}'
 		if i in DB_Singleton._instances and not DB_Singleton._instances[i].closed:
-			logging.debug(f'Closing singleton instance: {i}')
 			DB_Singleton._instances[i].close()
 		return
 
 	def shutdown(self, cancel_pending: bool = True, timeout: int = 5) -> bool:
 		print()
-		logging.info('Shutting down MIND...')
-		super().shutdown(cancel_pending, timeout)
-		DBConnection(20.0).close()
-		return
+		logging.info('Shutting down MIND')
+		result = super().shutdown(cancel_pending, timeout)
+		return result
 
 class DBConnection(Connection, metaclass=DB_Singleton):
 	file = ''
 
 	def __init__(self, timeout: float) -> None:
-		logging.debug(f'Opening database connection for {current_thread()}')
+		logging.debug(f'Creating connection {self}')
 		super().__init__(self.file, timeout=timeout)
 		super().cursor().execute("PRAGMA foreign_keys = ON;")
 		self.closed = False
 		return
 
 	def close(self) -> None:
-		logging.debug(f'Closing database connection for {current_thread()}')
+		logging.debug(f'Closing connection {self}')
 		self.closed = True
 		super().close()
 		return
+
+	def __repr__(self) -> str:
+		return f'<{self.__class__.__name__}; {current_thread().name}; {id(self)}>'
 
 def get_db(output_type: Union[Type[dict], Type[tuple]]=tuple):
 	"""Get a database cursor instance. Coupled to Flask's g.

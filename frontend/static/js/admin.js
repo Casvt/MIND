@@ -9,6 +9,11 @@ const user_inputs = {
 	password: document.querySelector('#new-password-input')
 };
 
+const power_buttons = {
+	restart: document.querySelector('#restart-button'),
+	shutdown: document.querySelector('#shutdown-button')
+};
+
 function checkLogin() {
 	fetch(`${url_prefix}/api/auth/status?api_key=${api_key}`)
 	.then(response => {
@@ -175,6 +180,32 @@ function loadUsers() {
 	});
 };
 
+function restart_app() {
+	power_buttons.restart.innerText = 'Restarting...';
+	fetch(`${url_prefix}/api/admin/restart?api_key=${api_key}`, {
+		method: "POST"
+	})
+	.then(response =>
+		setTimeout(
+			() => window.location.reload(),
+			1000
+		)
+	);
+};
+
+function shutdown_app() {
+	power_buttons.shutdown.innerText = 'Shutting down...';
+	fetch(`${url_prefix}/api/admin/shutdown?api_key=${api_key}`, {
+		method: "POST"
+	})
+	.then(response =>
+		setTimeout(
+			() => window.location.reload(),
+			1000
+		)
+	);
+};
+
 // code run on load
 
 checkLogin();
@@ -187,3 +218,5 @@ document.querySelector('#add-user-button').onclick = e => toggleAddUser();
 document.querySelector('#add-user-form').action = 'javascript:addUser()';
 document.querySelector('#download-db-button').onclick = e => 
 	window.location.href = `${url_prefix}/api/admin/database?api_key=${api_key}`;
+power_buttons.restart.onclick = e => restart_app();
+power_buttons.shutdown.onclick = e => shutdown_app();

@@ -4,10 +4,12 @@ import logging
 from dataclasses import dataclass
 from io import BytesIO
 from os import urandom
+from threading import Timer
 from time import time as epoch_time
-from typing import Any, Callable, Dict, Tuple
+from typing import Any, Callable, Dict, Tuple, Union
 
 from flask import g, request, send_file
+from waitress.server import BaseWSGIServer
 
 from backend.custom_exceptions import (AccessUnauthorized, APIKeyExpired,
                                        APIKeyInvalid, InvalidKeyValue,
@@ -44,6 +46,19 @@ from frontend.input_validation import (AllowNewAccountsVariable, ColorVariable,
 #===================
 # General variables and functions
 #===================
+
+class APIVariables:
+	server_instance: Union[BaseWSGIServer, None] = None
+	restart: bool = False
+
+def shutdown_server() -> None:
+	APIVariables.server_instance.close()
+	APIVariables.server_instance.task_dispatcher.shutdown()
+	APIVariables.server_instance._map.clear()
+	return
+
+shutdown_server_thread = Timer(1.0, shutdown_server)
+shutdown_server_thread.name = "InternalStateHandler"
 
 @dataclass
 class ApiKeyEntry:
@@ -563,6 +578,27 @@ def api_get_static_reminder(inputs: Dict[str, Any], s_id: int):
 #===================
 # Admin panel endpoints
 #===================
+
+@admin_api.route(
+	'/shutdown',
+	'Shut down the application',
+	methods=['POST']
+)
+@endpoint_wrapper
+def api_shutdown():
+	shutdown_server_thread.start()
+	return return_api({})
+
+@admin_api.route(
+	'/restart',
+	'Restart the application',
+	methods=['POST']
+)
+@endpoint_wrapper
+def api_restart():
+	APIVariables.restart = True
+	shutdown_server_thread.start()
+	return return_api({})
 
 @api.route(
 	'/settings',

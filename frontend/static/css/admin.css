@@ -145,16 +145,20 @@ h2 {
 
 .add-user-container,
 .database-container {
+	margin-top: 2rem;
 	margin-bottom: 1rem;
 	width: 100%;
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	gap: 2rem;
+	flex-wrap: wrap;
 }
 
 #add-user-button,
-#download-db-button {
-	margin-top: 2rem;
+#download-db-button,
+#restart-button,
+#shutdown-button {
 
 	width: min(15rem, 100%);
 	height: 2rem;
@@ -166,7 +170,9 @@ h2 {
 	box-shadow: var(--default-shadow);
 }
 
-#download-db-button {
+#download-db-button,
+#restart-button,
+#shutdown-button {
 	height: unset;
 }
 

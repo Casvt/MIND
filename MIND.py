@@ -6,9 +6,10 @@ The main file where MIND is started from
 """
 
 import logging
-from os import makedirs, urandom
+from os import execv, makedirs, urandom
 from os.path import dirname, isfile
 from shutil import move
+from sys import argv
 
 from flask import Flask, render_template, request
 from waitress.server import create_server
@@ -17,7 +18,8 @@ from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from backend.db import DBConnection, ThreadedTaskDispatcher, close_db, setup_db
 from backend.helpers import check_python_version, folder_path
 from backend.reminders import ReminderHandler
-from frontend.api import admin_api, admin_api_prefix, api, api_prefix
+from frontend.api import (APIVariables, admin_api, admin_api_prefix, api,
+                          api_prefix)
 from frontend.ui import UIVariables, ui
 
 HOST = '0.0.0.0'
@@ -116,12 +118,17 @@ def MIND() -> None:
 		port=PORT,
 		threads=THREADS
 	)
+	APIVariables.server_instance = server
 	logging.info(f'MIND running on http://{HOST}:{PORT}{URL_PREFIX}')
 	# =================
 	server.run()
 	# =================
 
 	reminder_handler.stop_handling()
+
+	if APIVariables.restart:
+		logging.info('Restarting MIND')
+		execv(__file__, argv)
 
 	return
 
