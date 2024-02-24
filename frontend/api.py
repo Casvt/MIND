@@ -2,8 +2,10 @@
 
 import logging
 from dataclasses import dataclass
+from datetime import datetime
 from io import BytesIO
-from os import urandom
+from os import remove, urandom
+from os.path import basename
 from threading import Timer
 from time import time as epoch_time
 from typing import Any, Callable, Dict, Tuple, Union
@@ -20,7 +22,8 @@ from backend.custom_exceptions import (AccessUnauthorized, APIKeyExpired,
                                        ReminderNotFound, TemplateNotFound,
                                        UsernameInvalid, UsernameTaken,
                                        UserNotFound)
-from backend.db import DBConnection
+from backend.db import get_db
+from backend.helpers import folder_path
 from backend.notification_service import get_apprise_services
 from backend.settings import get_admin_settings, get_setting, set_setting
 from backend.users import User, Users
@@ -687,10 +690,22 @@ def api_admin_user(inputs: Dict[str, Any], u_id: int):
 )
 @endpoint_wrapper
 def api_admin_database():
-	with open(DBConnection.file, 'rb') as database_file:
-		return send_file(
-			BytesIO(database_file.read()),
-			'application/x-sqlite3',
-			download_name='MIND.db'
-		), 200
-	
+	current_date = datetime.now().strftime(r"%Y_%m_%d_%H_%M")
+	filename = folder_path(
+		'db', f'MIND_{current_date}.db'
+	)
+	get_db().execute(
+		"VACUUM INTO ?;",
+		(filename,)
+	)
+
+	with open(filename, 'rb') as database_file:
+		bi = BytesIO(database_file.read())
+
+	remove(filename)
+
+	return send_file(
+		bi,
+		mimetype='application/x-sqlite3',
+		download_name=basename(filename)
+	), 200
