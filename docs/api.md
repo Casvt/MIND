@@ -9,7 +9,7 @@ Authentication is done using an API key.
 To log in, make a POST request to the [`/api/auth/login`](#authlogin) endpoint.
 You'll receive an API key, which you can then use in your requests to authenticate.
 Supply it via the url parameter `api_key`.
-This API key is valid for one hour after which the key expires, any further requests return 401 'APIKeyExpired' and you are required to log in again.
+This API key is valid for one hour (though the admin can change this duration) after which the key expires, any further requests return 401 'APIKeyExpired' and you are required to log in again.
 If no `api_key` is supplied or it is invalid, 401 `APIKeyInvalid` is returned.
 
 For example:
@@ -56,7 +56,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 201| N/A | Success |
+	| 201 | N/A | Success |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 	| 401 | AccessUnauthorized | The password given is not correct |
 	| 404 | UserNotFound | The user requested can not be found |
@@ -73,7 +73,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 201| N/A | Success |
+	| 201 | N/A | Success |
 
 ### `/auth/status`
 
@@ -87,7 +87,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 
 ### `/user/add`
 
@@ -108,7 +108,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 201| N/A | Success |
+	| 201 | N/A | Success |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 	| 400 | UsernameInvalid | The username contains invalid characters |
 	| 400 | UsernameTaken | The username is already taken |
@@ -134,7 +134,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 
 ??? DELETE
@@ -145,7 +145,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 
 ### `/notificationservices`
 
@@ -161,7 +161,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 
 ??? POST
 
@@ -178,7 +178,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 201| N/A | Success |
+	| 201 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 
@@ -194,7 +194,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 
 ### `/notificationservices/test`
 
@@ -214,7 +214,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 201| N/A | Success |
+	| 201 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 
@@ -232,7 +232,7 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 404 | NotificationServiceNotFound | The notification service was not found |
 
 ??? PUT
@@ -250,7 +250,7 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 404 | NotificationServiceNotFound | The notification service was not found |
 
@@ -262,7 +262,7 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 404 | NotificationServiceNotFound | The notification service was not found |
 
 ### `/reminders`
@@ -285,7 +285,7 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 
 ??? POST
@@ -309,7 +309,7 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 201| N/A | Success |
+	| 201 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 400 | InvalidTime | The time given is in the past |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
@@ -334,8 +334,9 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
+	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 
 ### `/reminders/test`
 
@@ -357,7 +358,7 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 201| N/A | Success |
+	| 201 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 	| 404 | NotificationServiceNotFound | The notification service was not found |
@@ -376,7 +377,7 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 404 | ReminderNotFound | The reminder with the id can not be found |
 
 ??? PUT
@@ -400,7 +401,7 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 400 | InvalidTime | The time given is in the past |
 	| 404 | NotificationServiceNotFound | The notification service was not found |
@@ -414,7 +415,7 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 404 | ReminderNotFound | The reminder with the id can not be found |
 
 ### `/templates`
@@ -437,7 +438,7 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 
 ??? POST
@@ -457,7 +458,7 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 201| N/A | Success |
+	| 201 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 	| 404 | NotificationServiceNotFound | The notification service was not found |
@@ -481,8 +482,9 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
+	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 
 ### `/templates/<int:t_id>`
 
@@ -498,7 +500,7 @@ Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 404 | TemplateNotFound | The template was not found |
 
 ??? PUT
@@ -518,7 +520,7 @@ Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 404 | NotificationServiceNotFound | The notification service was not found |
 	| 404 | TemplateNotFound | The template was not found |
@@ -531,7 +533,7 @@ Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 404 | TemplateNotFound | The template was not found |
 
 ### `/staticreminders`
@@ -554,7 +556,7 @@ Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 
 ??? POST
@@ -574,7 +576,7 @@ Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 201| N/A | Success |
+	| 201 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 	| 404 | NotificationServiceNotFound | The notification service was not found |
@@ -598,8 +600,9 @@ Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
+	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 
 ### `/staticreminders/<int:s_id>`
 
@@ -615,7 +618,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 404 | ReminderNotFound | The reminder with the id can not be found |
 
 ??? POST
@@ -626,7 +629,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 201| N/A | Success |
+	| 201 | N/A | Success |
 	| 404 | ReminderNotFound | The reminder with the id can not be found |
 
 ??? PUT
@@ -646,7 +649,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 404 | NotificationServiceNotFound | The notification service was not found |
 	| 404 | ReminderNotFound | The reminder with the id can not be found |
@@ -659,7 +662,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 404 | ReminderNotFound | The reminder with the id can not be found |
 
 ### `/admin/shutdown`
@@ -674,7 +677,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 201| N/A | Success |
+	| 201 | N/A | Success |
 
 ### `/admin/restart`
 
@@ -688,7 +691,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 201| N/A | Success |
+	| 201 | N/A | Success |
 
 ### `/settings`
 
@@ -702,7 +705,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 
 ### `/admin/settings`
 
@@ -718,7 +721,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 
 ??? PUT
 
@@ -736,7 +739,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 
@@ -754,7 +757,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 
 ??? POST
 
@@ -771,7 +774,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 201| N/A | Success |
+	| 201 | N/A | Success |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 	| 400 | UsernameInvalid | The username contains invalid characters |
 	| 400 | UsernameTaken | The username is already taken |
@@ -799,7 +802,7 @@ Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 
 ??? DELETE
@@ -810,7 +813,7 @@ Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 
 ### `/admin/database`
 
@@ -820,9 +823,11 @@ Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
 
 ??? GET
 
+	Download the database file
+
 	**Returns**
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| 200| N/A | Success |
+	| 200 | N/A | Success |
 
