@@ -31,20 +31,20 @@ from frontend.input_validation import (AllowNewAccountsVariable, ColorVariable,
                                        EditNotificationServicesVariable,
                                        EditTimeVariable, EditTitleVariable,
                                        EditURLVariable, LoginTimeResetVariable,
-                                       LoginTimeVariable, NewPasswordVariable,
+                                       LoginTimeVariable, Method, Methods,
+                                       NewPasswordVariable,
                                        NotificationServicesVariable,
                                        PasswordCreateVariable,
                                        PasswordVariable, QueryVariable,
                                        RepeatIntervalVariable,
                                        RepeatQuantityVariable, SortByVariable,
-                                       StaticReminderSortByVariable,
-                                       TemplateSortByVariable, TextVariable,
+                                       TextVariable, TimelessSortByVariable,
                                        TimeVariable, TitleVariable,
                                        URLVariable, UsernameCreateVariable,
                                        UsernameVariable, WeekDaysVariable,
-                                       _admin_api_prefix, admin_api,
-                                       admin_api_prefix, api, api_docs,
-                                       api_prefix, input_validation)
+                                       admin_api, admin_api_prefix, api,
+                                       api_prefix, get_api_docs,
+                                       input_validation)
 
 #===================
 # General variables and functions
@@ -120,14 +120,8 @@ def auth() -> None:
 
 def endpoint_wrapper(method: Callable) -> Callable:
 	def wrapper(*args, **kwargs):
-		if request.path.startswith(admin_api_prefix):
-			requires_auth = api_docs[
-				_admin_api_prefix + request.url_rule.rule.split(admin_api_prefix)[1]
-			]['requires_auth']
-		else:
-			requires_auth = api_docs[
-				request.url_rule.rule.split(api_prefix)[1]
-			]['requires_auth']
+		requires_auth = get_api_docs(request).requires_auth
+
 		try:
 			if requires_auth:
 				auth()
@@ -159,8 +153,12 @@ def endpoint_wrapper(method: Callable) -> Callable:
 @api.route(
 	'/auth/login',
 	'Login to a user account',
-	{'POST': [[UsernameVariable, PasswordVariable]]},
-	False,
+	Methods(
+		post=Method(
+			vars=[UsernameVariable, PasswordVariable]
+		)
+	),
+	requires_auth=False,
 	methods=['POST']
 )
 @endpoint_wrapper
@@ -213,8 +211,12 @@ def api_status():
 @api.route(
 	'/user/add',
 	'Create a new user account',
-	{'POST': [[UsernameCreateVariable, PasswordCreateVariable]]},
-	False,
+	Methods(
+		post=Method(
+			vars=[UsernameCreateVariable, PasswordCreateVariable]
+		)
+	),
+	requires_auth=False,
 	methods=['POST']
 )
 @endpoint_wrapper
@@ -225,10 +227,15 @@ def api_add_user(inputs: Dict[str, str]):
 @api.route(
 	'/user',
 	'Manage a user account',
-	{'PUT': [[NewPasswordVariable],
-	  		'Change the password of the user account'],
-	'DELETE': [[],
-	    	'Delete the user account']},
+	Methods(
+		put=Method(
+			vars=[NewPasswordVariable],
+			description="Change the password of the user account"
+		),
+		delete=Method(
+			description='Delete the user account'
+		)
+	),
 	methods=['PUT', 'DELETE']
 )
 @endpoint_wrapper
@@ -250,10 +257,15 @@ def api_manage_user(inputs: Dict[str, str]):
 @api.route(
 	'/notificationservices',
 	'Manage the notification services',
-	{'GET': [[],
-			'Get a list of all notification services'],
-  	'POST': [[TitleVariable, URLVariable],
-			'Add a notification service']},
+	Methods(
+		get=Method(
+			description='Get a list of all notification services'
+		),
+		post=Method(
+			vars=[TitleVariable, URLVariable],
+			description='Add a notification service'
+		)
+	),
 	methods=['GET', 'POST']
 )
 @endpoint_wrapper
@@ -282,7 +294,11 @@ def api_notification_service_available():
 @api.route(
 	'/notificationservices/test',
 	'Send a test notification using the supplied Apprise URL',
-	{'POST': [[URLVariable]]}, 
+	Methods(
+		post=Method(
+			vars=[URLVariable]
+		)
+	),
 	methods=['POST']
 )
 @endpoint_wrapper
@@ -296,10 +312,15 @@ def api_test_service(inputs: Dict[str, Any]):
 @api.route(
 	'/notificationservices/<int:n_id>',
 	'Manage a specific notification service',
-	{'PUT': [[EditTitleVariable, EditURLVariable],
-	  		'Edit the notification service'],
-	'DELETE': [[],
-	    	'Delete the notification service']},
+	Methods(
+		put=Method(
+			vars=[EditTitleVariable, EditURLVariable],
+			description='Edit the notification service'
+		),
+		delete=Method(
+			description='Delete the notification service'
+		)
+	),
 	methods=['GET', 'PUT', 'DELETE']
 )
 @endpoint_wrapper
@@ -329,15 +350,20 @@ def api_notification_service(inputs: Dict[str, str], n_id: int):
 @api.route(
 	'/reminders',
 	'Manage the reminders',
-	{'GET': [[SortByVariable],
-			'Get a list of all reminders'],
-	'POST': [[TitleVariable, TimeVariable,
-			NotificationServicesVariable, TextVariable,
-			RepeatQuantityVariable, RepeatIntervalVariable,
-			WeekDaysVariable,
-			ColorVariable],
-			'Add a reminder']
-	},
+	Methods(
+		get=Method(
+			vars=[SortByVariable],
+			description='Get a list of all reminders'
+		),
+		post=Method(
+			vars=[TitleVariable, TimeVariable,
+				NotificationServicesVariable, TextVariable,
+				RepeatQuantityVariable, RepeatIntervalVariable,
+				WeekDaysVariable,
+				ColorVariable],
+			description='Add a reminder'
+		),
+	),
 	methods=['GET', 'POST']
 )
 @endpoint_wrapper
@@ -362,7 +388,11 @@ def api_reminders_list(inputs: Dict[str, Any]):
 @api.route(
 	'/reminders/search',
 	'Search through the list of reminders',
-	{'GET': [[SortByVariable, QueryVariable]]},
+	Methods(
+		get=Method(
+			vars=[SortByVariable, QueryVariable]
+		)
+	),
 	methods=['GET']
 )
 @endpoint_wrapper
@@ -376,8 +406,12 @@ def api_reminders_query(inputs: Dict[str, str]):
 @api.route(
 	'/reminders/test',
 	'Test send a reminder draft',
-	{'POST': [[TitleVariable, NotificationServicesVariable,
-			TextVariable]]}, 
+	Methods(
+		post=Method(
+			vars=[TitleVariable, NotificationServicesVariable,
+			TextVariable]
+		)
+	),
 	methods=['POST']
 )
 @endpoint_wrapper
@@ -392,14 +426,19 @@ def api_test_reminder(inputs: Dict[str, Any]):
 @api.route(
 	'/reminders/<int:r_id>',
 	'Manage a specific reminder',
-	{'PUT': [[EditTitleVariable, EditTimeVariable,
-			EditNotificationServicesVariable, TextVariable,
-			RepeatQuantityVariable, RepeatIntervalVariable,
-			WeekDaysVariable,
-			ColorVariable],
-			'Edit the reminder'],
-	'DELETE': [[],
-	    	'Delete the reminder']},
+	Methods(
+		put=Method(
+			vars=[EditTitleVariable, EditTimeVariable,
+				EditNotificationServicesVariable, TextVariable,
+				RepeatQuantityVariable, RepeatIntervalVariable,
+				WeekDaysVariable,
+				ColorVariable],
+			description='Edit the reminder'
+		),
+		delete=Method(
+			description='Delete the reminder'
+		)
+	),
 	methods=['GET', 'PUT', 'DELETE']
 )
 @endpoint_wrapper
@@ -432,11 +471,17 @@ def api_get_reminder(inputs: Dict[str, Any], r_id: int):
 @api.route(
 	'/templates',
 	'Manage the templates',
-	{'GET': [[TemplateSortByVariable],
-	  		'Get a list of all templates'],
-	'POST': [[TitleVariable, NotificationServicesVariable,
-			TextVariable, ColorVariable],
-			'Add a template']},
+	Methods(
+		get=Method(
+			vars=[TimelessSortByVariable],
+			description='Get a list of all templates'
+		),
+		post=Method(
+			vars=[TitleVariable, NotificationServicesVariable,
+				TextVariable, ColorVariable],
+			description='Add a template'
+		)
+	),
 	methods=['GET', 'POST']
 )
 @endpoint_wrapper
@@ -457,7 +502,11 @@ def api_get_templates(inputs: Dict[str, Any]):
 @api.route(
 	'/templates/search',
 	'Search through the list of templates',
-	{'GET': [[TemplateSortByVariable, QueryVariable]]},
+	Methods(
+		get=Method(
+			vars=[TimelessSortByVariable, QueryVariable]
+		)
+	),
 	methods=['GET']
 )
 @endpoint_wrapper
@@ -471,11 +520,16 @@ def api_templates_query(inputs: Dict[str, str]):
 @api.route(
 	'/templates/<int:t_id>',
 	'Manage a specific template',
-	{'PUT': [[EditTitleVariable, EditNotificationServicesVariable,
-			TextVariable, ColorVariable],
-			'Edit the template'],
-	'DELETE': [[],
-	    	'Delete the template']},
+	Methods(
+		put=Method(
+			vars=[EditTitleVariable, EditNotificationServicesVariable,
+				TextVariable, ColorVariable],
+			description='Edit the template'
+		),
+		delete=Method(
+			description='Delete the template'
+		)
+	),
 	methods=['GET', 'PUT', 'DELETE']
 )
 @endpoint_wrapper
@@ -507,11 +561,17 @@ def api_get_template(inputs: Dict[str, Any], t_id: int):
 @api.route(
 	'/staticreminders',
 	'Manage the static reminders',
-	{'GET': [[StaticReminderSortByVariable],
-	  		'Get a list of all static reminders'],
-	'POST': [[TitleVariable, NotificationServicesVariable,
-			TextVariable, ColorVariable],
-			'Add a static reminder']},
+	Methods(
+		get=Method(
+			vars=[TimelessSortByVariable],
+			description='Get a list of all static reminders'
+		),
+		post=Method(
+			vars=[TitleVariable, NotificationServicesVariable,
+				TextVariable, ColorVariable],
+			description='Add a static reminder'
+		)
+	),
 	methods=['GET', 'POST']
 )
 @endpoint_wrapper
@@ -532,7 +592,11 @@ def api_static_reminders_list(inputs: Dict[str, Any]):
 @api.route(
 	'/staticreminders/search',
 	'Search through the list of staticreminders',
-	{'GET': [[StaticReminderSortByVariable, QueryVariable]]},
+	Methods(
+		get=Method(
+			vars=[TimelessSortByVariable, QueryVariable]
+		)
+	),
 	methods=['GET']
 )
 @endpoint_wrapper
@@ -546,13 +610,19 @@ def api_static_reminders_query(inputs: Dict[str, str]):
 @api.route(
 	'/staticreminders/<int:s_id>',
 	'Manage a specific static reminder',
-	{'POST': [[],
-	   		'Trigger the static reminder'],
-	'PUT': [[EditTitleVariable, EditNotificationServicesVariable,
-			TextVariable, ColorVariable],
-			'Edit the static reminder'],
-	'DELETE': [[],
-	    	'Delete the static reminder']},
+	Methods(
+		post=Method(
+			description='Trigger the static reminder'
+		),
+		put=Method(
+			vars=[EditTitleVariable, EditNotificationServicesVariable,
+				TextVariable, ColorVariable],
+			description='Edit the static reminder'
+		),
+		delete=Method(
+			description='Delete the static reminder'
+		)
+	),
 	methods=['GET', 'POST', 'PUT', 'DELETE']
 )
 @endpoint_wrapper
@@ -616,11 +686,16 @@ def api_settings():
 @admin_api.route(
 	'/settings',
 	'Interact with the admin settings',
-	{'GET': [[],
-			'Get the admin settings'],
-	'PUT': [[AllowNewAccountsVariable, LoginTimeVariable,
-			LoginTimeResetVariable],
-			'Edit the admin settings']},
+	Methods(
+		get=Method(
+			description='Get the admin settings'
+		),
+		put=Method(
+			vars=[AllowNewAccountsVariable, LoginTimeVariable,
+				LoginTimeResetVariable],
+			description='Edit the admin settings'
+		)
+	),
 	methods=['GET', 'PUT']
 )
 @endpoint_wrapper
@@ -642,10 +717,15 @@ def api_admin_settings(inputs: Dict[str, Any]):
 @admin_api.route(
 	'/users',
 	'Get all users or add one',
-	{'GET': [[],
-			'Get all users'],
-	'POST': [[UsernameCreateVariable, PasswordCreateVariable],
-			'Add a new user']},
+	Methods(
+		get=Method(
+			description='Get all users'
+		),
+		post=Method(
+			vars=[UsernameCreateVariable, PasswordCreateVariable],
+			description='Add a new user'
+		)
+	),
 	methods=['GET', 'POST']
 )
 @endpoint_wrapper
@@ -661,10 +741,15 @@ def api_admin_users(inputs: Dict[str, Any]):
 @admin_api.route(
 	'/users/<int:u_id>',
 	'Manage a specific user',
-	{'PUT': [[NewPasswordVariable],
-			'Change the password of the user account'],
-	'DELETE': [[],
-			'Delete the user account']},
+	Methods(
+		put=Method(
+			vars=[NewPasswordVariable],
+			description='Change the password of the user account'
+		),
+		delete=Method(
+			description='Delete the user account'
+		)
+	),
 	methods=['PUT', 'DELETE']
 )
 @endpoint_wrapper
@@ -685,7 +770,11 @@ def api_admin_user(inputs: Dict[str, Any], u_id: int):
 @admin_api.route(
 	'/database',
 	'Download the database',
-	{'GET': [[]]},
+	Methods(
+		get=Method(
+			description="Download the database file"
+		),
+	),
 	methods=['GET']
 )
 @endpoint_wrapper

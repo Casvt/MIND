@@ -279,10 +279,13 @@ class Reminder:
 				data[k] = v
 
 		# Update database
+		rq = (data["repeat_quantity"].value
+			if data["repeat_quantity"] is not None else
+			None)
 		if repeated_reminder:
 			next_time = _find_next_time(
 				data["time"],
-				RepeatQuantity(data["repeat_quantity"]) if data["repeat_quantity"] else None,
+				data["repeat_quantity"],
 				data["repeat_interval"],
 				weekdays
 			)
@@ -302,7 +305,7 @@ class Reminder:
 					data["title"],
 					data["text"],
 					next_time,
-					data["repeat_quantity"],
+					rq,
 					data["repeat_interval"],
 					data["weekdays"],
 					data["time"],
@@ -327,7 +330,7 @@ class Reminder:
 					data["title"],
 					data["text"],
 					data["time"],
-					data["repeat_quantity"],
+					rq,
 					data["repeat_interval"],
 					data["weekdays"],
 					data["color"],

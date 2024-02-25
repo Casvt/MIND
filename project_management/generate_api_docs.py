@@ -11,8 +11,8 @@ from typing import Union
 
 from backend.helpers import folder_path
 from frontend.api import (NotificationServiceNotFound, ReminderNotFound,
-                          TemplateNotFound, api_docs, api_prefix)
-from frontend.input_validation import DataSource
+                          TemplateNotFound)
+from frontend.input_validation import DataSource, api_docs, api_prefix
 
 url_var_map = {
 	'int:n_id': NotificationServiceNotFound,
@@ -41,7 +41,7 @@ Authentication is done using an API key.
 To log in, make a POST request to the [`{api_prefix}/auth/login`](#authlogin) endpoint.
 You'll receive an API key, which you can then use in your requests to authenticate.
 Supply it via the url parameter `api_key`.
-This API key is valid for one hour after which the key expires, any further requests return 401 'APIKeyExpired' and you are required to log in again.
+This API key is valid for one hour (though the admin can change this duration) after which the key expires, any further requests return 401 'APIKeyExpired' and you are required to log in again.
 If no `api_key` is supplied or it is invalid, 401 `APIKeyInvalid` is returned.
 
 For example:
@@ -76,7 +76,7 @@ for rule, data in api_docs.items():
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| {'Yes' if data['requires_auth'] else 'No'} | {data['description']} | 
+| {'Yes' if data.requires_auth else 'No'} | {data.description} | 
 """
 
 	url_var = rule.replace('<', '>').split('>')
@@ -87,20 +87,20 @@ for rule, data in api_docs.items():
 Replace `<{url_var}>` with the ID of the entry. For example: `{rule.replace(f'<{url_var}>', '2')}`.
 """
 
-	for method in data['methods']:
-		result += f"\n??? {method}\n"
+	for m_name, method in ((m, data.methods[m]) for m in data.used_methods):
+		result += f"\n??? {m_name}\n"
 
-		if method in data['method_descriptions']:
-			result += f"\n	{data['method_descriptions'][method]}\n"
+		if method.description:
+			result += f"\n	{method.description}\n"
 
 		var_types = {
-			'url': list(var for var in data['input_variables'].get(method, []) if var.source == DataSource.VALUES),
-			'body': list(var for var in data['input_variables'].get(method, []) if var.source == DataSource.DATA)
+			'url': [v for v in method.vars if v.source == DataSource.VALUES],
+			'body': [v for v in method.vars if v.source == DataSource.DATA],
+			'file': [v for v in method.vars if v.source == DataSource.FILES]
 		}
-		
+
 		for var_type, entries in var_types.items():
 			if entries:
-				entries = [e('') for e in entries]
 				result += f"""
 	**Parameters ({var_type})**
 
@@ -108,18 +108,18 @@ Replace `<{url_var}>` with the ID of the entry. For example: `{rule.replace(f'<{
 	| ---- | -------- | ----------- | -------------- |
 """
 				for entry in entries:
-					result += f"	{entry}\n"
+					result += f"	{entry('')}\n"
 		
 		result += f"""
 	**Returns**
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| {201 if method == 'POST' else 200}| N/A | Success |
+	| {201 if m_name == 'POST' else 200} | N/A | Success |
 """
 
 		url_exception = [url_var_map[url_var]] if url_var in url_var_map else []
-		variable_exceptions = [e for v in data['input_variables'].get(method, []) for e in v.related_exceptions]
+		variable_exceptions = [e for v in method.vars for e in v.related_exceptions]
 		related_exceptions = sorted(
 			(make_exception_instance(e) for e in set(variable_exceptions + url_exception)),
 			key=lambda e: (e.api_response['code'], e.api_response['error'])
