@@ -831,3 +831,21 @@ Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
 
+??? POST
+
+	Upload and apply a database file
+
+	**Parameters (file)**
+
+	| Name | Required | Description | Allowed values |
+	| ---- | -------- | ----------- | -------------- |
+	| file | Yes | The MIND database file | N/A |
+
+	**Returns**
+	
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 201 | N/A | Success |
+	| 400 | InvalidDatabaseFile | The uploaded database file is invalid or not supported |
+	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
+
