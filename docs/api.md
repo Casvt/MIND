@@ -731,9 +731,12 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 
 	| Name | Required | Description | Allowed values |
 	| ---- | -------- | ----------- | -------------- |
-	| allow_new_accounts | Yes | Whether or not to allow users to register a new account. The admin can always add a new account. | N/A |
-	| login_time | Yes | How long a user stays logged in, in seconds. Between 1 min and 1 month (60 <= sec <= 2592000) | N/A |
-	| login_time_reset | Yes | If the Login Time timer should reset with each API request. | N/A |
+	| allow_new_accounts | No | Whether or not to allow users to register a new account. The admin can always add a new account. | N/A |
+	| login_time | No | How long a user stays logged in, in seconds. Between 1 min and 1 month (60 <= sec <= 2592000) | N/A |
+	| login_time_reset | No | If the Login Time timer should reset with each API request. | N/A |
+	| host | No | The IP to bind to. Use 0.0.0.0 to bind to all addresses. | N/A |
+	| port | No | The port to listen on. | N/A |
+	| url_prefix | No | The base url to run on. Useful for reverse proxies. Empty string to disable. | N/A |
 
 	**Returns**
 	
@@ -741,7 +744,6 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
-	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 
 ### `/admin/users`
 
