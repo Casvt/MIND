@@ -89,3 +89,6 @@ class RepeatQuantity(BaseEnum):
 	DAYS = "days"
 	HOURS = "hours"
 	MINUTES = "minutes"
+
+class RestartVars(BaseEnum):
+	DB_IMPORT = "db_import"

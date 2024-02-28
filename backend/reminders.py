@@ -716,7 +716,9 @@ class ReminderHandler(metaclass=Singleton):
 					# Set next time
 					new_time = _find_next_time(
 						reminder['original_time'],
-						RepeatQuantity(reminder['repeat_quantity']),
+						RepeatQuantity(reminder['repeat_quantity'])
+						if reminder['repeat_quantity'] is not None else
+						None,
 						reminder['repeat_interval'],
 						[int(d) for d in reminder['weekdays'].split(',')]
 						if reminder['weekdays'] is not None else

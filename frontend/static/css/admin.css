@@ -157,9 +157,9 @@ h2 {
 
 #add-user-button,
 #download-db-button,
+#upload-db-button,
 #restart-button,
 #shutdown-button {
-
 	width: min(15rem, 100%);
 	height: 2rem;
 	
@@ -171,6 +171,7 @@ h2 {
 }
 
 #download-db-button,
+#upload-db-button,
 #restart-button,
 #shutdown-button {
 	height: unset;
@@ -227,6 +228,13 @@ h2 {
 #user-table input {
 	width: 100%;
 	padding: .25rem;
+}
+
+#upload-database-form p {
+	max-width: 50rem;
+	margin-inline: auto;
+	text-align: center;
+	word-wrap: break-word;
 }
 
 @media (max-width: 40rem) {

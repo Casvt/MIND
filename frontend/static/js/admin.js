@@ -9,6 +9,11 @@ const user_inputs = {
 	password: document.querySelector('#new-password-input')
 };
 
+const import_inputs = {
+	file: document.querySelector('#database-file-input'),
+	button: document.querySelector('#upload-db-button')
+};
+
 const power_buttons = {
 	restart: document.querySelector('#restart-button'),
 	shutdown: document.querySelector('#shutdown-button')
@@ -180,6 +185,31 @@ function loadUsers() {
 	});
 };
 
+function upload_database() {
+	import_inputs.button.innerText = 'Importing';
+	const formData = new FormData();
+	formData.append('file', import_inputs.file.files[0]);
+	fetch(`${url_prefix}/api/admin/database?api_key=${api_key}`, {
+		method: 'POST',
+		body: formData
+	})
+	.then(response => {
+		if (!response.ok) return Promise.reject(response.status);
+		setTimeout(
+			() => window.location.reload(),
+			1000
+		);
+	})
+	.catch(e => {
+		if (e === 400) {
+			import_inputs.file.value = '';
+			import_inputs.button.innerText = 'Import Database';
+			alert('Invalid database file');
+		 } else
+			console.log(e);
+	});
+};
+
 function restart_app() {
 	power_buttons.restart.innerText = 'Restarting...';
 	fetch(`${url_prefix}/api/admin/restart?api_key=${api_key}`, {
@@ -218,5 +248,6 @@ document.querySelector('#add-user-button').onclick = e => toggleAddUser();
 document.querySelector('#add-user-form').action = 'javascript:addUser()';
 document.querySelector('#download-db-button').onclick = e => 
 	window.location.href = `${url_prefix}/api/admin/database?api_key=${api_key}`;
+document.querySelector('#upload-database-form').action = 'javascript:upload_database();';
 power_buttons.restart.onclick = e => restart_app();
 power_buttons.shutdown.onclick = e => shutdown_app();

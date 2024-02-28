@@ -6,7 +6,10 @@ Setting up and interacting with the database.
 
 import logging
 from datetime import datetime
-from sqlite3 import Connection, ProgrammingError, Row
+from os import remove
+from os.path import dirname, join
+from shutil import move
+from sqlite3 import Connection, OperationalError, ProgrammingError, Row
 from threading import current_thread, main_thread
 from time import time
 from typing import Type, Union
@@ -14,9 +17,12 @@ from typing import Type, Union
 from flask import g
 from waitress.task import ThreadedTaskDispatcher as OldThreadedTaskDispatcher
 
-from backend.custom_exceptions import AccessUnauthorized, UserNotFound
+from backend.custom_exceptions import (AccessUnauthorized, InvalidDatabaseFile,
+                                       UserNotFound)
+from backend.helpers import RestartVars
 
 __DATABASE_VERSION__ = 8
+__DATEBASE_NAME_ORIGINAL__ = "MIND_original.db"
 
 class DB_Singleton(type):
 	_instances = {}
@@ -375,5 +381,87 @@ def setup_db() -> None:
 			SET admin = 1
 			WHERE username = 'admin';
 		""")
+
+	return
+
+def revert_db_import(
+	swap: bool,
+	imported_db_file: str = ''
+) -> None:
+	"""Revert the database import process. The original_db_file is the file
+	currently used (`DBConnection.file`).
+
+	Args:
+		swap (bool): Whether or not to keep the imported_db_file or not,
+		instead of the original_db_file.
+		imported_db_file (str, optional): The other database file. Keep empty
+		to use `__DATABASE_NAME_ORIGINAL__`. Defaults to ''.
+	"""
+	original_db_file = DBConnection.file
+	if not imported_db_file:
+		imported_db_file = join(dirname(DBConnection.file), __DATEBASE_NAME_ORIGINAL__)
+	
+	if swap:
+		remove(original_db_file)
+		move(
+			imported_db_file,
+			original_db_file
+		)
+
+	else:
+		remove(imported_db_file)
+
+	return
+
+def import_db(new_db_file: str) -> None:
+	"""Replace the current database with a new one.
+
+	Args:
+		new_db_file (str): The path to the new database file.
+
+	Raises:
+		InvalidDatabaseFile: The new database file is invalid or unsupported.
+	"""
+	logging.info(f'Importing new database')
+	try:
+		cursor = Connection(new_db_file, timeout=20.0).cursor()
+
+		database_version = cursor.execute(
+			"SELECT value FROM config WHERE key = 'database_version' LIMIT 1;"
+		).fetchone()[0]
+		if not isinstance(database_version, int):
+			raise InvalidDatabaseFile
+
+	except (OperationalError, InvalidDatabaseFile):
+		logging.error('Uploaded database is not a MIND database file')
+		revert_db_import(
+			swap=False,
+			imported_db_file=new_db_file
+		)
+		raise InvalidDatabaseFile
+
+	finally:
+		cursor.connection.close()
+
+	if database_version > __DATABASE_VERSION__:
+		logging.error('Uploaded database is higher version than this MIND installation can support')
+		revert_db_import(
+			swap=False,
+			imported_db_file=new_db_file
+		)
+		raise InvalidDatabaseFile
+
+	move(
+		DBConnection.file,
+		join(dirname(DBConnection.file), __DATEBASE_NAME_ORIGINAL__)
+	)
+	move(
+		new_db_file,
+		DBConnection.file
+	)
+
+	from frontend.api import APIVariables, restart_server_thread
+	APIVariables.restart_args = [RestartVars.DB_IMPORT.value]
+	restart_server_thread.start()
 
 	return

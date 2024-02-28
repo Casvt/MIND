@@ -16,7 +16,7 @@ from apprise import Apprise
 from flask import Blueprint, request
 from flask.sansio.scaffold import T_route
 
-from backend.custom_exceptions import (AccessUnauthorized, InvalidKeyValue,
+from backend.custom_exceptions import (AccessUnauthorized, InvalidDatabaseFile, InvalidKeyValue,
                                        InvalidTime, KeyNotFound,
                                        NewAccountsNotAllowed,
                                        NotificationServiceNotFound,
@@ -395,6 +395,25 @@ class LoginTimeResetVariable(AdminSettingsVariable):
 	description = 'If the Login Time timer should reset with each API request.'
 
 
+class DatabaseFileVariable(BaseInputVariable):
+	name = 'file'
+	description = 'The MIND database file'
+	source = DataSource.FILES
+	related_exceptions = [KeyNotFound, InvalidDatabaseFile]
+
+	def validate(self) -> bool:
+		if (
+			self.value.filename
+			and splitext(self.value.filename)[1] == '.db'
+		):
+			path = folder_path('db', 'MIND_upload.db')
+			self.value.save(path)
+			self.value = path
+			return True
+		else:
+			return False
+
+
 def input_validation() -> Union[None, Dict[str, Any]]:
 	"""Checks, extracts and transforms inputs
 
@@ -431,7 +450,12 @@ def input_validation() -> Union[None, Dict[str, Any]]:
 		value: InputVariable = noted_var(input_value)
 
 		if not value.validate():
-			raise InvalidKeyValue(noted_var.name, input_value)
+			if noted_var.__class__.__name__ == DatabaseFileVariable.__name__:
+				raise InvalidDatabaseFile
+			elif noted_var.source == DataSource.FILES:
+				raise InvalidKeyValue(noted_var.name, input_value.filename)
+			else:
+				raise InvalidKeyValue(noted_var.name, input_value)
 
 		result[noted_var.name] = value.value
 	return result

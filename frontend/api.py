@@ -1,5 +1,7 @@
 #-*- coding: utf-8 -*-
 
+from __future__ import annotations
+
 import logging
 from dataclasses import dataclass
 from datetime import datetime
@@ -8,26 +10,26 @@ from os import remove, urandom
 from os.path import basename
 from threading import Timer
 from time import time as epoch_time
-from typing import Any, Callable, Dict, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Tuple, Union
 
 from flask import g, request, send_file
-from waitress.server import BaseWSGIServer
 
 from backend.custom_exceptions import (AccessUnauthorized, APIKeyExpired,
-                                       APIKeyInvalid, InvalidKeyValue,
-                                       InvalidTime, KeyNotFound,
-                                       NewAccountsNotAllowed,
+                                       APIKeyInvalid, InvalidDatabaseFile,
+                                       InvalidKeyValue, InvalidTime,
+                                       KeyNotFound, NewAccountsNotAllowed,
                                        NotificationServiceInUse,
                                        NotificationServiceNotFound,
                                        ReminderNotFound, TemplateNotFound,
                                        UsernameInvalid, UsernameTaken,
                                        UserNotFound)
-from backend.db import get_db
+from backend.db import get_db, import_db, revert_db_import
 from backend.helpers import folder_path
 from backend.notification_service import get_apprise_services
 from backend.settings import get_admin_settings, get_setting, set_setting
-from backend.users import User, Users
+from backend.users import Users
 from frontend.input_validation import (AllowNewAccountsVariable, ColorVariable,
+                                       DatabaseFileVariable,
                                        EditNotificationServicesVariable,
                                        EditTimeVariable, EditTitleVariable,
                                        EditURLVariable, LoginTimeResetVariable,
@@ -46,22 +48,57 @@ from frontend.input_validation import (AllowNewAccountsVariable, ColorVariable,
                                        api_prefix, get_api_docs,
                                        input_validation)
 
+if TYPE_CHECKING:
+	from waitress.server import BaseWSGIServer
+
+	from backend.users import User
+
+
 #===================
 # General variables and functions
 #===================
 
 class APIVariables:
 	server_instance: Union[BaseWSGIServer, None] = None
+
 	restart: bool = False
+	"Restart instead of shutdown"
+
+	restart_args: List[str] = []
+	"Flag to run with when restarting"
+
+	handle_flags: bool = False
+	"Run any flag specific actions before restarting"
 
 def shutdown_server() -> None:
+	"""Stop server from running"""
 	APIVariables.server_instance.close()
 	APIVariables.server_instance.task_dispatcher.shutdown()
 	APIVariables.server_instance._map.clear()
 	return
 
+def restart_server() -> None:
+	"""Restart server.
+	Will completely replace the current process.
+	"""
+	APIVariables.restart = True
+	shutdown_server()
+	return
+
+def revert_db() -> None:
+	"""Revert database import and restart.
+	"""
+	logging.warning(f'Timer for database import expired; reverting back to original file')
+	APIVariables.handle_flags = True
+	restart_server()
+	return
+
 shutdown_server_thread = Timer(1.0, shutdown_server)
 shutdown_server_thread.name = "InternalStateHandler"
+restart_server_thread = Timer(1.0, restart_server)
+restart_server_thread.name = "InternalStateHandler"
+revert_db_thread = Timer(60.0, revert_db)
+revert_db_thread.name = "DatabaseImportHandler"
 
 @dataclass
 class ApiKeyEntry:
@@ -132,15 +169,17 @@ def endpoint_wrapper(method: Callable) -> Callable:
 				return method(*args, **kwargs)
 			return method(inputs, *args, **kwargs)
 
-		except (AccessUnauthorized, APIKeyExpired,
-				APIKeyInvalid, InvalidKeyValue,
-				InvalidTime, KeyNotFound,
-				NewAccountsNotAllowed,
-				NotificationServiceInUse,
-				NotificationServiceNotFound,
-				ReminderNotFound, TemplateNotFound,
-				UsernameInvalid, UsernameTaken,
-				UserNotFound) as e:
+		except (
+			AccessUnauthorized, APIKeyExpired,
+			APIKeyInvalid, InvalidDatabaseFile,
+			InvalidKeyValue, InvalidTime,
+			KeyNotFound, NewAccountsNotAllowed,
+			NotificationServiceInUse,
+			NotificationServiceNotFound,
+			ReminderNotFound, TemplateNotFound,
+			UsernameInvalid, UsernameTaken,
+			UserNotFound
+		) as e:
 			return return_api(**e.api_response)
 	
 	wrapper.__name__ = method.__name__
@@ -164,6 +203,13 @@ def endpoint_wrapper(method: Callable) -> Callable:
 @endpoint_wrapper
 def api_login(inputs: Dict[str, str]):
 	user = users.login(inputs['username'], inputs['password'])
+	
+	# Login successful
+	
+	if user.admin and revert_db_thread.is_alive():
+		logging.info('Timer for database import diffused')
+		revert_db_thread.cancel()
+		revert_db_import(swap=False)
 
 	# Generate an API key until one
 	# is generated that isn't used already
@@ -669,8 +715,7 @@ def api_shutdown():
 )
 @endpoint_wrapper
 def api_restart():
-	APIVariables.restart = True
-	shutdown_server_thread.start()
+	restart_server_thread.start()
 	return return_api({})
 
 @api.route(
@@ -774,27 +819,36 @@ def api_admin_user(inputs: Dict[str, Any], u_id: int):
 		get=Method(
 			description="Download the database file"
 		),
+		post=Method(
+			vars=[DatabaseFileVariable],
+			description="Upload and apply a database file"
+		)
 	),
-	methods=['GET']
+	methods=['GET', 'POST']
 )
 @endpoint_wrapper
-def api_admin_database():
-	current_date = datetime.now().strftime(r"%Y_%m_%d_%H_%M")
-	filename = folder_path(
-		'db', f'MIND_{current_date}.db'
-	)
-	get_db().execute(
-		"VACUUM INTO ?;",
-		(filename,)
-	)
+def api_admin_database(inputs: Dict[str, Any]):
+	if request.method == "GET":
+		current_date = datetime.now().strftime(r"%Y_%m_%d_%H_%M")
+		filename = folder_path(
+			'db', f'MIND_{current_date}.db'
+		)
+		get_db().execute(
+			"VACUUM INTO ?;",
+			(filename,)
+		)
 
-	with open(filename, 'rb') as database_file:
-		bi = BytesIO(database_file.read())
+		with open(filename, 'rb') as database_file:
+			bi = BytesIO(database_file.read())
 
-	remove(filename)
+		remove(filename)
 
-	return send_file(
-		bi,
-		mimetype='application/x-sqlite3',
-		download_name=basename(filename)
-	), 200
+		return send_file(
+			bi,
+			mimetype='application/x-sqlite3',
+			download_name=basename(filename)
+		), 200
+
+	elif request.method == "POST":
+		import_db(inputs['file'])
+		return return_api({})

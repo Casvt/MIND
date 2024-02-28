@@ -123,6 +123,17 @@
 			<div class="database-container">
 				<button id="download-db-button">Download Database</button>
 			</div>
+			<form id="upload-database-form">
+				<div class="database-container">
+					<input type="file" id="database-file-input" required>
+					<button type="submit" id="upload-db-button">Import Database</button>
+				</div>
+				<p>Restore a backup.</p>
+				<br>
+				<p>Note: The uploaded file can be denied if it is not a valid database file, is too old or is for a newer version than this MIND instance.</p>
+				<br>
+				<p>IMPORTANT: After uploading the backup, it is required to log into the admin panel within 1 minute (60 seconds) in order to keep the new database file. Otherwise, MIND will revert the upload and go back to the old database.</p>
+			</form>
 			<h2>Power</h2>
 			<div class="database-container">
 				<button id="restart-button">Restart</button>

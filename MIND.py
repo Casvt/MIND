@@ -10,16 +10,18 @@ from os import execv, makedirs, urandom
 from os.path import dirname, isfile
 from shutil import move
 from sys import argv
+from typing import Union
 
 from flask import Flask, render_template, request
 from waitress.server import create_server
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
-from backend.db import DBConnection, ThreadedTaskDispatcher, close_db, setup_db
-from backend.helpers import check_python_version, folder_path
+from backend.db import (DBConnection, ThreadedTaskDispatcher, close_db,
+                        revert_db_import, setup_db)
+from backend.helpers import RestartVars, check_python_version, folder_path
 from backend.reminders import ReminderHandler
 from frontend.api import (APIVariables, admin_api, admin_api_prefix, api,
-                          api_prefix)
+                          api_prefix, revert_db_thread)
 from frontend.ui import UIVariables, ui
 
 HOST = '0.0.0.0'
@@ -85,6 +87,29 @@ def _create_app() -> Flask:
 	
 	return app
 
+def _handle_flags(flag: Union[None, str]) -> None:
+	"""Run flag specific actions on startup.
+
+	Args:
+		flag (Union[None, str]): The flag or `None` if there is no flag set.
+	"""
+	if flag == RestartVars.DB_IMPORT:
+		logging.info('Starting timer for database import')
+		revert_db_thread.start()
+
+	return
+
+def _handle_flags_pre_restart(flag: Union[None, str]) -> None:
+	"""Run flag specific actions just before restarting.
+
+	Args:
+		flag (Union[None, str]): The flag or `None` if there is no flag set.
+	"""
+	if flag == RestartVars.DB_IMPORT:
+		revert_db_import(swap=True)
+
+	return
+
 def MIND() -> None:
 	"""The main function of MIND
 	"""
@@ -92,7 +117,10 @@ def MIND() -> None:
 
 	if not check_python_version():
 		exit(1)
-	
+
+	flag = argv[1] if len(argv) > 1 else None
+	_handle_flags(flag)
+
 	if isfile(folder_path('db', 'Noted.db')):
 		move(folder_path('db', 'Noted.db'), folder_path(*DB_FILENAME))
 
@@ -127,8 +155,11 @@ def MIND() -> None:
 	reminder_handler.stop_handling()
 
 	if APIVariables.restart:
+		if APIVariables.handle_flags:
+			_handle_flags_pre_restart(flag)
+
 		logging.info('Restarting MIND')
-		execv(__file__, argv)
+		execv(__file__, [argv[0], *APIVariables.restart_args])
 
 	return
 

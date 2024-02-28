@@ -128,3 +128,7 @@ class APIKeyExpired(Exception):
 class NewAccountsNotAllowed(CustomException):
 	"""It's not allowed to create a new account"""
 	api_response = {'error': 'NewAccountsNotAllowed', 'result': {}, 'code': 403}
+
+class InvalidDatabaseFile(CustomException):
+	"""The uploaded database file is invalid or not supported"""
+	api_response = {'error': 'InvalidDatabaseFile', 'result': {}, 'code': 400}
