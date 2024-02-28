@@ -52,7 +52,8 @@ main {
 	padding-top: var(--nav-width);
 }
 
-#settings-form {
+#settings-form,
+#hosting-form {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -74,7 +75,8 @@ h2 {
 	overflow-x: auto;
 	
 	display: flex;
-	justify-content: center;
+	flex-direction: column;
+	align-items: center;
 }
 
 .settings-table {
@@ -96,6 +98,7 @@ h2 {
 .settings-table td:first-child {
 	width: 50%;
 	padding-right: var(--middle-spacing);
+	padding-top: .55rem;
 	text-align: right;
 }
 
@@ -155,14 +158,14 @@ h2 {
 	flex-wrap: wrap;
 }
 
+#save-hosting-button,
 #add-user-button,
 #download-db-button,
 #upload-db-button,
 #restart-button,
 #shutdown-button {
 	width: min(15rem, 100%);
-	height: 2rem;
-	
+
 	padding: .5rem 1rem;
 	border-radius: 4px;
 	background-color: var(--color-gray);
@@ -170,11 +173,12 @@ h2 {
 	box-shadow: var(--default-shadow);
 }
 
-#download-db-button,
-#upload-db-button,
-#restart-button,
-#shutdown-button {
-	height: unset;
+#save-hosting-button {
+	align-self: center;
+}
+
+#add-user-button {
+	height: 2rem;
 }
 
 #add-user-button > svg {
@@ -230,6 +234,7 @@ h2 {
 	padding: .25rem;
 }
 
+#hosting-form > p,
 #upload-database-form p {
 	max-width: 50rem;
 	margin-inline: auto;
@@ -238,10 +243,6 @@ h2 {
 }
 
 @media (max-width: 40rem) {
-	#settings-form {
-		justify-content: flex-start;
-	}
-
 	h2 {
 		text-align: center;
 		padding-inline: 0;
@@ -249,7 +250,7 @@ h2 {
 
 	.settings-table-container,
 	.user-table-container {
-		justify-content: left;
+		align-items: flex-start;
 	}
 
 	.settings-table tbody {

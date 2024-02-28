@@ -20,18 +20,25 @@ from backend.db import (DBConnection, ThreadedTaskDispatcher, close_db,
                         revert_db_import, setup_db)
 from backend.helpers import RestartVars, check_python_version, folder_path
 from backend.reminders import ReminderHandler
+from backend.settings import get_setting, restore_hosting_settings
 from frontend.api import (APIVariables, admin_api, admin_api_prefix, api,
-                          api_prefix, revert_db_thread)
+                          api_prefix, revert_db_thread, revert_hosting_thread)
 from frontend.ui import UIVariables, ui
 
+#=============================
+# WARNING:
+# These settings have moved into the admin panel. Their current value has been
+# taken over. The values will from now on be ignored, and the variables will
+# be deleted next version.
 HOST = '0.0.0.0'
 PORT = '8080'
 URL_PREFIX = '' # Must either be empty or start with '/' e.g. '/mind' 
+#=============================
+
 LOGGING_LEVEL = logging.INFO
 THREADS = 10
 DB_FILENAME = 'db', 'MIND.db'
 
-UIVariables.url_prefix = URL_PREFIX
 logging.basicConfig(
 	level=LOGGING_LEVEL,
 	format='[%(asctime)s][%(threadName)s][%(levelname)s] %(message)s',
@@ -53,11 +60,6 @@ def _create_app() -> Flask:
 	app.config['SECRET_KEY'] = urandom(32)
 	app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 	app.config['JSON_SORT_KEYS'] = False
-	app.config['APPLICATION_ROOT'] = URL_PREFIX
-	app.wsgi_app = DispatcherMiddleware(
-		Flask(__name__),
-		{URL_PREFIX: app.wsgi_app}
-	)
 
 	# Add error handlers
 	@app.errorhandler(400)
@@ -87,6 +89,21 @@ def _create_app() -> Flask:
 	
 	return app
 
+def _set_url_prefix(app: Flask, url_prefix: str) -> None:
+	"""Change the URL prefix of the server.
+
+	Args:
+		app (Flask): The `Flask` instance to change the URL prefix of.
+		url_prefix (str): The desired URL prefix to set it to.
+	"""
+	app.config["APPLICATION_ROOT"] = url_prefix
+	app.wsgi_app = DispatcherMiddleware(
+		Flask(__name__),
+		{url_prefix: app.wsgi_app}
+	)
+	UIVariables.url_prefix = url_prefix
+	return
+
 def _handle_flags(flag: Union[None, str]) -> None:
 	"""Run flag specific actions on startup.
 
@@ -96,6 +113,10 @@ def _handle_flags(flag: Union[None, str]) -> None:
 	if flag == RestartVars.DB_IMPORT:
 		logging.info('Starting timer for database import')
 		revert_db_thread.start()
+
+	elif flag == RestartVars.HOST_CHANGE:
+		logging.info('Starting timer for hosting changes')
+		revert_hosting_thread.start()
 
 	return
 
@@ -107,6 +128,11 @@ def _handle_flags_pre_restart(flag: Union[None, str]) -> None:
 	"""
 	if flag == RestartVars.DB_IMPORT:
 		revert_db_import(swap=True)
+
+	elif flag == RestartVars.HOST_CHANGE:
+		with Flask(__name__).app_context():
+			restore_hosting_settings()
+			close_db()
 
 	return
 
@@ -134,6 +160,12 @@ def MIND() -> None:
 	reminder_handler = ReminderHandler(app.app_context)
 	with app.app_context():
 		setup_db()
+
+		host = get_setting("host")
+		port = get_setting("port")
+		url_prefix = get_setting("url_prefix")
+		_set_url_prefix(app, url_prefix)
+
 		reminder_handler.find_next_reminder()
 
 	# Create waitress server and run
@@ -142,12 +174,12 @@ def MIND() -> None:
 	server = create_server(
 		app,
 		_dispatcher=dispatcher,
-		host=HOST,
-		port=PORT,
+		host=host,
+		port=port,
 		threads=THREADS
 	)
 	APIVariables.server_instance = server
-	logging.info(f'MIND running on http://{HOST}:{PORT}{URL_PREFIX}')
+	logging.info(f'MIND running on http://{host}:{port}{url_prefix}')
 	# =================
 	server.run()
 	# =================

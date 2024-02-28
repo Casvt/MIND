@@ -112,3 +112,4 @@ class RepeatQuantity(BaseEnum):
 
 class RestartVars(BaseEnum):
 	DB_IMPORT = "db_import"
+	HOST_CHANGE = "host_change"

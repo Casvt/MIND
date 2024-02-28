@@ -53,7 +53,7 @@
 								<td><label for="login-time-input">Login Time</label></td>
 								<td>
 									<div class="number-input">
-										<input type="number" id="login-time-input" min="1" max="43200">
+										<input type="number" id="login-time-input" min="1" max="43200" required>
 										<p>Min</p>
 									</div>
 									<p>For how long users stay logged in before having to authenticate again. Between 1 minute and 1 month.</p>
@@ -73,6 +73,38 @@
 						</tbody>
 					</table>
 				</div>
+			</form>
+			<form id="hosting-form">
+				<h2>Hosting</h2>
+				<div class="settings-table-container">
+					<table class="settings-table">
+						<tbody>
+							<tr>
+								<td><label for="host-input">Host</label></td>
+								<td>
+									<input type="text" id="host-input" required>
+									<p>Valid IPv4 address (default is '0.0.0.0' for all available interfaces)</p>
+								</td>
+							</tr>
+							<tr>
+								<td><label for="port-input">Port</label></td>
+								<td>
+									<input type="number" id="port-input" min="1" max="65535" required>
+									<p>The port used to access the web UI (default is '8080')</p>
+								</td>
+							</tr>
+							<tr>
+								<td><label for="url-prefix-input">URL Prefix</label></td>
+								<td>
+									<input type="text" id="url-prefix-input">
+									<p>For reverse proxy support (default is empty).</p>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+					<button type="submit" id="save-hosting-button">Save and Restart</button>
+				</div>
+				<p>IMPORTANT: After saving the hosting settings, it is required to log into the admin panel within 1 minute (60 seconds) in order to keep the new hosting settings. Otherwise, MIND will revert the changes and go back to the old hosting settings.</p>
 			</form>
 			<h2>User Management</h2>
 			<div class="add-user-container">

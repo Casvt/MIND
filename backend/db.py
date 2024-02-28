@@ -21,7 +21,7 @@ from backend.custom_exceptions import (AccessUnauthorized, InvalidDatabaseFile,
                                        UserNotFound)
 from backend.helpers import RestartVars
 
-__DATABASE_VERSION__ = 8
+__DATABASE_VERSION__ = 9
 __DATEBASE_NAME_ORIGINAL__ = "MIND_original.db"
 
 class DB_Singleton(type):
@@ -270,6 +270,19 @@ def migrate_db(current_db_version: int) -> None:
 			SET admin = 1
 			WHERE username = 'admin';
 		""")
+
+		current_db_version = 8
+
+	if current_db_version == 8:
+		# V8 -> V9
+		from backend.settings import set_setting
+		from MIND import HOST, PORT, URL_PREFIX
+
+		set_setting('host', HOST)
+		set_setting('port', int(PORT))
+		set_setting('url_prefix', URL_PREFIX)
+
+		current_db_version = 9
 
 	return
 

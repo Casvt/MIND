@@ -378,21 +378,36 @@ class AdminSettingsVariable(BaseInputVariable):
 		return True
 
 
-class AllowNewAccountsVariable(AdminSettingsVariable):
+class AllowNewAccountsVariable(NonRequiredVersion, AdminSettingsVariable):
 	name = 'allow_new_accounts'
 	description = ('Whether or not to allow users to register a new account. '
 	+ 'The admin can always add a new account.')
 
 
-class LoginTimeVariable(AdminSettingsVariable):
+class LoginTimeVariable(NonRequiredVersion, AdminSettingsVariable):
 	name = 'login_time'
 	description = ('How long a user stays logged in, in seconds. '
 	+ 'Between 1 min and 1 month (60 <= sec <= 2592000)')
 
 
-class LoginTimeResetVariable(AdminSettingsVariable):
+class LoginTimeResetVariable(NonRequiredVersion, AdminSettingsVariable):
 	name = 'login_time_reset'
 	description = 'If the Login Time timer should reset with each API request.'
+
+
+class HostVariable(NonRequiredVersion, AdminSettingsVariable):
+	name = 'host'
+	description = 'The IP to bind to. Use 0.0.0.0 to bind to all addresses.'
+
+
+class PortVariable(NonRequiredVersion, AdminSettingsVariable):
+	name = 'port'
+	description = 'The port to listen on.'
+
+
+class UrlPrefixVariable(NonRequiredVersion, AdminSettingsVariable):
+	name = 'url_prefix'
+	description = 'The base url to run on. Useful for reverse proxies. Empty string to disable.'
 
 
 class DatabaseFileVariable(BaseInputVariable):

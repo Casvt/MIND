@@ -4,6 +4,14 @@ const setting_inputs = {
 	login_time_reset: document.querySelector('#login-time-reset-input')
 };
 
+const hosting_inputs = {
+	form: document.querySelector('#hosting-form'),
+	host: document.querySelector('#host-input'),
+	port: document.querySelector('#port-input'),
+	url_prefix: document.querySelector('#url-prefix-input'),
+	submit: document.querySelector('#save-hosting-button')
+};
+
 const user_inputs = {
 	username: document.querySelector('#new-username-input'),
 	password: document.querySelector('#new-password-input')
@@ -44,6 +52,9 @@ function loadSettings() {
 		setting_inputs.allow_new_accounts.checked = json.result.allow_new_accounts;
 		setting_inputs.login_time.value = Math.round(json.result.login_time / 60);
 		setting_inputs.login_time_reset.value = json.result.login_time_reset.toString();
+		hosting_inputs.host.value = json.result.host;
+		hosting_inputs.port.value = json.result.port;
+		hosting_inputs.url_prefix.value = json.result.url_prefix;
 	});
 };
 
@@ -62,6 +73,34 @@ function submitSettings() {
 	.then(json => {
 		if (json.error !== null)
 			return Promise.reject(json)
+	})
+	.catch(json => {
+		if (['ApiKeyInvalid', 'ApiKeyExpired'].includes(json.error))
+			window.location.href = `${url_prefix}/`;
+	});
+};
+
+function submitHostingSettings() {
+	hosting_inputs.submit.innerText = 'Restarting';
+	const data = {
+		host: hosting_inputs.host.value,
+		port: parseInt(hosting_inputs.port.value),
+		url_prefix: hosting_inputs.url_prefix.value
+	};
+	fetch(`${url_prefix}/api/admin/settings?api_key=${api_key}`, {
+		'method': 'PUT',
+		'headers': {'Content-Type': 'application/json'},
+		'body': JSON.stringify(data)
+	})
+	.then(response => response.json())
+	.then(json => {
+		if (json.error !== null)
+			return Promise.reject(json)
+
+		setTimeout(
+			() => window.location.reload(),
+			1000
+		)
 	})
 	.catch(json => {
 		if (['ApiKeyInvalid', 'ApiKeyExpired'].includes(json.error))
@@ -244,6 +283,7 @@ loadUsers();
 
 document.querySelector('#logout-button').onclick = e => logout();
 document.querySelector('#settings-form').action = 'javascript:submitSettings();';
+hosting_inputs.form.action = 'javascript:submitHostingSettings();';
 document.querySelector('#add-user-button').onclick = e => toggleAddUser();
 document.querySelector('#add-user-form').action = 'javascript:addUser()';
 document.querySelector('#download-db-button').onclick = e => 

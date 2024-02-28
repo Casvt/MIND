@@ -24,25 +24,28 @@ from backend.custom_exceptions import (AccessUnauthorized, APIKeyExpired,
                                        UsernameInvalid, UsernameTaken,
                                        UserNotFound)
 from backend.db import get_db, import_db, revert_db_import
-from backend.helpers import folder_path
+from backend.helpers import RestartVars, folder_path
 from backend.notification_service import get_apprise_services
-from backend.settings import get_admin_settings, get_setting, set_setting
+from backend.settings import (backup_hosting_settings, get_admin_settings,
+                              get_setting, set_setting)
 from backend.users import Users
 from frontend.input_validation import (AllowNewAccountsVariable, ColorVariable,
                                        DatabaseFileVariable,
                                        EditNotificationServicesVariable,
                                        EditTimeVariable, EditTitleVariable,
-                                       EditURLVariable, LoginTimeResetVariable,
+                                       EditURLVariable, HostVariable,
+                                       LoginTimeResetVariable,
                                        LoginTimeVariable, Method, Methods,
                                        NewPasswordVariable,
                                        NotificationServicesVariable,
                                        PasswordCreateVariable,
-                                       PasswordVariable, QueryVariable,
-                                       RepeatIntervalVariable,
+                                       PasswordVariable, PortVariable,
+                                       QueryVariable, RepeatIntervalVariable,
                                        RepeatQuantityVariable, SortByVariable,
                                        TextVariable, TimelessSortByVariable,
                                        TimeVariable, TitleVariable,
-                                       URLVariable, UsernameCreateVariable,
+                                       UrlPrefixVariable, URLVariable,
+                                       UsernameCreateVariable,
                                        UsernameVariable, WeekDaysVariable,
                                        admin_api, admin_api_prefix, api,
                                        api_prefix, get_api_docs,
@@ -93,12 +96,22 @@ def revert_db() -> None:
 	restart_server()
 	return
 
+def revert_hosting() -> None:
+	"""Revert the hosting changes.
+	"""
+	logging.warning(f'Timer for hosting changes expired; reverting back to original settings')
+	APIVariables.handle_flags = True
+	restart_server()
+	return
+
 shutdown_server_thread = Timer(1.0, shutdown_server)
 shutdown_server_thread.name = "InternalStateHandler"
 restart_server_thread = Timer(1.0, restart_server)
 restart_server_thread.name = "InternalStateHandler"
 revert_db_thread = Timer(60.0, revert_db)
 revert_db_thread.name = "DatabaseImportHandler"
+revert_hosting_thread = Timer(60.0, revert_hosting)
+revert_hosting_thread.name = "HostingHandler"
 
 @dataclass
 class ApiKeyEntry:
@@ -210,6 +223,10 @@ def api_login(inputs: Dict[str, str]):
 		logging.info('Timer for database import diffused')
 		revert_db_thread.cancel()
 		revert_db_import(swap=False)
+
+	elif user.admin and revert_hosting_thread.is_alive():
+		logging.info('Timer for hosting changes diffused')
+		revert_hosting_thread.cancel()
 
 	# Generate an API key until one
 	# is generated that isn't used already
@@ -737,7 +754,8 @@ def api_settings():
 		),
 		put=Method(
 			vars=[AllowNewAccountsVariable, LoginTimeVariable,
-				LoginTimeResetVariable],
+				LoginTimeResetVariable, HostVariable, PortVariable,
+				UrlPrefixVariable],
 			description='Edit the admin settings'
 		)
 	),
@@ -749,14 +767,24 @@ def api_admin_settings(inputs: Dict[str, Any]):
 		return return_api(get_admin_settings())
 
 	elif request.method == 'PUT':
-		values = {
-			'allow_new_accounts': inputs['allow_new_accounts'],
-			'login_time': inputs['login_time'],
-			'login_time_reset': inputs['login_time_reset']
-		}
-		logging.info(f'Submitting admin settings: {values}')
-		for k, v in values.items():
-			set_setting(k, v)
+		logging.info(f'Submitting admin settings: {inputs}')
+		
+		hosting_changes = any(
+			inputs[s] is not None 
+			for s in ('host', 'port', 'url_prefix')
+		)
+
+		if hosting_changes:
+			backup_hosting_settings()
+		
+		for k, v in inputs.items():
+			if v is not None:
+				set_setting(k, v)
+
+		if hosting_changes:
+			APIVariables.restart_args = [RestartVars.HOST_CHANGE.value]
+			restart_server_thread.start()
+		
 		return return_api({})
 
 @admin_api.route(
