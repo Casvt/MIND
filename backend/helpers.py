@@ -8,7 +8,10 @@ import logging
 from enum import Enum
 from os.path import abspath, dirname, join
 from sys import version_info
+from typing import Any, Callable, TypeVar, Union
 
+T = TypeVar('T')
+U = TypeVar('U')
 
 def folder_path(*folders) -> str:
 	"""Turn filepaths relative to the project folder into absolute paths
@@ -49,6 +52,23 @@ def search_filter(query: str, result: dict) -> bool:
 		query in result["title"].lower()
 		or query in result["text"].lower()
 	)
+
+
+def when_not_none(value: T, to_run: Callable[[T], U]) -> Union[U, None]:
+	"""Run `to_run` with argument `value` iff `value is not None`. Else return
+	`None`.
+
+	Args:
+		value (T): The value to check.
+		to_run (Callable[[T], U]): The function to run.
+
+	Returns:
+		Union[U, None]: Either the return value of `to_run`, or `None`.
+	"""
+	if value is None:
+		return None
+	else:
+		return to_run(value)
 
 
 class Singleton(type):

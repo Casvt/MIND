@@ -9,14 +9,14 @@ from apprise import Apprise
 from backend.custom_exceptions import (NotificationServiceInUse,
                                        NotificationServiceNotFound)
 from backend.db import get_db
+from backend.helpers import when_not_none
 
 remove_named_groups = compile(r'(?<=\()\?P<\w+>')
 
-def process_regex(regex: Union[List[str], None]):
-	return (
-		[remove_named_groups.sub('', regex[0]), regex[1]]
-		if regex is not None else
-		None
+def process_regex(regex: Union[List[str], None]) -> Union[None, List[str]]:
+	return when_not_none(
+		regex,
+		lambda r: [remove_named_groups.sub('', r[0]), r[1]]
 	)
 
 def _sort_tokens(t: dict) -> int:

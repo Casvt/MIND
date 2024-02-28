@@ -14,7 +14,7 @@ from backend.custom_exceptions import (InvalidKeyValue, InvalidTime,
                                        NotificationServiceNotFound,
                                        ReminderNotFound)
 from backend.db import get_db
-from backend.helpers import RepeatQuantity, Singleton, SortingMethod, search_filter
+from backend.helpers import RepeatQuantity, Singleton, SortingMethod, search_filter, when_not_none
 
 
 def __next_selected_day(
@@ -265,10 +265,10 @@ class Reminder:
 			'text': text,
 			'repeat_quantity': repeat_quantity,
 			'repeat_interval': repeat_interval,
-			'weekdays':
-				",".join(map(str, sorted(weekdays)))
-				if weekdays is not None else
-				None,
+			'weekdays': when_not_none(
+				weekdays,
+				lambda w: ",".join(map(str, sorted(w)))
+			),
 			'color': color
 		}
 		for k, v in new_values.items():
@@ -279,9 +279,10 @@ class Reminder:
 				data[k] = v
 
 		# Update database
-		rq = (data["repeat_quantity"].value
-			if data["repeat_quantity"] is not None else
-			None)
+		rq = when_not_none(
+			data["repeat_quantity"],
+			lambda q: q.value
+		)
 		if repeated_reminder:
 			next_time = _find_next_time(
 				data["time"],
@@ -556,11 +557,14 @@ class Reminders:
 		else:
 			original_time = None
 
-		if weekdays is not None:
-			weekdays = ",".join(map(str, sorted(weekdays)))
-
-		if repeat_quantity is not None:
-			repeat_quantity = repeat_quantity.value
+		weekdays = when_not_none(
+			weekdays,
+			lambda w: ",".join(map(str, sorted(w)))
+		)
+		repeat_quantity = when_not_none(
+			repeat_quantity,
+			lambda q: q.value
+		)
 
 		cursor.connection.isolation_level = None
 		cursor.execute("BEGIN TRANSACTION;")
@@ -716,13 +720,15 @@ class ReminderHandler(metaclass=Singleton):
 					# Set next time
 					new_time = _find_next_time(
 						reminder['original_time'],
-						RepeatQuantity(reminder['repeat_quantity'])
-						if reminder['repeat_quantity'] is not None else
-						None,
+						when_not_none(
+							reminder["repeat_quantity"],
+							lambda q: RepeatQuantity(q)
+						),
 						reminder['repeat_interval'],
-						[int(d) for d in reminder['weekdays'].split(',')]
-						if reminder['weekdays'] is not None else
-						None
+						when_not_none(
+							reminder["weekdays"],
+							lambda w: [int(d) for d in w.split(',')]
+						)
 					)
 					cursor.execute(
 						"UPDATE reminders SET time = ? WHERE id = ?;",
