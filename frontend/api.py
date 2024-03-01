@@ -8,9 +8,8 @@ from datetime import datetime
 from io import BytesIO
 from os import remove, urandom
 from os.path import basename
-from threading import Timer
 from time import time as epoch_time
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Tuple
 
 from flask import g, request, send_file
 
@@ -26,6 +25,7 @@ from backend.custom_exceptions import (AccessUnauthorized, APIKeyExpired,
 from backend.db import get_db, import_db, revert_db_import
 from backend.helpers import RestartVars, folder_path
 from backend.notification_service import get_apprise_services
+from backend.server import SERVER
 from backend.settings import (backup_hosting_settings, get_admin_settings,
                               get_setting, set_setting)
 from backend.users import Users
@@ -47,71 +47,16 @@ from frontend.input_validation import (AllowNewAccountsVariable, ColorVariable,
                                        UrlPrefixVariable, URLVariable,
                                        UsernameCreateVariable,
                                        UsernameVariable, WeekDaysVariable,
-                                       admin_api, admin_api_prefix, api,
-                                       api_prefix, get_api_docs,
+                                       admin_api, api, get_api_docs,
                                        input_validation)
 
 if TYPE_CHECKING:
-	from waitress.server import BaseWSGIServer
-
 	from backend.users import User
 
 
 #===================
 # General variables and functions
 #===================
-
-class APIVariables:
-	server_instance: Union[BaseWSGIServer, None] = None
-
-	restart: bool = False
-	"Restart instead of shutdown"
-
-	restart_args: List[str] = []
-	"Flag to run with when restarting"
-
-	handle_flags: bool = False
-	"Run any flag specific actions before restarting"
-
-def shutdown_server() -> None:
-	"""Stop server from running"""
-	APIVariables.server_instance.close()
-	APIVariables.server_instance.task_dispatcher.shutdown()
-	APIVariables.server_instance._map.clear()
-	return
-
-def restart_server() -> None:
-	"""Restart server.
-	Will completely replace the current process.
-	"""
-	APIVariables.restart = True
-	shutdown_server()
-	return
-
-def revert_db() -> None:
-	"""Revert database import and restart.
-	"""
-	logging.warning(f'Timer for database import expired; reverting back to original file')
-	APIVariables.handle_flags = True
-	restart_server()
-	return
-
-def revert_hosting() -> None:
-	"""Revert the hosting changes.
-	"""
-	logging.warning(f'Timer for hosting changes expired; reverting back to original settings')
-	APIVariables.handle_flags = True
-	restart_server()
-	return
-
-shutdown_server_thread = Timer(1.0, shutdown_server)
-shutdown_server_thread.name = "InternalStateHandler"
-restart_server_thread = Timer(1.0, restart_server)
-restart_server_thread.name = "InternalStateHandler"
-revert_db_thread = Timer(60.0, revert_db)
-revert_db_thread.name = "DatabaseImportHandler"
-revert_hosting_thread = Timer(60.0, revert_hosting)
-revert_hosting_thread.name = "HostingHandler"
 
 @dataclass
 class ApiKeyEntry:
@@ -140,14 +85,14 @@ def auth() -> None:
 	if (
 		map_entry.user_data.admin
 		and
-		not request.path.startswith((admin_api_prefix, api_prefix + '/auth'))
+		not request.path.startswith((SERVER.admin_prefix, SERVER.api_prefix + '/auth'))
 	):
 		raise APIKeyInvalid
 	
 	if (
 		not map_entry.user_data.admin
 		and
-		request.path.startswith(admin_api_prefix)
+		request.path.startswith(SERVER.admin_prefix)
 	):
 		raise APIKeyInvalid
 
@@ -216,17 +161,17 @@ def endpoint_wrapper(method: Callable) -> Callable:
 @endpoint_wrapper
 def api_login(inputs: Dict[str, str]):
 	user = users.login(inputs['username'], inputs['password'])
-	
+
 	# Login successful
-	
-	if user.admin and revert_db_thread.is_alive():
+
+	if user.admin and SERVER.revert_db_timer.is_alive():
 		logging.info('Timer for database import diffused')
-		revert_db_thread.cancel()
+		SERVER.revert_db_timer.cancel()
 		revert_db_import(swap=False)
 
-	elif user.admin and revert_hosting_thread.is_alive():
+	elif user.admin and SERVER.revert_hosting_timer.is_alive():
 		logging.info('Timer for hosting changes diffused')
-		revert_hosting_thread.cancel()
+		SERVER.revert_hosting_timer.cancel()
 
 	# Generate an API key until one
 	# is generated that isn't used already
@@ -722,7 +667,7 @@ def api_get_static_reminder(inputs: Dict[str, Any], s_id: int):
 )
 @endpoint_wrapper
 def api_shutdown():
-	shutdown_server_thread.start()
+	SERVER.shutdown()
 	return return_api({})
 
 @admin_api.route(
@@ -732,7 +677,7 @@ def api_shutdown():
 )
 @endpoint_wrapper
 def api_restart():
-	restart_server_thread.start()
+	SERVER.restart()
 	return return_api({})
 
 @api.route(
@@ -782,8 +727,7 @@ def api_admin_settings(inputs: Dict[str, Any]):
 				set_setting(k, v)
 
 		if hosting_changes:
-			APIVariables.restart_args = [RestartVars.HOST_CHANGE.value]
-			restart_server_thread.start()
+			SERVER.restart([RestartVars.HOST_CHANGE.value])
 		
 		return return_api({})
 

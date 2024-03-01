@@ -6,8 +6,8 @@ Setting up and interacting with the database.
 
 import logging
 from datetime import datetime
-from os import remove
-from os.path import dirname, join
+from os import makedirs, remove
+from os.path import dirname, isfile, join
 from shutil import move
 from sqlite3 import Connection, OperationalError, ProgrammingError, Row
 from threading import current_thread, main_thread
@@ -15,12 +15,12 @@ from time import time
 from typing import Type, Union
 
 from flask import g
-from waitress.task import ThreadedTaskDispatcher as OldThreadedTaskDispatcher
 
 from backend.custom_exceptions import (AccessUnauthorized, InvalidDatabaseFile,
                                        UserNotFound)
-from backend.helpers import RestartVars
+from backend.helpers import RestartVars, folder_path
 
+DB_FILENAME = 'db', 'MIND.db'
 __DATABASE_VERSION__ = 9
 __DATEBASE_NAME_ORIGINAL__ = "MIND_original.db"
 
@@ -33,20 +33,6 @@ class DB_Singleton(type):
 			cls._instances[i] = super(DB_Singleton, cls).__call__(*args, **kwargs)
 
 		return cls._instances[i]
-
-class ThreadedTaskDispatcher(OldThreadedTaskDispatcher):
-	def handler_thread(self, thread_no: int) -> None:
-		super().handler_thread(thread_no)
-		i = f'{DBConnection}{current_thread()}'
-		if i in DB_Singleton._instances and not DB_Singleton._instances[i].closed:
-			DB_Singleton._instances[i].close()
-		return
-
-	def shutdown(self, cancel_pending: bool = True, timeout: int = 5) -> bool:
-		print()
-		logging.info('Shutting down MIND')
-		result = super().shutdown(cancel_pending, timeout)
-		return result
 
 class DBConnection(Connection, metaclass=DB_Singleton):
 	file = ''
@@ -66,6 +52,19 @@ class DBConnection(Connection, metaclass=DB_Singleton):
 
 	def __repr__(self) -> str:
 		return f'<{self.__class__.__name__}; {current_thread().name}; {id(self)}>'
+
+def setup_db_location() -> None:
+	"""Create folder for database and link file to DBConnection class
+	"""
+	if isfile(folder_path('db', 'Noted.db')):
+		move(folder_path('db', 'Noted.db'), folder_path(*DB_FILENAME))
+
+	db_location = folder_path(*DB_FILENAME)
+	logging.debug(f'Database location: {db_location}')
+	makedirs(dirname(db_location), exist_ok=True)
+
+	DBConnection.file = db_location
+	return
 
 def get_db(output_type: Union[Type[dict], Type[tuple]]=tuple):
 	"""Get a database cursor instance. Coupled to Flask's g.
@@ -473,8 +472,7 @@ def import_db(new_db_file: str) -> None:
 		DBConnection.file
 	)
 
-	from frontend.api import APIVariables, restart_server_thread
-	APIVariables.restart_args = [RestartVars.DB_IMPORT.value]
-	restart_server_thread.start()
+	from backend.server import SERVER
+	SERVER.restart([RestartVars.DB_IMPORT.value])
 
 	return

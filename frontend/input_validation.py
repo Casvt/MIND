@@ -16,22 +16,19 @@ from apprise import Apprise
 from flask import Blueprint, request
 from flask.sansio.scaffold import T_route
 
-from backend.custom_exceptions import (AccessUnauthorized, InvalidDatabaseFile, InvalidKeyValue,
-                                       InvalidTime, KeyNotFound,
-                                       NewAccountsNotAllowed,
+from backend.custom_exceptions import (AccessUnauthorized, InvalidDatabaseFile,
+                                       InvalidKeyValue, InvalidTime,
+                                       KeyNotFound, NewAccountsNotAllowed,
                                        NotificationServiceNotFound,
                                        UsernameInvalid, UsernameTaken,
                                        UserNotFound)
 from backend.helpers import (RepeatQuantity, SortingMethod,
                              TimelessSortingMethod, folder_path)
+from backend.server import SERVER
 from backend.settings import _format_setting
 
 if TYPE_CHECKING:
 	from flask import Request
-
-api_prefix = "/api"
-_admin_api_prefix = '/admin'
-admin_api_prefix = api_prefix + _admin_api_prefix
 
 color_regex = compile(r'#[0-9a-f]{6}')
 
@@ -130,10 +127,10 @@ class ApiDocEntry:
 
 
 def get_api_docs(request: Request) -> ApiDocEntry:
-	if request.path.startswith(admin_api_prefix):
-		url = _admin_api_prefix + request.url_rule.rule.split(admin_api_prefix)[1]
+	if request.path.startswith(SERVER.admin_prefix):
+		url = SERVER.admin_api_extension + request.url_rule.rule.split(SERVER.admin_prefix)[1]
 	else:
-		url = request.url_rule.rule.split(api_prefix)[1]
+		url = request.url_rule.rule.split(SERVER.api_prefix)[1]
 	return api_docs[url]
 
 
@@ -489,7 +486,7 @@ class APIBlueprint(Blueprint):
 		if self == api:
 			processed_rule = rule
 		elif self == admin_api:
-			processed_rule = _admin_api_prefix + rule
+			processed_rule = SERVER.admin_api_extension + rule
 		else:
 			raise NotImplementedError
 

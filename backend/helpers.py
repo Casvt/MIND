@@ -8,7 +8,7 @@ import logging
 from enum import Enum
 from os.path import abspath, dirname, join
 from sys import version_info
-from typing import Any, Callable, TypeVar, Union
+from typing import Callable, TypeVar, Union
 
 T = TypeVar('T')
 U = TypeVar('U')
