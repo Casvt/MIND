@@ -10,9 +10,12 @@ from subprocess import run
 from typing import Union
 
 from backend.helpers import folder_path
+from backend.server import SERVER
 from frontend.api import (NotificationServiceNotFound, ReminderNotFound,
                           TemplateNotFound)
-from frontend.input_validation import DataSource, api_docs, api_prefix
+from frontend.input_validation import DataSource, api_docs
+
+api_prefix = SERVER.api_prefix
 
 url_var_map = {
 	'int:n_id': NotificationServiceNotFound,
