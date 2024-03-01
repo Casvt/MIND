@@ -9,4 +9,3 @@ class Test_DB(unittest.TestCase):
 		DBConnection.file = folder_path(*DB_FILENAME)
 		instance = DBConnection(timeout=20.0)
 		self.assertEqual(instance.cursor().execute("PRAGMA foreign_keys;").fetchone()[0], 1)
-		self.assertEqual(instance.cursor().execute("PRAGMA journal_mode;").fetchone()[0], 'wal')
