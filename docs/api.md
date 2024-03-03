@@ -302,7 +302,7 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 	| text | No | string | The body of the entry | N/A |
 	| repeat_quantity | No | string | The quantity of the repeat_interval | `years`, `months`, `weeks`, `days`, `hours`, `minutes` |
 	| repeat_interval | No | number | The number of the interval | N/A |
-	| weekdays | No | list of numbers | On which days of the weeks to run the reminder | N/A |
+	| weekdays | No | list of numbers | On which days of the weeks to run the reminder | `0`, `1`, `2`, `3`, `4`, `5`, `6` |
 	| color | No | string | The hex code of the color of the entry, which is shown in the web-ui | N/A |
 
 	**Returns**
@@ -394,7 +394,7 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 	| text | No | string | The body of the entry | N/A |
 	| repeat_quantity | No | string | The quantity of the repeat_interval | `years`, `months`, `weeks`, `days`, `hours`, `minutes` |
 	| repeat_interval | No | number | The number of the interval | N/A |
-	| weekdays | No | list of numbers | On which days of the weeks to run the reminder | N/A |
+	| weekdays | No | list of numbers | On which days of the weeks to run the reminder | `0`, `1`, `2`, `3`, `4`, `5`, `6` |
 	| color | No | string | The hex code of the color of the entry, which is shown in the web-ui | N/A |
 
 	**Returns**
@@ -737,6 +737,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	| host | No | string | The IP to bind to. Use 0.0.0.0 to bind to all addresses. | N/A |
 	| port | No | number | The port to listen on. | N/A |
 	| url_prefix | No | string | The base url to run on. Useful for reverse proxies. Empty string to disable. | N/A |
+	| log_level | No | number | The level to log on. | `20`, `10` |
 
 	**Returns**
 	
