@@ -107,8 +107,8 @@ Replace `<{url_var}>` with the ID of the entry. For example: `{rule.replace(f'<{
 				result += f"""
 	**Parameters ({var_type})**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
 """
 				for entry in entries:
 					result += f"	{entry('')}\n"

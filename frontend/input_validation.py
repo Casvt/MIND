@@ -52,6 +52,15 @@ class DataSource:
 		return self.map[key]
 
 
+class DataType:
+	STR = 'string'
+	INT = 'number'
+	FLOAT = 'decimal number'
+	BOOL = 'bool'
+	INT_ARRAY = 'list of numbers'
+	NA = 'N/A'
+
+
 class InputVariable(ABC):
 	value: Any
 
@@ -71,6 +80,11 @@ class InputVariable(ABC):
 	@property
 	@abstractmethod
 	def required(self) -> bool:
+		pass
+
+	@property
+	@abstractmethod
+	def data_type(self) -> List[str]:
 		pass
 
 	@property
@@ -136,6 +150,7 @@ def get_api_docs(request: Request) -> ApiDocEntry:
 
 class BaseInputVariable(InputVariable):
 	source = DataSource.DATA
+	data_type = [DataType.STR]
 	required = True
 	default = None
 	related_exceptions = [KeyNotFound, InvalidKeyValue]
@@ -147,7 +162,7 @@ class BaseInputVariable(InputVariable):
 		return isinstance(self.value, str) and self.value
 
 	def __repr__(self) -> str:
-		return f'| {self.name} | {"Yes" if self.required else "No"} | {self.description} | N/A |'
+		return f'| {self.name} | {"Yes" if self.required else "No"} | {",".join(self.data_type)} | {self.description} | N/A |'
 
 
 class NonRequiredVersion(BaseInputVariable):
@@ -232,9 +247,10 @@ class SortByVariable(NonRequiredVersion, BaseInputVariable):
 		return True
 
 	def __repr__(self) -> str:
-		return '| {n} | {r} | {d} | {v} |'.format(
+		return '| {n} | {r} | {t} | {d} | {v} |'.format(
 			n=self.name,
 			r="Yes" if self.required else "No",
+			t=",".join(self.data_type),
 			d=self.description,
 			v=", ".join(f'`{o}`' for o in self._options)
 		)
@@ -255,6 +271,7 @@ class TimelessSortByVariable(SortByVariable):
 class TimeVariable(BaseInputVariable):
 	name = 'time'
 	description = 'The UTC epoch timestamp that the reminder should be sent at'
+	data_type = [DataType.INT, DataType.FLOAT]
 	related_exceptions = [KeyNotFound, InvalidKeyValue, InvalidTime]
 
 	def validate(self) -> bool:
@@ -268,6 +285,7 @@ class EditTimeVariable(NonRequiredVersion, TimeVariable):
 class NotificationServicesVariable(BaseInputVariable):
 	name = 'notification_services'
 	description = "Array of the id's of the notification services to use to send the notification"
+	data_type = [DataType.INT_ARRAY]
 	related_exceptions = [
 		KeyNotFound, InvalidKeyValue,
 		NotificationServiceNotFound
@@ -313,9 +331,10 @@ class RepeatQuantityVariable(NonRequiredVersion, BaseInputVariable):
 		return True
 
 	def __repr__(self) -> str:
-		return '| {n} | {r} | {d} | {v} |'.format(
+		return '| {n} | {r} | {t} | {d} | {v} |'.format(
 			n=self.name,
 			r="Yes" if self.required else "No",
+			t=",".join(self.data_type),
 			d=self.description,
 			v=", ".join(f'`{o}`' for o in self._options)
 		)
@@ -324,6 +343,7 @@ class RepeatQuantityVariable(NonRequiredVersion, BaseInputVariable):
 class RepeatIntervalVariable(NonRequiredVersion, BaseInputVariable):
 	name = 'repeat_interval'
 	description = 'The number of the interval'
+	data_type = [DataType.INT]
 
 	def validate(self) -> bool:
 		return (
@@ -338,6 +358,7 @@ class RepeatIntervalVariable(NonRequiredVersion, BaseInputVariable):
 class WeekDaysVariable(NonRequiredVersion, BaseInputVariable):
 	name = 'weekdays'
 	description = 'On which days of the weeks to run the reminder'
+	data_type = [DataType.INT_ARRAY]
 	_options = {0, 1, 2, 3, 4, 5, 6}
 
 	def validate(self) -> bool:
@@ -379,17 +400,20 @@ class AllowNewAccountsVariable(NonRequiredVersion, AdminSettingsVariable):
 	name = 'allow_new_accounts'
 	description = ('Whether or not to allow users to register a new account. '
 	+ 'The admin can always add a new account.')
+	data_type = [DataType.BOOL]
 
 
 class LoginTimeVariable(NonRequiredVersion, AdminSettingsVariable):
 	name = 'login_time'
 	description = ('How long a user stays logged in, in seconds. '
 	+ 'Between 1 min and 1 month (60 <= sec <= 2592000)')
+	data_type = [DataType.INT]
 
 
 class LoginTimeResetVariable(NonRequiredVersion, AdminSettingsVariable):
 	name = 'login_time_reset'
 	description = 'If the Login Time timer should reset with each API request.'
+	data_type = [DataType.BOOL]
 
 
 class HostVariable(NonRequiredVersion, AdminSettingsVariable):
@@ -400,6 +424,7 @@ class HostVariable(NonRequiredVersion, AdminSettingsVariable):
 class PortVariable(NonRequiredVersion, AdminSettingsVariable):
 	name = 'port'
 	description = 'The port to listen on.'
+	data_type = [DataType.INT]
 
 
 class UrlPrefixVariable(NonRequiredVersion, AdminSettingsVariable):
@@ -410,6 +435,7 @@ class UrlPrefixVariable(NonRequiredVersion, AdminSettingsVariable):
 class DatabaseFileVariable(BaseInputVariable):
 	name = 'file'
 	description = 'The MIND database file'
+	data_type = [DataType.NA]
 	source = DataSource.FILES
 	related_exceptions = [KeyNotFound, InvalidDatabaseFile]
 
@@ -429,6 +455,7 @@ class DatabaseFileVariable(BaseInputVariable):
 class CopyHostingSettingsVariable(BaseInputVariable):
 	name = 'copy_hosting_settings'
 	description = 'Copy the hosting settings from the current database'
+	data_type = [DataType.BOOL]
 	source = DataSource.VALUES
 
 	def validate(self) -> bool:

@@ -706,7 +706,7 @@ def api_settings():
 			vars=[AllowNewAccountsVariable, LoginTimeVariable,
 				LoginTimeResetVariable, HostVariable, PortVariable,
 				UrlPrefixVariable],
-			description='Edit the admin settings'
+			description='Edit the admin settings. Supplying a hosting setting will automatically restart MIND.'
 		)
 	),
 	methods=['GET', 'PUT']
@@ -798,7 +798,7 @@ def api_admin_user(inputs: Dict[str, Any], u_id: int):
 		),
 		post=Method(
 			vars=[DatabaseFileVariable, CopyHostingSettingsVariable],
-			description="Upload and apply a database file"
+			description="Upload and apply a database file. Will automatically restart MIND."
 		)
 	),
 	methods=['GET', 'POST']

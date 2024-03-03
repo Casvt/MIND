@@ -126,7 +126,7 @@ class APIKeyExpired(Exception):
 	api_response = {'error': 'APIKeyExpired', 'result': {}, 'code': 401}
 
 class NewAccountsNotAllowed(CustomException):
-	"""It's not allowed to create a new account"""
+	"""It's not allowed to create a new account except for the admin"""
 	api_response = {'error': 'NewAccountsNotAllowed', 'result': {}, 'code': 403}
 
 class InvalidDatabaseFile(CustomException):
