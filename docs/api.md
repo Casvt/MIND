@@ -837,6 +837,12 @@ Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
 
 	Upload and apply a database file
 
+	**Parameters (url)**
+
+	| Name | Required | Description | Allowed values |
+	| ---- | -------- | ----------- | -------------- |
+	| copy_hosting_settings | Yes | Copy the hosting settings from the current database | N/A |
+
 	**Parameters (file)**
 
 	| Name | Required | Description | Allowed values |
@@ -849,5 +855,6 @@ Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
 	| ---- | ----- | ----------- |
 	| 201 | N/A | Success |
 	| 400 | InvalidDatabaseFile | The uploaded database file is invalid or not supported |
+	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 
