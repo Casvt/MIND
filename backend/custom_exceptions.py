@@ -8,13 +8,13 @@ All custom exceptions are defined here
 Note: Not all CE's inherit from CustomException.
 """
 
-import logging
 from typing import Any, Dict
+from backend.logging import LOGGER
 
 
 class CustomException(Exception):
 	def __init__(self, e=None) -> None:
-		logging.warning(self.__doc__)
+		LOGGER.warning(self.__doc__)
 		super().__init__(e)
 		return
 
@@ -29,7 +29,7 @@ class UsernameInvalid(Exception):
 	def __init__(self, username: str):
 		self.username = username
 		super().__init__(self.username)
-		logging.warning(
+		LOGGER.warning(
 			f'The username contains invalid characters: {username}'
 		)
 		return
@@ -58,7 +58,7 @@ class NotificationServiceInUse(Exception):
 	def __init__(self, type: str=''):
 		self.type = type
 		super().__init__(self.type)
-		logging.warning(
+		LOGGER.warning(
 			f'The notification is wished to be deleted but a reminder of type {type} is still using it'
 		)
 		return
@@ -80,7 +80,7 @@ class KeyNotFound(Exception):
 	def __init__(self, key: str=''):
 		self.key = key
 		super().__init__(self.key)
-		logging.warning(
+		LOGGER.warning(
 			"This key was not found in the API request,"
 			+ f" eventhough it's required: {key}"
 		)
@@ -100,7 +100,7 @@ class InvalidKeyValue(Exception):
 		self.key = key
 		self.value = value
 		super().__init__(self.key)
-		logging.warning(
+		LOGGER.warning(
 			'This key in the API request has an invalid value: ' + 
 			f'{key} = {value}'
 		)
@@ -132,3 +132,7 @@ class NewAccountsNotAllowed(CustomException):
 class InvalidDatabaseFile(CustomException):
 	"""The uploaded database file is invalid or not supported"""
 	api_response = {'error': 'InvalidDatabaseFile', 'result': {}, 'code': 400}
+
+class LogFileNotFound(CustomException):
+	"""No log file was found"""
+	api_response = {'error': 'LogFileNotFound', 'result': {}, 'code': 404}

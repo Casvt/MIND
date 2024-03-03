@@ -1,6 +1,5 @@
 #-*- coding: utf-8 -*-
 
-import logging
 from sqlite3 import IntegrityError
 from typing import List, Optional, Union
 
@@ -8,6 +7,7 @@ from backend.custom_exceptions import (NotificationServiceNotFound,
                                        TemplateNotFound)
 from backend.db import get_db
 from backend.helpers import TimelessSortingMethod, search_filter
+from backend.logging import LOGGER
 
 
 class Template:
@@ -104,7 +104,7 @@ class Template:
 		Returns:
 			dict: The new template info
 		"""
-		logging.info(
+		LOGGER.info(
 			f'Updating template {self.id}: '
 			+ f'{title=}, {notification_services=}, {text=}, {color=}'
 		)
@@ -162,7 +162,7 @@ class Template:
 	def delete(self) -> None:
 		"""Delete the template
 		"""
-		logging.info(f'Deleting template {self.id}')
+		LOGGER.info(f'Deleting template {self.id}')
 		get_db().execute("DELETE FROM templates WHERE id = ?;", (self.id,))
 		return
 
@@ -275,7 +275,7 @@ class Templates:
 		Returns:
 			Template: The info about the template
 		"""
-		logging.info(
+		LOGGER.info(
 			f'Adding template with {title=}, {notification_services=}, {text=}, {color=}'
 		)
 

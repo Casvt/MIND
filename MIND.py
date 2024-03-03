@@ -5,12 +5,11 @@
 The main file where MIND is started from
 """
 
-import logging
 from sys import argv
 
 from backend.db import setup_db, setup_db_location
 from backend.helpers import check_python_version
-from backend.logging import setup_logging
+from backend.logging import LOGGER, setup_logging
 from backend.reminders import ReminderHandler
 from backend.server import SERVER, handle_flags
 from backend.settings import get_setting
@@ -29,7 +28,7 @@ def MIND() -> None:
 	"""The main function of MIND
 	"""
 	setup_logging()
-	logging.info('Starting up MIND')
+	LOGGER.info('Starting up MIND')
 
 	if not check_python_version():
 		exit(1)

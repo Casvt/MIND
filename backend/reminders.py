@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 from datetime import datetime
 from sqlite3 import IntegrityError
 from threading import Timer
@@ -18,6 +17,7 @@ from backend.custom_exceptions import (InvalidKeyValue, InvalidTime,
 from backend.db import get_db
 from backend.helpers import (RepeatQuantity, Singleton, SortingMethod,
                              search_filter, when_not_none)
+from backend.logging import LOGGER
 
 if TYPE_CHECKING:
 	from flask.ctx import AppContext
@@ -98,7 +98,7 @@ def _find_next_time(
 			one_to_go = False
 
 	result = int(new_time.timestamp())
-	logging.debug(
+	LOGGER.debug(
 		f'{original_time=}, {current_time=} ' +
 		f'and interval of {repeat_interval} {repeat_quantity} ' +
 		f'leads to {result}'
@@ -237,7 +237,7 @@ class Reminder:
 		Returns:
 			dict: The new reminder info.
 		"""
-		logging.info(
+		LOGGER.info(
 			f'Updating notification service {self.id}: '
 			+ f'{title=}, {time=}, {notification_services=}, {text=}, '
 			+ f'{repeat_quantity=}, {repeat_interval=}, {weekdays=}, {color=}'
@@ -375,7 +375,7 @@ class Reminder:
 	def delete(self) -> None:
 		"""Delete the reminder
 		"""
-		logging.info(f'Deleting reminder {self.id}')
+		LOGGER.info(f'Deleting reminder {self.id}')
 		get_db().execute("DELETE FROM reminders WHERE id = ?", (self.id,))
 		ReminderHandler().find_next_reminder()
 		return
@@ -518,7 +518,7 @@ class Reminders:
 		Returns:
 			dict: The info about the reminder.
 		"""
-		logging.info(
+		LOGGER.info(
 			f'Adding reminder with {title=}, {time=}, {notification_services=}, '
 			+ f'{text=}, {repeat_quantity=}, {repeat_interval=}, {weekdays=}, {color=}'
 		)
@@ -636,7 +636,7 @@ class Reminders:
 			text (str, optional): The body of the reminder.
 				Defaults to ''.
 		"""
-		logging.info(f'Testing reminder with {title=}, {notification_services=}, {text=}')
+		LOGGER.info(f'Testing reminder with {title=}, {notification_services=}, {text=}')
 		a = Apprise()
 		cursor = get_db(dict)
 

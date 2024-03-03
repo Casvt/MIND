@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
 from datetime import datetime
 from io import BytesIO
 from os import remove, urandom
-from os.path import basename
+from os.path import basename, exists
 from time import time as epoch_time
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple
 
@@ -16,7 +15,8 @@ from flask import g, request, send_file
 from backend.custom_exceptions import (AccessUnauthorized, APIKeyExpired,
                                        APIKeyInvalid, InvalidDatabaseFile,
                                        InvalidKeyValue, InvalidTime,
-                                       KeyNotFound, NewAccountsNotAllowed,
+                                       KeyNotFound, LogFileNotFound,
+                                       NewAccountsNotAllowed,
                                        NotificationServiceInUse,
                                        NotificationServiceNotFound,
                                        ReminderNotFound, TemplateNotFound,
@@ -24,6 +24,7 @@ from backend.custom_exceptions import (AccessUnauthorized, APIKeyExpired,
                                        UserNotFound)
 from backend.db import get_db, import_db, revert_db_import
 from backend.helpers import RestartVars, folder_path
+from backend.logging import LOGGER, get_debug_log_filepath
 from backend.notification_service import get_apprise_services
 from backend.server import SERVER
 from backend.settings import (backup_hosting_settings, get_admin_settings,
@@ -136,7 +137,8 @@ def endpoint_wrapper(method: Callable) -> Callable:
 			AccessUnauthorized, APIKeyExpired,
 			APIKeyInvalid, InvalidDatabaseFile,
 			InvalidKeyValue, InvalidTime,
-			KeyNotFound, NewAccountsNotAllowed,
+			KeyNotFound, LogFileNotFound,
+			NewAccountsNotAllowed,
 			NotificationServiceInUse,
 			NotificationServiceNotFound,
 			ReminderNotFound, TemplateNotFound,
@@ -170,12 +172,12 @@ def api_login(inputs: Dict[str, str]):
 	# Login successful
 
 	if user.admin and SERVER.revert_db_timer.is_alive():
-		logging.info('Timer for database import diffused')
+		LOGGER.info('Timer for database import diffused')
 		SERVER.revert_db_timer.cancel()
 		revert_db_import(swap=False)
 
 	elif user.admin and SERVER.revert_hosting_timer.is_alive():
-		logging.info('Timer for hosting changes diffused')
+		LOGGER.info('Timer for hosting changes diffused')
 		SERVER.revert_hosting_timer.cancel()
 
 	# Generate an API key until one
@@ -717,7 +719,7 @@ def api_admin_settings(inputs: Dict[str, Any]):
 		return return_api(get_admin_settings())
 
 	elif request.method == 'PUT':
-		logging.info(f'Submitting admin settings: {inputs}')
+		LOGGER.info(f'Submitting admin settings: {inputs}')
 		
 		hosting_changes = any(
 			inputs[s] is not None 
@@ -735,6 +737,19 @@ def api_admin_settings(inputs: Dict[str, Any]):
 			SERVER.restart([RestartVars.HOST_CHANGE.value])
 		
 		return return_api({})
+
+@admin_api.route(
+	'/logs',
+	'Get the debug logs',
+	methods=['GET']
+)
+@endpoint_wrapper
+def api_admin_logs():
+	file = get_debug_log_filepath()
+	if not exists(file):
+		raise LogFileNotFound
+
+	return send_file(file), 200
 
 @admin_api.route(
 	'/users',

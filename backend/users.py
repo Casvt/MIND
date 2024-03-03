@@ -1,12 +1,12 @@
 #-*- coding: utf-8 -*-
 
-import logging
 from typing import List
 
 from backend.custom_exceptions import (AccessUnauthorized,
                                        NewAccountsNotAllowed, UsernameInvalid,
                                        UsernameTaken, UserNotFound)
 from backend.db import get_db
+from backend.logging import LOGGER
 from backend.notification_service import NotificationServices
 from backend.reminders import Reminders
 from backend.security import generate_salt_hash, get_hash
@@ -97,7 +97,7 @@ class User:
 			"UPDATE users SET hash = ? WHERE id = ?",
 			(hash_password, self.user_id)
 		)
-		logging.info(f'The user {self.username} ({self.user_id}) changed their password')
+		LOGGER.info(f'The user {self.username} ({self.user_id}) changed their password')
 		return
 
 	def delete(self) -> None:
@@ -106,7 +106,7 @@ class User:
 		if self.username == 'admin':
 			raise UserNotFound
 
-		logging.info(f'Deleting the user {self.username} ({self.user_id})')
+		LOGGER.info(f'Deleting the user {self.username} ({self.user_id})')
 		
 		cursor = get_db()
 		cursor.execute(
@@ -141,7 +141,7 @@ class Users:
 		Raises:
 			UsernameInvalid: The username is not valid
 		"""
-		logging.debug(f'Checking the username {username}')
+		LOGGER.debug(f'Checking the username {username}')
 		if username in ONEPASS_INVALID_USERNAMES or username.isdigit():
 			raise UsernameInvalid(username)
 		if list(filter(lambda c: not c in ONEPASS_USERNAME_CHARACTERS, username)):
@@ -173,7 +173,7 @@ class Users:
 		Returns:
 			int: The id of the new user. User registered successful
 		"""
-		logging.info(f'Registering user with username {username}')
+		LOGGER.info(f'Registering user with username {username}')
 		
 		if not from_admin and not get_setting('allow_new_accounts'):
 			raise NewAccountsNotAllowed
@@ -200,7 +200,7 @@ class Users:
 			(username, salt, hashed_password)
 		).lastrowid
 
-		logging.debug(f'Newly registered user has id {user_id}')
+		LOGGER.debug(f'Newly registered user has id {user_id}')
 		return user_id
 
 	def get_all(self) -> List[dict]:

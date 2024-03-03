@@ -4,7 +4,6 @@
 General functions
 """
 
-import logging
 from enum import Enum
 from os.path import abspath, dirname, join
 from sys import version_info
@@ -29,7 +28,9 @@ def check_python_version() -> bool:
 		bool: Whether or not the python version is version 3.8 or above or not.
 	"""
 	if not (version_info.major == 3 and version_info.minor >= 8):
-		logging.critical(
+		from backend.logging import LOGGER
+
+		LOGGER.critical(
 			'The minimum python version required is python3.8 ' + 
 			'(currently ' + str(version_info.major) + '.' + str(version_info.minor) + '.' + str(version_info.micro) + ').'
 		)

@@ -158,6 +158,7 @@ h2 {
 	flex-wrap: wrap;
 }
 
+#download-logs-button,
 #save-hosting-button,
 #add-user-button,
 #download-db-button,
@@ -171,6 +172,10 @@ h2 {
 	background-color: var(--color-gray);
 	
 	box-shadow: var(--default-shadow);
+}
+
+.database-container:has(#download-logs-button) {
+	margin: 0;
 }
 
 #save-hosting-button {

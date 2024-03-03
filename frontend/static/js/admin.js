@@ -84,6 +84,18 @@ function submitSettings() {
 	});
 };
 
+function downloadLogFile() {
+	fetch(`${url_prefix}/api/admin/logs?api_key=${api_key}`)
+	.then(response => {
+		if (!response.ok) return Promise.reject(response.status)
+		window.location.href = `${url_prefix}/api/admin/logs?api_key=${api_key}`;
+	})
+	.catch(e => {
+		if (e === 404)
+			alert("No debug log file to download. Enable debug logging first.")
+	});
+};
+
 function submitHostingSettings() {
 	hosting_inputs.submit.innerText = 'Restarting';
 	const data = {
@@ -291,6 +303,7 @@ loadUsers();
 
 document.querySelector('#logout-button').onclick = e => logout();
 document.querySelector('#settings-form').action = 'javascript:submitSettings();';
+document.querySelector('#download-logs-button').onclick = e => downloadLogFile();
 hosting_inputs.form.action = 'javascript:submitHostingSettings();';
 document.querySelector('#add-user-button').onclick = e => toggleAddUser();
 document.querySelector('#add-user-form').action = 'javascript:addUser()';

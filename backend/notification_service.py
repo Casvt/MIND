@@ -1,6 +1,5 @@
 #-*- coding: utf-8 -*-
 
-import logging
 from re import compile
 from typing import Dict, List, Optional, Union
 
@@ -10,6 +9,7 @@ from backend.custom_exceptions import (NotificationServiceInUse,
                                        NotificationServiceNotFound)
 from backend.db import get_db
 from backend.helpers import when_not_none
+from backend.logging import LOGGER
 
 remove_named_groups = compile(r'(?<=\()\?P<\w+>')
 
@@ -220,7 +220,7 @@ class NotificationService:
 		Returns:
 			dict: The new info about the service
 		"""	
-		logging.info(f'Updating notification service {self.id}: {title=}, {url=}')
+		LOGGER.info(f'Updating notification service {self.id}: {title=}, {url=}')
 
 		# Get current data and update it with new values
 		data = self.get()
@@ -253,7 +253,7 @@ class NotificationService:
 		Raises:
 			NotificationServiceInUse: The service is still used by a reminder
 		"""	
-		logging.info(f'Deleting notification service {self.id}')
+		LOGGER.info(f'Deleting notification service {self.id}')
 		
 		# Check if no reminders exist with this service
 		cursor = get_db()
@@ -344,7 +344,7 @@ class NotificationServices:
 		Returns:
 			NotificationService: The instance representing the new service
 		"""	
-		logging.info(f'Adding notification service with {title=}, {url=}')
+		LOGGER.info(f'Adding notification service with {title=}, {url=}')
 
 		new_id = get_db().execute("""
 			INSERT INTO notification_services(user_id, title, url)
@@ -364,7 +364,7 @@ class NotificationServices:
 		Args:
 			url (str): The Apprise URL to use to send the test notification
 		"""
-		logging.info(f'Testing service with {url=}')
+		LOGGER.info(f'Testing service with {url=}')
 		a = Apprise()
 		a.add(url)
 		a.notify(title='MIND: Test title', body='MIND: Test body')

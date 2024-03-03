@@ -4,7 +4,6 @@
 Setting up and interacting with the database.
 """
 
-import logging
 from datetime import datetime
 from os import makedirs, remove
 from os.path import dirname, isfile, join
@@ -19,7 +18,7 @@ from flask import g
 from backend.custom_exceptions import (AccessUnauthorized, InvalidDatabaseFile,
                                        UserNotFound)
 from backend.helpers import RestartVars, folder_path
-from backend.logging import set_log_level
+from backend.logging import LOGGER, set_log_level
 
 DB_FILENAME = 'db', 'MIND.db'
 __DATABASE_VERSION__ = 10
@@ -39,14 +38,14 @@ class DBConnection(Connection, metaclass=DB_Singleton):
 	file = ''
 
 	def __init__(self, timeout: float) -> None:
-		logging.debug(f'Creating connection {self}')
+		LOGGER.debug(f'Creating connection {self}')
 		super().__init__(self.file, timeout=timeout)
 		super().cursor().execute("PRAGMA foreign_keys = ON;")
 		self.closed = False
 		return
 
 	def close(self) -> None:
-		logging.debug(f'Closing connection {self}')
+		LOGGER.debug(f'Closing connection {self}')
 		self.closed = True
 		super().close()
 		return
@@ -61,7 +60,6 @@ def setup_db_location() -> None:
 		move(folder_path('db', 'Noted.db'), folder_path(*DB_FILENAME))
 
 	db_location = folder_path(*DB_FILENAME)
-	logging.debug(f'Database location: {db_location}')
 	makedirs(dirname(db_location), exist_ok=True)
 
 	DBConnection.file = db_location
@@ -111,7 +109,7 @@ def migrate_db(current_db_version: int) -> None:
 	Migrate a MIND database from it's current version 
 	to the newest version supported by the MIND version installed.
 	"""
-	logging.info('Migrating database to newer version...')
+	LOGGER.info('Migrating database to newer version...')
 	cursor = get_db()
 	if current_db_version == 1:
 		# V1 -> V2
@@ -394,11 +392,11 @@ def setup_db() -> None:
 		)
 	)
 
-	set_log_level(get_setting('log_level'))
+	set_log_level(get_setting('log_level'), clear_file=False)
 
 	current_db_version = get_setting('database_version')
 	if current_db_version < __DATABASE_VERSION__:
-		logging.debug(
+		LOGGER.debug(
 			f'Database migration: {current_db_version} -> {__DATABASE_VERSION__}'
 		)
 		migrate_db(current_db_version)
@@ -458,7 +456,7 @@ def import_db(
 	Raises:
 		InvalidDatabaseFile: The new database file is invalid or unsupported.
 	"""
-	logging.info(f'Importing new database; {copy_hosting_settings=}')
+	LOGGER.info(f'Importing new database; {copy_hosting_settings=}')
 	try:
 		cursor = Connection(new_db_file, timeout=20.0).cursor()
 
@@ -469,7 +467,7 @@ def import_db(
 			raise InvalidDatabaseFile
 
 	except (OperationalError, InvalidDatabaseFile):
-		logging.error('Uploaded database is not a MIND database file')
+		LOGGER.error('Uploaded database is not a MIND database file')
 		cursor.connection.close()
 		revert_db_import(
 			swap=False,
@@ -478,7 +476,7 @@ def import_db(
 		raise InvalidDatabaseFile
 
 	if database_version > __DATABASE_VERSION__:
-		logging.error('Uploaded database is higher version than this MIND installation can support')
+		LOGGER.error('Uploaded database is higher version than this MIND installation can support')
 		revert_db_import(
 			swap=False,
 			imported_db_file=new_db_file

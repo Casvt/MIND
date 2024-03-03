@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 from os import execv, urandom
 from sys import argv
 from threading import Timer, current_thread
@@ -15,6 +14,7 @@ from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
 from backend.db import DB_Singleton, DBConnection, close_db, revert_db_import
 from backend.helpers import RestartVars, Singleton, folder_path
+from backend.logging import LOGGER
 from backend.settings import restore_hosting_settings
 
 if TYPE_CHECKING:
@@ -32,8 +32,9 @@ class ThreadedTaskDispatcher(TTD):
 
 	def shutdown(self, cancel_pending: bool = True, timeout: int = 5) -> bool:
 		print()
-		logging.info('Shutting down MIND')
+		LOGGER.info('Shutting down MIND')
 		result = super().shutdown(cancel_pending, timeout)
+		DBConnection(timeout=20.0).close()
 		return result
 
 
@@ -153,7 +154,7 @@ class Server(metaclass=Singleton):
 			port (int): The port to listen on.
 		"""
 		self.server = self.__create_waitress_server(host, port)
-		logging.info(f'MIND running on http://{host}:{port}{self.url_prefix}')
+		LOGGER.info(f'MIND running on http://{host}:{port}{self.url_prefix}')
 		self.server.run()
 
 		return
@@ -207,21 +208,21 @@ class Server(metaclass=Singleton):
 		if self.handle_flags:
 			handle_flags_pre_restart(flag)
 
-		logging.info('Restarting MIND')
+		LOGGER.info('Restarting MIND')
 		from MIND import __file__ as mind_file
 		execv(folder_path(mind_file), [argv[0], *self.restart_args])
 
 	def __revert_db(self) -> None:
 		"""Revert database import and restart.
 		"""
-		logging.warning(f'Timer for database import expired; reverting back to original file')
+		LOGGER.warning(f'Timer for database import expired; reverting back to original file')
 		self.restart(handle_flags=True)
 		return
 
 	def __revert_hosting(self) -> None:
 		"""Revert the hosting changes.
 		"""
-		logging.warning(f'Timer for hosting changes expired; reverting back to original settings')
+		LOGGER.warning(f'Timer for hosting changes expired; reverting back to original settings')
 		self.restart(handle_flags=True)
 		return
 
@@ -236,11 +237,11 @@ def handle_flags(flag: Union[None, str]) -> None:
 		flag (Union[None, str]): The flag or `None` if there is no flag set.
 	"""
 	if flag == RestartVars.DB_IMPORT:
-		logging.info('Starting timer for database import')
+		LOGGER.info('Starting timer for database import')
 		SERVER.revert_db_timer.start()
 
 	elif flag == RestartVars.HOST_CHANGE:
-		logging.info('Starting timer for hosting changes')
+		LOGGER.info('Starting timer for hosting changes')
 		SERVER.revert_hosting_timer.start()
 
 	return

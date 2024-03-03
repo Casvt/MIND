@@ -1,6 +1,5 @@
 #-*- coding: utf-8 -*-
 
-import logging
 from sqlite3 import IntegrityError
 from typing import List, Optional, Union
 
@@ -10,6 +9,7 @@ from backend.custom_exceptions import (NotificationServiceNotFound,
                                        ReminderNotFound)
 from backend.db import get_db
 from backend.helpers import TimelessSortingMethod, search_filter
+from backend.logging import LOGGER
 
 
 class StaticReminder:
@@ -108,7 +108,7 @@ class StaticReminder:
 		Returns:
 			dict: The new static reminder info
 		"""
-		logging.info(
+		LOGGER.info(
 			f'Updating static reminder {self.id}: '
 			+ f'{title=}, {notification_services=}, {text=}, {color=}'
 		)
@@ -168,7 +168,7 @@ class StaticReminder:
 	def delete(self) -> None:
 		"""Delete the static reminder
 		"""
-		logging.info(f'Deleting static reminder {self.id}')
+		LOGGER.info(f'Deleting static reminder {self.id}')
 		get_db().execute("DELETE FROM static_reminders WHERE id = ?", (self.id,))
 		return
 
@@ -281,7 +281,7 @@ class StaticReminders:
 		Returns:
 			StaticReminder: The info about the static reminder
 		"""
-		logging.info(
+		LOGGER.info(
 			f'Adding static reminder with {title=}, {notification_services=}, {text=}, {color=}'
 		)
 
@@ -324,7 +324,7 @@ class StaticReminders:
 		Raises:
 			ReminderNotFound: The static reminder with the given id was not found
 		"""
-		logging.info(f'Triggering static reminder {id}')
+		LOGGER.info(f'Triggering static reminder {id}')
 		cursor = get_db(dict)
 		reminder = cursor.execute("""
 			SELECT title, text
