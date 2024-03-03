@@ -746,6 +746,20 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	| 200 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 
+### `/admin/logs`
+
+| Requires being logged in | Description |
+| ------------------------ | ----------- |
+| Yes | Get the debug logs | 
+
+??? GET
+
+	**Returns**
+	
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 200 | N/A | Success |
+
 ### `/admin/users`
 
 | Requires being logged in | Description |
