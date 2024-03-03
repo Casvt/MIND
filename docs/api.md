@@ -47,10 +47,10 @@ The following is automatically generated. Please report any issues on [GitHub](h
 
 	**Parameters (body)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| username | Yes | The username of the user account | N/A |
-	| password | Yes | The password of the user account | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| username | Yes | string | The username of the user account | N/A |
+	| password | Yes | string | The password of the user account | N/A |
 
 	**Returns**
 	
@@ -99,10 +99,10 @@ The following is automatically generated. Please report any issues on [GitHub](h
 
 	**Parameters (body)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| username | Yes | The username of the user account | N/A |
-	| password | Yes | The password of the user account | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| username | Yes | string | The username of the user account | N/A |
+	| password | Yes | string | The password of the user account | N/A |
 
 	**Returns**
 	
@@ -112,7 +112,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 	| 400 | UsernameInvalid | The username contains invalid characters |
 	| 400 | UsernameTaken | The username is already taken |
-	| 403 | NewAccountsNotAllowed | It's not allowed to create a new account |
+	| 403 | NewAccountsNotAllowed | It's not allowed to create a new account except for the admin |
 
 ### `/user`
 
@@ -126,9 +126,9 @@ The following is automatically generated. Please report any issues on [GitHub](h
 
 	**Parameters (body)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| new_password | Yes | The new password of the user account | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| new_password | Yes | string | The new password of the user account | N/A |
 
 	**Returns**
 	
@@ -169,10 +169,10 @@ The following is automatically generated. Please report any issues on [GitHub](h
 
 	**Parameters (body)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| title | Yes | The title of the entry | N/A |
-	| url | Yes | The Apprise URL of the notification service | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| title | Yes | string | The title of the entry | N/A |
+	| url | Yes | string | The Apprise URL of the notification service | N/A |
 
 	**Returns**
 	
@@ -206,9 +206,9 @@ The following is automatically generated. Please report any issues on [GitHub](h
 
 	**Parameters (body)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| url | Yes | The Apprise URL of the notification service | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| url | Yes | string | The Apprise URL of the notification service | N/A |
 
 	**Returns**
 	
@@ -241,10 +241,10 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 
 	**Parameters (body)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| title | No | The title of the entry | N/A |
-	| url | No | The Apprise URL of the notification service | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| title | No | string | The title of the entry | N/A |
+	| url | No | string | The Apprise URL of the notification service | N/A |
 
 	**Returns**
 	
@@ -277,9 +277,9 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 
 	**Parameters (url)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| sort_by | No | How to sort the result | `time`, `time_reversed`, `title`, `title_reversed`, `date_added`, `date_added_reversed` |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| sort_by | No | string | How to sort the result | `time`, `time_reversed`, `title`, `title_reversed`, `date_added`, `date_added_reversed` |
 
 	**Returns**
 	
@@ -294,16 +294,16 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 
 	**Parameters (body)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| title | Yes | The title of the entry | N/A |
-	| time | Yes | The UTC epoch timestamp that the reminder should be sent at | N/A |
-	| notification_services | Yes | Array of the id's of the notification services to use to send the notification | N/A |
-	| text | No | The body of the entry | N/A |
-	| repeat_quantity | No | The quantity of the repeat_interval | `years`, `months`, `weeks`, `days`, `hours`, `minutes` |
-	| repeat_interval | No | The number of the interval | N/A |
-	| weekdays | No | On which days of the weeks to run the reminder | N/A |
-	| color | No | The hex code of the color of the entry, which is shown in the web-ui | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| title | Yes | string | The title of the entry | N/A |
+	| time | Yes | number,decimal number | The UTC epoch timestamp that the reminder should be sent at | N/A |
+	| notification_services | Yes | list of numbers | Array of the id's of the notification services to use to send the notification | N/A |
+	| text | No | string | The body of the entry | N/A |
+	| repeat_quantity | No | string | The quantity of the repeat_interval | `years`, `months`, `weeks`, `days`, `hours`, `minutes` |
+	| repeat_interval | No | number | The number of the interval | N/A |
+	| weekdays | No | list of numbers | On which days of the weeks to run the reminder | N/A |
+	| color | No | string | The hex code of the color of the entry, which is shown in the web-ui | N/A |
 
 	**Returns**
 	
@@ -325,10 +325,10 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 
 	**Parameters (url)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| sort_by | No | How to sort the result | `time`, `time_reversed`, `title`, `title_reversed`, `date_added`, `date_added_reversed` |
-	| query | Yes | The search term | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| sort_by | No | string | How to sort the result | `time`, `time_reversed`, `title`, `title_reversed`, `date_added`, `date_added_reversed` |
+	| query | Yes | string | The search term | N/A |
 
 	**Returns**
 	
@@ -348,11 +348,11 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 
 	**Parameters (body)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| title | Yes | The title of the entry | N/A |
-	| notification_services | Yes | Array of the id's of the notification services to use to send the notification | N/A |
-	| text | No | The body of the entry | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| title | Yes | string | The title of the entry | N/A |
+	| notification_services | Yes | list of numbers | Array of the id's of the notification services to use to send the notification | N/A |
+	| text | No | string | The body of the entry | N/A |
 
 	**Returns**
 	
@@ -386,16 +386,16 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 
 	**Parameters (body)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| title | No | The title of the entry | N/A |
-	| time | No | The UTC epoch timestamp that the reminder should be sent at | N/A |
-	| notification_services | No | Array of the id's of the notification services to use to send the notification | N/A |
-	| text | No | The body of the entry | N/A |
-	| repeat_quantity | No | The quantity of the repeat_interval | `years`, `months`, `weeks`, `days`, `hours`, `minutes` |
-	| repeat_interval | No | The number of the interval | N/A |
-	| weekdays | No | On which days of the weeks to run the reminder | N/A |
-	| color | No | The hex code of the color of the entry, which is shown in the web-ui | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| title | No | string | The title of the entry | N/A |
+	| time | No | number,decimal number | The UTC epoch timestamp that the reminder should be sent at | N/A |
+	| notification_services | No | list of numbers | Array of the id's of the notification services to use to send the notification | N/A |
+	| text | No | string | The body of the entry | N/A |
+	| repeat_quantity | No | string | The quantity of the repeat_interval | `years`, `months`, `weeks`, `days`, `hours`, `minutes` |
+	| repeat_interval | No | number | The number of the interval | N/A |
+	| weekdays | No | list of numbers | On which days of the weeks to run the reminder | N/A |
+	| color | No | string | The hex code of the color of the entry, which is shown in the web-ui | N/A |
 
 	**Returns**
 	
@@ -430,9 +430,9 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 
 	**Parameters (url)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| sort_by | No | How to sort the result | `title`, `title_reversed`, `date_added`, `date_added_reversed` |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| sort_by | No | string | How to sort the result | `title`, `title_reversed`, `date_added`, `date_added_reversed` |
 
 	**Returns**
 	
@@ -447,12 +447,12 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 
 	**Parameters (body)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| title | Yes | The title of the entry | N/A |
-	| notification_services | Yes | Array of the id's of the notification services to use to send the notification | N/A |
-	| text | No | The body of the entry | N/A |
-	| color | No | The hex code of the color of the entry, which is shown in the web-ui | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| title | Yes | string | The title of the entry | N/A |
+	| notification_services | Yes | list of numbers | Array of the id's of the notification services to use to send the notification | N/A |
+	| text | No | string | The body of the entry | N/A |
+	| color | No | string | The hex code of the color of the entry, which is shown in the web-ui | N/A |
 
 	**Returns**
 	
@@ -473,10 +473,10 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 
 	**Parameters (url)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| sort_by | No | How to sort the result | `title`, `title_reversed`, `date_added`, `date_added_reversed` |
-	| query | Yes | The search term | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| sort_by | No | string | How to sort the result | `title`, `title_reversed`, `date_added`, `date_added_reversed` |
+	| query | Yes | string | The search term | N/A |
 
 	**Returns**
 	
@@ -509,12 +509,12 @@ Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 
 	**Parameters (body)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| title | No | The title of the entry | N/A |
-	| notification_services | No | Array of the id's of the notification services to use to send the notification | N/A |
-	| text | No | The body of the entry | N/A |
-	| color | No | The hex code of the color of the entry, which is shown in the web-ui | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| title | No | string | The title of the entry | N/A |
+	| notification_services | No | list of numbers | Array of the id's of the notification services to use to send the notification | N/A |
+	| text | No | string | The body of the entry | N/A |
+	| color | No | string | The hex code of the color of the entry, which is shown in the web-ui | N/A |
 
 	**Returns**
 	
@@ -548,9 +548,9 @@ Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 
 	**Parameters (url)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| sort_by | No | How to sort the result | `title`, `title_reversed`, `date_added`, `date_added_reversed` |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| sort_by | No | string | How to sort the result | `title`, `title_reversed`, `date_added`, `date_added_reversed` |
 
 	**Returns**
 	
@@ -565,12 +565,12 @@ Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 
 	**Parameters (body)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| title | Yes | The title of the entry | N/A |
-	| notification_services | Yes | Array of the id's of the notification services to use to send the notification | N/A |
-	| text | No | The body of the entry | N/A |
-	| color | No | The hex code of the color of the entry, which is shown in the web-ui | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| title | Yes | string | The title of the entry | N/A |
+	| notification_services | Yes | list of numbers | Array of the id's of the notification services to use to send the notification | N/A |
+	| text | No | string | The body of the entry | N/A |
+	| color | No | string | The hex code of the color of the entry, which is shown in the web-ui | N/A |
 
 	**Returns**
 	
@@ -591,10 +591,10 @@ Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 
 	**Parameters (url)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| sort_by | No | How to sort the result | `title`, `title_reversed`, `date_added`, `date_added_reversed` |
-	| query | Yes | The search term | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| sort_by | No | string | How to sort the result | `title`, `title_reversed`, `date_added`, `date_added_reversed` |
+	| query | Yes | string | The search term | N/A |
 
 	**Returns**
 	
@@ -638,12 +638,12 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 
 	**Parameters (body)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| title | No | The title of the entry | N/A |
-	| notification_services | No | Array of the id's of the notification services to use to send the notification | N/A |
-	| text | No | The body of the entry | N/A |
-	| color | No | The hex code of the color of the entry, which is shown in the web-ui | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| title | No | string | The title of the entry | N/A |
+	| notification_services | No | list of numbers | Array of the id's of the notification services to use to send the notification | N/A |
+	| text | No | string | The body of the entry | N/A |
+	| color | No | string | The hex code of the color of the entry, which is shown in the web-ui | N/A |
 
 	**Returns**
 	
@@ -725,18 +725,18 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 
 ??? PUT
 
-	Edit the admin settings
+	Edit the admin settings. Supplying a hosting setting will automatically restart MIND.
 
 	**Parameters (body)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| allow_new_accounts | No | Whether or not to allow users to register a new account. The admin can always add a new account. | N/A |
-	| login_time | No | How long a user stays logged in, in seconds. Between 1 min and 1 month (60 <= sec <= 2592000) | N/A |
-	| login_time_reset | No | If the Login Time timer should reset with each API request. | N/A |
-	| host | No | The IP to bind to. Use 0.0.0.0 to bind to all addresses. | N/A |
-	| port | No | The port to listen on. | N/A |
-	| url_prefix | No | The base url to run on. Useful for reverse proxies. Empty string to disable. | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| allow_new_accounts | No | bool | Whether or not to allow users to register a new account. The admin can always add a new account. | N/A |
+	| login_time | No | number | How long a user stays logged in, in seconds. Between 1 min and 1 month (60 <= sec <= 2592000) | N/A |
+	| login_time_reset | No | bool | If the Login Time timer should reset with each API request. | N/A |
+	| host | No | string | The IP to bind to. Use 0.0.0.0 to bind to all addresses. | N/A |
+	| port | No | number | The port to listen on. | N/A |
+	| url_prefix | No | string | The base url to run on. Useful for reverse proxies. Empty string to disable. | N/A |
 
 	**Returns**
 	
@@ -767,10 +767,10 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 
 	**Parameters (body)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| username | Yes | The username of the user account | N/A |
-	| password | Yes | The password of the user account | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| username | Yes | string | The username of the user account | N/A |
+	| password | Yes | string | The password of the user account | N/A |
 
 	**Returns**
 	
@@ -780,7 +780,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 	| 400 | UsernameInvalid | The username contains invalid characters |
 	| 400 | UsernameTaken | The username is already taken |
-	| 403 | NewAccountsNotAllowed | It's not allowed to create a new account |
+	| 403 | NewAccountsNotAllowed | It's not allowed to create a new account except for the admin |
 
 ### `/admin/users/<int:u_id>`
 
@@ -796,9 +796,9 @@ Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
 
 	**Parameters (body)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| new_password | Yes | The new password of the user account | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| new_password | Yes | string | The new password of the user account | N/A |
 
 	**Returns**
 	
@@ -835,19 +835,19 @@ Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
 
 ??? POST
 
-	Upload and apply a database file
+	Upload and apply a database file. Will automatically restart MIND.
 
 	**Parameters (url)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| copy_hosting_settings | Yes | Copy the hosting settings from the current database | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| copy_hosting_settings | Yes | bool | Copy the hosting settings from the current database | N/A |
 
 	**Parameters (file)**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
-	| file | Yes | The MIND database file | N/A |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| file | Yes | N/A | The MIND database file | N/A |
 
 	**Returns**
 	
