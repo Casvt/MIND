@@ -4,10 +4,12 @@
 Getting and setting settings
 """
 
+from json import dumps, loads
 from typing import Any
 
 from backend.custom_exceptions import InvalidKeyValue, KeyNotFound
 from backend.db import __DATABASE_VERSION__, get_db
+from backend.helpers import folder_path
 
 default_settings = {
 	'allow_new_accounts': True,
@@ -143,6 +145,25 @@ def set_setting(key: str, value: Any) -> None:
 		"UPDATE config SET value = ? WHERE key = ?;",
 		(value, key)
 	)
+
+	if key == 'url_prefix':
+		update_manifest(value)
+
+	return
+
+def update_manifest(url_base: str) -> None:
+	"""Update the url's in the manifest file.
+	Needs to happen when url base changes.
+
+	Args:
+		url_base (str): The url base to use in the file.
+	"""
+	with open(folder_path('frontend', 'static', 'json', 'manifest.json'), 'r+') as f:
+		manifest = loads(f.read())
+		manifest['start_url'] = url_base + '/'
+		manifest['icons'][0]['src'] = f'{url_base}/static/img/favicon.svg'
+		f.seek(0)
+		f.write(dumps(manifest, indent=4))
 	return
 
 def backup_hosting_settings() -> None:
