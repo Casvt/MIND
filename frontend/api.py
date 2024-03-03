@@ -29,7 +29,7 @@ from backend.server import SERVER
 from backend.settings import (backup_hosting_settings, get_admin_settings,
                               get_setting, set_setting)
 from backend.users import Users
-from frontend.input_validation import (AllowNewAccountsVariable, ColorVariable,
+from frontend.input_validation import (AllowNewAccountsVariable, ColorVariable, CopyHostingSettingsVariable,
                                        DatabaseFileVariable,
                                        EditNotificationServicesVariable,
                                        EditTimeVariable, EditTitleVariable,
@@ -792,7 +792,7 @@ def api_admin_user(inputs: Dict[str, Any], u_id: int):
 			description="Download the database file"
 		),
 		post=Method(
-			vars=[DatabaseFileVariable],
+			vars=[DatabaseFileVariable, CopyHostingSettingsVariable],
 			description="Upload and apply a database file"
 		)
 	),
@@ -822,5 +822,5 @@ def api_admin_database(inputs: Dict[str, Any]):
 		), 200
 
 	elif request.method == "POST":
-		import_db(inputs['file'])
+		import_db(inputs['file'], inputs['copy_hosting_settings'])
 		return return_api({})

@@ -19,6 +19,7 @@ const user_inputs = {
 
 const import_inputs = {
 	file: document.querySelector('#database-file-input'),
+	copy_hosting: document.querySelector('#copy-hosting-input'),
 	button: document.querySelector('#upload-db-button')
 };
 
@@ -226,9 +227,10 @@ function loadUsers() {
 
 function upload_database() {
 	import_inputs.button.innerText = 'Importing';
+	const copy_hosting = import_inputs.copy_hosting.checked ? 'true' : 'false';
 	const formData = new FormData();
 	formData.append('file', import_inputs.file.files[0]);
-	fetch(`${url_prefix}/api/admin/database?api_key=${api_key}`, {
+	fetch(`${url_prefix}/api/admin/database?api_key=${api_key}&copy_hosting_settings=${copy_hosting}`, {
 		method: 'POST',
 		body: formData
 	})

@@ -426,6 +426,19 @@ class DatabaseFileVariable(BaseInputVariable):
 			return False
 
 
+class CopyHostingSettingsVariable(BaseInputVariable):
+	name = 'copy_hosting_settings'
+	description = 'Copy the hosting settings from the current database'
+	source = DataSource.VALUES
+
+	def validate(self) -> bool:
+		if not self.value in ('true', 'false'):
+			return False
+
+		self.value = self.value == 'true'
+		return True
+
+
 def input_validation() -> Union[None, Dict[str, Any]]:
 	"""Checks, extracts and transforms inputs
 

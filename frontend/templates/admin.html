@@ -83,14 +83,14 @@
 								<td><label for="host-input">Host</label></td>
 								<td>
 									<input type="text" id="host-input" required>
-									<p>Valid IPv4 address (default is '0.0.0.0' for all available interfaces)</p>
+									<p>Valid IPv4 address (default is '0.0.0.0' for all available interfaces).</p>
 								</td>
 							</tr>
 							<tr>
 								<td><label for="port-input">Port</label></td>
 								<td>
 									<input type="number" id="port-input" min="1" max="65535" required>
-									<p>The port used to access the web UI (default is '8080')</p>
+									<p>The port used to access the web UI (default is '8080').</p>
 								</td>
 							</tr>
 							<tr>
@@ -156,14 +156,26 @@
 				<button id="download-db-button">Download Database</button>
 			</div>
 			<form id="upload-database-form">
-				<div class="database-container">
-					<input type="file" id="database-file-input" required>
-					<button type="submit" id="upload-db-button">Import Database</button>
+				<div class="settings-table-container">
+					<table class="settings-table">
+						<tbody>
+							<tr>
+								<td><label for="database-file-input">Database File</label></td>
+								<td><input type="file" id="database-file-input" required></td>
+							</tr>
+							<tr>
+								<td><label for="copy-hosting-input">Keep Hosting Settings</label></td>
+								<td>
+									<input type="checkbox" id="copy-hosting-input">
+									<p>Keep the current hosting settings instead of using the settings in the uploaded database.</p>
+								</td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
+				<button type="submit" id="upload-db-button">Import Database</button>
 				<p>Restore a backup.</p>
-				<br>
 				<p>Note: The uploaded file can be denied if it is not a valid database file, is too old or is for a newer version than this MIND instance.</p>
-				<br>
 				<p>IMPORTANT: After uploading the backup, it is required to log into the admin panel within 1 minute (60 seconds) in order to keep the new database file. Otherwise, MIND will revert the upload and go back to the old database.</p>
 			</form>
 			<h2>Power</h2>

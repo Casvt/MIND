@@ -425,16 +425,21 @@ def revert_db_import(
 
 	return
 
-def import_db(new_db_file: str) -> None:
+def import_db(
+	new_db_file: str,
+	copy_hosting_settings: bool
+) -> None:
 	"""Replace the current database with a new one.
 
 	Args:
 		new_db_file (str): The path to the new database file.
+		copy_hosting_settings (bool): Keep the hosting settings from the current
+		database.
 
 	Raises:
 		InvalidDatabaseFile: The new database file is invalid or unsupported.
 	"""
-	logging.info(f'Importing new database')
+	logging.info(f'Importing new database; {copy_hosting_settings=}')
 	try:
 		cursor = Connection(new_db_file, timeout=20.0).cursor()
 
@@ -446,14 +451,12 @@ def import_db(new_db_file: str) -> None:
 
 	except (OperationalError, InvalidDatabaseFile):
 		logging.error('Uploaded database is not a MIND database file')
+		cursor.connection.close()
 		revert_db_import(
 			swap=False,
 			imported_db_file=new_db_file
 		)
 		raise InvalidDatabaseFile
-
-	finally:
-		cursor.connection.close()
 
 	if database_version > __DATABASE_VERSION__:
 		logging.error('Uploaded database is higher version than this MIND installation can support')
@@ -462,6 +465,28 @@ def import_db(new_db_file: str) -> None:
 			imported_db_file=new_db_file
 		)
 		raise InvalidDatabaseFile
+
+	if copy_hosting_settings:
+		hosting_settings = get_db().execute("""
+			SELECT key, value, value
+			FROM config
+			WHERE key = 'host'
+				OR key = 'port'
+				OR key = 'url_prefix'
+			LIMIT 3;
+			"""
+		)
+		cursor.executemany("""
+			INSERT INTO config(key, value)
+			VALUES (?, ?)
+			ON CONFLICT(key) DO
+			UPDATE
+			SET value = ?;
+			""",
+			hosting_settings
+		)
+	cursor.connection.commit()
+	cursor.connection.close()
 
 	move(
 		DBConnection.file,

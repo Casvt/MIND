@@ -234,8 +234,15 @@ h2 {
 	padding: .25rem;
 }
 
+#upload-database-form {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
+}
+
 #hosting-form > p,
-#upload-database-form p {
+#upload-database-form > p {
 	max-width: 50rem;
 	margin-inline: auto;
 	text-align: center;
