@@ -4,21 +4,27 @@
 Getting and setting settings
 """
 
+import logging
 from json import dumps, loads
 from typing import Any
 
 from backend.custom_exceptions import InvalidKeyValue, KeyNotFound
 from backend.db import __DATABASE_VERSION__, get_db
 from backend.helpers import folder_path
+from backend.logging import set_log_level
 
 default_settings = {
 	'allow_new_accounts': True,
 	'login_time': 3600,
 	'login_time_reset': True,
+
 	'database_version': __DATABASE_VERSION__,
+
 	'host': '0.0.0.0',
 	'port': 8080,
-	'url_prefix': ''
+	'url_prefix': '',
+
+	'log_level': logging.INFO
 }
 
 def _format_setting(key: str, value):
@@ -63,6 +69,9 @@ def _format_setting(key: str, value):
 
 		if value:
 			value = '/' + value.strip('/')
+
+	elif key == 'log_level' and not value in (logging.INFO, logging.DEBUG):
+		raise InvalidKeyValue(key, value)
 
 	return value
 
@@ -120,7 +129,8 @@ def get_admin_settings() -> dict:
 				OR key = 'login_time_reset'
 				OR key = 'host'
 				OR key = 'port'
-				OR key = 'url_prefix';
+				OR key = 'url_prefix'
+				OR key = 'log_level';
 			"""
 		)
 	))
@@ -148,6 +158,9 @@ def set_setting(key: str, value: Any) -> None:
 
 	if key == 'url_prefix':
 		update_manifest(value)
+
+	elif key == 'log_level':
+		set_log_level(value)
 
 	return
 

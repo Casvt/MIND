@@ -19,6 +19,7 @@ from flask import g
 from backend.custom_exceptions import (AccessUnauthorized, InvalidDatabaseFile,
                                        UserNotFound)
 from backend.helpers import RestartVars, folder_path
+from backend.logging import set_log_level
 
 DB_FILENAME = 'db', 'MIND.db'
 __DATABASE_VERSION__ = 10
@@ -392,6 +393,8 @@ def setup_db() -> None:
 			default_settings.items()
 		)
 	)
+
+	set_log_level(get_setting('log_level'))
 
 	current_db_version = get_setting('database_version')
 	if current_db_version < __DATABASE_VERSION__:

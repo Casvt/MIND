@@ -10,6 +10,7 @@ from sys import argv
 
 from backend.db import setup_db, setup_db_location
 from backend.helpers import check_python_version
+from backend.logging import setup_logging
 from backend.reminders import ReminderHandler
 from backend.server import SERVER, handle_flags
 from backend.settings import get_setting
@@ -24,17 +25,10 @@ PORT = '8080'
 URL_PREFIX = '' # Must either be empty or start with '/' e.g. '/mind' 
 #=============================
 
-LOGGING_LEVEL = logging.INFO
-
-logging.basicConfig(
-	level=LOGGING_LEVEL,
-	format='[%(asctime)s][%(threadName)s][%(levelname)s] %(message)s',
-	datefmt='%Y-%m-%d %H:%M:%S'
-)
-
 def MIND() -> None:
 	"""The main function of MIND
 	"""
+	setup_logging()
 	logging.info('Starting up MIND')
 
 	if not check_python_version():

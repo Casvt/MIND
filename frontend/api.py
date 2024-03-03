@@ -36,8 +36,8 @@ from frontend.input_validation import (AllowNewAccountsVariable, ColorVariable,
                                        EditTimeVariable, EditTitleVariable,
                                        EditURLVariable, HostVariable,
                                        LoginTimeResetVariable,
-                                       LoginTimeVariable, Method, Methods,
-                                       NewPasswordVariable,
+                                       LoginTimeVariable, LogLevelVariable,
+                                       Method, Methods, NewPasswordVariable,
                                        NotificationServicesVariable,
                                        PasswordCreateVariable,
                                        PasswordVariable, PortVariable,
@@ -705,7 +705,7 @@ def api_settings():
 		put=Method(
 			vars=[AllowNewAccountsVariable, LoginTimeVariable,
 				LoginTimeResetVariable, HostVariable, PortVariable,
-				UrlPrefixVariable],
+				UrlPrefixVariable, LogLevelVariable],
 			description='Edit the admin settings. Supplying a hosting setting will automatically restart MIND.'
 		)
 	),

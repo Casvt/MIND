@@ -1,7 +1,8 @@
 const setting_inputs = {
 	allow_new_accounts: document.querySelector('#allow-new-accounts-input'),
 	login_time: document.querySelector('#login-time-input'),
-	login_time_reset: document.querySelector('#login-time-reset-input')
+	login_time_reset: document.querySelector('#login-time-reset-input'),
+	log_level: document.querySelector('#log-level-input')
 };
 
 const hosting_inputs = {
@@ -53,6 +54,7 @@ function loadSettings() {
 		setting_inputs.allow_new_accounts.checked = json.result.allow_new_accounts;
 		setting_inputs.login_time.value = Math.round(json.result.login_time / 60);
 		setting_inputs.login_time_reset.value = json.result.login_time_reset.toString();
+		setting_inputs.log_level.value = json.result.log_level;
 		hosting_inputs.host.value = json.result.host;
 		hosting_inputs.port.value = json.result.port;
 		hosting_inputs.url_prefix.value = json.result.url_prefix;
@@ -63,7 +65,8 @@ function submitSettings() {
 	const data = {
 		'allow_new_accounts': setting_inputs.allow_new_accounts.checked,
 		'login_time': setting_inputs.login_time.value * 60,
-		'login_time_reset': setting_inputs.login_time_reset.value === 'true'
+		'login_time_reset': setting_inputs.login_time_reset.value === 'true',
+		'log_level': parseInt(setting_inputs.log_level.value)
 	};
 	fetch(`${url_prefix}/api/admin/settings?api_key=${api_key}`, {
 		'method': 'PUT',

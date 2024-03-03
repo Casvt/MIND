@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+import logging
 from os.path import splitext
 from re import compile
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Type, Union
@@ -368,6 +369,14 @@ class WeekDaysVariable(NonRequiredVersion, BaseInputVariable):
 			and all(v in self._options for v in self.value)
 		)
 
+	def __repr__(self) -> str:
+		return '| {n} | {r} | {t} | {d} | {v} |'.format(
+			n=self.name,
+			r="Yes" if self.required else "No",
+			t=",".join(self.data_type),
+			d=self.description,
+			v=", ".join(f'`{o}`' for o in self._options)
+		)
 
 class ColorVariable(NonRequiredVersion, BaseInputVariable):
 	name = 'color'
@@ -430,6 +439,22 @@ class PortVariable(NonRequiredVersion, AdminSettingsVariable):
 class UrlPrefixVariable(NonRequiredVersion, AdminSettingsVariable):
 	name = 'url_prefix'
 	description = 'The base url to run on. Useful for reverse proxies. Empty string to disable.'
+
+
+class LogLevelVariable(NonRequiredVersion, AdminSettingsVariable):
+	name = 'log_level'
+	description = 'The level to log on.'
+	data_type = [DataType.INT]
+	_options = [logging.INFO, logging.DEBUG]
+
+	def __repr__(self) -> str:
+		return '| {n} | {r} | {t} | {d} | {v} |'.format(
+			n=self.name,
+			r="Yes" if self.required else "No",
+			t=",".join(self.data_type),
+			d=self.description,
+			v=", ".join(f'`{o}`' for o in self._options)
+		)
 
 
 class DatabaseFileVariable(BaseInputVariable):
