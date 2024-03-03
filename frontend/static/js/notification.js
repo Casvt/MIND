@@ -172,6 +172,10 @@ function deleteService(id) {
 			const delete_button = row.querySelector('button[title="Delete"]');
 			delete_button.classList.add('error-icon');
 			delete_button.title = `The notification service is still in use by a ${e.result.type}`;
+			setTimeout(
+				() => alert(`The notification service is still in use by a ${e.result.type}`),
+				10
+			);
 		} else
 			console.log(e);
 	});

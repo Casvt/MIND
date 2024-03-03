@@ -245,7 +245,10 @@ function upload_database() {
 		if (e === 400) {
 			import_inputs.file.value = '';
 			import_inputs.button.innerText = 'Import Database';
-			alert('Invalid database file');
+			setTimeout(
+				() => alert('Invalid database file'),
+				10
+			);
 		 } else
 			console.log(e);
 	});
