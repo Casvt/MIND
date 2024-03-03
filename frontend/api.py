@@ -9,7 +9,7 @@ from io import BytesIO
 from os import remove, urandom
 from os.path import basename
 from time import time as epoch_time
-from typing import TYPE_CHECKING, Any, Callable, Dict, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple
 
 from flask import g, request, send_file
 
@@ -29,7 +29,8 @@ from backend.server import SERVER
 from backend.settings import (backup_hosting_settings, get_admin_settings,
                               get_setting, set_setting)
 from backend.users import Users
-from frontend.input_validation import (AllowNewAccountsVariable, ColorVariable, CopyHostingSettingsVariable,
+from frontend.input_validation import (AllowNewAccountsVariable, ColorVariable,
+                                       CopyHostingSettingsVariable,
                                        DatabaseFileVariable,
                                        EditNotificationServicesVariable,
                                        EditTimeVariable, EditTitleVariable,
@@ -66,7 +67,11 @@ class ApiKeyEntry:
 users = Users()
 api_key_map: Dict[int, ApiKeyEntry] = {}
 
-def return_api(result: Any, error: str=None, code: int=200) -> Tuple[dict, int]:
+def return_api(
+	result: Any,
+	error: Optional[str] = None,
+	code: int = 200
+) -> Tuple[dict, int]:
 	return {'error': error, 'result': result}, code
 
 def auth() -> None:

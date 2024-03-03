@@ -96,7 +96,7 @@ class KeyNotFound(Exception):
 
 class InvalidKeyValue(Exception):
 	"""The value of a key is invalid"""	
-	def __init__(self, key: str='', value: str=''):
+	def __init__(self, key: str = '', value: Any = ''):
 		self.key = key
 		self.value = value
 		super().__init__(self.key)

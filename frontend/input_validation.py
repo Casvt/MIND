@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from os.path import splitext
 from re import compile
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Type, Union
 
 from apprise import Apprise
 from flask import Blueprint, request
@@ -41,14 +41,14 @@ class DataSource:
 	FILES = 3
 
 	def __init__(self, request: Request) -> None:
-		self.map = {
+		self.map: Dict[int, dict] = {
 			self.DATA: request.get_json() if request.data else {},
 			self.VALUES: request.values,
 			self.FILES: request.files
 		}
 		return
 
-	def __getitem__(self, key: DataSource) -> dict:
+	def __getitem__(self, key: int) -> dict:
 		return self.map[key]
 
 
@@ -61,7 +61,7 @@ class InputVariable(ABC):
 
 	@property
 	@abstractmethod
-	def name() -> str:
+	def name(self) -> str:
 		pass
 
 	@abstractmethod
@@ -70,34 +70,34 @@ class InputVariable(ABC):
 
 	@property
 	@abstractmethod
-	def required() -> bool:
+	def required(self) -> bool:
 		pass
 
 	@property
 	@abstractmethod
-	def default() -> Any:
+	def default(self) -> Any:
 		pass
 
 	@property
 	@abstractmethod
-	def source() -> int:
+	def source(self) -> int:
 		pass
 
 	@property
 	@abstractmethod
-	def description() -> str:
+	def description(self) -> str:
 		pass
 
 	@property
 	@abstractmethod
-	def related_exceptions() -> List[Exception]:
+	def related_exceptions(self) -> List[Exception]:
 		pass
 
 
 @dataclass(frozen=True)
 class Method:
 	description: str = ''
-	vars: List[InputVariable] = field(default_factory=list)
+	vars: List[Type[InputVariable]] = field(default_factory=list)
 	
 	def __bool__(self) -> bool:
 		return self.vars != []

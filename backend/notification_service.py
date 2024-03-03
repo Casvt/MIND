@@ -2,7 +2,7 @@
 
 import logging
 from re import compile
-from typing import Dict, List, Union
+from typing import Dict, List, Optional, Union
 
 from apprise import Apprise
 
@@ -19,7 +19,7 @@ def process_regex(regex: Union[List[str], None]) -> Union[None, List[str]]:
 		lambda r: [remove_named_groups.sub('', r[0]), r[1]]
 	)
 
-def _sort_tokens(t: dict) -> int:
+def _sort_tokens(t: dict) -> List[int]:
 	result = [
 		int(not t['required'])
 	]
@@ -208,14 +208,14 @@ class NotificationService:
 		
 	def update(
 		self,
-		title: str = None,
-		url: str = None
+		title: Optional[str] = None,
+		url: Optional[str] = None
 	) -> dict:
 		"""Edit the notification service
 
 		Args:
-			title (str, optional): The new title of the service. Defaults to None.
-			url (str, optional): The new url of the service. Defaults to None.
+			title (Optional[str], optional): The new title of the service. Defaults to None.
+			url (Optional[str], optional): The new url of the service. Defaults to None.
 
 		Returns:
 			dict: The new info about the service

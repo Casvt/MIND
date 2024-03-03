@@ -1,10 +1,12 @@
 #-*- coding: utf-8 -*-
 
+from __future__ import annotations
+
 import logging
 from datetime import datetime
 from sqlite3 import IntegrityError
 from threading import Timer
-from typing import List, Literal, Union
+from typing import TYPE_CHECKING, Callable, List, Optional, Tuple, Union
 
 from apprise import Apprise
 from dateutil.relativedelta import relativedelta
@@ -14,7 +16,11 @@ from backend.custom_exceptions import (InvalidKeyValue, InvalidTime,
                                        NotificationServiceNotFound,
                                        ReminderNotFound)
 from backend.db import get_db
-from backend.helpers import RepeatQuantity, Singleton, SortingMethod, search_filter, when_not_none
+from backend.helpers import (RepeatQuantity, Singleton, SortingMethod,
+                             search_filter, when_not_none)
+
+if TYPE_CHECKING:
+	from flask.ctx import AppContext
 
 
 def __next_selected_day(
@@ -74,7 +80,7 @@ def _find_next_time(
 		while new_time <= current_time:
 			new_time += td
 
-	else:
+	elif weekdays is not None:
 		# We run the loop contents at least once and then actually use the cond.
 		# This is because we need to force the 'free' date to go to one of the
 		# selected weekdays.
@@ -557,11 +563,11 @@ class Reminders:
 		else:
 			original_time = None
 
-		weekdays = when_not_none(
+		weekdays_str = when_not_none(
 			weekdays,
 			lambda w: ",".join(map(str, sorted(w)))
 		)
-		repeat_quantity = when_not_none(
+		repeat_quantity_str = when_not_none(
 			repeat_quantity,
 			lambda q: q.value
 		)
@@ -584,9 +590,9 @@ class Reminders:
 				self.user_id,
 				title, text,
 				time,
-				repeat_quantity,
+				repeat_quantity_str,
 				repeat_interval,
-				weekdays,
+				weekdays_str,
 				original_time,
 				color
 		)).lastrowid
@@ -657,11 +663,15 @@ class ReminderHandler(metaclass=Singleton):
 	
 	Note: Singleton.
 	"""	
-	def __init__(self, context) -> None:
+	def __init__(
+		self,
+		context: Callable[[], AppContext]
+	) -> None:
 		"""Create instance of handler.
 
 		Args:
-			context (AppContext): `Flask.app_context`
+			context (Optional[AppContext], optional): `Flask.app_context`.
+				Defaults to None.
 		"""
 		self.context = context
 		self.thread: Union[Timer, None] = None
@@ -738,26 +748,26 @@ class ReminderHandler(metaclass=Singleton):
 				self.find_next_reminder()
 			return
 
-	def find_next_reminder(self, time: int=None) -> None:
+	def find_next_reminder(self, time: Optional[int] = None) -> None:
 		"""Determine when the soonest reminder is and set the timer to that time
 
 		Args:
-			time (int, optional): The timestamp to check for.
+			time (Optional[int], optional): The timestamp to check for.
 			Otherwise check soonest in database.
 				Defaults to None.
 		"""
-		if not time:
+		if time is None:
 			with self.context():
-				time = get_db().execute("""
+				soonest_time: Union[Tuple[int], None] = get_db().execute("""
 					SELECT DISTINCT r1.time
 					FROM reminders r1
 					LEFT JOIN reminders r2
 					ON r1.time > r2.time
 					WHERE r2.id IS NULL;
 				""").fetchone()
-				if time is None:
+				if soonest_time is None:
 					return
-				time = time[0]
+				time = soonest_time[0]
 
 		if (
 			self.thread is None

@@ -2,7 +2,7 @@
 
 import logging
 from sqlite3 import IntegrityError
-from typing import List, Union
+from typing import List, Optional, Union
 
 from apprise import Apprise
 
@@ -258,7 +258,7 @@ class StaticReminders:
 		title: str,
 		notification_services: List[int],
 		text: str = '',
-		color: str = None
+		color: Optional[str] = None
 	) -> StaticReminder:
 		"""Add a static reminder
 
@@ -271,7 +271,7 @@ class StaticReminders:
 			text (str, optional): The body of the reminder.
 				Defaults to ''.
 
-			color (str, optional): The hex code of the color of the template,
+			color (Optional[str], optional): The hex code of the color of the template,
 			which is shown in the web-ui.
 				Defaults to None.
 

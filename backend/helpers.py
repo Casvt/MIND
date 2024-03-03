@@ -54,12 +54,12 @@ def search_filter(query: str, result: dict) -> bool:
 	)
 
 
-def when_not_none(value: T, to_run: Callable[[T], U]) -> Union[U, None]:
+def when_not_none(value: Union[T, None], to_run: Callable[[T], U]) -> Union[U, None]:
 	"""Run `to_run` with argument `value` iff `value is not None`. Else return
 	`None`.
 
 	Args:
-		value (T): The value to check.
+		value (Union[T, None]): The value to check.
 		to_run (Callable[[T], U]): The function to run.
 
 	Returns:
