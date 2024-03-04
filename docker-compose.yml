@@ -1,11 +1,14 @@
-version: '3.3'
+version: "3.3"
 services:
     mind:
         container_name: mind
+        image: mrcas/mind:latest
         volumes:
-            - 'mind-db:/app/db'
+            - "mind-db:/app/db"
         environment:
             - TZ=Europe/Amsterdam
         ports:
-            - '8080:8080'
-        image: 'mrcas/mind:latest'
+            - 8080:8080
+
+volumes:
+    mind-db:
