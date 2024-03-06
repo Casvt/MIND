@@ -720,7 +720,7 @@ def api_admin_settings(inputs: Dict[str, Any]):
 
 	elif request.method == 'PUT':
 		LOGGER.info(f'Submitting admin settings: {inputs}')
-		
+
 		hosting_changes = any(
 			inputs[s] is not None 
 			for s in ('host', 'port', 'url_prefix')

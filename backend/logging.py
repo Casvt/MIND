@@ -115,6 +115,9 @@ def set_log_level(
 		clear_file (bool, optional): Empty the debug logging file.
 			Defaults to True.
 	"""
+	if LOGGER.level == level:
+		return
+
 	LOGGER.debug(f'Setting logging level: {level}')
 	LOGGER.setLevel(level)
 
