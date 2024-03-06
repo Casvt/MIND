@@ -18,7 +18,7 @@ MIND can be used for sending notifications at the desired time. This can be a se
 
 - Fine control over repetition: single time, time interval, certain weekdays or manual trigger.
 
-- Uses the [apprise library](https://github.com/caronc/apprise), giving you 80+ platforms to send notifications to and the option to send to multiple platforms for each reminder
+- Uses the [Apprise library](https://github.com/caronc/apprise), giving you 80+ platforms to send notifications to and the option to send to multiple platforms for each reminder
 
 - Easily manage the reminders with sorting options, search ability and color coding
 
@@ -32,7 +32,7 @@ MIND can be used for sending notifications at the desired time. This can be a se
 
 ## Installation, support and documentation
 
-- For instructions on how to install MIND, see the [installation documentation](https://casvt.github.io/MIND/installation/)
+- For instructions on how to install MIND, see the [installation documentation](https://casvt.github.io/MIND/installation/installation)
 
 - For support, a [discord server](https://discord.gg/nMNdgG7vsE) is available or [make an issue](https://github.com/Casvt/MIND/issues)
 

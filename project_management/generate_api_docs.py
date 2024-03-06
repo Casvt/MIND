@@ -16,6 +16,7 @@ from frontend.api import (NotificationServiceNotFound, ReminderNotFound,
 from frontend.input_validation import DataSource, api_docs
 
 api_prefix = SERVER.api_prefix
+api_file = folder_path('docs', 'other_docs', 'api.md')
 
 url_var_map = {
 	'int:n_id': NotificationServiceNotFound,
@@ -133,18 +134,18 @@ Replace `<{url_var}>` with the ID of the entry. For example: `{rule.replace(f'<{
 
 	result += '\n'
 
-with open(folder_path('docs', 'api.md'), 'r') as f:
+with open(api_file, 'r') as f:
 	current_content = f.read()
 
 if current_content == result:
 	print('Nothing changed')
 else:
-	with open(folder_path('docs', 'api.md'), 'w+') as f:
+	with open(api_file, 'w+') as f:
 		f.write(result)
 
 	run(["git", "config", "--global", "user.email", '"casvantijn@gmail.com"'])
 	run(["git", "config", "--global", "user.name", '"CasVT"'])
 	run(["git", "checkout", "Development"])
-	run(["git", "add", folder_path('docs', 'api.md')])
+	run(["git", "add", api_file])
 	run(["git", "commit", "-m", "Updated API docs"])
 	run(["git", "push"])

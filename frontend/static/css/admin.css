@@ -2,6 +2,10 @@ main {
 	position: relative;
 }
 
+main a {
+	color: var(--color-light);
+}
+
 .action-buttons {
 	--spacing: .5rem;
 
