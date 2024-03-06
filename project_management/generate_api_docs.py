@@ -16,6 +16,7 @@ from frontend.api import (NotificationServiceNotFound, ReminderNotFound,
 from frontend.input_validation import DataSource, api_docs
 
 api_prefix = SERVER.api_prefix
+admin_prefix = SERVER.admin_prefix
 api_file = folder_path('docs', 'other_docs', 'api.md')
 
 url_var_map = {
@@ -55,9 +56,11 @@ curl -sSL 'http://192.168.2.15:8080{api_prefix}/reminders?api_key=ABCDEFG'
 
 ## Supplying data
 
-Often, data needs to be supplied with a request.
-If the parameters need to be supplied via `url`, add them to the url as url parameters.
-If the parameters need to be supplied via `body`, add them to the body as a json object and supply the `Content-Type: application/json` header.
+Often, data needs to be supplied with a request:
+
+- If the parameters need to be supplied via `url`, add them to the url as url parameters.
+- If the parameters need to be supplied via `body`, add them to the body as a json object and supply the `Content-Type: application/json` header.
+- If the parameters need to be supplied via `file`, send them as form data values and supply the `Content-Type: multipart/form-data` header.
 
 For example:
 ```bash
@@ -69,6 +72,13 @@ curl -sSLX POST \\
 	-H 'Content-Type: application/json' \\
 	-d '{{"title": "Test service", "url": "test://fake/url"}}' \\
 	'http://192.168.2.15:8080{api_prefix}/notificationservices?api_key=ABCDEFG'
+
+# File parameter
+curl -sSLX POST \\
+	-H 'Content-Type: multipart/form-data' \\
+	-F file=@/backups/MIND_backup.db \\
+	'http://192.168.2.15:8080{admin_prefix}/database?api_key=ABCDEFG'
+
 ```
 
 ## Endpoints
@@ -143,9 +153,9 @@ else:
 	with open(api_file, 'w+') as f:
 		f.write(result)
 
-	run(["git", "config", "--global", "user.email", '"casvantijn@gmail.com"'])
-	run(["git", "config", "--global", "user.name", '"CasVT"'])
-	run(["git", "checkout", "Development"])
-	run(["git", "add", api_file])
-	run(["git", "commit", "-m", "Updated API docs"])
-	run(["git", "push"])
+	# run(["git", "config", "--global", "user.email", '"casvantijn@gmail.com"'])
+	# run(["git", "config", "--global", "user.name", '"CasVT"'])
+	# run(["git", "checkout", "Development"])
+	# run(["git", "add", api_file])
+	# run(["git", "commit", "-m", "Updated API docs"])
+	# run(["git", "push"])
