@@ -1,4 +1,4 @@
-apprise>=1.4.5
-python-dateutil>=2.8.2
-Flask>=3.0.1
-waitress>=2.1.2
+apprise~=1.4
+python-dateutil~=2.8
+Flask~=3.0
+waitress~=2.1
