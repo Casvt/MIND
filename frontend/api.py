@@ -33,6 +33,7 @@ from backend.users import Users
 from frontend.input_validation import (AllowNewAccountsVariable, ColorVariable,
                                        CopyHostingSettingsVariable,
                                        DatabaseFileVariable,
+                                       DeleteRemindersUsingVariable,
                                        EditNotificationServicesVariable,
                                        EditTimeVariable, EditTitleVariable,
                                        EditURLVariable, HostVariable,
@@ -333,6 +334,7 @@ def api_test_service(inputs: Dict[str, Any]):
 			description='Edit the notification service'
 		),
 		delete=Method(
+			vars=[DeleteRemindersUsingVariable],
 			description='Delete the notification service'
 		)
 	),
@@ -355,7 +357,9 @@ def api_notification_service(inputs: Dict[str, str], n_id: int):
 		return return_api(result)
 
 	elif request.method == 'DELETE':
-		service.delete()
+		service.delete(
+			inputs['delete_reminders_using']
+		)
 		return return_api({})
 
 #===================

@@ -153,9 +153,9 @@ function saveService(id) {
 	});
 };
 
-function deleteService(id) {
+function deleteService(id, delete_reminders_using=false) {
 	const row = document.querySelector(`tr[data-id="${id}"]`);
-	fetch(`${url_prefix}/api/notificationservices/${id}?api_key=${api_key}`, {
+	fetch(`${url_prefix}/api/notificationservices/${id}?api_key=${api_key}&delete_reminders_using=${delete_reminders_using}`, {
 		'method': 'DELETE'
 	})
 	.then(response => response.json())
@@ -164,18 +164,25 @@ function deleteService(id) {
 		
 		row.remove();
 		fillNotificationServices();
+		if (delete_reminders_using) {
+			fillLibrary(Types.reminder);
+			fillLibrary(Types.static_reminder);
+			fillLibrary(Types.template);
+		};
 	})
 	.catch(e => {
 		if (e.error === 'ApiKeyExpired' || e.error === 'ApiKeyInvalid')
 			window.location.href = `${url_prefix}/`;
+
 		else if (e.error === 'NotificationServiceInUse') {
-			const delete_button = row.querySelector('button[title="Delete"]');
-			delete_button.classList.add('error-icon');
-			delete_button.title = `The notification service is still in use by a ${e.result.type}`;
-			setTimeout(
-				() => alert(`The notification service is still in use by a ${e.result.type}`),
-				10
+			const delete_reminders = confirm(
+				`The notification service is still in use by a ${e.result.type}. Do you want to delete all ${e.result.type}s that are using the notification service?`
 			);
+			
+			if (delete_reminders)
+				deleteService(id, delete_reminders_using=true);
+			return;
+
 		} else
 			console.log(e);
 	});

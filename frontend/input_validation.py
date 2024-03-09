@@ -383,7 +383,6 @@ class ColorVariable(NonRequiredVersion, BaseInputVariable):
 	description = 'The hex code of the color of the entry, which is shown in the web-ui'
 
 	def validate(self) -> bool:
-		super()
 		return self.value is None or (
 			isinstance(self.value, str)
 			and color_regex.search(self.value)
@@ -394,6 +393,26 @@ class QueryVariable(BaseInputVariable):
 	name = 'query'
 	description = 'The search term'
 	source = DataSource.VALUES
+
+
+class DeleteRemindersUsingVariable(NonRequiredVersion, BaseInputVariable):
+	name = 'delete_reminders_using'
+	description = 'Instead of throwing an error when there are still reminders using the service, delete the reminders.'
+	source = DataSource.VALUES
+	default = 'false'
+	data_type = [DataType.BOOL]
+
+	def validate(self) -> bool:
+		if self.value == 'true':
+			self.value = True
+			return True
+
+		elif self.value == 'false':
+			self.value = False
+			return True
+
+		else:
+			return False
 
 
 class AdminSettingsVariable(BaseInputVariable):

@@ -247,53 +247,86 @@ class NotificationService:
 
 		return self.get()
 		
-	def delete(self) -> None:
-		"""Delete the service
+	def delete(
+		self,
+		delete_reminders_using: bool = False
+	) -> None:
+		"""Delete the service.
+
+		Args:
+			delete_reminders_using (bool, optional): Instead of throwing an
+			error when there are still reminders using the service, delete
+			the reminders.
+				Defaults to False.
 
 		Raises:
-			NotificationServiceInUse: The service is still used by a reminder
-		"""	
+			NotificationServiceInUse: The service is still used by a reminder.
+		"""
 		LOGGER.info(f'Deleting notification service {self.id}')
-		
-		# Check if no reminders exist with this service
-		cursor = get_db()
-		cursor.execute("""
-			SELECT 1
-			FROM reminder_services
-			WHERE notification_service_id = ?
-				AND reminder_id IS NOT NULL
-			LIMIT 1;
-			""",
-			(self.id,)
-		)
-		if cursor.fetchone():
-			raise NotificationServiceInUse('reminder')
-			
-		# Check if no templates exist with this service
-		cursor.execute("""
-			SELECT 1
-			FROM reminder_services
-			WHERE notification_service_id = ?
-				AND template_id IS NOT NULL
-			LIMIT 1;
-			""",
-			(self.id,)
-		)
-		if cursor.fetchone():
-			raise NotificationServiceInUse('template')
 
-		# Check if no static reminders exist with this service
-		cursor.execute("""
-			SELECT 1
-			FROM reminder_services
-			WHERE notification_service_id = ?
-				AND static_reminder_id IS NOT NULL
-			LIMIT 1;
-			""",
-			(self.id,)
-		)
-		if cursor.fetchone():
-			raise NotificationServiceInUse('static reminder')
+		cursor = get_db()
+		if not delete_reminders_using:
+			# Check if no reminders exist with this service
+			cursor.execute("""
+				SELECT 1
+				FROM reminder_services
+				WHERE notification_service_id = ?
+					AND reminder_id IS NOT NULL
+				LIMIT 1;
+				""",
+				(self.id,)
+			)
+			if cursor.fetchone():
+				raise NotificationServiceInUse('reminder')
+				
+			# Check if no templates exist with this service
+			cursor.execute("""
+				SELECT 1
+				FROM reminder_services
+				WHERE notification_service_id = ?
+					AND template_id IS NOT NULL
+				LIMIT 1;
+				""",
+				(self.id,)
+			)
+			if cursor.fetchone():
+				raise NotificationServiceInUse('template')
+
+			# Check if no static reminders exist with this service
+			cursor.execute("""
+				SELECT 1
+				FROM reminder_services
+				WHERE notification_service_id = ?
+					AND static_reminder_id IS NOT NULL
+				LIMIT 1;
+				""",
+				(self.id,)
+			)
+			if cursor.fetchone():
+				raise NotificationServiceInUse('static reminder')
+
+		else:
+			cursor.execute("""
+				DELETE FROM reminders
+				WHERE id IN (
+					SELECT reminder_id AS id FROM reminder_services
+					WHERE notification_service_id = ?
+				);
+			""", (self.id,))
+			cursor.execute("""
+				DELETE FROM static_reminders
+				WHERE id IN (
+					SELECT static_reminder_id AS id FROM reminder_services
+					WHERE notification_service_id = ?
+				);
+			""", (self.id,))
+			cursor.execute("""
+				DELETE FROM templates
+				WHERE id IN (
+					SELECT template_id AS id FROM reminder_services
+					WHERE notification_service_id = ?
+				);
+			""", (self.id,))
 
 		cursor.execute(
 			"DELETE FROM notification_services WHERE id = ?",
