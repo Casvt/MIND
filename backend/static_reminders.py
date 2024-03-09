@@ -352,5 +352,5 @@ class StaticReminders:
 		)
 		for url in cursor:
 			a.add(url['url'])
-		a.notify(title=reminder['title'], body=reminder['text'])
+		a.notify(title=reminder['title'], body=reminder['text'] or '\u200B')
 		return

@@ -654,7 +654,7 @@ class Reminders:
 				raise NotificationServiceNotFound
 			a.add(url[0])
 
-		a.notify(title=title, body=text)
+		a.notify(title=title, body=text or '\u200B')
 		return
 
 
@@ -717,7 +717,7 @@ class ReminderHandler(metaclass=Singleton):
 				a = Apprise()
 				for url in cursor:
 					a.add(url['url'])
-				a.notify(title=reminder["title"], body=reminder["text"])
+				a.notify(title=reminder["title"], body=reminder["text"] or '\u200B')
 
 				self.thread = None
 				self.time = None
