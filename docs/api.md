@@ -258,11 +258,18 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 
 	Delete the notification service
 
+	**Parameters (url)**
+
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| delete_reminders_using | No | bool | Instead of throwing an error when there are still reminders using the service, delete the reminders. | N/A |
+
 	**Returns**
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
+	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 404 | NotificationServiceNotFound | The notification service was not found |
 
 ### `/reminders`
