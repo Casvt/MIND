@@ -171,7 +171,7 @@ def update_manifest(url_base: str) -> None:
 	Args:
 		url_base (str): The url base to use in the file.
 	"""
-	with open(folder_path('frontend', 'static', 'json', 'manifest.json'), 'r+') as f:
+	with open(folder_path('frontend', 'static', 'json', 'pwa_manifest.json'), 'r+') as f:
 		manifest = loads(f.read())
 		manifest['start_url'] = url_base + '/'
 		manifest['icons'][0]['src'] = f'{url_base}/static/img/favicon.svg'
