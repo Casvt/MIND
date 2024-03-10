@@ -304,7 +304,7 @@ def setup_db() -> None:
 	"""Setup the database
 	"""
 	from backend.settings import (_format_setting, default_settings, get_setting,
-	                              set_setting)
+	                              set_setting, update_manifest)
 	from backend.users import Users
 
 	cursor = get_db()
@@ -393,6 +393,7 @@ def setup_db() -> None:
 	)
 
 	set_log_level(get_setting('log_level'), clear_file=False)
+	update_manifest(get_setting('url_prefix'))
 
 	current_db_version = get_setting('database_version')
 	if current_db_version < __DATABASE_VERSION__:
