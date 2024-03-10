@@ -1,39 +1,57 @@
-const sorting_options = {};
-sorting_options[types.reminder.id] = [
-	['time', 'Time'],
-	['time_reversed', 'Time Reversed'],
-	['title', 'Title'],
-	['title_reversed', 'Title Reversed'],
-	['date_added', 'Date Added'],
-	['date_added_reversed', 'Date Added Reversed']
-];
-sorting_options[types.static_reminder.id] = [
-	['title', 'Title'],
-	['title_reversed', 'Title Reversed'],
-	['date_added', 'Date Added'],
-	['date_added_reversed', 'Date Added Reversed']
-];
-sorting_options[types.template.id] = [
-	['title', 'Title'],
-	['title_reversed', 'Title Reversed'],
-	['date_added', 'Date Added'],
-	['date_added_reversed', 'Date Added Reversed']
-];
+const NavButtons = {
+	home: document.querySelector('#home-button'),
+	notification_services: document.querySelector('#notification-services-button'),
+	settings: document.querySelector('#settings-button'),
+	log_out: document.querySelector('#logout-button')
+};
 
-function showTab(button) {
-	// Apply styling to selected button
-	document.querySelectorAll('.tab-selector > button').forEach(
-		b => b.dataset.selected = b === button ? 'true' : 'false'
-	);
+const LibEls = {
+	tab_selector: document.querySelector('.tab-selector'),
+	tab_container: document.querySelector('.tab-container'),
+	search_bar: {
+		form: document.querySelector('#search-form'),
+		input: document.querySelector('#search-input'),
+		clear: document.querySelector('#clear-button'),
+		sort: document.querySelector('#sort-input'),
+		wide: document.querySelector('#wide-button')
+	}
+};
 
-	// Show desired tab and hide all others
-	document.querySelectorAll('#home > div:not(.tab-selector):not(.search-container)').forEach(
-		e => e.classList.add('hidden')
-	);
-	document.getElementById(button.dataset.target).classList.remove('hidden');
-	
-	fillSortOptions();
-	document.querySelector('#search-input').value = '';
+//
+// Helpers
+//
+function getSorting(type, key=false) {
+	let sorting_key;
+	if (type === Types.reminder)
+		sorting_key = 'sorting_reminders';
+	else if (type === Types.static_reminder)
+		sorting_key = 'sorting_static';
+	else if (type === Types.template)
+		sorting_key = 'sorting_templates';
+
+	if (key)
+		return sorting_key;
+	else
+		return getLocalStorage(sorting_key)[sorting_key];
+};
+
+function getWeekDays(locale) {
+	const baseDate = new Date(Date.UTC(2017, 0, 2)); // just a Monday
+	const weekDays = [];
+	for (i = 0; i < 7; i++)
+	{
+		weekDays.push(baseDate.toLocaleDateString(locale, { weekday: 'short' }));
+		baseDate.setDate(baseDate.getDate() + 1);
+	}
+	return weekDays;
+};
+
+function getActiveTab() {
+	for (let t of Object.values(Types)) {
+		if (getComputedStyle(t).display === 'flex')
+			return t
+	};
+	return null;
 };
 
 // 
@@ -53,21 +71,23 @@ function getWeekDays(locale)
 const week_days = getWeekDays(getLocalStorage('locale')['locale']);
 
 function fillTable(table, results) {
-	table.querySelectorAll('button.entry:not(.add-entry)').forEach(e => e.remove());
+	table.querySelectorAll('button.entry:not(.add-entry)').forEach(
+		e => e.remove()
+	);
 
 	results.forEach(r => {
 		const entry = document.createElement('button');
 		entry.classList.add('entry');
 		entry.dataset.id = r.id;
-		entry.addEventListener('click', e => showEdit(r.id, table));
+		entry.onclick = e => showEdit(r.id, table);
 		if (r.color !== null)
 			entry.style.setProperty('--color', r.color);
-		
+
 		const title = document.createElement('h2');
 		title.innerText = r.title;
 		entry.appendChild(title);
 
-		if (table === types.reminder) {
+		if (table === Types.reminder) {
 			const time = document.createElement('p');
 			let offset = new Date(r.time * 1000).getTimezoneOffset() * -60;
 			let d = new Date((r.time + offset) * 1000);
@@ -83,160 +103,99 @@ function fillTable(table, results) {
 				formatted_date += interval_text;
 
 			} else if (r.weekdays !== null)
+<<<<<<< HEAD
 				formatted_date += ` (each ${r.weekdays.split(',').map(d => week_days[parseInt(d)]).join(', ')})`;
+=======
+				formatted_date += ` (each ${r.weekdays.map(d => week_days[d]).join(', ')})`;
+>>>>>>> Development
 
 			time.innerText = formatted_date;
 			entry.appendChild(time);
 		};
-		
+
 		table.appendChild(entry);
-		
-		if (title.clientHeight < title.scrollHeight)
-			entry.classList.add('expand');
 	});
-	table.querySelectorAll('button.entry:not(.add-entry)').forEach(r => r.classList.add('fit'));
+	evaluateSizing();
 };
 
-function fillLibrary(url, type) {
-	fetch(url)
-	.then(response => {
-		if (!response.ok) return Promise.reject(response.status);
-		return response.json();
-	})
-	.then(json => fillTable(type, json.result))
-	.catch(e => {
-		if (e === 401)
-			window.location.href = `${url_prefix}/`;
-		else
-			console.log(e);
-	});
-};
+function fillLibrary(type=null) {
+	let tab_type = type || getActiveTab();
 
-function fillReminders() {
-	const sorting = document.querySelector('#sort-input').value;
-	fillLibrary(`/api/reminders?api_key=${api_key}&sort_by=${sorting}`, types.reminder);
-};
-
-function fillStaticReminders(assume_sorting=false) {
-	let sorting;
-	if (assume_sorting)
-		sorting = sorting_options[types.static_reminder.id][0][0];
-	else
-		sorting = document.querySelector('#sort-input').value;
-	fillLibrary(`/api/staticreminders?api_key=${api_key}&sort_by=${sorting}`, types.static_reminder);
-}
-
-function fillTemplates(assume_sorting=false) {
-	let sorting;
-	if (assume_sorting)
-		sorting = sorting_options[types.template.id][0][0];
-	else
-		sorting = document.querySelector('#sort-input').value;
-	fillLibrary(`/api/templates?api_key=${api_key}&sort_by=${sorting}`, types.template);
-};
-
-// 
-// Library search
-// 
-function searchLibrary() {
-	const query = document.querySelector('#search-input').value,
-		tab = document.getElementById(
-			document.querySelector('.tab-selector > button[data-selected="true"]').dataset.target
-		)
-	const sorting = document.querySelector('#sort-input').value;
 	let url;
-	if (tab === types.reminder)
-		url = `${url_prefix}/api/reminders/search?api_key=${api_key}&query=${query}&sort_by=${sorting}`;
-	else if (tab === types.static_reminder)
-		url = `${url_prefix}/api/staticreminders/search?api_key=${api_key}&query=${query}&sort_by=${sorting}`;
-	else if (tab === types.template)
-		url = `${url_prefix}/api/templates/search?api_key=${api_key}&query=${query}&sort_by=${sorting}`;
-	else return;
-
-	fillLibrary(url, tab);
-};
-
-function clearSearchLibrary() {
-	document.querySelector('#search-input').value = '';
-	const tab = document.getElementById(
-		document.querySelector('.tab-selector > button[data-selected="true"]').dataset.target
-	)
-	if (tab === types.reminder)
-		fillReminders();
-	else if (tab === types.static_reminder)
-		fillStaticReminders();
-	else if (tab === types.template)
-		fillTemplates();
-	else return;
-};
-
-// 
-// Library sort
-// 
-function fillSortOptions() {
-	const tab = document.getElementById(
-		document.querySelector('.tab-selector > button[data-selected="true"]').dataset.target
-	)
-	const sort_options = sorting_options[tab.id];
-	
-	const select = document.getElementById('sort-input');
-	select.innerHTML = '';
-	sort_options.forEach(o => {
-		const entry = document.createElement('option');
-		entry.value = o[0]
-		entry.innerText = o[1]
-		select.appendChild(entry);
-	});
-	select.querySelector(':first-child').setAttribute('selected', '');
-};
-
-function applySorting() {
-	const query = document.querySelector('#search-input').value;
-	if (query !== '') {
-		searchLibrary();
+	if (tab_type === Types.reminder)
+		url = `${url_prefix}/api/reminders`;
+	else if (tab_type === Types.static_reminder)
+		url = `${url_prefix}/api/staticreminders`;
+	else if (tab_type === Types.template)
+		url = `${url_prefix}/api/templates`;
+	else
 		return;
-	};
 
-	const sorting = document.getElementById('sort-input').value,
-		tab = document.getElementById(
-			document.querySelector('.tab-selector > button[data-selected="true"]').dataset.target
-		)
-
-	let url;
-	if (tab === types.reminder)
-		url = `${url_prefix}/api/reminders?api_key=${api_key}&sort_by=${sorting}`;
-	else if (tab === types.static_reminder)
-		url = `${url_prefix}/api/staticreminders?api_key=${api_key}&sort_by=${sorting}`;
-	else if (tab === types.template)
-		url = `${url_prefix}/api/templates?api_key=${api_key}&sort_by=${sorting}`;
-	else return;
+	const sorting = getSorting(tab_type);
+	const query = LibEls.search_bar.input.value;
+	if (query)
+		url = `${url}/search?api_key=${api_key}&sort_by=${sorting}&query=${query}`;
+	else
+		url = `${url}?api_key=${api_key}&sort_by=${sorting}`;
 
 	fetch(url)
 	.then(response => {
 		if (!response.ok) return Promise.reject(response.status);
 		return response.json();
 	})
-	.then(json => fillTable(tab, json.result))
+	.then(json => fillTable(tab_type, json.result))
 	.catch(e => {
 		if (e === 401)
 			window.location.href = `${url_prefix}/`;
 		else
 			console.log(e);
 	});
+};
+
+function saveSorting() {
+	const type = getActiveTab();
+	const sorting_key = getSorting(type, key=true);
+	const value = LibEls.search_bar.sort.value;
+	setLocalStorage({[sorting_key]: value});
+};
+
+function evaluateSizing() {
+	const tab = getActiveTab();
+	const entries = [...tab.querySelectorAll('button:not(.add-entry)')];
+	entries.forEach(e => e.classList.remove('fit'));
+	entries.forEach(e => {
+		const title = e.querySelector('h2');
+		if (title.clientHeight < title.scrollHeight)
+			e.classList.add('expand');
+	});
+	entries.forEach(e => e.classList.add('fit'));
 };
 
 // code run on load
 
-document.querySelectorAll('.tab-selector > button').forEach(b => {
-	b.addEventListener('click', e => showTab(b));
+Object.values(Types).forEach(t => fillLibrary(t));
+setInterval(() => fillLibrary(Types.reminder), 60000);
+
+const week_days = getWeekDays(getLocalStorage('locale')['locale']);
+
+NavButtons.home.onclick = e => showWindow("home");
+NavButtons.notification_services.onclick = e => showWindow("notification");
+NavButtons.settings.onclick = e => showWindow("settings");
+NavButtons.log_out.onclick = e => logout();
+
+LibEls.search_bar.form.action = 'javascript:fillLibrary();'
+LibEls.search_bar.sort.value = getSorting(getActiveTab());
+LibEls.search_bar.sort.onchange = e => {
+	saveSorting();
+	fillLibrary();
+};
+LibEls.search_bar.clear.onclick = e => {
+	LibEls.search_bar.input.value = '';
+	fillLibrary();
+};
+
+LibEls.tab_selector.querySelectorAll('input').forEach(r => r.onchange = e => {
+	evaluateSizing();
+	LibEls.search_bar.input.value = '';
+	LibEls.search_bar.sort.value = getSorting(getActiveTab());
 });
-
-fillSortOptions();
-fillReminders();
-fillStaticReminders(assume_sorting=true);
-fillTemplates(assume_sorting=true);
-setInterval(fillReminders, 60000);
-
-document.querySelector('#search-form').setAttribute('action', 'javascript:searchLibrary();');
-document.querySelector('#clear-button').addEventListener('click', e => clearSearchLibrary());
-document.querySelector('#sort-input').addEventListener('change', e => applySorting());

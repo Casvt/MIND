@@ -1,8 +1,10 @@
+/*  */
 /* SEARCH BAR */
+/*  */
 .search-container {
 	max-width: 40rem;
 	margin: auto;
-	
+
 	padding-block: clamp(1rem, 4vw, 2rem);
 }
 
@@ -12,24 +14,28 @@
 
 .search-bar {
 	display: flex;
-	
+
 	border: 2px solid var(--color-gray);
 	border-radius: 4px;
-	
+
 	box-shadow: var(--default-shadow);
 }
 
-.search-bar button {
-	width: 3.5rem;
-	padding: .8rem;
+.search-bar :where(button, label) {
+	width: clamp(2rem, 7.5vw, 3rem);
+	flex-shrink: 0;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
-.search-bar button svg {
-	width: 1rem;
+.search-bar :where(button, label) svg {
 	height: 1rem;
 }
 
 .search-bar input {
+	width: 100%;
 	border: 0;
 	padding-block: 1rem;
 	box-shadow: none;
@@ -37,7 +43,7 @@
 
 #clear-button {
 	opacity: 0;
-	
+
 	transition: opacity .1s linear;
 }
 
@@ -46,26 +52,44 @@
 }
 
 #sort-input {
-	width: min-content;
+	width: clamp(6rem, 25vw, 12rem);
 	border: 0;
 	box-shadow: none;
 }
 
+.window-container:has(
+	:where(#static-tab-selector, #template-tab-selector):checked
+) #sort-input > option:where(
+	[value="time"], [value="time_reversed"]
+) {
+	display: none;
+}
+
+/*  */
 /* REMINDER LIST */
-#reminder-tab,
-#static-reminder-tab,
-#template-tab {
+/*  */
+.tab-container > div {
 	--gap: 1rem;
 	--entry-width: 13rem;
 	max-width: 43rem;
 	margin-inline: auto;
 	
-	display: flex;
+	display: none;
 	justify-content: left;
 	gap: var(--gap);
 	flex-wrap: wrap;
 	
 	padding: 1rem;
+	
+	transition: max-width .75s ease-in-out;
+}
+
+body:has(#wide-toggle:checked) .tab-container > div {
+	max-width: 85rem;
+}
+
+#home {
+	overflow-y: auto;
 }
 
 .entry.add-entry {
@@ -122,9 +146,60 @@ button.entry.fit {
 	font-weight: 500;
 }
 
+/*  */
+/* Tab selector */
+/*  */
+.tab-selector {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 1rem;
+
+	padding-inline: 1rem;
+	padding-top: 1rem;
+}
+
+.tab-selector > input {
+	display: none;
+}
+
+.tab-selector > label {
+	min-width: 9.55rem;
+
+	padding: .5rem 1rem;
+	border-radius: 4px;
+	border: 2px solid var(--color-gray);
+	background-color: var(--color-dark);
+	color: var(--color-light);
+	
+	text-align: center;
+
+	transition: background-color .3s ease-in-out;
+}
+
+.tab-selector > input:checked + label {
+	background-color: var(--color-gray);
+}
+
+.window-container:has(#reminder-tab-selector:checked) #reminder-tab,
+.window-container:has(#static-tab-selector:checked) #static-reminder-tab,
+.window-container:has(#template-tab-selector:checked) #template-tab {
+	display: flex;
+}
+
 @media (max-width: 543px) {
 	header > div {
 		transform: translateX(0);
+	}
+	
+	.tab-selector > label {
+		flex: 1 0 25%;
+	}
+	
+	#wide-button {
+		display: none;
 	}
 
 	.entry {

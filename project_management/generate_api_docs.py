@@ -1,16 +1,23 @@
 #!/usr/bin/env python3
 #-*- coding: utf-8 -*-
 
-from sys import path
 from os.path import dirname
+from sys import path
 
 path.insert(0, dirname(path[0]))
 
 from subprocess import run
 from typing import Union
-from frontend.api import (DataSource, NotificationServiceNotFound,
-                          ReminderNotFound, TemplateNotFound, api_docs)
-from MIND import _folder_path, api_prefix
+
+from backend.helpers import folder_path
+from backend.server import SERVER
+from frontend.api import (NotificationServiceNotFound, ReminderNotFound,
+                          TemplateNotFound)
+from frontend.input_validation import DataSource, api_docs
+
+api_prefix = SERVER.api_prefix
+admin_prefix = SERVER.admin_prefix
+api_file = folder_path('docs', 'other_docs', 'api.md')
 
 url_var_map = {
 	'int:n_id': NotificationServiceNotFound,
@@ -18,6 +25,15 @@ url_var_map = {
 	'int:t_id': TemplateNotFound,
 	'int:s_id': ReminderNotFound
 }
+
+def make_exception_instance(cls: Exception) -> Exception:
+	try:
+		return cls()
+	except TypeError:
+		try:
+			return cls('1')
+		except TypeError:
+			return cls('1', '2')
 
 result = f"""# API
 Below is the API documentation. Report an issue on [GitHub](https://github.com/Casvt/MIND/issues).
@@ -30,7 +46,7 @@ Authentication is done using an API key.
 To log in, make a POST request to the [`{api_prefix}/auth/login`](#authlogin) endpoint.
 You'll receive an API key, which you can then use in your requests to authenticate.
 Supply it via the url parameter `api_key`.
-This API key is valid for one hour after which the key expires, any further requests return 401 'APIKeyExpired' and you are required to log in again.
+This API key is valid for one hour (though the admin can change this duration) after which the key expires, any further requests return 401 'APIKeyExpired' and you are required to log in again.
 If no `api_key` is supplied or it is invalid, 401 `APIKeyInvalid` is returned.
 
 For example:
@@ -40,9 +56,11 @@ curl -sSL 'http://192.168.2.15:8080{api_prefix}/reminders?api_key=ABCDEFG'
 
 ## Supplying data
 
-Often, data needs to be supplied with a request.
-If the parameters need to be supplied via `url`, add them to the url as url parameters.
-If the parameters need to be supplied via `body`, add them to the body as a json object and supply the `Content-Type: application/json` header.
+Often, data needs to be supplied with a request:
+
+- If the parameters need to be supplied via `url`, add them to the url as url parameters.
+- If the parameters need to be supplied via `body`, add them to the body as a json object and supply the `Content-Type: application/json` header.
+- If the parameters need to be supplied via `file`, send them as form data values and supply the `Content-Type: multipart/form-data` header.
 
 For example:
 ```bash
@@ -54,6 +72,13 @@ curl -sSLX POST \\
 	-H 'Content-Type: application/json' \\
 	-d '{{"title": "Test service", "url": "test://fake/url"}}' \\
 	'http://192.168.2.15:8080{api_prefix}/notificationservices?api_key=ABCDEFG'
+
+# File parameter
+curl -sSLX POST \\
+	-H 'Content-Type: multipart/form-data' \\
+	-F file=@/backups/MIND_backup.db \\
+	'http://192.168.2.15:8080{admin_prefix}/database?api_key=ABCDEFG'
+
 ```
 
 ## Endpoints
@@ -65,7 +90,7 @@ for rule, data in api_docs.items():
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| {'Yes' if data['requires_auth'] else 'No'} | {data['description']} | 
+| {'Yes' if data.requires_auth else 'No'} | {data.description} | 
 """
 
 	url_var = rule.replace('<', '>').split('>')
@@ -76,41 +101,41 @@ for rule, data in api_docs.items():
 Replace `<{url_var}>` with the ID of the entry. For example: `{rule.replace(f'<{url_var}>', '2')}`.
 """
 
-	for method in data['methods']:
-		result += f"\n??? {method}\n"
+	for m_name, method in ((m, data.methods[m]) for m in data.used_methods):
+		result += f"\n??? {m_name}\n"
 
-		if method in data['method_descriptions']:
-			result += f"\n	{data['method_descriptions'][method]}\n"
+		if method.description:
+			result += f"\n	{method.description}\n"
 
 		var_types = {
-			'url': list(var for var in data['input_variables'].get(method, []) if var.source == DataSource.VALUES),
-			'body': list(var for var in data['input_variables'].get(method, []) if var.source == DataSource.DATA)
+			'url': [v for v in method.vars if v.source == DataSource.VALUES],
+			'body': [v for v in method.vars if v.source == DataSource.DATA],
+			'file': [v for v in method.vars if v.source == DataSource.FILES]
 		}
-		
+
 		for var_type, entries in var_types.items():
 			if entries:
-				entries = [e('') for e in entries]
 				result += f"""
 	**Parameters ({var_type})**
 
-	| Name | Required | Description | Allowed values |
-	| ---- | -------- | ----------- | -------------- |
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
 """
 				for entry in entries:
-					result += f"	{entry}\n"
+					result += f"	{entry('')}\n"
 		
 		result += f"""
 	**Returns**
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| {201 if method == 'POST' else 200}| N/A | Success |
+	| {201 if m_name == 'POST' else 200} | N/A | Success |
 """
 
 		url_exception = [url_var_map[url_var]] if url_var in url_var_map else []
-		variable_exceptions = [e for v in data['input_variables'].get(method, []) for e in v.related_exceptions]
+		variable_exceptions = [e for v in method.vars for e in v.related_exceptions]
 		related_exceptions = sorted(
-			(e() for e in set(variable_exceptions + url_exception)),
+			(make_exception_instance(e) for e in set(variable_exceptions + url_exception)),
 			key=lambda e: (e.api_response['code'], e.api_response['error'])
 		)
 		for related_exception in related_exceptions:
@@ -119,18 +144,18 @@ Replace `<{url_var}>` with the ID of the entry. For example: `{rule.replace(f'<{
 
 	result += '\n'
 
-with open(_folder_path('docs', 'api.md'), 'r') as f:
+with open(api_file, 'r') as f:
 	current_content = f.read()
 
 if current_content == result:
 	print('Nothing changed')
 else:
-	with open(_folder_path('docs', 'api.md'), 'w+') as f:
+	with open(api_file, 'w+') as f:
 		f.write(result)
-	
-	run(["git", "config", "--global", "user.email", '"casvantijn@gmail.com"'])
-	run(["git", "config", "--global", "user.name", '"CasVT"'])
-	run(["git", "checkout", "Development"])
-	run(["git", "add", _folder_path('docs', 'api.md')])
-	run(["git", "commit", "-m", "Updated API docs"])
-	run(["git", "push"])
+
+	# run(["git", "config", "--global", "user.email", '"casvantijn@gmail.com"'])
+	# run(["git", "config", "--global", "user.name", '"CasVT"'])
+	# run(["git", "checkout", "Development"])
+	# run(["git", "add", api_file])
+	# run(["git", "commit", "-m", "Updated API docs"])
+	# run(["git", "push"])

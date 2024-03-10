@@ -14,6 +14,7 @@ h2 {
 
 p {
 	font-size: clamp(1rem, 4.2vw, 1.75rem);
+	text-align: center;
 }
 
 a {

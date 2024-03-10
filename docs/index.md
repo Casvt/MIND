@@ -1,38 +1,32 @@
-# MIND Docs
-
-[![Docker Pulls](https://img.shields.io/docker/pulls/mrcas/mind.svg)](https://hub.docker.com/r/mrcas/mind)
-[![GitHub Downloads](https://img.shields.io/github/downloads/Casvt/MIND/total.svg)](https://github.com/Casvt/MIND/releases)
+---
+description: The Official MIND Documentation Hub!
+hide:
+  - navigation
+---
+# MIND Documentation Hub
 
 __A simple self hosted reminder application that can send push notifications to your device. Set the reminder and forget about it!__
 
-Getting started:
+MIND can be used for sending notifications at the desired time. This can be a set time, like a yearly reminder for a birthday, or at a button click, to easily send a predefined notification when you want to. The notification can be sent to 80+ platforms with the integration of [Apprise](https://github.com/caronc/apprise).
 
-- [Installation](./installation.md)
-- [Setup After Installation](./setup_after_installation.md)
+## Quick Links
 
-General Information:
+### Getting Started
 
-- [API Docs](./api.md)
+- [Installation and Updating](./installation/installation.md)
+- [Setup after installation](./installation/setup_after_installation.md)
 
-## Workings
+### General Information
 
-MIND can be used for sending notifications at the desired time. This can be a set time, like a yearly reminder for a birthday, or at a button click, to easily send a predefined notification when you want to.
+- [How features work](./general_info/workings.md)
+- [API Documentation](./other_docs/api.md)
 
-## Features
+### Settings
 
-- Works cross-timezone
-- Notifications are sent with second-precision
-- Uses the [apprise library](https://github.com/caronc/apprise), giving you 80+ platforms to send notifications to
-- Easily manage the reminders with sorting options, search ability and color coding
-- Docker image available
-- Mobile friendly web-interface
-- API available
-
-### Planned Features
-
-You can see the planned features in the [Project board](https://github.com/users/Casvt/projects/3).
+- [Explanation of settings](./settings/settings.md)
 
 ## Contact
 
-- For support, a [discord server](https://discord.gg/nMNdgG7vsE) is available
-- Alternatively, [make an issue](https://github.com/Casvt/MIND/issues)
+- For support, a [Discord server](https://discord.gg/nMNdgG7vsE) is available.
+- For issues or feature suggestions, see the [Reporting page](./other_docs/reporting.md).
+- For donations, go to [Ko-Fi](https://ko-fi.com/casvt).

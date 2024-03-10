@@ -1,0 +1,16 @@
+{
+    "name": "MIND",
+    "short_name": "MIND",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#1b1b1b",
+    "theme_color": "#6b6b6b",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/static/img/favicon.svg",
+            "type": "image/svg+xml",
+            "sizes": "64x64 32x32 24x24 16x16"
+        }
+    ]
+}

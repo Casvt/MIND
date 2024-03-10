@@ -8,6 +8,7 @@
 
 :root {
 	--color-light: #ffffff;
+	--color-light-gray: #6b6b6b;
 	--color-gray: #3c3c3c;
 	--color-dark: #1b1b1b;
 
@@ -27,30 +28,32 @@ img {
 	width: 100%;
 }
 
-button {
+button,
+label {
 	border: 0;
 	border-radius: 4px;
 	background-color: var(--color-dark);
 	color: var(--color-light);
 }
 
-button:hover {
+button:hover,
+label:hover {
 	cursor: pointer;
 }
 
 input:not([type="checkbox"]),
 select,
-textarea {
-	width: 100%;
-	
+textarea,
+.as-button {
 	border: 2px solid var(--color-gray);
 	border-radius: 4px;
-	padding: .75rem;
+	padding: .6rem;
 	outline: 0;
-	box-shadow: var(--default-shadow);
 	background-color: var(--color-dark);
 	color: var(--color-light);
 	
+	box-shadow: var(--default-shadow);
+
 	font-size: 1rem;
 }
 
@@ -68,6 +71,21 @@ svg rect {
 	fill: var(--color-light);
 }
 
+::-webkit-scrollbar {
+	width: 12px;
+	height: 12px;
+	background-color: var(--color-dark);
+}
+
+::-webkit-scrollbar-thumb {
+	-webkit-border-radius: 6px;
+	background-color: var(--color-gray);
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background-color: var(--color-light-gray);
+}
+
 /*  */
 /* Utility classes */
 /*  */
@@ -75,17 +93,25 @@ svg rect {
 	display: none !important;
 }
 
-.error {
+.error,
+.error-container p {
 	color: var(--color-error) !important;
 	font-size: 1rem !important;
 }
 
+.error-container p {
+	display: block !important;
+}
+
 .error-icon path,
-.error-icon rect {
+.error-icon rect,
+.error-container path,
+.error-container rect {
 	fill: var(--color-error) !important;
 }
 
-.error-input {
+.error-input,
+.error-container input {
 	border: 2px solid var(--color-error) !important;
 }
 
@@ -172,11 +198,11 @@ header img {
 	padding-block: var(--rem-clamp);
 }
 
-.nav-divider.show-nav > nav {
+body:has(#nav-switch:checked) .nav-divider > nav {
 	left: var(--rem-clamp);
 }
 
-.nav-divider.show-nav > .window-container {
+body:has(#nav-switch:checked) .nav-divider > .window-container {
 	margin-left: calc(var(--nav-width) + var(--rem-clamp));
 }
 
@@ -236,70 +262,68 @@ nav > div > button svg {
 }
 
 /*  */
-/* Main window */
+/* Window management */
 /*  */
 .window-container {
 	margin-left: calc(4rem + var(--rem-clamp));
 	width: 100%;
-	
+
 	display: flex;
-	overflow-y: auto;
-	overflow-x: hidden;
-	
+	overflow: hidden;
+
 	transition: margin-left .3s ease-in-out;
 }
 
-.window-container > div {
+.window-container > :where(#home, .extra-window-container) {
 	width: 100%;
 	flex: 0 0 auto;
-	
-	transform: translateX(0);
 
-	transition: transform .5s ease-in-out;
+	translate: 0 0;
+	transition: translate .5s ease-in-out;
 }
 
-.window-container > div.show-window {
-	transform: translateX(-100%);
+.window-container.inter-window-ani > :where(#home, .extra-window-container) {
+	transition: translate .5s ease-in-out,
+				transform .5s ease-in-out;
 }
 
-.window-container > div:not(#home) {
+.extra-window-container {
+	--y-offset: 0%;
+	transform: translateY(var(--y-offset));
+}
+
+.extra-window-container > div {
+	height: 100%;
+	overflow-y: auto;
+}
+
+.window-container.show-window > :where(#home, .extra-window-container) {
+	translate: -100% 0;
+}
+
+.window-container.show-window > .extra-window-container {
+	transform: translateY(var(--y-offset));
+}
+
+/*  */
+/* Styling extra window */
+/*  */
+.extra-window-container > div {
 	padding: var(--rem-clamp);
 }
 
-.window-container > div:not(#home) > h2 {
+.extra-window-container > div > h2 {
 	text-align: center;
 	font-size: clamp(1.3rem, 5vw, 2rem);
 	margin-bottom: 2rem;
 }
 
-.window-container > div:not(#home) > h2:not(:first-of-type) {
+.extra-window-container > div > h2:not(:first-of-type) {
 	margin-top: 1.5rem;
 }
 
-.window-container > div:not(#home) > p {
+.extra-window-container > div > p {
 	text-align: center;
-}
-
-.tab-selector {
-	width: 100%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 1rem;
-
-	padding-inline: .5rem;
-	padding-top: 1rem;
-}
-
-.tab-selector > button {
-	border: 2px solid var(--color-gray);
-	padding: .5rem 1rem;
-	transition: background-color .3s ease-in-out;
-}
-
-.tab-selector > button[data-selected="true"] {
-	background-color: var(--color-gray);
 }
 
 @media (max-width: 543px) {

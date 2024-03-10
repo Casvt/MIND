@@ -1,65 +1,77 @@
 #-*- coding: utf-8 -*-
 
+"""
+Setting up and interacting with the database.
+"""
+
 from datetime import datetime
-import logging
-from sqlite3 import Connection, ProgrammingError, Row
+from os import makedirs, remove
+from os.path import dirname, isfile, join
+from shutil import move
+from sqlite3 import Connection, OperationalError, ProgrammingError, Row
 from threading import current_thread, main_thread
 from time import time
-from typing import Union
+from typing import Type, Union
 
 from flask import g
-from waitress.task import ThreadedTaskDispatcher as OldThreadedTaskDispatcher
 
-from backend.custom_exceptions import AccessUnauthorized, UserNotFound
+from backend.custom_exceptions import (AccessUnauthorized, InvalidDatabaseFile,
+                                       UserNotFound)
+from backend.helpers import RestartVars, folder_path
+from backend.logging import LOGGER, set_log_level
 
-__DATABASE_VERSION__ = 7
+DB_FILENAME = 'db', 'MIND.db'
+__DATABASE_VERSION__ = 10
+__DATEBASE_NAME_ORIGINAL__ = "MIND_original.db"
 
-class Singleton(type):
+class DB_Singleton(type):
 	_instances = {}
 	def __call__(cls, *args, **kwargs):
 		i = f'{cls}{current_thread()}'
 		if (i not in cls._instances
-      	or cls._instances[i].closed):
-			logging.debug(f'Creating singleton instance: {i}')
-			cls._instances[i] = super(Singleton, cls).__call__(*args, **kwargs)
+		or cls._instances[i].closed):
+			cls._instances[i] = super(DB_Singleton, cls).__call__(*args, **kwargs)
 
 		return cls._instances[i]
 
-class ThreadedTaskDispatcher(OldThreadedTaskDispatcher):
-	def handler_thread(self, thread_no: int) -> None:
-		super().handler_thread(thread_no)
-		i = f'{DBConnection}{current_thread()}'
-		if i in Singleton._instances and not Singleton._instances[i].closed:
-			logging.debug(f'Closing singleton instance: {i}')
-			Singleton._instances[i].close()
-			
-	def shutdown(self, cancel_pending: bool = True, timeout: int = 5) -> bool:
-		print()
-		logging.info('Shutting down MIND...')
-		super().shutdown(cancel_pending, timeout)
-		DBConnection(20.0).close()
-
-class DBConnection(Connection, metaclass=Singleton):
+class DBConnection(Connection, metaclass=DB_Singleton):
 	file = ''
-	
+
 	def __init__(self, timeout: float) -> None:
-		logging.debug(f'Opening database connection for {current_thread()}')
+		LOGGER.debug(f'Creating connection {self}')
 		super().__init__(self.file, timeout=timeout)
 		super().cursor().execute("PRAGMA foreign_keys = ON;")
 		self.closed = False
 		return
 
 	def close(self) -> None:
-		logging.debug(f'Closing database connection for {current_thread()}')
+		LOGGER.debug(f'Closing connection {self}')
 		self.closed = True
 		super().close()
 		return
 
-def get_db(output_type: Union[dict, tuple]=tuple):
+	def __repr__(self) -> str:
+		return f'<{self.__class__.__name__}; {current_thread().name}; {id(self)}>'
+
+def setup_db_location() -> None:
+	"""Create folder for database and link file to DBConnection class
+	"""
+	if isfile(folder_path('db', 'Noted.db')):
+		move(folder_path('db', 'Noted.db'), folder_path(*DB_FILENAME))
+
+	db_location = folder_path(*DB_FILENAME)
+	makedirs(dirname(db_location), exist_ok=True)
+
+	DBConnection.file = db_location
+	return
+
+def get_db(output_type: Union[Type[dict], Type[tuple]]=tuple):
 	"""Get a database cursor instance. Coupled to Flask's g.
 
 	Args:
-		output_type (Union[dict, tuple], optional): The type of output: a tuple or dictionary with the row values. Defaults to tuple.
+		output_type (Union[Type[dict], Type[tuple]], optional):
+		The type of output: a tuple or dictionary with the row values.
+			Defaults to tuple.
 
 	Returns:
 		Cursor: The Cursor instance to use
@@ -97,7 +109,7 @@ def migrate_db(current_db_version: int) -> None:
 	Migrate a MIND database from it's current version 
 	to the newest version supported by the MIND version installed.
 	"""
-	logging.info('Migrating database to newer version...')
+	LOGGER.info('Migrating database to newer version...')
 	cursor = get_db()
 	if current_db_version == 1:
 		# V1 -> V2
@@ -217,11 +229,84 @@ def migrate_db(current_db_version: int) -> None:
 		""")
 		current_db_version = 7
 
+	if current_db_version == 7:
+		# V7 -> V8
+		from backend.settings import _format_setting, default_settings
+		from backend.users import Users
+
+		cursor.executescript("""
+			DROP TABLE config;
+			CREATE TABLE IF NOT EXISTS config(
+				key VARCHAR(255) PRIMARY KEY,
+				value BLOB NOT NULL
+			);
+			"""
+		)
+		cursor.executemany("""
+			INSERT OR IGNORE INTO config(key, value)
+			VALUES (?, ?);
+			""",
+			map(
+				lambda kv: (kv[0], _format_setting(*kv)),
+				default_settings.items()
+			)
+		)
+
+		cursor.executescript("""
+			ALTER TABLE users
+			ADD admin BOOL NOT NULL DEFAULT 0;
+					   
+			UPDATE users
+			SET username = 'admin_old'
+			WHERE username = 'admin';
+		""")
+
+		Users().add('admin', 'admin', True)
+
+		cursor.execute("""
+			UPDATE users
+			SET admin = 1
+			WHERE username = 'admin';
+		""")
+
+		current_db_version = 8
+
+	if current_db_version == 8:
+		# V8 -> V9
+		from backend.settings import set_setting
+		from MIND import HOST, PORT, URL_PREFIX
+
+		set_setting('host', HOST)
+		set_setting('port', int(PORT))
+		set_setting('url_prefix', URL_PREFIX)
+
+		current_db_version = 9
+
+	if current_db_version == 9:
+		# V9 -> V10
+
+		# Nothing is changed in the database
+		# It's just that this code needs to run once
+		# and the DB migration system does exactly that:
+		# run pieces of code once.
+		from backend.settings import update_manifest
+
+		url_prefix: str = cursor.execute(
+			"SELECT value FROM config WHERE key = 'url_prefix' LIMIT 1;"
+		).fetchone()[0]
+		update_manifest(url_prefix)
+
+		current_db_version = 10
+
 	return
 
 def setup_db() -> None:
 	"""Setup the database
 	"""
+	from backend.settings import (_format_setting, default_settings, get_setting,
+	                              set_setting, update_manifest)
+	from backend.users import Users
+
 	cursor = get_db()
 	cursor.execute("PRAGMA journal_mode = wal;")
 
@@ -230,7 +315,8 @@ def setup_db() -> None:
 			id INTEGER PRIMARY KEY,
 			username VARCHAR(255) UNIQUE NOT NULL,
 			salt VARCHAR(40) NOT NULL,
-			hash VARCHAR(100) NOT NULL
+			hash VARCHAR(100) NOT NULL,
+			admin BOOL NOT NULL DEFAULT 0
 		);
 		CREATE TABLE IF NOT EXISTS notification_services(
 			id INTEGER PRIMARY KEY,
@@ -292,26 +378,144 @@ def setup_db() -> None:
 		);
 		CREATE TABLE IF NOT EXISTS config(
 			key VARCHAR(255) PRIMARY KEY,
-			value TEXT NOT NULL
+			value BLOB NOT NULL
 		);
 	""")
 
-	cursor.execute("""
+	cursor.executemany("""
 		INSERT OR IGNORE INTO config(key, value)
-		VALUES ('database_version', ?);
+		VALUES (?, ?);
 		""",
-		(__DATABASE_VERSION__,)
-	)
-	current_db_version = int(cursor.execute(
-		"SELECT value FROM config WHERE key = 'database_version' LIMIT 1;"
-	).fetchone()[0])
-	
-	logging.debug(f'Current database version {current_db_version} and desired database version {__DATABASE_VERSION__}')
-	if current_db_version < __DATABASE_VERSION__:
-		migrate_db(current_db_version)
-		cursor.execute(
-			"UPDATE config SET value = ? WHERE key = 'database_version';",
-			(__DATABASE_VERSION__,)
+		map(
+			lambda kv: (kv[0], _format_setting(*kv)),
+			default_settings.items()
 		)
+	)
+
+	set_log_level(get_setting('log_level'), clear_file=False)
+	update_manifest(get_setting('url_prefix'))
+
+	current_db_version = get_setting('database_version')
+	if current_db_version < __DATABASE_VERSION__:
+		LOGGER.debug(
+			f'Database migration: {current_db_version} -> {__DATABASE_VERSION__}'
+		)
+		migrate_db(current_db_version)
+		set_setting('database_version', __DATABASE_VERSION__)
+
+	users = Users()
+	if not 'admin' in users:
+		users.add('admin', 'admin', True)
+		cursor.execute("""
+			UPDATE users
+			SET admin = 1
+			WHERE username = 'admin';
+		""")
+
+	return
+
+def revert_db_import(
+	swap: bool,
+	imported_db_file: str = ''
+) -> None:
+	"""Revert the database import process. The original_db_file is the file
+	currently used (`DBConnection.file`).
+
+	Args:
+		swap (bool): Whether or not to keep the imported_db_file or not,
+		instead of the original_db_file.
+		imported_db_file (str, optional): The other database file. Keep empty
+		to use `__DATABASE_NAME_ORIGINAL__`. Defaults to ''.
+	"""
+	original_db_file = DBConnection.file
+	if not imported_db_file:
+		imported_db_file = join(dirname(DBConnection.file), __DATEBASE_NAME_ORIGINAL__)
+	
+	if swap:
+		remove(original_db_file)
+		move(
+			imported_db_file,
+			original_db_file
+		)
+
+	else:
+		remove(imported_db_file)
+
+	return
+
+def import_db(
+	new_db_file: str,
+	copy_hosting_settings: bool
+) -> None:
+	"""Replace the current database with a new one.
+
+	Args:
+		new_db_file (str): The path to the new database file.
+		copy_hosting_settings (bool): Keep the hosting settings from the current
+		database.
+
+	Raises:
+		InvalidDatabaseFile: The new database file is invalid or unsupported.
+	"""
+	LOGGER.info(f'Importing new database; {copy_hosting_settings=}')
+	try:
+		cursor = Connection(new_db_file, timeout=20.0).cursor()
+
+		database_version = cursor.execute(
+			"SELECT value FROM config WHERE key = 'database_version' LIMIT 1;"
+		).fetchone()[0]
+		if not isinstance(database_version, int):
+			raise InvalidDatabaseFile
+
+	except (OperationalError, InvalidDatabaseFile):
+		LOGGER.error('Uploaded database is not a MIND database file')
+		cursor.connection.close()
+		revert_db_import(
+			swap=False,
+			imported_db_file=new_db_file
+		)
+		raise InvalidDatabaseFile
+
+	if database_version > __DATABASE_VERSION__:
+		LOGGER.error('Uploaded database is higher version than this MIND installation can support')
+		revert_db_import(
+			swap=False,
+			imported_db_file=new_db_file
+		)
+		raise InvalidDatabaseFile
+
+	if copy_hosting_settings:
+		hosting_settings = get_db().execute("""
+			SELECT key, value, value
+			FROM config
+			WHERE key = 'host'
+				OR key = 'port'
+				OR key = 'url_prefix'
+			LIMIT 3;
+			"""
+		)
+		cursor.executemany("""
+			INSERT INTO config(key, value)
+			VALUES (?, ?)
+			ON CONFLICT(key) DO
+			UPDATE
+			SET value = ?;
+			""",
+			hosting_settings
+		)
+	cursor.connection.commit()
+	cursor.connection.close()
+
+	move(
+		DBConnection.file,
+		join(dirname(DBConnection.file), __DATEBASE_NAME_ORIGINAL__)
+	)
+	move(
+		new_db_file,
+		DBConnection.file
+	)
+
+	from backend.server import SERVER
+	SERVER.restart([RestartVars.DB_IMPORT.value])
 
 	return

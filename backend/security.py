@@ -1,5 +1,9 @@
 #-*- coding: utf-8 -*-
 
+"""
+Hashing and salting
+"""
+
 from base64 import urlsafe_b64encode
 from hashlib import pbkdf2_hmac
 from secrets import token_bytes
@@ -29,7 +33,6 @@ def generate_salt_hash(password: str) -> Tuple[bytes, bytes]:
 	Returns:
 		Tuple[bytes, bytes]: The salt (1) and hashed_password (2)
 	"""
-	# Hash the password
 	salt = token_bytes()
 	hashed_password = get_hash(salt, password)
 	del password

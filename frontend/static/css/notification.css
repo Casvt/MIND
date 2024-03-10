@@ -8,25 +8,40 @@
 }
 
 #add-service-button {
-	padding: .5rem 8rem;
+	width: min(100%, 17rem);
+	height: 2rem;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	border-radius: 4px;
 	background-color: var(--color-gray);
 }
 
 #add-service-button > svg {
 	height: 1rem;
 	width: 1rem;
+	transition: transform .125s linear;
+}
+
+.table-container:has(#service-list-toggle:checked) #add-service-button > svg {
+	transform: rotate(45deg);
 }
 
 .overflow-container {
 	margin-inline: auto;
-	width: 100%;
-	max-width: 50rem;
+	width: min(100%, 50rem);
 
 	overflow-x: auto;
 }
 
 .overflow-container > table {
 	border-spacing: 0px;
+}
+
+.overflow-container > table:not(:has(tbody > tr)) {
+	display: none;
 }
 
 .overflow-container > table th,
@@ -38,7 +53,7 @@
 	padding: .5rem;
 }
 
-#services-list > tr > td {
+.overflow-container td {
 	border-top: 1px solid var(--color-gray);
 	padding: .25rem;
 }
@@ -46,7 +61,7 @@
 .title-column {
 	min-width: 9.5rem;
 	width: 25%;
-	
+
 	padding-left: 1.5rem;
 	padding-right: 1rem;
 }
@@ -56,17 +71,18 @@
 	width: 65%;
 }
 
-#services-list input {
-	border-radius: 2px;
+.overflow-container table input {
+	width: 100%;
+	border-radius: 4px;
 	padding: .25rem;
 	box-shadow: none;
 }
 
-#services-list input:read-only {
+.overflow-container input:read-only {
 	border-color: transparent;
 }
 
-#services-list > tr > td.action-column {
+.overflow-container .action-column {
 	min-width: 4rem;
 	width: 20%;
 	
@@ -77,21 +93,163 @@
 	padding-right: 1.5rem;
 }
 
-.action-column svg {
-	width: 1rem;
-	height: 1rem;
+.action-column > button {
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 
-#services-list > tr:not(.edit) > td.action-column > button[data-type="edit"],
-#services-list > tr.edit > td.action-column > button[data-type="save"] {
-	display: inline-block;
+.overflow-container .action-column svg {
+	width: 1.25rem;
+	height: 1.25rem;
 }
 
-#services-list > tr.edit > td.action-column > button[data-type="edit"],
-#services-list > tr:not(.edit):not(#add-row) > td.action-column > button[data-type="save"] {
+tr:has(input:not(:read-only)) button[data-type="save"],
+tr:has(input:read-only) button[data-type="edit"] {
+	display: flex;
+}
+
+tr:has(input:not(:read-only)) button[data-type="edit"],
+tr:has(input:read-only) button[data-type="save"] {
 	display: none;
 }
 
+/*  */
+/* Add service */
+/*  */
+#add-service-container {
+	display: none;
+}
+
+.overflow-container:has(#service-list-toggle:checked) table {
+	display: none;
+}
+
+.overflow-container:has(#service-list-toggle:checked) #add-service-container {
+	display: block;
+}
+
+.overflow-container:has(#add-service-toggle:checked) #service-list {
+	display: none;
+}
+
+.overflow-container:has(#add-service-toggle:checked) #add-service-window {
+	display: flex;
+}
+
+#service-list {
+	display: flex;
+	gap: 1rem;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+#service-list button {
+	width: max(30%, 10rem);
+	height: 6rem;
+	
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	padding: .75rem;
+	border-radius: 4px;
+	border: 2px solid var(--color-gray);
+	
+	text-align: center;
+	font-size: 1.1rem;
+}
+
+/*  */
+/* Add service form */
+/*  */
+#add-service-window {
+	max-width: 30rem;
+	margin: auto;
+
+	display: none;
+	flex-direction: column;
+	justify-content: center;
+	gap: 1rem;
+	
+	text-align: center;
+}
+
+#add-service-window > h3 {
+	font-size: 1.75rem;
+}
+
+#add-service-window > p {
+	margin-bottom: calc((1rem + 2px) * -1);
+	
+	border: 2px solid var(--color-gray);
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	padding: .75rem 1rem;
+	color: var(--color-gray);
+
+	text-align: left;
+	
+	box-shadow: var(--default-shadow);
+}
+
+#add-service-window > button {
+	border-radius: 4px;
+	border: 2px solid var(--color-gray);
+	padding: .75rem;
+}
+
+#add-service-window > a,
+#add-service-window > p > a {
+	color: var(--color-light);
+}
+
+#add-service-window > div[data-map],
+#add-service-window > div[data-map] > .entries-list {
+	display: flex;
+	flex-direction: column;
+	gap: inherit;
+}
+
+#add-service-window > div[data-map] {
+	padding: .5rem;
+	border: 2px solid var(--color-gray);
+	border-radius: 4px;
+	box-shadow: var(--default-shadow);
+}
+
+#add-service-window > div[data-map] > p {
+	color: var(--color-gray);
+	font-size: 1.1rem;
+}
+
+.entries-list {
+	min-height: 5rem;
+	max-height: 15rem;
+	overflow-y: auto;
+
+	align-items: center;
+
+	background-color: var(--color-dark);
+	color: var(--color-light);
+	border: 2px solid var(--color-gray);
+	border-radius: 4px;
+	padding: .75rem;
+	box-shadow: var(--default-shadow);
+
+	font-size: 1rem;
+}
+
+.entries-list > p:first-child {
+	color: var(--color-gray);
+	font-size: 1.1rem;
+}
+
+.input-entries:not(:has(div)) {
+	display: none;
+}
+
+<<<<<<< HEAD
 /*  */
 /* Add service */
 /*  */
@@ -232,15 +390,32 @@
 	width: 80%;
 
 	display: flex;
+=======
+.add-row {
+	width: min(100%, 21rem);
+
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+>>>>>>> Development
 	gap: 1rem;
 }
 
 .add-row input {
 	flex-grow: 1;
+<<<<<<< HEAD
+=======
+	height: 2rem;
+	min-width: 0rem;
+>>>>>>> Development
 	font-size: .8rem;
 }
 
 .add-row button {
+<<<<<<< HEAD
+=======
+	height: 2rem;
+>>>>>>> Development
 	padding: .35rem .75rem;
 	background-color: var(--color-gray);
 	border-radius: 4px;
@@ -265,3 +440,12 @@
 	height: inherit;
 	fill: var(--color-dark);
 }
+<<<<<<< HEAD
+=======
+
+@media (max-width: 543px) {
+	#service-list button {
+		flex-grow: 1;
+	}
+}
+>>>>>>> Development
