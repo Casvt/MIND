@@ -258,11 +258,18 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 
 	Delete the notification service
 
+	**Parameters (url)**
+
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| delete_reminders_using | No | bool | Instead of throwing an error when there are still reminders using the service, delete the reminders. | N/A |
+
 	**Returns**
 	
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
+	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 404 | NotificationServiceNotFound | The notification service was not found |
 
 ### `/reminders`
@@ -872,4 +879,3 @@ Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
 	| 400 | InvalidDatabaseFile | The uploaded database file is invalid or not supported |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
-
