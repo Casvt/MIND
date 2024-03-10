@@ -5,6 +5,21 @@
 	--color-dark: #1b1b1b;
 }
 
+::-webkit-scrollbar {
+	width: 12px;
+	height: 12px;
+	background-color: var(--color-gray);
+}
+
+::-webkit-scrollbar-thumb {
+	-webkit-border-radius: 6px;
+	background-color: var(--color-dim-light);
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background-color: var(--color-light);
+}
+
 .md-typeset code {
 	border-radius: 6px;
 }
@@ -54,6 +69,9 @@
 	/* Hover color for mark and ToC */
 	--md-accent-fg-color: var(--color-gray);
 
+	/* BG color git link in mobile nav */
+	--md-primary-fg-color--dark: var(--color-gray);
+	
 	/* Code color */
 	--md-code-fg-color: var(--color-light);
 	/* Code background color */
@@ -117,8 +135,8 @@
 	color: var(--color-gray);
 }
 
-[data-md-color-scheme="MIND"] .tabbed-block {
-	--md-default-fg-color--light: var(--color-dark);
+[data-md-color-scheme="MIND"] [data-md-component="sidebar"][data-md-type="navigation"] nav > label {
+	background-color: var(--color-gray);
 }
 
 [data-md-color-scheme="MIND"] details {
@@ -157,6 +175,9 @@
 	
 	/* Hover color for mark and ToC */
 	--md-accent-fg-color: var(--color-dim-light);
+
+	/* BG color git link in mobile nav */
+	--md-primary-fg-color--dark: var(--color-gray);
 
 	/* Code color */
 	--md-code-fg-color: var(--color-light);
@@ -217,8 +238,8 @@
 	color: var(--color-dim-light);
 }
 
-[data-md-color-scheme="MIND-dark"] .tabbed-block {
-	--md-default-fg-color--light: var(--color-dark);
+[data-md-color-scheme="MIND-dark"] [data-md-component="sidebar"][data-md-type="navigation"] nav > label {
+	background-color: var(--color-dim-light);
 }
 
 [data-md-color-scheme="MIND-dark"] details {

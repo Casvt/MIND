@@ -810,7 +810,7 @@ def api_admin_user(inputs: Dict[str, Any], u_id: int):
 
 @admin_api.route(
 	'/database',
-	'Download the database',
+	'Download and upload the database',
 	Methods(
 		get=Method(
 			description="Download the database file"

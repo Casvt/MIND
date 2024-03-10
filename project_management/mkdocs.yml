@@ -46,6 +46,7 @@ theme:
 # Markdown extensions
 markdown_extensions:
   - abbr
+  - admonition
   - attr_list
   - meta
   - pymdownx.details
@@ -63,7 +64,7 @@ markdown_extensions:
   - sane_lists
   - toc:
       permalink: true
-      toc_depth: 5
+      toc_depth: 3
   - tables
 
 # mkdocs function extensions
@@ -77,9 +78,19 @@ plugins:
 # Navigation Layout
 nav:
   - Home: index.md
-  - Getting Started:
-    - Installation: installation.md
-    - Setup After Installation: setup_after_installation.md
+  - Installation And Updating:
+    - Introduction: installation/installation.md
+    - Docker: installation/docker.md
+    - Manual Instal: installation/manual_instal.md
+    - Setup After Installation: installation/setup_after_installation.md
+  - General Information:
+    - Introduction: general_info/workings.md
+    - Reminders: general_info/reminders.md
+    - Admin Panel: general_info/admin_panel.md
+  - Settings:
+    - Introduction: settings/settings.md
+    - User Settings: settings/user_settings.md
+    - Admin Settings: settings/admin_settings.md
   - Other Docs:
-    - API: api.md
-    - Backup Your Data: backup_your_data.md
+    - Reporting: other_docs/reporting.md
+    - API: other_docs/api.md
