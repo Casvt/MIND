@@ -229,9 +229,6 @@ class Reminder:
 			Either repeat_quantity and repeat_interval are given, weekdays is
 			given or neither, but not both.
 
-		Note about args:
-			Either repeat_quantity and repeat_interval are given, weekdays is given or neither, but not both.
-
 		Raises:
 			NotificationServiceNotFound: One of the notification services was not found.
 			InvalidKeyValue: The value of one of the keys is not valid or
@@ -512,9 +509,6 @@ class Reminders:
 		Note about args:
 			Either repeat_quantity and repeat_interval are given,
 			weekdays is given or neither, but not both.
-
-		Note about args:
-			Either repeat_quantity and repeat_interval are given, weekdays is given or neither, but not both.
 
 		Raises:
 			NotificationServiceNotFound: One of the notification services was not found.
