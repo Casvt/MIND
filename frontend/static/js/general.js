@@ -62,14 +62,10 @@ function logout() {
 const default_values = {
 	'api_key': null,
 	'locale': 'en-GB',
-<<<<<<< HEAD
-	'default_service': null
-=======
 	'default_service': null,
 	'sorting_reminders': 'time',
 	'sorting_static': 'title',
 	'sorting_templates': 'title'
->>>>>>> Development
 };
 
 function setupLocalStorage() {

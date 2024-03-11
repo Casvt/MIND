@@ -12,15 +12,6 @@ const inputs = {
 };
 
 const type_buttons = {
-<<<<<<< HEAD
-	'normal_button': document.getElementById('normal-button'),
-	'repeat_button': document.getElementById('repeat-button'),
-	'weekday_button': document.getElementById('weekday-button'),
-	
-	'repeat_bar': document.querySelector('.repeat-bar'),
-	'repeat_interval': document.getElementById('repeat-interval'),
-	'repeat_quantity': document.getElementById('repeat-quantity'),
-=======
 	'normal_button': document.querySelector('#normal-button'),
 	'repeat_button': document.querySelector('#repeat-button'),
 	'weekday_button': document.querySelector('#weekday-button'),
@@ -28,7 +19,6 @@ const type_buttons = {
 	'repeat_bar': document.querySelector('.repeat-bar'),
 	'repeat_interval': document.querySelector('#repeat-interval'),
 	'repeat_quantity': document.querySelector('#repeat-quantity'),
->>>>>>> Development
 	
 	'weekday_bar': document.querySelector('.weekday-bar')
 };
@@ -71,12 +61,8 @@ function toggleNormal() {
 	type_buttons.repeat_interval.value = '';
 	
 	type_buttons.weekday_bar.classList.add('hidden');
-<<<<<<< HEAD
-	type_buttons.weekday_bar.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
-=======
 	type_buttons.weekday_bar.querySelectorAll('input[type="checkbox"]')
 		.forEach(el => el.checked = false);
->>>>>>> Development
 };
 
 function toggleRepeated() {
@@ -88,12 +74,8 @@ function toggleRepeated() {
 	type_buttons.repeat_interval.setAttribute('required', '');
 	
 	type_buttons.weekday_bar.classList.add('hidden');
-<<<<<<< HEAD
-	type_buttons.weekday_bar.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
-=======
 	type_buttons.weekday_bar.querySelectorAll('input[type="checkbox"]')
 		.forEach(el => el.checked = false);
->>>>>>> Development
 };
 
 function toggleWeekDay() {
@@ -347,20 +329,6 @@ function submitInfo() {
 
 // code run on load
 
-<<<<<<< HEAD
-loadColor();
-
-document.getElementById('template-selection').addEventListener('change', e => applyTemplate());
-document.getElementById('color-toggle').addEventListener('click', e => toggleColor());
-document.getElementById('toggle-notification-service-list').addEventListener('click', e => toggleNotificationService());
-document.getElementById('normal-button').addEventListener('click', e => toggleNormal());
-document.getElementById('repeat-button').addEventListener('click', e => toggleRepeated());
-document.getElementById('weekday-button').addEventListener('click', e => toggleWeekDay());
-document.getElementById('close-info').addEventListener('click', e => hideWindow());
-document.getElementById('delete-info').addEventListener('click', e => deleteInfo());
-document.getElementById('test-reminder').addEventListener('click', e => testReminder());
-document.getElementById('info-form').setAttribute('action', 'javascript:submitInfo();');
-=======
 fillColors();
 
 document.querySelector('#template-selection').onchange = e => applyTemplate();
@@ -371,4 +339,3 @@ document.querySelector('#close-info').onclick = e => showWindow("home");
 document.querySelector('#delete-info').onclick = e => deleteInfo();
 document.querySelector('#test-reminder').onclick = e => testReminder();
 document.querySelector('#info-form').action = 'javascript:submitInfo();';
->>>>>>> Development
