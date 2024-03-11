@@ -57,6 +57,19 @@ function getActiveTab() {
 // 
 // Filling library
 // 
+function getWeekDays(locale)
+{
+	let baseDate = new Date(Date.UTC(2017, 0, 2)); // just a Monday
+	let weekDays = [];
+	for(i = 0; i < 7; i++)
+	{
+		weekDays.push(baseDate.toLocaleDateString(locale, { weekday: 'short' }));
+		baseDate.setDate(baseDate.getDate() + 1);
+	}
+	return weekDays;
+};
+const week_days = getWeekDays(getLocalStorage('locale')['locale']);
+
 function fillTable(table, results) {
 	table.querySelectorAll('button.entry:not(.add-entry)').forEach(
 		e => e.remove()
@@ -90,7 +103,11 @@ function fillTable(table, results) {
 				formatted_date += interval_text;
 
 			} else if (r.weekdays !== null)
+<<<<<<< HEAD
+				formatted_date += ` (each ${r.weekdays.split(',').map(d => week_days[parseInt(d)]).join(', ')})`;
+=======
 				formatted_date += ` (each ${r.weekdays.map(d => week_days[d]).join(', ')})`;
+>>>>>>> Development
 
 			time.innerText = formatted_date;
 			entry.appendChild(time);

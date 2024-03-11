@@ -110,9 +110,123 @@ function fillNotificationServices() {
 		return response.json();
 	})
 	.then(json => {
+<<<<<<< HEAD
+		if (json.result.length) {
+			document.getElementById('add-reminder').classList.remove('error', 'error-icon');
+
+			const default_select = document.querySelector('#default-service-input');
+			default_select.innerHTML = '';
+			let default_service = getLocalStorage('default_service')['default_service'];
+			json.result.forEach(service => {
+				const entry = document.createElement('option');
+				entry.value = service.id;
+				entry.innerText = service.title;
+				if (default_service === service.id)
+					entry.setAttribute('selected', '');
+				default_select.appendChild(entry);
+			});
+			if (!document.querySelector(`#default-service-input > option[value="${default_service}"]`))
+				setLocalStorage({'default_service': 
+					parseInt(document.querySelector('#default-service-input > option')?.value)
+					|| null
+				});
+				default_service = getLocalStorage('default_service')['default_service'];
+
+			inputs.notification_service.innerHTML = '';
+			json.result.forEach(service => {
+				const entry = document.createElement('div');
+				
+				const select = document.createElement('input');
+				select.dataset.id = service.id;
+				select.type = 'checkbox';
+				entry.appendChild(select);
+
+				const title = document.createElement('p');
+				title.innerText = service.title;
+				entry.appendChild(title);
+				
+				inputs.notification_service.appendChild(entry);
+			});
+			inputs.notification_service.querySelector(':first-child input').checked = true;
+			
+			const table = document.getElementById('services-list');
+			table.innerHTML = '';
+			json.result.forEach(service => {
+				const entry = document.createElement('tr');
+				entry.dataset.id = service.id;
+	
+				const title_container = document.createElement('td');
+				title_container.classList.add('title-column');
+				const title = document.createElement('input');
+				title.setAttribute('readonly', '');
+				title.setAttribute('type', 'text');
+				title.value = service.title;
+				title_container.appendChild(title);
+				entry.appendChild(title_container);
+	
+				const url_container = document.createElement('td');
+				url_container.classList.add('url-column');
+				const url = document.createElement('input');
+				url.setAttribute('readonly', '');
+				url.setAttribute('type', 'text');
+				url.value = service.url;
+				url.addEventListener('keydown', e => {
+					if (e.key === 'Enter')
+						saveService(service.id);
+				});
+				url_container.appendChild(url);
+				entry.appendChild(url_container);
+				
+				const actions = document.createElement('td');
+				actions.classList.add('action-column');
+				entry.appendChild(actions);
+	
+				const edit_button = document.createElement('button');
+				edit_button.dataset.type = 'edit';
+				edit_button.addEventListener('click', e => editService(service.id));
+				edit_button.title = 'Edit';
+				edit_button.setAttribute('aria-label', 'Edit');
+				edit_button.innerHTML = icons.edit;
+				actions.appendChild(edit_button);
+				
+				const save_button = document.createElement('button');
+				save_button.dataset.type = 'save';
+				save_button.addEventListener('click', e => saveService(service.id));
+				save_button.title = 'Save Edits';
+				save_button.setAttribute('aria-label', 'Save Edits');
+				save_button.innerHTML = icons.save;
+				actions.appendChild(save_button);
+				
+				const delete_button = document.createElement('button');
+				delete_button.dataset.type = 'delete';
+				delete_button.addEventListener('click', e => deleteService(service.id));
+				delete_button.title = 'Delete';
+				delete_button.setAttribute('aria-label', 'Delete');
+				delete_button.innerHTML = icons.delete;
+				actions.appendChild(delete_button);
+				
+				table.appendChild(entry);
+			});	
+		} else {
+			document.getElementById('add-reminder').classList.add('error', 'error-icon');
+
+			inputs.notification_service.innerHTML = '';
+
+			const default_select = document.querySelector('#default-service-input');
+			default_select.innerHTML = '';
+
+			const default_service = getLocalStorage('default_service')['default_service'];
+			if (!document.querySelector(`#default-service-input > option[value="${default_service}"]`))
+				setLocalStorage({'default_service': 
+					parseInt(document.querySelector('#default-service-input > option')?.value)
+					|| null
+				});
+		};
+=======
 		fillNotificationTable(json);
 		fillNotificationSelection(json);
 		setNoNotificationServiceMsg(json);
+>>>>>>> Development
 	})
 	.catch(e => {
 		if (e === 401)
@@ -163,12 +277,18 @@ function deleteService(id, delete_reminders_using=false) {
 		if (json.error !== null) return Promise.reject(json);
 		
 		row.remove();
+<<<<<<< HEAD
+		fillNotificationSelection();
+		if (document.querySelectorAll('#services-list > tr').length === 0)
+			document.getElementById('add-reminder').classList.add('error', 'error-icon');
+=======
 		fillNotificationServices();
 		if (delete_reminders_using) {
 			fillLibrary(Types.reminder);
 			fillLibrary(Types.static_reminder);
 			fillLibrary(Types.template);
 		};
+>>>>>>> Development
 	})
 	.catch(e => {
 		if (e.error === 'ApiKeyExpired' || e.error === 'ApiKeyInvalid')
@@ -188,6 +308,80 @@ function deleteService(id, delete_reminders_using=false) {
 	});
 };
 
+<<<<<<< HEAD
+function testService() {
+	const test_button = document.querySelector('#test-service');
+
+	// Check regexes for input's
+	[...document.querySelectorAll('#add-service-window > input:not([data-regex=""])[data-regex]')]
+		.forEach(el => el.classList.remove('error-input'));
+
+	const faulty_inputs =
+		[...document.querySelectorAll('#add-service-window > input:not([data-regex=""])[data-regex]')]
+			.filter(el => !new RegExp
+				(
+					el.dataset.regex.split('').reverse().join('').split(',').slice(1).join(',').split('').reverse().join(''),
+					el.dataset.regex.split('').reverse().join('').split(',')[0]
+				).test(el.value)
+			);
+	if (faulty_inputs.length > 0) {
+		faulty_inputs.forEach(el => el.classList.add('error-input'));
+		return;
+	};
+
+	const data = {
+		'url': buildAppriseURL()
+	};
+	if (!data.url) {
+		test_button.classList.add('error-input');
+		test_button.title = 'Required field missing';
+		return;
+	};
+	fetch(`${url_prefix}/api/notificationservices/test?api_key=${api_key}`, {
+		'method': 'POST',
+		'headers': {'Content-Type': 'application/json'},
+		'body': JSON.stringify(data)
+	})
+	.then(response => {
+		if (!response.ok) return Promise.reject(response.status);
+		
+		test_button.classList.remove('error-input');
+		test_button.title = '';
+		test_button.classList.add('show-sent');
+	})
+	.catch(e => {
+		if (e === 401)
+			window.location.href = `${url_prefix}/`;
+		else if (e === 400) {
+			test_button.classList.add('error-input');
+			test_button.title = 'Invalid Apprise URL';
+		} else
+			console.log(e);
+	});
+};
+
+function toggleAddService() {
+	const cont = document.querySelector('.overflow-container');
+	if (cont.classList.contains('show-add')) {
+		// Hide add
+		cont.classList.remove('show-add');
+		hideAddServiceWindow();
+	} else {
+		// Show add
+		if (notification_services === null) {
+			fetch(`${url_prefix}/api/notificationservices/available?api_key=${api_key}`)
+			.then(response => response.json())
+			.then(json => {
+				notification_services = json.result;
+				const table = document.querySelector('#service-list');
+				json.result.forEach((result, index) => {
+					const entry = document.createElement('button');
+					entry.innerText = result.name;
+					entry.addEventListener('click', e => showAddServiceWindow(index));
+					table.appendChild(entry);
+				});
+			});
+=======
 // 
 // Adding a service
 // 
@@ -310,6 +504,7 @@ function createEntriesList(token) {
 			e.preventDefault();
 			e.stopImmediatePropagation();
 			addEntry(entries_list);
+>>>>>>> Development
 		};
 	};
 	add_row.appendChild(add_input);
@@ -348,6 +543,137 @@ function addEntry(entries_list) {
 	toggleAddRow(entries_list.querySelector('.add-row'));
 };
 
+function createTitle() {
+	const service_title = document.createElement('input');
+	service_title.id = 'service-title';
+	service_title.type = 'text';
+	service_title.placeholder = 'Service Title';
+	service_title.required = true;
+	return service_title;
+};
+
+function createChoice(token) {
+	const choice = document.createElement('select');
+	choice.dataset.map = token.map_to || '';
+	choice.dataset.prefix = '';
+	choice.placeholder = token.name;
+	choice.required = token.required;
+	token.options.forEach(option => {
+		const entry = document.createElement('option');
+		entry.value = option;
+		entry.innerText = option;
+		choice.appendChild(entry);
+	});
+	if (token.default)
+		choice.querySelector(`option[value="${token.default}"]`).setAttribute('selected', '');
+
+	return choice;
+};
+
+function createString(token) {
+	const str_input = document.createElement('input');
+	str_input.dataset.map = token.map_to || '';
+	str_input.dataset.prefix = token.prefix || '';
+	str_input.dataset.regex = token.regex || '';
+	str_input.type = 'text';
+	str_input.placeholder = `${token.name}${!token.required ? ' (Optional)' : ''}`;
+	str_input.required = token.required;
+	return str_input;
+};
+
+function createInt(token) {
+	const int_input = document.createElement('input');
+	int_input.dataset.map = token.map_to || '';
+	int_input.dataset.prefix = token.prefix || '';
+	int_input.type = 'number';
+	int_input.placeholder = `${token.name}${!token.required ? ' (Optional)' : ''}`;
+	int_input.required = token.required;
+	if (token.min !== null)
+		int_input.min = token.min;
+	if (token.max !== null)
+		int_input.max = token.max;
+	return int_input;
+};
+
+function createBool(token) {
+	const bool_input = document.createElement('select');
+	bool_input.dataset.map = token.map_to || '';
+	bool_input.dataset.prefix = '';
+	bool_input.placeholder = token.name;
+	bool_input.required = token.required;
+	[['Yes', 'true'], ['No', 'false']].forEach(option => {
+		const entry = document.createElement('option');
+		entry.value = option[1];
+		entry.innerText = option[0];
+		bool_input.appendChild(entry);
+	});
+	bool_input.querySelector(`option[value="${token.default}"]`).setAttribute('selected', '');
+	
+	return bool_input;
+};
+
+function createEntriesList(token) {
+	const entries_list = document.createElement('div');
+	entries_list.classList.add('entries-list');
+	entries_list.dataset.map = token.map_to || '';
+	entries_list.dataset.delim = token.delim || '';
+	entries_list.dataset.prefix = token.prefix || '';
+
+	const entries_desc = document.createElement('p');
+	entries_desc.innerText = token.name;
+	entries_list.appendChild(entries_desc);
+
+	const entries = document.createElement('div');
+	entries.classList.add('input-entries');
+	entries_list.appendChild(entries);
+
+	const add_row = document.createElement('div');
+	add_row.classList.add('add-row', 'hidden');
+	const add_input = document.createElement('input');
+	add_input.type = 'text';
+	add_input.addEventListener('keydown', e => {
+		if (e.key === "Enter") {
+			e.preventDefault();
+			e.stopImmediatePropagation();
+			addEntry(entries_list);
+		};
+	});
+	add_row.appendChild(add_input);
+	const add_entry_button = document.createElement('button');
+	add_entry_button.type = 'button';
+	add_entry_button.innerText = 'Add';
+	add_entry_button.addEventListener('click', e => addEntry(entries_list));
+	add_row.appendChild(add_entry_button);
+	entries_list.appendChild(add_row);
+
+	const add_button = document.createElement('button');
+	add_button.type = 'button';
+	add_button.innerHTML = icons.add;
+	add_button.addEventListener('click', e => toggleAddRow(add_row));
+	entries_list.appendChild(add_button);
+	
+	return entries_list;
+};
+
+function toggleAddRow(row) {
+	if (row.classList.contains('hidden')) {
+		// Show row
+		row.querySelector('input').value = '';
+		row.classList.remove('hidden');
+	} else {
+		// Hide row
+		row.classList.add('hidden');
+	};
+};
+
+function addEntry(entries_list) {
+	const value = entries_list.querySelector('.add-row > input').value;
+	const entry = document.createElement('div');
+	entry.innerText = value;
+	entries_list.querySelector('.input-entries').appendChild(entry);
+	toggleAddRow(entries_list.querySelector('.add-row'));
+};
+
 function showAddServiceWindow(index) {
 	const window = NotiEls.add_service_window;
 	window.innerHTML = '';
@@ -359,6 +685,30 @@ function showAddServiceWindow(index) {
 	const title = document.createElement('h3');
 	title.innerText = data.name;
 	window.appendChild(title);
+<<<<<<< HEAD
+
+	const docs = document.createElement('a');
+	docs.href = data.doc_url;
+	docs.target = '_blank';
+	docs.innerText = 'Documentation';
+	window.appendChild(docs);
+
+	window.appendChild(createTitle());	
+	
+	[[data.details.tokens, 'tokens'], [data.details.args, 'args']].forEach(vars => {
+		if (vars[1] === 'args' && vars[0].length > 0) {
+			// The args are hidden behind a "Show Advanced Settings" button
+			const show_args = document.createElement('button');
+			show_args.type = 'button';
+			show_args.innerText = 'Show Advanced Settings';
+			show_args.addEventListener('click', e => {
+				window.querySelectorAll('[data-is_arg="true"]').forEach(el => el.classList.toggle('hidden'));
+				show_args.innerText = show_args.innerText === 'Show Advanced Settings' ? 'Hide Advanced Settings' : 'Show Advanced Settings';
+			});
+			window.appendChild(show_args);
+		};
+
+=======
 
 	const docs = document.createElement('a');
 	docs.href = data.doc_url;
@@ -381,6 +731,7 @@ function showAddServiceWindow(index) {
 			window.appendChild(show_args);
 		};
 
+>>>>>>> Development
 		vars[0].forEach(token => {
 			let result = null;
 			if (token.type === 'choice') {
@@ -425,9 +776,13 @@ function showAddServiceWindow(index) {
 		});
 		
 		if (vars[1] === 'args' && vars[0].length > 0)
+<<<<<<< HEAD
+			window.querySelectorAll('[data-is_arg="true"]').forEach(el => el.classList.toggle('hidden'));
+=======
 			window.querySelectorAll('[data-is_arg="true"]').forEach(
 				el => el.classList.toggle('hidden')
 			);
+>>>>>>> Development
 	})
 	
 	// Bottom options
@@ -443,7 +798,11 @@ function showAddServiceWindow(index) {
 	const test = document.createElement('button');
 	test.id = 'test-service';
 	test.type = 'button';
+<<<<<<< HEAD
+	test.addEventListener('click', e => testService());
+=======
 	test.onclick = e => testService();
+>>>>>>> Development
 	options.appendChild(test);
 	const test_text = document.createElement('div');
 	test_text.innerText = 'Test';
@@ -462,8 +821,13 @@ function showAddServiceWindow(index) {
 };
 
 function buildAppriseURL() {
+<<<<<<< HEAD
+	const data = notification_services[document.querySelector('#add-service-window').dataset.index];
+	const inputs = document.querySelectorAll('#add-service-window > [data-map][data-is_arg="false"]');
+=======
 	const data = notification_services[NotiEls.add_service_window.dataset.index];
 	const inputs = NotiEls.add_service_window.querySelectorAll('[data-map][data-is_arg="false"]');
+>>>>>>> Development
 	const values = {};
 
 	// Gather all values and format
@@ -504,9 +868,15 @@ function buildAppriseURL() {
 		template = template.replace(`{${key}}`, value);
 
 	// Add args
+<<<<<<< HEAD
+	const args = [...document.querySelectorAll('#add-service-window > [data-map][data-is_arg="true"]')]
+		.map(el => {
+			if (['INPUT', 'SELECT'].includes(el.nodeName) && el.value)
+=======
 	const args = [...NotiEls.add_service_window.querySelectorAll('[data-map][data-is_arg="true"]')]
 		.map(el => {
 			if (['INPUT', 'SELECT'].includes(el.nodeName) && el.value && el.value !== el.dataset.default)
+>>>>>>> Development
 				return `${el.dataset.map}=${el.value}`;
 			else if (el.nodeName == 'DIV') {
 				let value = 
@@ -534,6 +904,24 @@ function buildAppriseURL() {
 	console.debug(template);
 
 	return template;
+<<<<<<< HEAD
+};
+
+function addService() {
+	const add_button = document.querySelector('#add-service-window > .options > button[type="submit"]');
+	
+	// Check regexes for input's
+	[...document.querySelectorAll('#add-service-window > input:not([data-regex=""])[data-regex]')]
+		.forEach(el => el.classList.remove('error-input'));
+
+	const faulty_inputs =
+		[...document.querySelectorAll('#add-service-window > input:not([data-regex=""])[data-regex]')]
+			.filter(el => !new RegExp
+				(
+					el.dataset.regex.split('').reverse().join('').split(',').slice(1).join(',').split('').reverse().join(''),
+					el.dataset.regex.split('').reverse().join('').split(',')[0]
+				).test(el.value)
+=======
 };
 
 function testService() {
@@ -605,6 +993,7 @@ function addService() {
 						el.dataset.regex.split(',')[el.dataset.regex.split(',').length-1]
 					).test(el.value)
 				)
+>>>>>>> Development
 			);
 	if (faulty_inputs.length > 0) {
 		faulty_inputs.forEach(el => el.classList.add('error-input'));
@@ -652,5 +1041,10 @@ fillNotificationServices();
 
 let notification_services = null;
 
+<<<<<<< HEAD
+document.getElementById('add-service-button').addEventListener('click', e => toggleAddService());
+document.getElementById('add-service-window').setAttribute('action', 'javascript:addService();');
+=======
 NotiEls.triggers.service_list.onchange = showServiceList;
 NotiEls.add_service_window.action = 'javascript:addService();';
+>>>>>>> Development

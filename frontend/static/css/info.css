@@ -117,7 +117,10 @@
 .form-container > form .repeat-options > button {
 	width: calc((100% / 3) - (var(--gap) / 1.5));
 	min-width: min-content;
+<<<<<<< HEAD
+=======
 	padding: 1rem 0rem;
+>>>>>>> Development
 }
 
 .repeat-bar {
@@ -224,7 +227,10 @@ div.options > button {
 	.sub-inputs > input,
 	.sub-inputs > select,
 	.sub-inputs > button,
+<<<<<<< HEAD
+=======
 	.sub-inputs > label,
+>>>>>>> Development
 	.form-container > form .repeat-options > button {
 		width: 100%;
 	}

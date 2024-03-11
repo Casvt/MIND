@@ -4,6 +4,11 @@ function showAdd(type) {
 	inputs.title.value = '';
 	inputs.text.value = '';
 	inputs.time.value = '';
+<<<<<<< HEAD
+	inputs.notification_service.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
+	inputs.notification_service.querySelector(`input[type="checkbox"][data-id="${default_service}"]`).checked = true;
+	document.querySelectorAll('.weekday-bar > input[type="checkbox"]').forEach(el => el.checked = false);
+=======
 	inputs.notification_service.querySelectorAll('input[type="checkbox"]')
 		.forEach(c => c.checked = false);
 	inputs.notification_service.querySelector(
@@ -11,6 +16,7 @@ function showAdd(type) {
 	).checked = true;
 	document.querySelectorAll('.weekday-bar > input[type="checkbox"]')
 		.forEach(el => el.checked = false);
+>>>>>>> Development
 	toggleNormal();
 	selectColor(colors[0]);
 	inputs.color_toggle.checked = false;
@@ -84,7 +90,11 @@ function showEdit(id, type) {
 			c => c.checked = json.result.notification_services.includes(parseInt(c.dataset.id))
 		);
 
+<<<<<<< HEAD
+		if (type == types.reminder) {
+=======
 		if (type == Types.reminder) {
+>>>>>>> Development
 			if (json.result.repeat_interval !== null) {
 				toggleRepeated();
 				type_buttons.repeat_interval.value = json.result.repeat_interval;
