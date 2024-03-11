@@ -249,173 +249,24 @@ tr:has(input:read-only) button[data-type="save"] {
 	display: none;
 }
 
-<<<<<<< HEAD
-/*  */
-/* Add service */
-/*  */
-#add-service-container {
-	display: none;
-}
-
-.overflow-container.show-add #add-service-container {
-	display: block;
-}
-
-.overflow-container.show-add > table {
-	display: none;
-}
-
-#service-list {
-	display: flex;
-	gap: 1rem;
-	flex-wrap: wrap;
-	justify-content: center;
-}
-
-#service-list button {
-	width: max(30%, 10rem);
-	height: 6rem;
-	
-	display: flex;
-	justify-content: center;
-	align-items: center;
-
-	padding: .75rem;
-	border-radius: 4px;
-	border: 2px solid var(--color-gray);
-	
-	text-align: center;
-	font-size: 1.1rem;
-}
-
-#add-service-container.show-add-window #add-service-window {
-	display: flex;
-}
-
-#add-service-container.show-add-window #service-list {
-	display: none;
-}
-
-/*  */
-/* Add service form */
-/*  */
-#add-service-window {
-	max-width: 30rem;
-	margin: auto;
-
-	display: none;
-	flex-direction: column;
-	justify-content: center;
-	gap: 1rem;
-	
-	text-align: center;
-}
-
-#add-service-window > h3 {
-	font-size: 1.75rem;
-}
-
-#add-service-window > p {
-	margin-bottom: calc((1rem + 2px) * -1);
-	
-	border: 2px solid var(--color-gray);
-	border-top-left-radius: 4px;
-	border-top-right-radius: 4px;
-	padding: .75rem 1rem;
-	color: var(--color-gray);
-
-	text-align: left;
-	
-	box-shadow: var(--default-shadow);
-}
-
-#add-service-window > button {
-	border-radius: 4px;
-	border: 2px solid var(--color-gray);
-	padding: .75rem;
-}
-
-#add-service-window > a,
-#add-service-window > p > a {
-	color: var(--color-light);
-}
-
-#add-service-window > div[data-map],
-#add-service-window > div[data-map] > .entries-list {
-	display: flex;
-	flex-direction: column;
-	gap: inherit;
-}
-
-#add-service-window > div[data-map] {
-	padding: .5rem;
-	border: 2px solid var(--color-gray);
-	border-radius: 4px;
-	box-shadow: var(--default-shadow);
-}
-
-#add-service-window > div[data-map] > p {
-	color: var(--color-gray);
-	font-size: 1.1rem;
-}
-
-.entries-list {
-	min-height: 5rem;
-	max-height: 15rem;
-	overflow-y: auto;
-	
-	align-items: center;
-
-	background-color: var(--color-dark);
-	color: var(--color-light);
-	border: 2px solid var(--color-gray);
-	border-radius: 4px;
-	padding: .75rem;
-	box-shadow: var(--default-shadow);
-
-	font-size: 1rem;
-}
-
-.entries-list > p:first-child {
-	color: var(--color-gray);
-	font-size: 1.1rem;
-}
-
-.input-entries:not(:has(div)) {
-	display: none;
-}
-
-.add-row {
-	height: 2rem;
-	width: 80%;
-
-	display: flex;
-=======
 .add-row {
 	width: min(100%, 21rem);
 
 	display: flex;
 	justify-content: center;
 	flex-wrap: wrap;
->>>>>>> Development
 	gap: 1rem;
 }
 
 .add-row input {
 	flex-grow: 1;
-<<<<<<< HEAD
-=======
 	height: 2rem;
 	min-width: 0rem;
->>>>>>> Development
 	font-size: .8rem;
 }
 
 .add-row button {
-<<<<<<< HEAD
-=======
 	height: 2rem;
->>>>>>> Development
 	padding: .35rem .75rem;
 	background-color: var(--color-gray);
 	border-radius: 4px;
@@ -440,12 +291,9 @@ tr:has(input:read-only) button[data-type="save"] {
 	height: inherit;
 	fill: var(--color-dark);
 }
-<<<<<<< HEAD
-=======
 
 @media (max-width: 543px) {
 	#service-list button {
 		flex-grow: 1;
 	}
 }
->>>>>>> Development
