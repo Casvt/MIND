@@ -90,6 +90,10 @@ def _reverse_format_setting(key: str, value: Any) -> Any:
 	"""
 	if key in ('allow_new_accounts', 'login_time_reset'):
 		value = value == 1
+
+	elif key in ('log_level', 'database_version', 'login_time'):
+		value = int(value)
+
 	return value
 
 def get_setting(key: str) -> Any:
