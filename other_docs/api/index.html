@@ -1,0 +1,4105 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="The official guide for MIND">
+      
+      
+        <meta name="author" content="Casvt">
+      
+      
+      
+        <link rel="prev" href="../reporting/">
+      
+      
+      
+      <link rel="icon" href="../../assets/img/favicon.svg">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.13">
+    
+    
+      
+        <title>API - MIND Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e359304.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../css/timeago.css">
+    
+      <link rel="stylesheet" href="../../assets/css/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="MIND" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#api" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="MIND Docs" class="md-header__button md-logo" aria-label="MIND Docs" data-md-component="logo">
+      
+  <img src="../../assets/img/favicon.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            MIND Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              API
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="MIND" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4zM7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="MIND-dark" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Casvt/MIND" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Casvt/MIND
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../installation/installation/" class="md-tabs__link">
+          
+  
+    
+  
+  Installation And Updating
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../general_info/workings/" class="md-tabs__link">
+          
+  
+    
+  
+  General Information
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../settings/settings/" class="md-tabs__link">
+          
+  
+    
+  
+  Settings
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../reporting/" class="md-tabs__link">
+          
+  
+    
+  
+  Other Docs
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="MIND Docs" class="md-nav__button md-logo" aria-label="MIND Docs" data-md-component="logo">
+      
+  <img src="../../assets/img/favicon.svg" alt="logo">
+
+    </a>
+    MIND Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Casvt/MIND" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Casvt/MIND
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Installation And Updating
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Installation And Updating
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/docker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Docker
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/manual_instal/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Manual Instal
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../installation/setup_after_installation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Setup After Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    General Information
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            General Information
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../general_info/workings/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../general_info/reminders/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Reminders
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../general_info/admin_panel/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Admin Panel
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Settings
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            Settings
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../settings/settings/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../settings/user_settings/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    User Settings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../settings/admin_settings/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Admin Settings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Other Docs
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Other Docs
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reporting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Reporting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    API
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    API
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentication
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supplying-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supplying data
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Endpoints
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Endpoints">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#authlogin" class="md-nav__link">
+    <span class="md-ellipsis">
+      /auth/login
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authlogout" class="md-nav__link">
+    <span class="md-ellipsis">
+      /auth/logout
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authstatus" class="md-nav__link">
+    <span class="md-ellipsis">
+      /auth/status
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#useradd" class="md-nav__link">
+    <span class="md-ellipsis">
+      /user/add
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user" class="md-nav__link">
+    <span class="md-ellipsis">
+      /user
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notificationservices" class="md-nav__link">
+    <span class="md-ellipsis">
+      /notificationservices
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notificationservicesavailable" class="md-nav__link">
+    <span class="md-ellipsis">
+      /notificationservices/available
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notificationservicestest" class="md-nav__link">
+    <span class="md-ellipsis">
+      /notificationservices/test
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notificationservicesintn_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      /notificationservices/&lt;int:n_id&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reminders" class="md-nav__link">
+    <span class="md-ellipsis">
+      /reminders
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reminderssearch" class="md-nav__link">
+    <span class="md-ellipsis">
+      /reminders/search
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reminderstest" class="md-nav__link">
+    <span class="md-ellipsis">
+      /reminders/test
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remindersintr_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      /reminders/&lt;int:r_id&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      /templates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#templatessearch" class="md-nav__link">
+    <span class="md-ellipsis">
+      /templates/search
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#templatesintt_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      /templates/&lt;int:t_id&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#staticreminders" class="md-nav__link">
+    <span class="md-ellipsis">
+      /staticreminders
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#staticreminderssearch" class="md-nav__link">
+    <span class="md-ellipsis">
+      /staticreminders/search
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#staticremindersints_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      /staticreminders/&lt;int:s_id&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adminshutdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      /admin/shutdown
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adminrestart" class="md-nav__link">
+    <span class="md-ellipsis">
+      /admin/restart
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      /settings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adminsettings" class="md-nav__link">
+    <span class="md-ellipsis">
+      /admin/settings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adminlogs" class="md-nav__link">
+    <span class="md-ellipsis">
+      /admin/logs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adminusers" class="md-nav__link">
+    <span class="md-ellipsis">
+      /admin/users
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adminusersintu_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      /admin/users/&lt;int:u_id&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#admindatabase" class="md-nav__link">
+    <span class="md-ellipsis">
+      /admin/database
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentication
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supplying-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supplying data
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      Endpoints
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Endpoints">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#authlogin" class="md-nav__link">
+    <span class="md-ellipsis">
+      /auth/login
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authlogout" class="md-nav__link">
+    <span class="md-ellipsis">
+      /auth/logout
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authstatus" class="md-nav__link">
+    <span class="md-ellipsis">
+      /auth/status
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#useradd" class="md-nav__link">
+    <span class="md-ellipsis">
+      /user/add
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#user" class="md-nav__link">
+    <span class="md-ellipsis">
+      /user
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notificationservices" class="md-nav__link">
+    <span class="md-ellipsis">
+      /notificationservices
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notificationservicesavailable" class="md-nav__link">
+    <span class="md-ellipsis">
+      /notificationservices/available
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notificationservicestest" class="md-nav__link">
+    <span class="md-ellipsis">
+      /notificationservices/test
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#notificationservicesintn_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      /notificationservices/&lt;int:n_id&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reminders" class="md-nav__link">
+    <span class="md-ellipsis">
+      /reminders
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reminderssearch" class="md-nav__link">
+    <span class="md-ellipsis">
+      /reminders/search
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reminderstest" class="md-nav__link">
+    <span class="md-ellipsis">
+      /reminders/test
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#remindersintr_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      /reminders/&lt;int:r_id&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      /templates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#templatessearch" class="md-nav__link">
+    <span class="md-ellipsis">
+      /templates/search
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#templatesintt_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      /templates/&lt;int:t_id&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#staticreminders" class="md-nav__link">
+    <span class="md-ellipsis">
+      /staticreminders
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#staticreminderssearch" class="md-nav__link">
+    <span class="md-ellipsis">
+      /staticreminders/search
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#staticremindersints_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      /staticreminders/&lt;int:s_id&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adminshutdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      /admin/shutdown
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adminrestart" class="md-nav__link">
+    <span class="md-ellipsis">
+      /admin/restart
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      /settings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adminsettings" class="md-nav__link">
+    <span class="md-ellipsis">
+      /admin/settings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adminlogs" class="md-nav__link">
+    <span class="md-ellipsis">
+      /admin/logs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adminusers" class="md-nav__link">
+    <span class="md-ellipsis">
+      /admin/users
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adminusersintu_id" class="md-nav__link">
+    <span class="md-ellipsis">
+      /admin/users/&lt;int:u_id&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#admindatabase" class="md-nav__link">
+    <span class="md-ellipsis">
+      /admin/database
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="api">API<a class="headerlink" href="#api" title="Permanent link">&para;</a></h1>
+<p>Below is the API documentation. Report an issue on <a href="https://github.com/Casvt/MIND/issues">GitHub</a>.</p>
+<p>All endpoints have the <code class="highlight">/api</code> prefix. That means, for example, that <code class="highlight">/auth/login</code> can be reached at <code class="highlight">/api/auth/login</code>.</p>
+<h2 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">&para;</a></h2>
+<p>Authentication is done using an API key.
+To log in, make a POST request to the <a href="#authlogin"><code class="highlight">/api/auth/login</code></a> endpoint.
+You'll receive an API key, which you can then use in your requests to authenticate.
+Supply it via the url parameter <code class="highlight">api_key</code>.
+This API key is valid for one hour (though the admin can change this duration) after which the key expires, any further requests return 401 'APIKeyExpired' and you are required to log in again.
+If no <code class="highlight">api_key</code> is supplied or it is invalid, 401 <code class="highlight">APIKeyInvalid</code> is returned.</p>
+<p>For example:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl<span class="w"> </span>-sSL<span class="w"> </span><span class="s1">&#39;http://192.168.2.15:8080/api/reminders?api_key=ABCDEFG&#39;</span>
+</code></pre></div></p>
+<h2 id="supplying-data">Supplying data<a class="headerlink" href="#supplying-data" title="Permanent link">&para;</a></h2>
+<p>Often, data needs to be supplied with a request:</p>
+<ul>
+<li>If the parameters need to be supplied via <code class="highlight">url</code>, add them to the url as url parameters.</li>
+<li>If the parameters need to be supplied via <code class="highlight">body</code>, add them to the body as a json object and supply the <code class="highlight">Content-Type: application/json</code> header.</li>
+<li>If the parameters need to be supplied via <code class="highlight">file</code>, send them as form data values and supply the <code class="highlight">Content-Type: multipart/form-data</code> header.</li>
+</ul>
+<p>For example:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># URL parameter</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>curl<span class="w"> </span>-sSL<span class="w"> </span><span class="s1">&#39;http://192.168.2.15:8080/api/reminders/search?api_key=ABCDEFG&amp;query=Fountain&amp;sort_by=time_reversed&#39;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Body parameter</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>curl<span class="w"> </span>-sSLX<span class="w"> </span>POST<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;title&quot;: &quot;Test service&quot;, &quot;url&quot;: &quot;test://fake/url&quot;}&#39;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="s1">&#39;http://192.168.2.15:8080/api/notificationservices?api_key=ABCDEFG&#39;</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="c1"># File parameter</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>curl<span class="w"> </span>-sSLX<span class="w"> </span>POST<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: multipart/form-data&#39;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span>-F<span class="w"> </span><span class="nv">file</span><span class="o">=</span>@/backups/MIND_backup.db<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="s1">&#39;http://192.168.2.15:8080/api/admin/database?api_key=ABCDEFG&#39;</span>
+</code></pre></div></p>
+<h2 id="endpoints">Endpoints<a class="headerlink" href="#endpoints" title="Permanent link">&para;</a></h2>
+<p>The following is automatically generated. Please report any issues on <a href="https://github.com/Casvt/MIND/issues">GitHub</a>.</p>
+<h3 id="authlogin"><code class="highlight">/auth/login</code><a class="headerlink" href="#authlogin" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No</td>
+<td>Login to a user account</td>
+</tr>
+</tbody>
+</table>
+<details class="post">
+<summary>Post</summary>
+<p><strong>Parameters (body)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>username</td>
+<td>Yes</td>
+<td>string</td>
+<td>The username of the user account</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>password</td>
+<td>Yes</td>
+<td>string</td>
+<td>The password of the user account</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>201</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>KeyNotFound</td>
+<td>A key was not found in the input that is required to be given</td>
+</tr>
+<tr>
+<td>401</td>
+<td>AccessUnauthorized</td>
+<td>The password given is not correct</td>
+</tr>
+<tr>
+<td>404</td>
+<td>UserNotFound</td>
+<td>The user requested can not be found</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="authlogout"><code class="highlight">/auth/logout</code><a class="headerlink" href="#authlogout" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Logout of a user account</td>
+</tr>
+</tbody>
+</table>
+<details class="post">
+<summary>Post</summary>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>201</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="authstatus"><code class="highlight">/auth/status</code><a class="headerlink" href="#authstatus" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Get current status of login</td>
+</tr>
+</tbody>
+</table>
+<details class="get">
+<summary>Get</summary>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="useradd"><code class="highlight">/user/add</code><a class="headerlink" href="#useradd" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No</td>
+<td>Create a new user account</td>
+</tr>
+</tbody>
+</table>
+<details class="post">
+<summary>Post</summary>
+<p><strong>Parameters (body)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>username</td>
+<td>Yes</td>
+<td>string</td>
+<td>The username of the user account</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>password</td>
+<td>Yes</td>
+<td>string</td>
+<td>The password of the user account</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>201</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>KeyNotFound</td>
+<td>A key was not found in the input that is required to be given</td>
+</tr>
+<tr>
+<td>400</td>
+<td>UsernameInvalid</td>
+<td>The username contains invalid characters</td>
+</tr>
+<tr>
+<td>400</td>
+<td>UsernameTaken</td>
+<td>The username is already taken</td>
+</tr>
+<tr>
+<td>403</td>
+<td>NewAccountsNotAllowed</td>
+<td>It's not allowed to create a new account except for the admin</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="user"><code class="highlight">/user</code><a class="headerlink" href="#user" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Manage a user account</td>
+</tr>
+</tbody>
+</table>
+<details class="put">
+<summary>Put</summary>
+<p>Change the password of the user account</p>
+<p><strong>Parameters (body)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>new_password</td>
+<td>Yes</td>
+<td>string</td>
+<td>The new password of the user account</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>KeyNotFound</td>
+<td>A key was not found in the input that is required to be given</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="delete">
+<summary>Delete</summary>
+<p>Delete the user account</p>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="notificationservices"><code class="highlight">/notificationservices</code><a class="headerlink" href="#notificationservices" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Manage the notification services</td>
+</tr>
+</tbody>
+</table>
+<details class="get">
+<summary>Get</summary>
+<p>Get a list of all notification services</p>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="post">
+<summary>Post</summary>
+<p>Add a notification service</p>
+<p><strong>Parameters (body)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>title</td>
+<td>Yes</td>
+<td>string</td>
+<td>The title of the entry</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>url</td>
+<td>Yes</td>
+<td>string</td>
+<td>The Apprise URL of the notification service</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>201</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+<tr>
+<td>400</td>
+<td>KeyNotFound</td>
+<td>A key was not found in the input that is required to be given</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="notificationservicesavailable"><code class="highlight">/notificationservices/available</code><a class="headerlink" href="#notificationservicesavailable" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Get all available notification services and their url layout</td>
+</tr>
+</tbody>
+</table>
+<details class="get">
+<summary>Get</summary>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="notificationservicestest"><code class="highlight">/notificationservices/test</code><a class="headerlink" href="#notificationservicestest" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Send a test notification using the supplied Apprise URL</td>
+</tr>
+</tbody>
+</table>
+<details class="post">
+<summary>Post</summary>
+<p><strong>Parameters (body)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>url</td>
+<td>Yes</td>
+<td>string</td>
+<td>The Apprise URL of the notification service</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>201</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+<tr>
+<td>400</td>
+<td>KeyNotFound</td>
+<td>A key was not found in the input that is required to be given</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="notificationservicesintn_id"><code class="highlight">/notificationservices/&lt;int:n_id&gt;</code><a class="headerlink" href="#notificationservicesintn_id" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Manage a specific notification service</td>
+</tr>
+</tbody>
+</table>
+<p>Replace <code class="highlight">&lt;int:n_id&gt;</code> with the ID of the entry. For example: <code class="highlight">/notificationservices/2</code>.</p>
+<details class="get">
+<summary>Get</summary>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>404</td>
+<td>NotificationServiceNotFound</td>
+<td>The notification service was not found</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="put">
+<summary>Put</summary>
+<p>Edit the notification service</p>
+<p><strong>Parameters (body)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>title</td>
+<td>No</td>
+<td>string</td>
+<td>The title of the entry</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>url</td>
+<td>No</td>
+<td>string</td>
+<td>The Apprise URL of the notification service</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+<tr>
+<td>404</td>
+<td>NotificationServiceNotFound</td>
+<td>The notification service was not found</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="delete">
+<summary>Delete</summary>
+<p>Delete the notification service</p>
+<p><strong>Parameters (url)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>delete_reminders_using</td>
+<td>No</td>
+<td>bool</td>
+<td>Instead of throwing an error when there are still reminders using the service, delete the reminders.</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+<tr>
+<td>404</td>
+<td>NotificationServiceNotFound</td>
+<td>The notification service was not found</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="reminders"><code class="highlight">/reminders</code><a class="headerlink" href="#reminders" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Manage the reminders</td>
+</tr>
+</tbody>
+</table>
+<details class="get">
+<summary>Get</summary>
+<p>Get a list of all reminders</p>
+<p><strong>Parameters (url)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sort_by</td>
+<td>No</td>
+<td>string</td>
+<td>How to sort the result</td>
+<td><code class="highlight">time</code>, <code class="highlight">time_reversed</code>, <code class="highlight">title</code>, <code class="highlight">title_reversed</code>, <code class="highlight">date_added</code>, <code class="highlight">date_added_reversed</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="post">
+<summary>Post</summary>
+<p>Add a reminder</p>
+<p><strong>Parameters (body)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>title</td>
+<td>Yes</td>
+<td>string</td>
+<td>The title of the entry</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>time</td>
+<td>Yes</td>
+<td>number,decimal number</td>
+<td>The UTC epoch timestamp that the reminder should be sent at</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>notification_services</td>
+<td>Yes</td>
+<td>list of numbers</td>
+<td>Array of the id's of the notification services to use to send the notification</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>text</td>
+<td>No</td>
+<td>string</td>
+<td>The body of the entry</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>repeat_quantity</td>
+<td>No</td>
+<td>string</td>
+<td>The quantity of the repeat_interval</td>
+<td><code class="highlight">years</code>, <code class="highlight">months</code>, <code class="highlight">weeks</code>, <code class="highlight">days</code>, <code class="highlight">hours</code>, <code class="highlight">minutes</code></td>
+</tr>
+<tr>
+<td>repeat_interval</td>
+<td>No</td>
+<td>number</td>
+<td>The number of the interval</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>weekdays</td>
+<td>No</td>
+<td>list of numbers</td>
+<td>On which days of the weeks to run the reminder</td>
+<td><code class="highlight"><span class="mf">0</span></code>, <code class="highlight"><span class="mf">1</span></code>, <code class="highlight"><span class="mf">2</span></code>, <code class="highlight"><span class="mf">3</span></code>, <code class="highlight"><span class="mf">4</span></code>, <code class="highlight"><span class="mf">5</span></code>, <code class="highlight"><span class="mf">6</span></code></td>
+</tr>
+<tr>
+<td>color</td>
+<td>No</td>
+<td>string</td>
+<td>The hex code of the color of the entry, which is shown in the web-ui</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>201</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidTime</td>
+<td>The time given is in the past</td>
+</tr>
+<tr>
+<td>400</td>
+<td>KeyNotFound</td>
+<td>A key was not found in the input that is required to be given</td>
+</tr>
+<tr>
+<td>404</td>
+<td>NotificationServiceNotFound</td>
+<td>The notification service was not found</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="reminderssearch"><code class="highlight">/reminders/search</code><a class="headerlink" href="#reminderssearch" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Search through the list of reminders</td>
+</tr>
+</tbody>
+</table>
+<details class="get">
+<summary>Get</summary>
+<p><strong>Parameters (url)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sort_by</td>
+<td>No</td>
+<td>string</td>
+<td>How to sort the result</td>
+<td><code class="highlight">time</code>, <code class="highlight">time_reversed</code>, <code class="highlight">title</code>, <code class="highlight">title_reversed</code>, <code class="highlight">date_added</code>, <code class="highlight">date_added_reversed</code></td>
+</tr>
+<tr>
+<td>query</td>
+<td>Yes</td>
+<td>string</td>
+<td>The search term</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+<tr>
+<td>400</td>
+<td>KeyNotFound</td>
+<td>A key was not found in the input that is required to be given</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="reminderstest"><code class="highlight">/reminders/test</code><a class="headerlink" href="#reminderstest" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Test send a reminder draft</td>
+</tr>
+</tbody>
+</table>
+<details class="post">
+<summary>Post</summary>
+<p><strong>Parameters (body)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>title</td>
+<td>Yes</td>
+<td>string</td>
+<td>The title of the entry</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>notification_services</td>
+<td>Yes</td>
+<td>list of numbers</td>
+<td>Array of the id's of the notification services to use to send the notification</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>text</td>
+<td>No</td>
+<td>string</td>
+<td>The body of the entry</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>201</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+<tr>
+<td>400</td>
+<td>KeyNotFound</td>
+<td>A key was not found in the input that is required to be given</td>
+</tr>
+<tr>
+<td>404</td>
+<td>NotificationServiceNotFound</td>
+<td>The notification service was not found</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="remindersintr_id"><code class="highlight">/reminders/&lt;int:r_id&gt;</code><a class="headerlink" href="#remindersintr_id" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Manage a specific reminder</td>
+</tr>
+</tbody>
+</table>
+<p>Replace <code class="highlight">&lt;int:r_id&gt;</code> with the ID of the entry. For example: <code class="highlight">/reminders/2</code>.</p>
+<details class="get">
+<summary>Get</summary>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>404</td>
+<td>ReminderNotFound</td>
+<td>The reminder with the id can not be found</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="put">
+<summary>Put</summary>
+<p>Edit the reminder</p>
+<p><strong>Parameters (body)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>title</td>
+<td>No</td>
+<td>string</td>
+<td>The title of the entry</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>time</td>
+<td>No</td>
+<td>number,decimal number</td>
+<td>The UTC epoch timestamp that the reminder should be sent at</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>notification_services</td>
+<td>No</td>
+<td>list of numbers</td>
+<td>Array of the id's of the notification services to use to send the notification</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>text</td>
+<td>No</td>
+<td>string</td>
+<td>The body of the entry</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>repeat_quantity</td>
+<td>No</td>
+<td>string</td>
+<td>The quantity of the repeat_interval</td>
+<td><code class="highlight">years</code>, <code class="highlight">months</code>, <code class="highlight">weeks</code>, <code class="highlight">days</code>, <code class="highlight">hours</code>, <code class="highlight">minutes</code></td>
+</tr>
+<tr>
+<td>repeat_interval</td>
+<td>No</td>
+<td>number</td>
+<td>The number of the interval</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>weekdays</td>
+<td>No</td>
+<td>list of numbers</td>
+<td>On which days of the weeks to run the reminder</td>
+<td><code class="highlight"><span class="mf">0</span></code>, <code class="highlight"><span class="mf">1</span></code>, <code class="highlight"><span class="mf">2</span></code>, <code class="highlight"><span class="mf">3</span></code>, <code class="highlight"><span class="mf">4</span></code>, <code class="highlight"><span class="mf">5</span></code>, <code class="highlight"><span class="mf">6</span></code></td>
+</tr>
+<tr>
+<td>color</td>
+<td>No</td>
+<td>string</td>
+<td>The hex code of the color of the entry, which is shown in the web-ui</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidTime</td>
+<td>The time given is in the past</td>
+</tr>
+<tr>
+<td>404</td>
+<td>NotificationServiceNotFound</td>
+<td>The notification service was not found</td>
+</tr>
+<tr>
+<td>404</td>
+<td>ReminderNotFound</td>
+<td>The reminder with the id can not be found</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="delete">
+<summary>Delete</summary>
+<p>Delete the reminder</p>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>404</td>
+<td>ReminderNotFound</td>
+<td>The reminder with the id can not be found</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="templates"><code class="highlight">/templates</code><a class="headerlink" href="#templates" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Manage the templates</td>
+</tr>
+</tbody>
+</table>
+<details class="get">
+<summary>Get</summary>
+<p>Get a list of all templates</p>
+<p><strong>Parameters (url)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sort_by</td>
+<td>No</td>
+<td>string</td>
+<td>How to sort the result</td>
+<td><code class="highlight">title</code>, <code class="highlight">title_reversed</code>, <code class="highlight">date_added</code>, <code class="highlight">date_added_reversed</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="post">
+<summary>Post</summary>
+<p>Add a template</p>
+<p><strong>Parameters (body)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>title</td>
+<td>Yes</td>
+<td>string</td>
+<td>The title of the entry</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>notification_services</td>
+<td>Yes</td>
+<td>list of numbers</td>
+<td>Array of the id's of the notification services to use to send the notification</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>text</td>
+<td>No</td>
+<td>string</td>
+<td>The body of the entry</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>color</td>
+<td>No</td>
+<td>string</td>
+<td>The hex code of the color of the entry, which is shown in the web-ui</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>201</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+<tr>
+<td>400</td>
+<td>KeyNotFound</td>
+<td>A key was not found in the input that is required to be given</td>
+</tr>
+<tr>
+<td>404</td>
+<td>NotificationServiceNotFound</td>
+<td>The notification service was not found</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="templatessearch"><code class="highlight">/templates/search</code><a class="headerlink" href="#templatessearch" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Search through the list of templates</td>
+</tr>
+</tbody>
+</table>
+<details class="get">
+<summary>Get</summary>
+<p><strong>Parameters (url)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sort_by</td>
+<td>No</td>
+<td>string</td>
+<td>How to sort the result</td>
+<td><code class="highlight">title</code>, <code class="highlight">title_reversed</code>, <code class="highlight">date_added</code>, <code class="highlight">date_added_reversed</code></td>
+</tr>
+<tr>
+<td>query</td>
+<td>Yes</td>
+<td>string</td>
+<td>The search term</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+<tr>
+<td>400</td>
+<td>KeyNotFound</td>
+<td>A key was not found in the input that is required to be given</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="templatesintt_id"><code class="highlight">/templates/&lt;int:t_id&gt;</code><a class="headerlink" href="#templatesintt_id" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Manage a specific template</td>
+</tr>
+</tbody>
+</table>
+<p>Replace <code class="highlight">&lt;int:t_id&gt;</code> with the ID of the entry. For example: <code class="highlight">/templates/2</code>.</p>
+<details class="get">
+<summary>Get</summary>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>404</td>
+<td>TemplateNotFound</td>
+<td>The template was not found</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="put">
+<summary>Put</summary>
+<p>Edit the template</p>
+<p><strong>Parameters (body)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>title</td>
+<td>No</td>
+<td>string</td>
+<td>The title of the entry</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>notification_services</td>
+<td>No</td>
+<td>list of numbers</td>
+<td>Array of the id's of the notification services to use to send the notification</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>text</td>
+<td>No</td>
+<td>string</td>
+<td>The body of the entry</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>color</td>
+<td>No</td>
+<td>string</td>
+<td>The hex code of the color of the entry, which is shown in the web-ui</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+<tr>
+<td>404</td>
+<td>NotificationServiceNotFound</td>
+<td>The notification service was not found</td>
+</tr>
+<tr>
+<td>404</td>
+<td>TemplateNotFound</td>
+<td>The template was not found</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="delete">
+<summary>Delete</summary>
+<p>Delete the template</p>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>404</td>
+<td>TemplateNotFound</td>
+<td>The template was not found</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="staticreminders"><code class="highlight">/staticreminders</code><a class="headerlink" href="#staticreminders" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Manage the static reminders</td>
+</tr>
+</tbody>
+</table>
+<details class="get">
+<summary>Get</summary>
+<p>Get a list of all static reminders</p>
+<p><strong>Parameters (url)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sort_by</td>
+<td>No</td>
+<td>string</td>
+<td>How to sort the result</td>
+<td><code class="highlight">title</code>, <code class="highlight">title_reversed</code>, <code class="highlight">date_added</code>, <code class="highlight">date_added_reversed</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="post">
+<summary>Post</summary>
+<p>Add a static reminder</p>
+<p><strong>Parameters (body)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>title</td>
+<td>Yes</td>
+<td>string</td>
+<td>The title of the entry</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>notification_services</td>
+<td>Yes</td>
+<td>list of numbers</td>
+<td>Array of the id's of the notification services to use to send the notification</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>text</td>
+<td>No</td>
+<td>string</td>
+<td>The body of the entry</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>color</td>
+<td>No</td>
+<td>string</td>
+<td>The hex code of the color of the entry, which is shown in the web-ui</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>201</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+<tr>
+<td>400</td>
+<td>KeyNotFound</td>
+<td>A key was not found in the input that is required to be given</td>
+</tr>
+<tr>
+<td>404</td>
+<td>NotificationServiceNotFound</td>
+<td>The notification service was not found</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="staticreminderssearch"><code class="highlight">/staticreminders/search</code><a class="headerlink" href="#staticreminderssearch" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Search through the list of staticreminders</td>
+</tr>
+</tbody>
+</table>
+<details class="get">
+<summary>Get</summary>
+<p><strong>Parameters (url)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sort_by</td>
+<td>No</td>
+<td>string</td>
+<td>How to sort the result</td>
+<td><code class="highlight">title</code>, <code class="highlight">title_reversed</code>, <code class="highlight">date_added</code>, <code class="highlight">date_added_reversed</code></td>
+</tr>
+<tr>
+<td>query</td>
+<td>Yes</td>
+<td>string</td>
+<td>The search term</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+<tr>
+<td>400</td>
+<td>KeyNotFound</td>
+<td>A key was not found in the input that is required to be given</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="staticremindersints_id"><code class="highlight">/staticreminders/&lt;int:s_id&gt;</code><a class="headerlink" href="#staticremindersints_id" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Manage a specific static reminder</td>
+</tr>
+</tbody>
+</table>
+<p>Replace <code class="highlight">&lt;int:s_id&gt;</code> with the ID of the entry. For example: <code class="highlight">/staticreminders/2</code>.</p>
+<details class="get">
+<summary>Get</summary>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>404</td>
+<td>ReminderNotFound</td>
+<td>The reminder with the id can not be found</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="post">
+<summary>Post</summary>
+<p>Trigger the static reminder</p>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>201</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>404</td>
+<td>ReminderNotFound</td>
+<td>The reminder with the id can not be found</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="put">
+<summary>Put</summary>
+<p>Edit the static reminder</p>
+<p><strong>Parameters (body)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>title</td>
+<td>No</td>
+<td>string</td>
+<td>The title of the entry</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>notification_services</td>
+<td>No</td>
+<td>list of numbers</td>
+<td>Array of the id's of the notification services to use to send the notification</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>text</td>
+<td>No</td>
+<td>string</td>
+<td>The body of the entry</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>color</td>
+<td>No</td>
+<td>string</td>
+<td>The hex code of the color of the entry, which is shown in the web-ui</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+<tr>
+<td>404</td>
+<td>NotificationServiceNotFound</td>
+<td>The notification service was not found</td>
+</tr>
+<tr>
+<td>404</td>
+<td>ReminderNotFound</td>
+<td>The reminder with the id can not be found</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="delete">
+<summary>Delete</summary>
+<p>Delete the static reminder</p>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>404</td>
+<td>ReminderNotFound</td>
+<td>The reminder with the id can not be found</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="adminshutdown"><code class="highlight">/admin/shutdown</code><a class="headerlink" href="#adminshutdown" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Shut down the application</td>
+</tr>
+</tbody>
+</table>
+<details class="post">
+<summary>Post</summary>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>201</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="adminrestart"><code class="highlight">/admin/restart</code><a class="headerlink" href="#adminrestart" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Restart the application</td>
+</tr>
+</tbody>
+</table>
+<details class="post">
+<summary>Post</summary>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>201</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="settings"><code class="highlight">/settings</code><a class="headerlink" href="#settings" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No</td>
+<td>Get the admin settings</td>
+</tr>
+</tbody>
+</table>
+<details class="get">
+<summary>Get</summary>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="adminsettings"><code class="highlight">/admin/settings</code><a class="headerlink" href="#adminsettings" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Interact with the admin settings</td>
+</tr>
+</tbody>
+</table>
+<details class="get">
+<summary>Get</summary>
+<p>Get the admin settings</p>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="put">
+<summary>Put</summary>
+<p>Edit the admin settings. Supplying a hosting setting will automatically restart MIND.</p>
+<p><strong>Parameters (body)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>allow_new_accounts</td>
+<td>No</td>
+<td>bool</td>
+<td>Whether or not to allow users to register a new account. The admin can always add a new account.</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>login_time</td>
+<td>No</td>
+<td>number</td>
+<td>How long a user stays logged in, in seconds. Between 1 min and 1 month (60 &lt;= sec &lt;= 2592000)</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>login_time_reset</td>
+<td>No</td>
+<td>bool</td>
+<td>If the Login Time timer should reset with each API request.</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>host</td>
+<td>No</td>
+<td>string</td>
+<td>The IP to bind to. Use 0.0.0.0 to bind to all addresses.</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>port</td>
+<td>No</td>
+<td>number</td>
+<td>The port to listen on.</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>url_prefix</td>
+<td>No</td>
+<td>string</td>
+<td>The base url to run on. Useful for reverse proxies. Empty string to disable.</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>log_level</td>
+<td>No</td>
+<td>number</td>
+<td>The level to log on.</td>
+<td><code class="highlight"><span class="mf">20</span></code>, <code class="highlight"><span class="mf">10</span></code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="adminlogs"><code class="highlight">/admin/logs</code><a class="headerlink" href="#adminlogs" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Get the debug logs</td>
+</tr>
+</tbody>
+</table>
+<details class="get">
+<summary>Get</summary>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="adminusers"><code class="highlight">/admin/users</code><a class="headerlink" href="#adminusers" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Get all users or add one</td>
+</tr>
+</tbody>
+</table>
+<details class="get">
+<summary>Get</summary>
+<p>Get all users</p>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="post">
+<summary>Post</summary>
+<p>Add a new user</p>
+<p><strong>Parameters (body)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>username</td>
+<td>Yes</td>
+<td>string</td>
+<td>The username of the user account</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>password</td>
+<td>Yes</td>
+<td>string</td>
+<td>The password of the user account</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>201</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>KeyNotFound</td>
+<td>A key was not found in the input that is required to be given</td>
+</tr>
+<tr>
+<td>400</td>
+<td>UsernameInvalid</td>
+<td>The username contains invalid characters</td>
+</tr>
+<tr>
+<td>400</td>
+<td>UsernameTaken</td>
+<td>The username is already taken</td>
+</tr>
+<tr>
+<td>403</td>
+<td>NewAccountsNotAllowed</td>
+<td>It's not allowed to create a new account except for the admin</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="adminusersintu_id"><code class="highlight">/admin/users/&lt;int:u_id&gt;</code><a class="headerlink" href="#adminusersintu_id" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Manage a specific user</td>
+</tr>
+</tbody>
+</table>
+<p>Replace <code class="highlight">&lt;int:u_id&gt;</code> with the ID of the entry. For example: <code class="highlight">/admin/users/2</code>.</p>
+<details class="put">
+<summary>Put</summary>
+<p>Change the password of the user account</p>
+<p><strong>Parameters (body)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>new_password</td>
+<td>Yes</td>
+<td>string</td>
+<td>The new password of the user account</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>KeyNotFound</td>
+<td>A key was not found in the input that is required to be given</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="delete">
+<summary>Delete</summary>
+<p>Delete the user account</p>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h3 id="admindatabase"><code class="highlight">/admin/database</code><a class="headerlink" href="#admindatabase" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Requires being logged in</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yes</td>
+<td>Download and upload the database</td>
+</tr>
+</tbody>
+</table>
+<details class="get">
+<summary>Get</summary>
+<p>Download the database file</p>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>200</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+</tbody>
+</table>
+</details>
+<details class="post">
+<summary>Post</summary>
+<p>Upload and apply a database file. Will automatically restart MIND.</p>
+<p><strong>Parameters (url)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>copy_hosting_settings</td>
+<td>Yes</td>
+<td>bool</td>
+<td>Copy the hosting settings from the current database</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Parameters (file)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Required</th>
+<th>Data type</th>
+<th>Description</th>
+<th>Allowed values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>file</td>
+<td>Yes</td>
+<td>N/A</td>
+<td>The MIND database file</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Error</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>201</td>
+<td>N/A</td>
+<td>Success</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidDatabaseFile</td>
+<td>The uploaded database file is invalid or not supported</td>
+</tr>
+<tr>
+<td>400</td>
+<td>InvalidKeyValue</td>
+<td>The value of a key is invalid</td>
+</tr>
+<tr>
+<td>400</td>
+<td>KeyNotFound</td>
+<td>A key was not found in the input that is required to be given</td>
+</tr>
+</tbody>
+</table>
+</details>
+
+
+
+
+
+
+
+  
+    
+  
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-03-15T13:08:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-03-15</span>
+  </span>
+
+    
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["content.tabs.link", "content.code.copy", "header.autohide", "navigation.expand", "navigation.indexes", "navigation.instant", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.tracking"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c8d2eff1.min.js"></script>
+      
+        <script src="../../js/timeago.min.js"></script>
+      
+        <script src="../../js/timeago_mkdocs_material.js"></script>
+      
+    
+  </body>
+</html>
