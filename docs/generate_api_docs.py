@@ -22,7 +22,7 @@ from frontend.input_validation import DataSource, api_docs
 
 api_prefix = Server.api_prefix
 admin_prefix = Server.admin_prefix
-api_file = folder_path('docs', 'other_docs', 'api.md')
+api_file = folder_path('docs', 'src', 'other_docs', 'api.md')
 
 url_var_map = {
     'int:n_id': NotificationServiceNotFound,

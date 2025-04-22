@@ -5,7 +5,7 @@ site_author: Casvt
 repo_url: https://github.com/Casvt/MIND
 edit_uri: blob/Development/docs/
 repo_name: Casvt/MIND
-docs_dir: ../docs
+docs_dir: src/
 
 extra_css:
   - assets/css/extra.css
