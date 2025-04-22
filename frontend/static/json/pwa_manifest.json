@@ -2,6 +2,7 @@
     "name": "MIND",
     "short_name": "MIND",
     "start_url": "/",
+    "scope": "/",
     "display": "standalone",
     "background_color": "#1b1b1b",
     "theme_color": "#6b6b6b",

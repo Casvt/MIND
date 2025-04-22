@@ -1,0 +1,52 @@
+repos:
+-   repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+    -   id: isort
+        name: isort
+        additional_dependencies: [
+          apprise ~= 1.4,
+          python-dateutil ~= 2.8,
+          Flask ~= 3.0,
+          waitress ~= 2.1
+        ]
+
+-   repo: local
+    hooks:
+    -   id: mypy
+        name: mypy
+        language: python
+        pass_filenames: false
+        additional_dependencies: [
+          mypy ~= 1.10,
+
+          apprise ~= 1.4,
+          python-dateutil ~= 2.8,
+          Flask ~= 3.0,
+          waitress ~= 2.1
+        ]
+        entry: python -m mypy --explicit-package-bases .
+    
+    -   id: unittest
+        name: unittest
+        language: python
+        pass_filenames: false
+        additional_dependencies: [
+          apprise ~= 1.4,
+          python-dateutil ~= 2.8,
+          Flask ~= 3.0,
+          waitress ~= 2.1
+        ]
+        entry: python -m unittest discover -s ./tests -p '*.py'
+
+-   repo: https://github.com/hhatto/autopep8
+    rev: v2.2.0
+    hooks:
+    -   id: autopep8
+        name: autopep8
+        additional_dependencies: [
+          apprise ~= 1.4,
+          python-dateutil ~= 2.8,
+          Flask ~= 3.0,
+          waitress ~= 2.1
+        ]

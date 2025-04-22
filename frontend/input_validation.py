@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 """
 Input validation for the API
@@ -6,583 +6,542 @@ Input validation for the API
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-import logging
+from logging import DEBUG, INFO
 from os.path import splitext
 from re import compile
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Type
 
 from apprise import Apprise
 from flask import Blueprint, request
-from flask.sansio.scaffold import T_route
 
-from backend.custom_exceptions import (AccessUnauthorized, InvalidDatabaseFile,
-                                       InvalidKeyValue, InvalidTime,
-                                       KeyNotFound, NewAccountsNotAllowed,
-                                       NotificationServiceNotFound,
-                                       UsernameInvalid, UsernameTaken,
-                                       UserNotFound)
-from backend.helpers import (RepeatQuantity, SortingMethod,
-                             TimelessSortingMethod, folder_path)
-from backend.server import SERVER
-from backend.settings import _format_setting
+from backend.base.custom_exceptions import (AccessUnauthorized,
+                                            InvalidDatabaseFile,
+                                            InvalidKeyValue, InvalidTime,
+                                            KeyNotFound, NewAccountsNotAllowed,
+                                            NotificationServiceNotFound,
+                                            UsernameInvalid, UsernameTaken)
+from backend.base.definitions import (ApiDocEntry, DataSource, DataType,
+                                      InputVariable, Methods, MindException,
+                                      SortingMethod, T, TimelessSortingMethod)
+from backend.base.helpers import RepeatQuantity, folder_path
+from backend.internals.server import Server
 
 if TYPE_CHECKING:
-	from flask import Request
+    from flask import Request
+    from flask.sansio.scaffold import T_route
+
 
 color_regex = compile(r'#[0-9a-f]{6}')
-
 api_docs: Dict[str, ApiDocEntry] = {}
 
 
-class DataSource:
-	DATA = 1
-	VALUES = 2
-	FILES = 3
+def request_data(request: Request) -> Dict[DataSource, Dict[str, Any]]:
+    """Returns the request data in a dictionary.
 
-	def __init__(self, request: Request) -> None:
-		self.map: Dict[int, dict] = {
-			self.DATA: request.get_json() if request.data else {},
-			self.VALUES: request.values,
-			self.FILES: request.files
-		}
-		return
+    Args:
+        request (Request): The request object.
 
-	def __getitem__(self, key: int) -> dict:
-		return self.map[key]
-
-
-class DataType:
-	STR = 'string'
-	INT = 'number'
-	FLOAT = 'decimal number'
-	BOOL = 'bool'
-	INT_ARRAY = 'list of numbers'
-	NA = 'N/A'
-
-
-class InputVariable(ABC):
-	value: Any
-
-	@abstractmethod
-	def __init__(self, value: Any) -> None:
-		pass
-
-	@property
-	@abstractmethod
-	def name(self) -> str:
-		pass
-
-	@abstractmethod
-	def validate(self) -> bool:
-		pass
-
-	@property
-	@abstractmethod
-	def required(self) -> bool:
-		pass
-
-	@property
-	@abstractmethod
-	def data_type(self) -> List[str]:
-		pass
-
-	@property
-	@abstractmethod
-	def default(self) -> Any:
-		pass
-
-	@property
-	@abstractmethod
-	def source(self) -> int:
-		pass
-
-	@property
-	@abstractmethod
-	def description(self) -> str:
-		pass
-
-	@property
-	@abstractmethod
-	def related_exceptions(self) -> List[Exception]:
-		pass
-
-
-@dataclass(frozen=True)
-class Method:
-	description: str = ''
-	vars: List[Type[InputVariable]] = field(default_factory=list)
-	
-	def __bool__(self) -> bool:
-		return self.vars != []
-
-
-@dataclass(frozen=True)
-class Methods:
-	get: Method = Method()
-	post: Method = Method()
-	put: Method = Method()
-	delete: Method = Method()
-
-	def __getitem__(self, key: str) -> Method:
-		return getattr(self, key.lower())
-
-	def __bool__(self) -> bool:
-		return bool(self.get or self.post or self.put or self.delete)
-
-
-@dataclass(frozen=True)
-class ApiDocEntry:
-	endpoint: str
-	description: str
-	requires_auth: bool
-	used_methods: List[str]
-	methods: Methods
+    Returns:
+        Dict[DataSource, Dict[str, Any]]: The request data.
+    """
+    return {
+        DataSource.DATA: request.get_json() if request.data else {},
+        DataSource.VALUES: request.values,
+        DataSource.FILES: request.files
+    }
 
 
 def get_api_docs(request: Request) -> ApiDocEntry:
-	if request.path.startswith(SERVER.admin_prefix):
-		url = SERVER.admin_api_extension + request.url_rule.rule.split(SERVER.admin_prefix)[1]
-	else:
-		url = request.url_rule.rule.split(SERVER.api_prefix)[1]
-	return api_docs[url]
+    """Returns the API documentation for the given request.
+
+    Args:
+        request (Request): The request object.
+
+    Returns:
+        ApiDocEntry: The API documentation for the used endpoint.
+    """
+    assert (request.url_rule is not None)
+
+    if request.path.startswith(Server.admin_prefix):
+        url = (
+            Server.admin_api_extension +
+            request.url_rule.rule.split(Server.admin_prefix)[1]
+        )
+    else:
+        url = request.url_rule.rule.split(Server.api_prefix)[1]
+
+    return api_docs[url]
 
 
-class BaseInputVariable(InputVariable):
-	source = DataSource.DATA
-	data_type = [DataType.STR]
-	required = True
-	default = None
-	related_exceptions = [KeyNotFound, InvalidKeyValue]
-
-	def __init__(self, value: Any) -> None:
-		self.value = value
-
-	def validate(self) -> bool:
-		return isinstance(self.value, str) and self.value
-
-	def __repr__(self) -> str:
-		return f'| {self.name} | {"Yes" if self.required else "No"} | {",".join(self.data_type)} | {self.description} | N/A |'
+def dl(*args: T) -> List[T]:
+    return field(default_factory=lambda: list(args))
 
 
-class NonRequiredVersion(BaseInputVariable):
-	required = False
-	related_exceptions = [InvalidKeyValue]
+@dataclass
+class NonRequiredVersion(InputVariable):
+    required: bool = False
+    related_exceptions: List[Type[MindException]] = dl(InvalidKeyValue)
 
-	def __init__(self, value: Any) -> None:
-		super().__init__(
-			value
-			if value is not None else
-			self.default
-		)
-		return
+    def __post_init__(self) -> None:
+        if self.value is None:
+            self.value = self.default
+        return
 
-	def validate(self) -> bool:
-		return self.value is None or super().validate()
+    def validate(self) -> bool:
+        return self.value is None or super().validate()
 
 
-class UsernameVariable(BaseInputVariable):
-	name = 'username'
-	description = 'The username of the user account'
-	related_exceptions = [KeyNotFound, UserNotFound]
+# ===================
+# region Variables
+# ===================
+@dataclass
+class UsernameVariable(InputVariable):
+    name: str = 'username'
+    description: str = 'The username of the user account'
+    related_exceptions: List[Type[MindException]] = dl(
+        KeyNotFound, UsernameInvalid
+    )
 
 
-class PasswordCreateVariable(BaseInputVariable):
-	name = 'password'
-	description = 'The password of the user account'
-	related_exceptions = [KeyNotFound]
+@dataclass
+class PasswordCreateVariable(InputVariable):
+    name: str = 'password'
+    description: str = 'The password of the user account'
+    related_exceptions: List[Type[MindException]] = dl(KeyNotFound)
 
 
+@dataclass
 class PasswordVariable(PasswordCreateVariable):
-	related_exceptions = [KeyNotFound, AccessUnauthorized]
+    related_exceptions: List[Type[MindException]] = dl(
+        KeyNotFound, AccessUnauthorized)
 
 
+@dataclass
 class UsernameCreateVariable(UsernameVariable):
-	related_exceptions = [
-		KeyNotFound,
-		UsernameInvalid, UsernameTaken,
-		NewAccountsNotAllowed
-	]
+    related_exceptions: List[Type[MindException]] = dl(
+        KeyNotFound,
+        UsernameInvalid, UsernameTaken,
+        NewAccountsNotAllowed
+    )
 
 
-class NewPasswordVariable(BaseInputVariable):
-	name = 'new_password'
-	description = 'The new password of the user account'
-	related_exceptions = [KeyNotFound]
+@dataclass
+class NewPasswordVariable(InputVariable):
+    name: str = 'new_password'
+    description: str = 'The new password of the user account'
+    related_exceptions: List[Type[MindException]] = dl(KeyNotFound)
 
 
-class TitleVariable(BaseInputVariable):
-	name = 'title'
-	description = 'The title of the entry'
+@dataclass
+class TitleVariable(InputVariable):
+    name: str = 'title'
+    description: str = 'The title of the entry'
 
 
-class URLVariable(BaseInputVariable):
-	name = 'url'
-	description = 'The Apprise URL of the notification service'
+@dataclass
+class URLVariable(InputVariable):
+    name: str = 'url'
+    description: str = 'The Apprise URL of the notification service'
 
-	def validate(self) -> bool:
-		return super().validate() and Apprise().add(self.value)
+    def validate(self) -> bool:
+        return super().validate() and Apprise().add(self.value)
 
 
+@dataclass
 class EditTitleVariable(NonRequiredVersion, TitleVariable):
-	pass
+    pass
 
 
+@dataclass
 class EditURLVariable(NonRequiredVersion, URLVariable):
-	pass
+    pass
 
 
-class SortByVariable(NonRequiredVersion, BaseInputVariable):
-	name = 'sort_by'
-	description = 'How to sort the result'
-	source = DataSource.VALUES
-	_options = [k.lower() for k in SortingMethod._member_names_]
-	default = SortingMethod._member_names_[0].lower()
+@dataclass
+class SortByVariable(NonRequiredVersion, InputVariable):
+    name: str = 'sort_by'
+    description: str = 'How to sort the result'
+    source: DataSource = DataSource.VALUES
+    _options: List[str] = dl(*(k.lower() for k in SortingMethod._member_names_))
+    default: Any = SortingMethod.TIME
 
-	def validate(self) -> bool:
-		if not self.value in self._options:
-			return False
+    def validate(self) -> bool:
+        if self.value not in self._options:
+            return False
 
-		self.value = SortingMethod[self.value.upper()]
-		return True
+        self.value = SortingMethod[self.value.upper()]
+        return True
 
-	def __repr__(self) -> str:
-		return '| {n} | {r} | {t} | {d} | {v} |'.format(
-			n=self.name,
-			r="Yes" if self.required else "No",
-			t=",".join(self.data_type),
-			d=self.description,
-			v=", ".join(f'`{o}`' for o in self._options)
-		)
+    def __repr__(self) -> str:
+        return '| {n} | {r} | {t} | {d} | {v} |'.format(
+            n=self.name,
+            r="Yes" if self.required else "No",
+            t=",".join(d.value for d in self.data_type),
+            d=self.description,
+            v=", ".join(f'`{o}`' for o in self._options)
+        )
 
 
+@dataclass
 class TimelessSortByVariable(SortByVariable):
-	_options = [k.lower() for k in TimelessSortingMethod._member_names_]
-	default = TimelessSortingMethod._member_names_[0].lower()
+    _options: List[str] = dl(*(k.lower()
+                             for k in TimelessSortingMethod._member_names_))
+    default: Any = TimelessSortingMethod.TITLE
 
-	def validate(self) -> bool:
-		if not self.value in self._options:
-			return False
+    def validate(self) -> bool:
+        if self.value not in self._options:
+            return False
 
-		self.value = TimelessSortingMethod[self.value.upper()]
-		return True
-
-
-class TimeVariable(BaseInputVariable):
-	name = 'time'
-	description = 'The UTC epoch timestamp that the reminder should be sent at'
-	data_type = [DataType.INT, DataType.FLOAT]
-	related_exceptions = [KeyNotFound, InvalidKeyValue, InvalidTime]
-
-	def validate(self) -> bool:
-		return isinstance(self.value, (float, int))
+        self.value = TimelessSortingMethod[self.value.upper()]
+        return True
 
 
+@dataclass
+class TimeVariable(InputVariable):
+    name: str = 'time'
+    description: str = 'The UTC epoch timestamp that the reminder should be sent at'
+    data_type: List[DataType] = dl(DataType.INT, DataType.FLOAT)
+    related_exceptions: List[Type[MindException]] = dl(
+        KeyNotFound, InvalidKeyValue, InvalidTime)
+
+    def validate(self) -> bool:
+        return isinstance(self.value, (float, int))
+
+
+@dataclass
 class EditTimeVariable(NonRequiredVersion, TimeVariable):
-	related_exceptions = [InvalidKeyValue, InvalidTime]
+    related_exceptions: List[Type[MindException]] = dl(
+        InvalidKeyValue, InvalidTime)
 
 
-class NotificationServicesVariable(BaseInputVariable):
-	name = 'notification_services'
-	description = "Array of the id's of the notification services to use to send the notification"
-	data_type = [DataType.INT_ARRAY]
-	related_exceptions = [
-		KeyNotFound, InvalidKeyValue,
-		NotificationServiceNotFound
-	]
+@dataclass
+class NotificationServicesVariable(InputVariable):
+    name: str = 'notification_services'
+    description: str = "Array of the id's of the notification services to use to send the notification"
+    data_type: List[DataType] = dl(DataType.INT_ARRAY)
+    related_exceptions: List[Type[MindException]] = dl(
+        KeyNotFound, InvalidKeyValue,
+        NotificationServiceNotFound
+    )
 
-	def validate(self) -> bool:
-		if not isinstance(self.value, list):
-			return False
-		if not self.value:
-			return False
-		for v in self.value:
-			if not isinstance(v, int):
-				return False
-		return True
-
-
-class EditNotificationServicesVariable(NonRequiredVersion, NotificationServicesVariable):
-	related_exceptions = [InvalidKeyValue, NotificationServiceNotFound]
+    def validate(self) -> bool:
+        if not isinstance(self.value, list):
+            return False
+        if not self.value:
+            return False
+        for v in self.value:
+            if not isinstance(v, int):
+                return False
+        return True
 
 
-class TextVariable(NonRequiredVersion, BaseInputVariable):
-	name = 'text'
-	description = 'The body of the entry'
-	default = ''
-
-	def validate(self) -> bool:
-		return isinstance(self.value, str)
-
-
-class RepeatQuantityVariable(NonRequiredVersion, BaseInputVariable):
-	name = 'repeat_quantity'
-	description = 'The quantity of the repeat_interval'
-	_options = [m.lower() for m in RepeatQuantity._member_names_]
-
-	def validate(self) -> bool:
-		if self.value is None:
-			return True
-
-		if not self.value in self._options:
-			return False
-
-		self.value = RepeatQuantity[self.value.upper()]
-		return True
-
-	def __repr__(self) -> str:
-		return '| {n} | {r} | {t} | {d} | {v} |'.format(
-			n=self.name,
-			r="Yes" if self.required else "No",
-			t=",".join(self.data_type),
-			d=self.description,
-			v=", ".join(f'`{o}`' for o in self._options)
-		)
+@dataclass
+class EditNotificationServicesVariable(
+    NonRequiredVersion,
+    NotificationServicesVariable
+):
+    related_exceptions: List[Type[MindException]] = dl(
+        InvalidKeyValue, NotificationServiceNotFound)
 
 
-class RepeatIntervalVariable(NonRequiredVersion, BaseInputVariable):
-	name = 'repeat_interval'
-	description = 'The number of the interval'
-	data_type = [DataType.INT]
+@dataclass
+class TextVariable(NonRequiredVersion):
+    name: str = 'text'
+    description: str = 'The body of the entry'
+    default: Any = ''
 
-	def validate(self) -> bool:
-		return (
-			self.value is None
-			or (
-				isinstance(self.value, int)
-				and self.value > 0
-			)
-		)
+    def validate(self) -> bool:
+        return isinstance(self.value, str)
 
 
-class WeekDaysVariable(NonRequiredVersion, BaseInputVariable):
-	name = 'weekdays'
-	description = 'On which days of the weeks to run the reminder'
-	data_type = [DataType.INT_ARRAY]
-	_options = {0, 1, 2, 3, 4, 5, 6}
+@dataclass
+class RepeatQuantityVariable(NonRequiredVersion):
+    name: str = 'repeat_quantity'
+    description: str = 'The quantity of the repeat_interval'
+    _options: List[str] = dl(*(m.lower()
+                             for m in RepeatQuantity._member_names_))
 
-	def validate(self) -> bool:
-		return self.value is None or (
-			isinstance(self.value, list)
-			and len(self.value) > 0
-			and all(v in self._options for v in self.value)
-		)
+    def validate(self) -> bool:
+        if self.value is None:
+            return True
 
-	def __repr__(self) -> str:
-		return '| {n} | {r} | {t} | {d} | {v} |'.format(
-			n=self.name,
-			r="Yes" if self.required else "No",
-			t=",".join(self.data_type),
-			d=self.description,
-			v=", ".join(f'`{o}`' for o in self._options)
-		)
+        if self.value not in self._options:
+            return False
 
-class ColorVariable(NonRequiredVersion, BaseInputVariable):
-	name = 'color'
-	description = 'The hex code of the color of the entry, which is shown in the web-ui'
+        self.value = RepeatQuantity[self.value.upper()]
+        return True
 
-	def validate(self) -> bool:
-		return self.value is None or (
-			isinstance(self.value, str)
-			and color_regex.search(self.value)
-		)
+    def __repr__(self) -> str:
+        return '| {n} | {r} | {t} | {d} | {v} |'.format(
+                n=self.name,
+                r="Yes" if self.required else "No",
+                t=",".join(d.value for d in self.data_type),
+                d=self.description,
+                v=", ".join(f'`{o}`' for o in self._options)
+        )
 
 
-class QueryVariable(BaseInputVariable):
-	name = 'query'
-	description = 'The search term'
-	source = DataSource.VALUES
+@dataclass
+class RepeatIntervalVariable(NonRequiredVersion):
+    name: str = 'repeat_interval'
+    description: str = 'The number of the interval'
+    data_type: List[DataType] = dl(DataType.INT)
+
+    def validate(self) -> bool:
+        return (
+            self.value is None
+            or (
+                isinstance(self.value, int)
+                and self.value > 0
+            )
+        )
 
 
-class DeleteRemindersUsingVariable(NonRequiredVersion, BaseInputVariable):
-	name = 'delete_reminders_using'
-	description = 'Instead of throwing an error when there are still reminders using the service, delete the reminders.'
-	source = DataSource.VALUES
-	default = 'false'
-	data_type = [DataType.BOOL]
+@dataclass
+class WeekDaysVariable(NonRequiredVersion):
+    name: str = 'weekdays'
+    description: str = 'On which days of the weeks to run the reminder'
+    data_type: List[DataType] = dl(DataType.INT_ARRAY)
+    _options = {0, 1, 2, 3, 4, 5, 6}
 
-	def validate(self) -> bool:
-		if self.value == 'true':
-			self.value = True
-			return True
+    def validate(self) -> bool:
+        return self.value is None or (
+            isinstance(self.value, list)
+            and len(self.value) > 0
+            and all(v in self._options for v in self.value)
+        )
 
-		elif self.value == 'false':
-			self.value = False
-			return True
-
-		else:
-			return False
-
-
-class AdminSettingsVariable(BaseInputVariable):
-	def validate(self) -> bool:
-		try:
-			_format_setting(self.name, self.value)
-		except InvalidKeyValue:
-			return False
-		return True
+    def __repr__(self) -> str:
+        return '| {n} | {r} | {t} | {d} | {v} |'.format(
+            n=self.name,
+            r="Yes" if self.required else "No",
+            t=",".join(d.value for d in self.data_type),
+            d=self.description,
+            v=", ".join(f'`{o}`' for o in self._options)
+        )
 
 
+@dataclass
+class ColorVariable(NonRequiredVersion):
+    name: str = 'color'
+    description: str = 'The hex code of the color of the entry, which is shown in the web-ui'
+
+    def validate(self) -> bool:
+        return self.value is None or (
+            isinstance(self.value, str)
+            and color_regex.search(self.value) is not None
+        )
+
+
+@dataclass
+class QueryVariable(InputVariable):
+    name: str = 'query'
+    description: str = 'The search term'
+    source: DataSource = DataSource.VALUES
+
+
+@dataclass
+class DeleteRemindersUsingVariable(NonRequiredVersion):
+    name: str = 'delete_reminders_using'
+    description: str = 'Instead of throwing an error when there are still reminders using the service, delete the reminders.'
+    source: DataSource = DataSource.VALUES
+    default: Any = 'false'
+    data_type: List[DataType] = dl(DataType.BOOL)
+
+    def validate(self) -> bool:
+        if self.value == 'true':
+            self.value = True
+            return True
+
+        elif self.value == 'false':
+            self.value = False
+            return True
+
+        else:
+            return False
+
+
+@dataclass
+class AdminSettingsVariable(InputVariable):
+    def validate(self) -> bool:
+        # @dataclassValidation is done in
+        #  the settings class
+        return True
+
+
+@dataclass
 class AllowNewAccountsVariable(NonRequiredVersion, AdminSettingsVariable):
-	name = 'allow_new_accounts'
-	description = ('Whether or not to allow users to register a new account. '
-	+ 'The admin can always add a new account.')
-	data_type = [DataType.BOOL]
+    name: str = 'allow_new_accounts'
+    description: str = (
+        'Whether or not to allow users to register a new account. ' +
+        'The admin can always add a new account.')
+    data_type: List[DataType] = dl(DataType.BOOL)
 
 
+@dataclass
 class LoginTimeVariable(NonRequiredVersion, AdminSettingsVariable):
-	name = 'login_time'
-	description = ('How long a user stays logged in, in seconds. '
-	+ 'Between 1 min and 1 month (60 <= sec <= 2592000)')
-	data_type = [DataType.INT]
+    name: str = 'login_time'
+    description: str = ('How long a user stays logged in, in seconds. '
+    + 'Between 1 min and 1 month (60 <= sec <= 2592000)')
+    data_type: List[DataType] = dl(DataType.INT)
 
 
+@dataclass
 class LoginTimeResetVariable(NonRequiredVersion, AdminSettingsVariable):
-	name = 'login_time_reset'
-	description = 'If the Login Time timer should reset with each API request.'
-	data_type = [DataType.BOOL]
+    name: str = 'login_time_reset'
+    description: str = 'If the Login Time timer should reset with each API request.'
+    data_type: List[DataType] = dl(DataType.BOOL)
 
 
+@dataclass
 class HostVariable(NonRequiredVersion, AdminSettingsVariable):
-	name = 'host'
-	description = 'The IP to bind to. Use 0.0.0.0 to bind to all addresses.'
+    name: str = 'host'
+    description: str = 'The IP to bind to. Use 0.0.0.0 to bind to all addresses.'
 
 
+@dataclass
 class PortVariable(NonRequiredVersion, AdminSettingsVariable):
-	name = 'port'
-	description = 'The port to listen on.'
-	data_type = [DataType.INT]
+    name: str = 'port'
+    description: str = 'The port to listen on.'
+    data_type: List[DataType] = dl(DataType.INT)
 
 
+@dataclass
 class UrlPrefixVariable(NonRequiredVersion, AdminSettingsVariable):
-	name = 'url_prefix'
-	description = 'The base url to run on. Useful for reverse proxies. Empty string to disable.'
+    name: str = 'url_prefix'
+    description: str = 'The base url to run on. Useful for reverse proxies. Empty string to disable.'
 
 
+@dataclass
 class LogLevelVariable(NonRequiredVersion, AdminSettingsVariable):
-	name = 'log_level'
-	description = 'The level to log on.'
-	data_type = [DataType.INT]
-	_options = [logging.INFO, logging.DEBUG]
+    name: str = 'log_level'
+    description: str = 'The level to log on.'
+    data_type: List[DataType] = dl(DataType.INT)
+    _options = [INFO, DEBUG]
 
-	def __repr__(self) -> str:
-		return '| {n} | {r} | {t} | {d} | {v} |'.format(
-			n=self.name,
-			r="Yes" if self.required else "No",
-			t=",".join(self.data_type),
-			d=self.description,
-			v=", ".join(f'`{o}`' for o in self._options)
-		)
-
-
-class DatabaseFileVariable(BaseInputVariable):
-	name = 'file'
-	description = 'The MIND database file'
-	data_type = [DataType.NA]
-	source = DataSource.FILES
-	related_exceptions = [KeyNotFound, InvalidDatabaseFile]
-
-	def validate(self) -> bool:
-		if (
-			self.value.filename
-			and splitext(self.value.filename)[1] == '.db'
-		):
-			path = folder_path('db', 'MIND_upload.db')
-			self.value.save(path)
-			self.value = path
-			return True
-		else:
-			return False
+    def __repr__(self) -> str:
+        return '| {n} | {r} | {t} | {d} | {v} |'.format(
+            n=self.name,
+            r="Yes" if self.required else "No",
+            t=",".join(d.value for d in self.data_type),
+            d=self.description,
+            v=", ".join(f'`{o}`' for o in self._options)
+        )
 
 
-class CopyHostingSettingsVariable(BaseInputVariable):
-	name = 'copy_hosting_settings'
-	description = 'Copy the hosting settings from the current database'
-	data_type = [DataType.BOOL]
-	source = DataSource.VALUES
+@dataclass
+class DatabaseFileVariable(InputVariable):
+    name: str = 'file'
+    description: str = 'The MIND database file'
+    data_type: List[DataType] = dl(DataType.NA)
+    source: DataSource = DataSource.FILES
+    related_exceptions: List[Type[MindException]] = dl(
+        KeyNotFound, InvalidDatabaseFile)
 
-	def validate(self) -> bool:
-		if not self.value in ('true', 'false'):
-			return False
+    def validate(self) -> bool:
+        if (
+            self.value.filename
+            and splitext(self.value.filename)[1] == '.db'
+        ):
+            path = folder_path('db', 'MIND_upload.db')
+            self.value.save(path)
+            self.value = path
+            return True
 
-		self.value = self.value == 'true'
-		return True
+        return False
 
 
-def input_validation() -> Union[None, Dict[str, Any]]:
-	"""Checks, extracts and transforms inputs
+@dataclass
+class CopyHostingSettingsVariable(InputVariable):
+    name: str = 'copy_hosting_settings'
+    description: str = 'Copy the hosting settings from the current database'
+    data_type: List[DataType] = dl(DataType.BOOL)
+    source: DataSource = DataSource.VALUES
 
-	Raises:
-		KeyNotFound: A required key was not supplied
-		InvalidKeyValue: The value of a key is not valid
+    def validate(self) -> bool:
+        if self.value not in ('true', 'false'):
+            return False
 
-	Returns:
-		Union[None, Dict[str, Any]]: `None` if the endpoint + method doesn't require input variables.
-		Otherwise `Dict[str, Any]` with the input variables, checked and formatted.
-	"""
-	result = {}
+        self.value = self.value == 'true'
+        return True
 
-	methods = get_api_docs(request).methods
-	method = methods[request.method]
-	noted_variables = method.vars
 
-	if not methods:
-		return None
+# ===================
+# region Endpoints
+# ===================
+def input_validation() -> Dict[str, Any]:
+    """Checks, extracts and transforms inputs.
 
-	if not method:
-		return result
+    Raises:
+        KeyNotFound: A required key was not supplied.
+        InvalidKeyValue: The value of a key is not valid.
 
-	given_variables = DataSource(request)
+    Returns:
+        Dict[str, Any]: The input variables, checked and formatted.
+    """
+    method = get_api_docs(request).methods[request.method]
+    if not method:
+        return {}
 
-	for noted_var in noted_variables:
-		if (
-			noted_var.required and
-			not noted_var.name in given_variables[noted_var.source]
-		):
-			raise KeyNotFound(noted_var.name)
+    result = {}
+    noted_variables = method.vars
+    given_variables = request_data(request)
+    for noted_var in noted_variables:
+        if noted_var.name not in given_variables[noted_var.source]:
+            if noted_var.required:
+                # Variable not given while required
+                raise KeyNotFound(noted_var.name)
+            else:
+                # Variable not given while not required, so set to default
+                result[noted_var.name] = noted_var.default
+                continue
 
-		input_value = given_variables[noted_var.source].get(noted_var.name)
-		value: InputVariable = noted_var(input_value)
+        input_value = given_variables[noted_var.source][noted_var.name]
+        value = noted_var(input_value) # type: ignore
 
-		if not value.validate():
-			if noted_var.__class__.__name__ == DatabaseFileVariable.__name__:
-				raise InvalidDatabaseFile
-			elif noted_var.source == DataSource.FILES:
-				raise InvalidKeyValue(noted_var.name, input_value.filename)
-			else:
-				raise InvalidKeyValue(noted_var.name, input_value)
+        if not value.validate():
+            if isinstance(value, DatabaseFileVariable):
+                raise InvalidDatabaseFile(value.value)
+            elif noted_var.source == DataSource.FILES:
+                raise InvalidKeyValue(noted_var.name, input_value.filename)
+            else:
+                raise InvalidKeyValue(noted_var.name, input_value)
 
-		result[noted_var.name] = value.value
-	return result
+        result[noted_var.name] = value.value
+
+    return result
 
 
 class APIBlueprint(Blueprint):
-	def route(
-		self,
-		rule: str,
-		description: str = '',
-		input_variables: Methods = Methods(),
-		requires_auth: bool = True,
-		**options: Any
-	) -> Callable[[T_route], T_route]:
+    def route(
+        self,
+        rule: str,
+        description: str = '',
+        input_variables: Methods = Methods(),
+        requires_auth: bool = True,
+        **options: Any
+    ) -> Callable[[T_route], T_route]:
 
-		if self == api:
-			processed_rule = rule
-		elif self == admin_api:
-			processed_rule = SERVER.admin_api_extension + rule
-		else:
-			raise NotImplementedError
+        if self == api:
+            processed_rule = rule
+        elif self == admin_api:
+            processed_rule = Server.admin_api_extension + rule
+        else:
+            raise NotImplementedError
 
-		api_docs[processed_rule] = ApiDocEntry(
-			endpoint=processed_rule,
-			description=description,
-			requires_auth=requires_auth,
-			used_methods=options['methods'],
-			methods=input_variables
-		)
+        api_docs[processed_rule] = ApiDocEntry(
+            endpoint=processed_rule,
+            description=description,
+            requires_auth=requires_auth,
+            methods=input_variables
+        )
 
-		return super().route(rule, **options)
+        if "methods" not in options:
+            options["methods"] = api_docs[processed_rule].methods.used_methods()
+
+        return super().route(rule, **options)
+
 
 api = APIBlueprint('api', __name__)
 admin_api = APIBlueprint('admin_api', __name__)

@@ -129,15 +129,14 @@ dmypy.json
 .pyre/
 
 # Database
-**/*.db
-**/*.db-shm
-**/*.db-wal
+db/
 
 # VS code
 *.code-workspace
 .vscode/
 
 # Docker
+Dockerfile
 .dockerignore
 docker-compose.yml
 
@@ -154,8 +153,6 @@ LICENSE
 tests/
 
 # Project management files
-release.sh
 docs/
-docs-requirements.txt
-mkdocs.yml
-generate_api_docs.py
+project_management/
+requirements-dev.txt

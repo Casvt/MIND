@@ -7,7 +7,7 @@ hide:
 
 __A simple self hosted reminder application that can send push notifications to your device. Set the reminder and forget about it!__
 
-MIND can be used for sending notifications at the desired time. This can be a set time, like a yearly reminder for a birthday, or at a button click, to easily send a predefined notification when you want to. The notification can be sent to 80+ platforms with the integration of [Apprise](https://github.com/caronc/apprise).
+MIND can be used for sending notifications at the desired time. This can be a set time, like a yearly reminder for a birthday, or at a button click, to easily send a predefined notification when you want to. The notification can be sent to 100+ platforms with the integration of [Apprise](https://github.com/caronc/apprise).
 
 ## Quick Links
 

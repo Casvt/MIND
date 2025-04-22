@@ -14,7 +14,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -57,6 +56,7 @@ coverage.xml
 
 # Django stuff:
 *.log
+*.log.*
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -137,4 +137,4 @@ dmypy.json
 *.code-workspace
 
 # Project management files
-release.sh
+release*.sh

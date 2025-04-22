@@ -1,13 +1,49 @@
 {
-	"python.testing.unittestArgs": [
-		"-v",
-		"-s",
-		"./tests",
-		"-p",
-		"*_test.py"
+	"editor.insertSpaces": true,
+    "editor.tabSize": 4,
+	
+	"[python]": {
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "ms-python.autopep8",
+		"editor.codeActionsOnSave": {
+			"source.organizeImports": "always",
+		}
+	},
+	"isort.check": true,
+	"isort.severity": {
+		"W": "Warning",
+		"E": "Warning"
+	},
+	"isort.args": [
+		"--jobs", "-1"
 	],
-	"python.testing.pytestEnabled": false,
+
 	"python.testing.unittestEnabled": true,
-	"python.analysis.autoImportCompletions": true,
-	"python.analysis.typeCheckingMode": "off"
+	"python.testing.unittestArgs": [
+		"-s", "./tests",
+		"-p", "*.py"
+	],
+
+	"python.analysis.typeCheckingMode": "standard",
+	"python.analysis.diagnosticMode": "workspace",
+
+	"mypy-type-checker.reportingScope": "workspace",
+	"mypy-type-checker.preferDaemon": false,
+	"mypy-type-checker.args": [
+		"--explicit-package-bases"
+	],
+  
+	"cSpell.words": [
+		"behaviour",
+		"customisable",
+		"customised",
+		"noqa",
+		"traceback"
+	],
+	"cSpell.languageSettings": [
+		{
+			"languageId": "log",
+			"enabled": false
+		}
+	]
 }

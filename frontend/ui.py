@@ -1,21 +1,35 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
+
+from typing import Any
 
 from flask import Blueprint, render_template
 
-from backend.server import SERVER
+from backend.internals.server import Server
 
 ui = Blueprint('ui', __name__)
-
 methods = ['GET']
+SERVER = Server()
+
+
+def render(filename: str, **kwargs: Any) -> str:
+    return render_template(filename, url_prefix=SERVER.url_prefix, **kwargs)
+
+
+@ui.errorhandler(404)
+def ui_not_found(e):
+    return render('page_not_found.html')
+
 
 @ui.route('/', methods=methods)
 def ui_login():
-	return render_template('login.html', url_prefix=SERVER.url_prefix)
+    return render('login.html')
+
 
 @ui.route('/reminders', methods=methods)
 def ui_reminders():
-	return render_template('reminders.html', url_prefix=SERVER.url_prefix)
+    return render('reminders.html')
+
 
 @ui.route('/admin', methods=methods)
 def ui_admin():
-	return render_template('admin.html', url_prefix=SERVER.url_prefix)
+    return render('admin.html')

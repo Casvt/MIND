@@ -1,39 +1,49 @@
 #!/usr/bin/env python3
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
+
+# autopep8: off
 
 from os.path import dirname
-from sys import path
-
-path.insert(0, dirname(path[0]))
-
 from subprocess import run
-from typing import Union
+from sys import path
+from typing import Type
 
-from backend.helpers import folder_path
-from backend.server import SERVER
-from frontend.api import (NotificationServiceNotFound, ReminderNotFound,
-                          TemplateNotFound)
+path.insert(0, dirname(dirname(__file__)))
+
+import frontend.api
+from backend.base.custom_exceptions import (NotificationServiceNotFound,
+                                            ReminderNotFound, TemplateNotFound)
+from backend.base.definitions import MindException, StartType
+from backend.base.helpers import folder_path
+from backend.internals.server import Server
 from frontend.input_validation import DataSource, api_docs
 
-api_prefix = SERVER.api_prefix
-admin_prefix = SERVER.admin_prefix
+# autopep8: on
+
+api_prefix = Server.api_prefix
+admin_prefix = Server.admin_prefix
 api_file = folder_path('docs', 'other_docs', 'api.md')
 
 url_var_map = {
-	'int:n_id': NotificationServiceNotFound,
-	'int:r_id': ReminderNotFound,
-	'int:t_id': TemplateNotFound,
-	'int:s_id': ReminderNotFound
+    'int:n_id': NotificationServiceNotFound,
+    'int:r_id': ReminderNotFound,
+    'int:t_id': TemplateNotFound,
+    'int:s_id': ReminderNotFound
 }
 
-def make_exception_instance(cls: Exception) -> Exception:
-	try:
-		return cls()
-	except TypeError:
-		try:
-			return cls('1')
-		except TypeError:
-			return cls('1', '2')
+
+def make_exception_instance(cls: Type[MindException]) -> MindException:
+    try:
+        return cls()
+    except TypeError:
+        try:
+            return cls('1')
+        except TypeError:
+            try:
+                return cls('1', '2')
+            except AttributeError:
+                return cls('1', StartType.STARTUP)
+
 
 result = f"""# API
 Below is the API documentation. Report an issue on [GitHub](https://github.com/Casvt/MIND/issues).
@@ -86,76 +96,96 @@ The following is automatically generated. Please report any issues on [GitHub](h
 """
 
 for rule, data in api_docs.items():
-	result += f"""### `{rule}`
+    result += f"""### `{rule}`
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| {'Yes' if data.requires_auth else 'No'} | {data.description} | 
+| {'Yes' if data.requires_auth else 'No'} | {data.description} |
 """
 
-	url_var = rule.replace('<', '>').split('>')
-	url_var: Union[str, None] = None if len(url_var) == 1 else url_var[1]
+    url_var = rule.replace('<', '>').split('>')
+    url_var = None if len(url_var) == 1 else url_var[1]
 
-	if url_var:
-		result += f"""
+    if url_var:
+        result += f"""
 Replace `<{url_var}>` with the ID of the entry. For example: `{rule.replace(f'<{url_var}>', '2')}`.
 """
 
-	for m_name, method in ((m, data.methods[m]) for m in data.used_methods):
-		result += f"\n??? {m_name}\n"
+    for m_name, method in ((m, data.methods[m])
+                           for m in data.methods.used_methods()):
+        if method is None:
+            continue
 
-		if method.description:
-			result += f"\n	{method.description}\n"
+        result += f"\n??? {m_name}\n"
 
-		var_types = {
-			'url': [v for v in method.vars if v.source == DataSource.VALUES],
-			'body': [v for v in method.vars if v.source == DataSource.DATA],
-			'file': [v for v in method.vars if v.source == DataSource.FILES]
-		}
+        if method.description:
+            result += f"\n	{method.description}\n"
 
-		for var_type, entries in var_types.items():
-			if entries:
-				result += f"""
+        var_types = {
+            'url': [
+                v for v in method.vars if v.source == DataSource.VALUES
+            ],
+            'body': [
+                v for v in method.vars if v.source == DataSource.DATA
+            ],
+            'file': [
+                v for v in method.vars if v.source == DataSource.FILES
+            ]
+        }
+
+        for var_type, entries in var_types.items():
+            if entries:
+                result += f"""
 	**Parameters ({var_type})**
 
 	| Name | Required | Data type | Description | Allowed values |
 	| ---- | -------- | --------- | ----------- | -------------- |
 """
-				for entry in entries:
-					result += f"	{entry('')}\n"
-		
-		result += f"""
+                for entry in entries:
+                    result += f"	{super(entry, entry('', entry.name, entry.description)).__repr__()}\n"
+
+        result += f"""
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| {201 if m_name == 'POST' else 200} | N/A | Success |
 """
 
-		url_exception = [url_var_map[url_var]] if url_var in url_var_map else []
-		variable_exceptions = [e for v in method.vars for e in v.related_exceptions]
-		related_exceptions = sorted(
-			(make_exception_instance(e) for e in set(variable_exceptions + url_exception)),
-			key=lambda e: (e.api_response['code'], e.api_response['error'])
-		)
-		for related_exception in related_exceptions:
-			ar = related_exception.api_response
-			result += f"	| {ar['code']} | {ar['error']} | {related_exception.__doc__} |\n"
+        url_exception = [url_var_map[url_var]] if url_var in url_var_map else []
+        variable_exceptions = [
+            e
+            for v in method.vars
+            for e in v('t', v.name, v.description).related_exceptions
+        ]
+        related_exceptions = sorted(
+            (
+                make_exception_instance(e)
+                for e in set(variable_exceptions + url_exception)
+            ),
+            key=lambda e: (
+                e.api_response["code"],
+                e.api_response["error"]
+            )
+        )
+        for related_exception in related_exceptions:
+            ar = related_exception.api_response
+            result += f"	| {ar['code']} | {ar['error']} | {related_exception.__doc__} |\n"
 
-	result += '\n'
+    result += '\n'
 
 with open(api_file, 'r') as f:
-	current_content = f.read()
+    current_content = f.read()
 
 if current_content == result:
-	print('Nothing changed')
+    print('Nothing changed')
 else:
-	with open(api_file, 'w+') as f:
-		f.write(result)
+    with open(api_file, 'w+') as f:
+        f.write(result)
 
-	# run(["git", "config", "--global", "user.email", '"casvantijn@gmail.com"'])
-	# run(["git", "config", "--global", "user.name", '"CasVT"'])
-	# run(["git", "checkout", "Development"])
-	# run(["git", "add", api_file])
-	# run(["git", "commit", "-m", "Updated API docs"])
-	# run(["git", "push"])
+    run(["git", "config", "--global", "user.email", '"casvantijn@gmail.com"'])
+    run(["git", "config", "--global", "user.name", '"CasVT"'])
+    run(["git", "checkout", "Development"])
+    run(["git", "add", api_file])
+    run(["git", "commit", "-m", "Updated API docs"])
+    run(["git", "push"])
