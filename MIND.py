@@ -99,7 +99,7 @@ def _main(
 
     finally:
         reminder_handler.stop_handling()
-        # close_all_db()
+        close_all_db()
 
         if SERVER.start_type is not None:
             LOGGER.info("Restarting MIND")
