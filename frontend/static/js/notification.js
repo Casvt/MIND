@@ -176,7 +176,7 @@ function deleteService(id, delete_reminders_using=false) {
 
 		else if (e.error === 'NotificationServiceInUse') {
 			const delete_reminders = confirm(
-				`The notification service is still in use by a ${e.result.type}. Do you want to delete all ${e.result.type}s that are using the notification service?`
+				`The notification service is still in use by a ${e.result.reminder_type.toLowerCase()}. Do you want to delete all ${e.result.reminder_type.toLowerCase()}s that are using the notification service?`
 			);
 			
 			if (delete_reminders)

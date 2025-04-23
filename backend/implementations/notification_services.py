@@ -82,10 +82,12 @@ class NotificationService:
             if v is not None:
                 data[k] = v
 
-        if test_url and NotificationServices(self.user_id).test(
-            data['url']
-        ) != SendResult.SUCCESS:
-            raise URLInvalid(data['url'])
+        if test_url:
+            test_result = NotificationServices(self.user_id).test(
+                data['url']
+            )
+            if test_result != SendResult.SUCCESS:
+                raise URLInvalid(data['url'], test_result)
 
         self.ns_db.update(self.id, data["title"], data["url"])
 
@@ -182,8 +184,9 @@ class NotificationServices:
         """
         LOGGER.info(f'Adding notification service with {title=}, {url=}')
 
-        if self.test(url) != SendResult.SUCCESS:
-            raise URLInvalid(url)
+        test_result = self.test(url)
+        if test_result != SendResult.SUCCESS:
+            raise URLInvalid(url, test_result)
 
         new_id = self.ns_db.add(title, url)
 

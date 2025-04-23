@@ -19,9 +19,11 @@ curl -sSL 'http://192.168.2.15:8080/api/reminders?api_key=ABCDEFG'
 
 ## Supplying data
 
-Often, data needs to be supplied with a request.
-If the parameters need to be supplied via `url`, add them to the url as url parameters.
-If the parameters need to be supplied via `body`, add them to the body as a json object and supply the `Content-Type: application/json` header.
+Often, data needs to be supplied with a request:
+
+- If the parameters need to be supplied via `url`, add them to the url as url parameters.
+- If the parameters need to be supplied via `body`, add them to the body as a json object and supply the `Content-Type: application/json` header.
+- If the parameters need to be supplied via `file`, send them as form data values and supply the `Content-Type: multipart/form-data` header.
 
 For example:
 ```bash
@@ -33,6 +35,13 @@ curl -sSLX POST \
 	-H 'Content-Type: application/json' \
 	-d '{"title": "Test service", "url": "test://fake/url"}' \
 	'http://192.168.2.15:8080/api/notificationservices?api_key=ABCDEFG'
+
+# File parameter
+curl -sSLX POST \
+	-H 'Content-Type: multipart/form-data' \
+	-F file=@/backups/MIND_backup.db \
+	'http://192.168.2.15:8080/api/admin/database?api_key=ABCDEFG'
+
 ```
 
 ## Endpoints
@@ -41,7 +50,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| No | Login to a user account | 
+| No | Login to a user account |
 
 ??? POST
 
@@ -53,24 +62,24 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	| password | Yes | string | The password of the user account | N/A |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 201 | N/A | Success |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
+	| 400 | UsernameInvalid | The username contains invalid characters or is not allowed |
 	| 401 | AccessUnauthorized | The password given is not correct |
-	| 404 | UserNotFound | The user requested can not be found |
 
 ### `/auth/logout`
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Logout of a user account | 
+| Yes | Logout of a user account |
 
 ??? POST
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 201 | N/A | Success |
@@ -79,12 +88,12 @@ The following is automatically generated. Please report any issues on [GitHub](h
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Get current status of login | 
+| Yes | Get current status of login |
 
 ??? GET
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -93,7 +102,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| No | Create a new user account | 
+| No | Create a new user account |
 
 ??? POST
 
@@ -105,12 +114,12 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	| password | Yes | string | The password of the user account | N/A |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 201 | N/A | Success |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
-	| 400 | UsernameInvalid | The username contains invalid characters |
+	| 400 | UsernameInvalid | The username contains invalid characters or is not allowed |
 	| 400 | UsernameTaken | The username is already taken |
 	| 403 | NewAccountsNotAllowed | It's not allowed to create a new account except for the admin |
 
@@ -118,7 +127,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Manage a user account | 
+| Yes | Manage a user account |
 
 ??? PUT
 
@@ -131,7 +140,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	| new_password | Yes | string | The new password of the user account | N/A |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -142,7 +151,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	Delete the user account
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -151,14 +160,14 @@ The following is automatically generated. Please report any issues on [GitHub](h
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Manage the notification services | 
+| Yes | Manage the notification services |
 
 ??? GET
 
 	Get a list of all notification services
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -175,7 +184,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	| url | Yes | string | The Apprise URL of the notification service | N/A |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 201 | N/A | Success |
@@ -186,12 +195,12 @@ The following is automatically generated. Please report any issues on [GitHub](h
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Get all available notification services and their url layout | 
+| Yes | Get all available notification services and their URL layout |
 
 ??? GET
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -200,7 +209,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Send a test notification using the supplied Apprise URL | 
+| Yes | Send a test notification using the supplied Apprise URL |
 
 ??? POST
 
@@ -211,7 +220,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	| url | Yes | string | The Apprise URL of the notification service | N/A |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 201 | N/A | Success |
@@ -222,14 +231,16 @@ The following is automatically generated. Please report any issues on [GitHub](h
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Manage a specific notification service | 
+| Yes | Manage a specific notification service |
 
 Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservices/2`.
 
 ??? GET
 
+	Get info of the notification service
+
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -247,7 +258,7 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 	| url | No | string | The Apprise URL of the notification service | N/A |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -262,10 +273,10 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 
 	| Name | Required | Data type | Description | Allowed values |
 	| ---- | -------- | --------- | ----------- | -------------- |
-	| delete_reminders_using | No | bool | Instead of throwing an error when there are still reminders using the service, delete the reminders. | N/A |
+	| delete_reminders_using | No | string | Instead of throwing an error when there are still reminders using the service, delete the reminders | N/A |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -276,20 +287,20 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Manage the reminders | 
+| Yes | Manage the reminders |
 
 ??? GET
 
-	Get a list of all reminders
+	Get a list of reminders
 
 	**Parameters (url)**
 
 	| Name | Required | Data type | Description | Allowed values |
 	| ---- | -------- | --------- | ----------- | -------------- |
-	| sort_by | No | string | How to sort the result | `time`, `time_reversed`, `title`, `title_reversed`, `date_added`, `date_added_reversed` |
+	| sort_by | No | string | How to sort the result | time, time_reversed, title, title_reversed, date_added, date_added_reversed |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -307,13 +318,13 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 	| time | Yes | number,decimal number | The UTC epoch timestamp that the reminder should be sent at | N/A |
 	| notification_services | Yes | list of numbers | Array of the id's of the notification services to use to send the notification | N/A |
 	| text | No | string | The body of the entry | N/A |
-	| repeat_quantity | No | string | The quantity of the repeat_interval | `years`, `months`, `weeks`, `days`, `hours`, `minutes` |
+	| repeat_quantity | No | string | The quantity of the repeat_interval | years, months, weeks, days, hours, minutes |
 	| repeat_interval | No | number | The number of the interval | N/A |
-	| weekdays | No | list of numbers | On which days of the weeks to run the reminder | `0`, `1`, `2`, `3`, `4`, `5`, `6` |
-	| color | No | string | The hex code of the color of the entry, which is shown in the web-ui | N/A |
+	| weekdays | No | list of numbers | On which days of the week to run the reminder | 0, 1, 2, 3, 4, 5, 6 |
+	| color | No | string | The hex code of the color of the entry, which is shown in the web-UI | N/A |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 201 | N/A | Success |
@@ -326,7 +337,7 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Search through the list of reminders | 
+| Yes | Search for reminders |
 
 ??? GET
 
@@ -334,11 +345,11 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 
 	| Name | Required | Data type | Description | Allowed values |
 	| ---- | -------- | --------- | ----------- | -------------- |
-	| sort_by | No | string | How to sort the result | `time`, `time_reversed`, `title`, `title_reversed`, `date_added`, `date_added_reversed` |
 	| query | Yes | string | The search term | N/A |
+	| sort_by | No | string | How to sort the result | time, time_reversed, title, title_reversed, date_added, date_added_reversed |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -349,7 +360,7 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Test send a reminder draft | 
+| Yes | Test send a reminder draft |
 
 ??? POST
 
@@ -362,7 +373,7 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 	| text | No | string | The body of the entry | N/A |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 201 | N/A | Success |
@@ -374,18 +385,20 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Manage a specific reminder | 
+| Yes | Manage a specific reminder |
 
 Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 
 ??? GET
 
+	Get info of the reminder
+
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
-	| 404 | ReminderNotFound | The reminder with the id can not be found |
+	| 404 | ReminderNotFound | The reminder was not found |
 
 ??? PUT
 
@@ -399,37 +412,37 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 	| time | No | number,decimal number | The UTC epoch timestamp that the reminder should be sent at | N/A |
 	| notification_services | No | list of numbers | Array of the id's of the notification services to use to send the notification | N/A |
 	| text | No | string | The body of the entry | N/A |
-	| repeat_quantity | No | string | The quantity of the repeat_interval | `years`, `months`, `weeks`, `days`, `hours`, `minutes` |
+	| repeat_quantity | No | string | The quantity of the repeat_interval | years, months, weeks, days, hours, minutes |
 	| repeat_interval | No | number | The number of the interval | N/A |
-	| weekdays | No | list of numbers | On which days of the weeks to run the reminder | `0`, `1`, `2`, `3`, `4`, `5`, `6` |
-	| color | No | string | The hex code of the color of the entry, which is shown in the web-ui | N/A |
+	| weekdays | No | list of numbers | On which days of the week to run the reminder | 0, 1, 2, 3, 4, 5, 6 |
+	| color | No | string | The hex code of the color of the entry, which is shown in the web-UI | N/A |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 400 | InvalidTime | The time given is in the past |
 	| 404 | NotificationServiceNotFound | The notification service was not found |
-	| 404 | ReminderNotFound | The reminder with the id can not be found |
+	| 404 | ReminderNotFound | The reminder was not found |
 
 ??? DELETE
 
 	Delete the reminder
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
-	| 404 | ReminderNotFound | The reminder with the id can not be found |
+	| 404 | ReminderNotFound | The reminder was not found |
 
 ### `/templates`
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Manage the templates | 
+| Yes | Manage the templates |
 
 ??? GET
 
@@ -439,10 +452,10 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 
 	| Name | Required | Data type | Description | Allowed values |
 	| ---- | -------- | --------- | ----------- | -------------- |
-	| sort_by | No | string | How to sort the result | `title`, `title_reversed`, `date_added`, `date_added_reversed` |
+	| sort_by | No | string | How to sort the result | title, title_reversed, date_added, date_added_reversed |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -459,10 +472,10 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 	| title | Yes | string | The title of the entry | N/A |
 	| notification_services | Yes | list of numbers | Array of the id's of the notification services to use to send the notification | N/A |
 	| text | No | string | The body of the entry | N/A |
-	| color | No | string | The hex code of the color of the entry, which is shown in the web-ui | N/A |
+	| color | No | string | The hex code of the color of the entry, which is shown in the web-UI | N/A |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 201 | N/A | Success |
@@ -474,7 +487,7 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Search through the list of templates | 
+| Yes | Search for templates |
 
 ??? GET
 
@@ -482,11 +495,11 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 
 	| Name | Required | Data type | Description | Allowed values |
 	| ---- | -------- | --------- | ----------- | -------------- |
-	| sort_by | No | string | How to sort the result | `title`, `title_reversed`, `date_added`, `date_added_reversed` |
 	| query | Yes | string | The search term | N/A |
+	| sort_by | No | string | How to sort the result | title, title_reversed, date_added, date_added_reversed |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -497,14 +510,16 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Manage a specific template | 
+| Yes | Manage a specific template |
 
 Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 
 ??? GET
 
+	Get info of the template
+
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -521,10 +536,10 @@ Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 	| title | No | string | The title of the entry | N/A |
 	| notification_services | No | list of numbers | Array of the id's of the notification services to use to send the notification | N/A |
 	| text | No | string | The body of the entry | N/A |
-	| color | No | string | The hex code of the color of the entry, which is shown in the web-ui | N/A |
+	| color | No | string | The hex code of the color of the entry, which is shown in the web-UI | N/A |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -537,7 +552,7 @@ Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 	Delete the template
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -547,7 +562,7 @@ Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Manage the static reminders | 
+| Yes | Manage the static reminders |
 
 ??? GET
 
@@ -557,10 +572,10 @@ Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 
 	| Name | Required | Data type | Description | Allowed values |
 	| ---- | -------- | --------- | ----------- | -------------- |
-	| sort_by | No | string | How to sort the result | `title`, `title_reversed`, `date_added`, `date_added_reversed` |
+	| sort_by | No | string | How to sort the result | title, title_reversed, date_added, date_added_reversed |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -577,10 +592,10 @@ Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 	| title | Yes | string | The title of the entry | N/A |
 	| notification_services | Yes | list of numbers | Array of the id's of the notification services to use to send the notification | N/A |
 	| text | No | string | The body of the entry | N/A |
-	| color | No | string | The hex code of the color of the entry, which is shown in the web-ui | N/A |
+	| color | No | string | The hex code of the color of the entry, which is shown in the web-UI | N/A |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 201 | N/A | Success |
@@ -592,7 +607,7 @@ Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Search through the list of staticreminders | 
+| Yes | Search for static reminders |
 
 ??? GET
 
@@ -600,44 +615,46 @@ Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 
 	| Name | Required | Data type | Description | Allowed values |
 	| ---- | -------- | --------- | ----------- | -------------- |
-	| sort_by | No | string | How to sort the result | `title`, `title_reversed`, `date_added`, `date_added_reversed` |
 	| query | Yes | string | The search term | N/A |
+	| sort_by | No | string | How to sort the result | title, title_reversed, date_added, date_added_reversed |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 
-### `/staticreminders/<int:s_id>`
+### `staticreminders/<int:s_id>`
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Manage a specific static reminder | 
+| Yes | Manage a specific static reminder |
 
-Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`.
+Replace `<int:s_id>` with the ID of the entry. For example: `staticreminders/2`.
 
 ??? GET
 
+	Get info of the static reminder
+
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
-	| 404 | ReminderNotFound | The reminder with the id can not be found |
+	| 404 | ReminderNotFound | The reminder was not found |
 
 ??? POST
 
 	Trigger the static reminder
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 201 | N/A | Success |
-	| 404 | ReminderNotFound | The reminder with the id can not be found |
+	| 404 | ReminderNotFound | The reminder was not found |
 
 ??? PUT
 
@@ -650,38 +667,38 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	| title | No | string | The title of the entry | N/A |
 	| notification_services | No | list of numbers | Array of the id's of the notification services to use to send the notification | N/A |
 	| text | No | string | The body of the entry | N/A |
-	| color | No | string | The hex code of the color of the entry, which is shown in the web-ui | N/A |
+	| color | No | string | The hex code of the color of the entry, which is shown in the web-UI | N/A |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 404 | NotificationServiceNotFound | The notification service was not found |
-	| 404 | ReminderNotFound | The reminder with the id can not be found |
+	| 404 | ReminderNotFound | The reminder was not found |
 
 ??? DELETE
 
 	Delete the static reminder
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
-	| 404 | ReminderNotFound | The reminder with the id can not be found |
+	| 404 | ReminderNotFound | The reminder was not found |
 
 ### `/admin/shutdown`
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Shut down the application | 
+| Yes | Shut down the application |
 
 ??? POST
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 201 | N/A | Success |
@@ -690,12 +707,12 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Restart the application | 
+| Yes | Restart the application |
 
 ??? POST
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 201 | N/A | Success |
@@ -704,12 +721,26 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| No | Get the admin settings | 
+| No | Get the admin settings |
 
 ??? GET
 
 	**Returns**
-	
+
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 200 | N/A | Success |
+
+### `/about`
+
+| Requires being logged in | Description |
+| ------------------------ | ----------- |
+| No | Get data about the application and it's environment |
+
+??? GET
+
+	**Returns**
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -718,14 +749,14 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Interact with the admin settings | 
+| Yes |  |
 
 ??? GET
 
 	Get the admin settings
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -738,16 +769,16 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 
 	| Name | Required | Data type | Description | Allowed values |
 	| ---- | -------- | --------- | ----------- | -------------- |
-	| allow_new_accounts | No | bool | Whether or not to allow users to register a new account. The admin can always add a new account. | N/A |
-	| login_time | No | number | How long a user stays logged in, in seconds. Between 1 min and 1 month (60 <= sec <= 2592000) | N/A |
-	| login_time_reset | No | bool | If the Login Time timer should reset with each API request. | N/A |
-	| host | No | string | The IP to bind to. Use 0.0.0.0 to bind to all addresses. | N/A |
-	| port | No | number | The port to listen on. | N/A |
-	| url_prefix | No | string | The base url to run on. Useful for reverse proxies. Empty string to disable. | N/A |
-	| log_level | No | number | The level to log on. | `20`, `10` |
+	| allow_new_accounts | No | bool | Whether to allow users to register a new account. The admin can always add a new account. | N/A |
+	| login_time | No | number | How long a user stays logged in, in seconds. Between 1 minute and 1 month (60 <= sec <= 2592000). | N/A |
+	| login_time_reset | No | bool | Whether the Login Time timer should reset with each API request | N/A |
+	| host | No | string | The IP to bind to. Use 0.0.0.0 to bind to all addresses | N/A |
+	| port | No | number | The port to listen on | N/A |
+	| url_prefix | No | string | The base URL to run on. Useful for reverse proxies. Empty string to disable. | N/A |
+	| log_level | No | number | The level to log on | 20, 10 |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -757,12 +788,12 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Get the debug logs | 
+| Yes | Get the logfile |
 
 ??? GET
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -771,21 +802,21 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Get all users or add one | 
+| Yes | Manage the users |
 
 ??? GET
 
-	Get all users
+	Get a list of all users
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
 
 ??? POST
 
-	Add a new user
+	Add a user
 
 	**Parameters (body)**
 
@@ -795,12 +826,12 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	| password | Yes | string | The password of the user account | N/A |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 201 | N/A | Success |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
-	| 400 | UsernameInvalid | The username contains invalid characters |
+	| 400 | UsernameInvalid | The username contains invalid characters or is not allowed |
 	| 400 | UsernameTaken | The username is already taken |
 	| 403 | NewAccountsNotAllowed | It's not allowed to create a new account except for the admin |
 
@@ -808,7 +839,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Manage a specific user | 
+| Yes | Manage a specific user |
 
 Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
 
@@ -823,7 +854,7 @@ Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
 	| new_password | Yes | string | The new password of the user account | N/A |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -834,7 +865,7 @@ Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
 	Delete the user account
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -843,14 +874,14 @@ Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| Yes | Download the database | 
+| Yes | Download and upload the database |
 
 ??? GET
 
-	Download the database file
+	Download the database
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
@@ -872,7 +903,7 @@ Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
 	| file | Yes | N/A | The MIND database file | N/A |
 
 	**Returns**
-	
+
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 201 | N/A | Success |

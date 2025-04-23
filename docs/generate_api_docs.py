@@ -6,7 +6,7 @@
 from os.path import dirname
 from subprocess import run
 from sys import path
-from typing import Type
+from typing import List, Type, Union
 
 path.insert(0, dirname(dirname(__file__)))
 
@@ -16,13 +16,13 @@ from backend.base.custom_exceptions import (NotificationServiceNotFound,
 from backend.base.definitions import MindException, StartType
 from backend.base.helpers import folder_path
 from backend.internals.server import Server
-from frontend.input_validation import DataSource, api_docs
+from frontend.input_validation import API_DOCS, DataSource, InputVariable
 
 # autopep8: on
 
-api_prefix = Server.api_prefix
-admin_prefix = Server.admin_prefix
-api_file = folder_path('docs', 'src', 'other_docs', 'api.md')
+API_PREFIX = Server.api_prefix
+ADMIN_PREFIX = Server.admin_prefix
+API_FILE = folder_path('docs', 'src', 'other_docs', 'api.md')
 
 url_var_map = {
     'int:n_id': NotificationServiceNotFound,
@@ -31,29 +31,15 @@ url_var_map = {
     'int:s_id': ReminderNotFound
 }
 
-
-def make_exception_instance(cls: Type[MindException]) -> MindException:
-    try:
-        return cls()
-    except TypeError:
-        try:
-            return cls('1')
-        except TypeError:
-            try:
-                return cls('1', '2')
-            except AttributeError:
-                return cls('1', StartType.STARTUP)
-
-
 result = f"""# API
 Below is the API documentation. Report an issue on [GitHub](https://github.com/Casvt/MIND/issues).
 
-All endpoints have the `{api_prefix}` prefix. That means, for example, that `/auth/login` can be reached at `{api_prefix}/auth/login`.
+All endpoints have the `{API_PREFIX}` prefix. That means, for example, that `/auth/login` can be reached at `{API_PREFIX}/auth/login`.
 
 ## Authentication
 
 Authentication is done using an API key.
-To log in, make a POST request to the [`{api_prefix}/auth/login`](#authlogin) endpoint.
+To log in, make a POST request to the [`{API_PREFIX}/auth/login`](#authlogin) endpoint.
 You'll receive an API key, which you can then use in your requests to authenticate.
 Supply it via the url parameter `api_key`.
 This API key is valid for one hour (though the admin can change this duration) after which the key expires, any further requests return 401 'APIKeyExpired' and you are required to log in again.
@@ -61,7 +47,7 @@ If no `api_key` is supplied or it is invalid, 401 `APIKeyInvalid` is returned.
 
 For example:
 ```bash
-curl -sSL 'http://192.168.2.15:8080{api_prefix}/reminders?api_key=ABCDEFG'
+curl -sSL 'http://192.168.2.15:8080{API_PREFIX}/reminders?api_key=ABCDEFG'
 ```
 
 ## Supplying data
@@ -75,19 +61,19 @@ Often, data needs to be supplied with a request:
 For example:
 ```bash
 # URL parameter
-curl -sSL 'http://192.168.2.15:8080{api_prefix}/reminders/search?api_key=ABCDEFG&query=Fountain&sort_by=time_reversed'
+curl -sSL 'http://192.168.2.15:8080{API_PREFIX}/reminders/search?api_key=ABCDEFG&query=Fountain&sort_by=time_reversed'
 
 # Body parameter
 curl -sSLX POST \\
 	-H 'Content-Type: application/json' \\
 	-d '{{"title": "Test service", "url": "test://fake/url"}}' \\
-	'http://192.168.2.15:8080{api_prefix}/notificationservices?api_key=ABCDEFG'
+	'http://192.168.2.15:8080{API_PREFIX}/notificationservices?api_key=ABCDEFG'
 
 # File parameter
 curl -sSLX POST \\
 	-H 'Content-Type: multipart/form-data' \\
 	-F file=@/backups/MIND_backup.db \\
-	'http://192.168.2.15:8080{admin_prefix}/database?api_key=ABCDEFG'
+	'http://192.168.2.15:8080{ADMIN_PREFIX}/database?api_key=ABCDEFG'
 
 ```
 
@@ -95,97 +81,177 @@ curl -sSLX POST \\
 The following is automatically generated. Please report any issues on [GitHub](https://github.com/Casvt/MIND/issues).
 """
 
-for rule, data in api_docs.items():
-    result += f"""### `{rule}`
+
+def make_exception_instance(cls: Type[MindException]) -> MindException:
+    for args in (
+        (),
+        ('1'),
+        ('1', '2'),
+        ('1', StartType.STARTUP)
+    ):
+        try:
+            inst = cls(*args)
+        except (TypeError, AttributeError):
+            continue
+        else:
+            return inst
+
+    raise RuntimeError("Unsupported exception parameter")
+
+
+def extract_url_var(endpoint: str) -> Union[str, None]:
+    split = endpoint.replace('<', '>').split('>')
+    return None if len(split) == 1 else split[1]
+
+
+def rule_header(endpoint: str, requires_auth: bool, description: str) -> str:
+    return f"""### `{endpoint}`
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
-| {'Yes' if data.requires_auth else 'No'} | {data.description} |
+| {'Yes' if requires_auth else 'No'} | {description} |
 """
 
-    url_var = rule.replace('<', '>').split('>')
-    url_var = None if len(url_var) == 1 else url_var[1]
 
-    if url_var:
-        result += f"""
-Replace `<{url_var}>` with the ID of the entry. For example: `{rule.replace(f'<{url_var}>', '2')}`.
+def url_var_note(endpoint: str, url_var: str) -> str:
+    return f"""
+Replace `<{url_var}>` with the ID of the entry. For example: `{endpoint.replace(f'<{url_var}>', '2')}`.
 """
 
-    for m_name, method in ((m, data.methods[m])
-                           for m in data.methods.used_methods()):
-        if method is None:
-            continue
 
-        result += f"\n??? {m_name}\n"
+def method_body(name: str, description: str) -> str:
+    r = f"\n??? {name.upper()}\n"
 
-        if method.description:
-            result += f"\n	{method.description}\n"
+    if description:
+        r += f"\n	{description}\n"
 
-        var_types = {
-            'url': [
-                v for v in method.vars if v.source == DataSource.VALUES
-            ],
-            'body': [
-                v for v in method.vars if v.source == DataSource.DATA
-            ],
-            'file': [
-                v for v in method.vars if v.source == DataSource.FILES
-            ]
-        }
+    return r
 
-        for var_type, entries in var_types.items():
-            if entries:
-                result += f"""
+
+def method_parameters(
+    var_type: str,
+    variables: List[Type[InputVariable]]
+) -> str:
+    r = f"""
 	**Parameters ({var_type})**
 
 	| Name | Required | Data type | Description | Allowed values |
 	| ---- | -------- | --------- | ----------- | -------------- |
 """
-                for entry in entries:
-                    result += f"	{super(entry, entry('', entry.name, entry.description)).__repr__()}\n"
 
-        result += f"""
+    for var in variables:
+        r += "	| %s | %s | %s | %s | %s |\n" % (
+            var.name, 'Yes' if var.required else 'No',
+            ','.join(v.value for v in var.data_type), var.description,
+            ", ".join(str(v) for v in var.options) or "N/A"
+        )
+
+    return r
+
+
+def return_codes(
+    method_name: str,
+    exceptions: List[MindException]
+) -> str:
+    r = f"""
 	**Returns**
 
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
-	| {201 if m_name == 'POST' else 200} | N/A | Success |
+	| {201 if method_name == 'post' else 200} | N/A | Success |
 """
 
-        url_exception = [url_var_map[url_var]] if url_var in url_var_map else []
-        variable_exceptions = [
-            e
-            for v in method.vars
-            for e in v('t', v.name, v.description).related_exceptions
-        ]
-        related_exceptions = sorted(
-            (
-                make_exception_instance(e)
-                for e in set(variable_exceptions + url_exception)
-            ),
-            key=lambda e: (
-                e.api_response["code"],
-                e.api_response["error"]
-            )
+    for exception in exceptions:
+        r += "	| %d | %s | %s |\n" % (
+            exception.api_response['code'], exception.api_response['error'],
+            exception.__doc__
         )
-        for related_exception in related_exceptions:
-            ar = related_exception.api_response
-            result += f"	| {ar['code']} | {ar['error']} | {related_exception.__doc__} |\n"
 
-    result += '\n'
+    return r
 
-with open(api_file, 'r') as f:
-    current_content = f.read()
 
-if current_content == result:
-    print('Nothing changed')
-else:
-    with open(api_file, 'w+') as f:
-        f.write(result)
+def create_result(base_string: str) -> str:
+    for endpoint, data in API_DOCS.items():
+        # Add header
+        base_string += rule_header(
+            endpoint,
+            data.requires_auth,
+            data.description
+        )
 
-    run(["git", "config", "--global", "user.email", '"casvantijn@gmail.com"'])
-    run(["git", "config", "--global", "user.name", '"CasVT"'])
-    run(["git", "checkout", "Development"])
-    run(["git", "add", api_file])
-    run(["git", "commit", "-m", "Updated API docs"])
-    run(["git", "push"])
+        # Add note about url var
+        url_var = extract_url_var(endpoint)
+        if url_var:
+            base_string += url_var_note(endpoint, url_var)
+
+        # Add info for each method
+        for m_name, method in (
+            (m, data.methods[m])
+            for m in data.methods.used_methods()
+        ):
+            if method is None:
+                continue
+
+            # Add basic method info
+            base_string += method_body(m_name, method.description)
+
+            # Add input variable info
+            var_types = {
+                'url': [
+                    v for v in method.input_variables if v.source == DataSource.VALUES
+                ],
+                'body': [
+                    v for v in method.input_variables if v.source == DataSource.DATA
+                ],
+                'file': [
+                    v for v in method.input_variables if v.source == DataSource.FILES
+                ]
+            }
+            for var_type, entries in var_types.items():
+                if entries:
+                    base_string += method_parameters(var_type, entries)
+
+            url_exception = (
+                [url_var_map[url_var]]
+                if url_var in url_var_map else
+                []
+            )
+            variable_exceptions = [
+                e
+                for v in method.input_variables
+                for e in v.related_exceptions
+            ]
+            related_exceptions = sorted(
+                (
+                    make_exception_instance(e)
+                    for e in set(variable_exceptions + url_exception)
+                ),
+                key=lambda e: (
+                    e.api_response["code"],
+                    e.api_response["error"]
+                )
+            )
+            base_string += return_codes(m_name, related_exceptions)
+
+        base_string += '\n'
+    return base_string.strip()
+
+
+if __name__ == '__main__':
+    result = create_result(result)
+
+    with open(API_FILE, 'r') as f:
+        current_content = f.read()
+
+    if current_content == result:
+        print('Nothing changed')
+    else:
+        with open(API_FILE, 'w+') as f:
+            f.write(result)
+
+        # run(["git", "config", "--global", "user.email", '"casvantijn@gmail.com"'])
+        # run(["git", "config", "--global", "user.name", '"CasVT"'])
+        # run(["git", "checkout", "Development"])
+        # run(["git", "add", API_FILE])
+        # run(["git", "commit", "-m", "Updated API docs"])
+        # run(["git", "push"])

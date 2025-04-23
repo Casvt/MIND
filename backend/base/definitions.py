@@ -187,60 +187,6 @@ class ApiKeyEntry:
     user_data: User
 
 
-def _return_exceptions() -> List[Type[MindException]]:
-    from backend.base.custom_exceptions import InvalidKeyValue, KeyNotFound
-    return [KeyNotFound, InvalidKeyValue]
-
-
-@dataclass
-class InputVariable(ABC):
-    value: Any
-    name: str
-    description: str
-    required: bool = True
-    default: Any = None
-    data_type: List[DataType] = field(default_factory=lambda: [DataType.STR])
-    source: DataSource = DataSource.DATA
-    related_exceptions: List[Type[MindException]] = field(
-        default_factory=_return_exceptions
-    )
-
-    def validate(self) -> bool:
-        return isinstance(self.value, str) and bool(self.value)
-
-
-@dataclass(frozen=True)
-class Method:
-    description: str = ''
-    vars: List[Type[InputVariable]] = field(default_factory=list)
-
-
-@dataclass(frozen=True)
-class Methods:
-    get: Union[Method, None] = None
-    post: Union[Method, None] = None
-    put: Union[Method, None] = None
-    delete: Union[Method, None] = None
-
-    def __getitem__(self, key: str) -> Union[Method, None]:
-        return getattr(self, key.lower())
-
-    def used_methods(self) -> List[str]:
-        result = []
-        for method in ('get', 'post', 'put', 'delete'):
-            if getattr(self, method) is not None:
-                result.append(method)
-        return result
-
-
-@dataclass(frozen=True)
-class ApiDocEntry:
-    endpoint: str
-    description: str
-    methods: Methods
-    requires_auth: bool
-
-
 @dataclass(frozen=True, order=True)
 class NotificationServiceData:
     id: int

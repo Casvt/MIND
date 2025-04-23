@@ -3,13 +3,13 @@
 from typing import Any, Union
 
 from backend.base.definitions import (ApiResponse, InvalidUsernameReason,
-                                      MindException)
+                                      MindException, SendResult)
 from backend.base.logging import LOGGER
 
 
 # region Input/Output
 class KeyNotFound(MindException):
-    "A key was not found in the input that is required to be given."
+    "A key was not found in the input that is required to be given"
 
     def __init__(self, key: str) -> None:
         self.key = key
@@ -32,7 +32,7 @@ class KeyNotFound(MindException):
 
 
 class InvalidKeyValue(MindException):
-    "The value of a key is invalid."
+    "The value of a key is invalid"
 
     def __init__(self, key: str, value: Any) -> None:
         self.key = key
@@ -342,12 +342,14 @@ class NotificationServiceInUse(MindException):
 class URLInvalid(MindException):
     "The Apprise URL is invalid"
 
-    def __init__(self, url: str) -> None:
+    def __init__(self, url: str, reason: SendResult) -> None:
         self.url = url
+        self.reason = reason
         LOGGER.warning(
-            "The Apprise URL given is invalid: %s",
-            url
+            "The Apprise URL given is invalid: %s (reason=%s)",
+            url, reason.value
         )
+        return
 
     @property
     def api_response(self) -> ApiResponse:
@@ -355,7 +357,8 @@ class URLInvalid(MindException):
             'code': 400,
             'error': self.__class__.__name__,
             'result': {
-                'url': self.url
+                'url': self.url,
+                'reason': self.reason.value
             }
         }
 

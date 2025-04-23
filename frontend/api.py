@@ -11,9 +11,8 @@ from flask import Response, g, request, send_file
 
 from backend.base.custom_exceptions import (APIKeyExpired, APIKeyInvalid,
                                             LogFileNotFound)
-from backend.base.definitions import (ApiKeyEntry, Method, Methods,
-                                      MindException, SendResult,
-                                      Serialisable, StartType)
+from backend.base.definitions import (ApiKeyEntry, MindException,
+                                      SendResult, Serialisable, StartType)
 from backend.base.helpers import folder_path
 from backend.base.logging import LOGGER, get_log_filepath
 from backend.features.reminders import Reminders
@@ -25,28 +24,25 @@ from backend.implementations.users import Users
 from backend.internals.db import get_db, import_db
 from backend.internals.server import Server, diffuse_timers
 from backend.internals.settings import Settings, get_about_data
-from frontend.input_validation import (AllowNewAccountsVariable, ColorVariable,
-                                       CopyHostingSettingsVariable,
-                                       DatabaseFileVariable,
-                                       DeleteRemindersUsingVariable,
-                                       EditNotificationServicesVariable,
-                                       EditTimeVariable, EditTitleVariable,
-                                       EditURLVariable, HostVariable,
-                                       LoginTimeResetVariable,
-                                       LoginTimeVariable, LogLevelVariable,
-                                       NewPasswordVariable,
-                                       NotificationServicesVariable,
-                                       PasswordCreateVariable,
-                                       PasswordVariable, PortVariable,
-                                       QueryVariable, RepeatIntervalVariable,
-                                       RepeatQuantityVariable, SortByVariable,
-                                       TextVariable, TimelessSortByVariable,
-                                       TimeVariable, TitleVariable,
-                                       UrlPrefixVariable, URLVariable,
-                                       UsernameCreateVariable,
-                                       UsernameVariable, WeekDaysVariable,
-                                       admin_api, api, get_api_docs,
-                                       input_validation)
+from frontend.input_validation import (AboutData, AuthLoginData,
+                                       AuthLogoutData, AuthStatusData,
+                                       AvailableNotificationServicesData,
+                                       DatabaseData, LogfileData,
+                                       NotificationServiceData,
+                                       NotificationServicesData,
+                                       PublicSettingsData, ReminderData,
+                                       RemindersData, RestartData,
+                                       SearchRemindersData,
+                                       SearchStaticRemindersData,
+                                       SearchTemplatesData, SettingsData,
+                                       ShutdownData, StaticReminderData,
+                                       StaticRemindersData, TemplateData,
+                                       TemplatesData,
+                                       TestNotificationServiceURLData,
+                                       TestRemindersData, UserManagementData,
+                                       UsersAddData, UsersData,
+                                       UsersManagementData, admin_api, api,
+                                       get_api_docs, input_validation)
 
 # ===================
 # region General variables and functions
@@ -148,16 +144,7 @@ def api_not_found(e):
 # ===================
 # region Auth
 # ===================
-@api.route(
-    '/auth/login',
-    'Login to a user account',
-    Methods(
-        post=Method(
-            vars=[UsernameVariable, PasswordVariable]
-        )
-    ),
-    requires_auth=False
-)
+@api.route('/auth/login', AuthLoginData)
 @endpoint_wrapper
 def api_login(inputs: Dict[str, Any]):
     user = users.login(inputs['username'], inputs['password'])
@@ -186,22 +173,14 @@ def api_login(inputs: Dict[str, Any]):
     return return_api(result, code=201)
 
 
-@api.route(
-    '/auth/logout',
-    'Logout of a user account',
-    methods=['POST']
-)
+@api.route('/auth/logout', AuthLogoutData)
 @endpoint_wrapper
 def api_logout(inputs: Dict[str, Any]):
     api_key_map.pop(g.hashed_api_key)
     return return_api({}, code=201)
 
 
-@api.route(
-    '/auth/status',
-    'Get current status of login',
-    methods=['GET']
-)
+@api.route('/auth/status', AuthStatusData)
 @endpoint_wrapper
 def api_status(inputs: Dict[str, Any]):
     map_entry = api_key_map[g.hashed_api_key]
@@ -217,37 +196,14 @@ def api_status(inputs: Dict[str, Any]):
 # ===================
 # region User
 # ===================
-@api.route(
-    '/user/add',
-    'Create a new user account',
-    Methods(
-        post=Method(
-            vars=[UsernameCreateVariable, PasswordCreateVariable]
-        )
-    ),
-    requires_auth=False,
-    methods=['POST']
-)
+@api.route('/user/add', UsersAddData)
 @endpoint_wrapper
 def api_add_user(inputs: Dict[str, str]):
     users.add(inputs['username'], inputs['password'])
     return return_api({}, code=201)
 
 
-@api.route(
-    '/user',
-    'Manage a user account',
-    Methods(
-        put=Method(
-            vars=[NewPasswordVariable],
-            description="Change the password of the user account"
-        ),
-        delete=Method(
-            description='Delete the user account'
-        )
-    ),
-    methods=['PUT', 'DELETE']
-)
+@api.route('/user', UsersData)
 @endpoint_wrapper
 def api_manage_user(inputs: Dict[str, Any]):
     user = api_key_map[g.hashed_api_key].user_data
@@ -264,20 +220,7 @@ def api_manage_user(inputs: Dict[str, Any]):
 # ===================
 # region Notification Service
 # ===================
-@api.route(
-    '/notificationservices',
-    'Manage the notification services',
-    Methods(
-        get=Method(
-            description='Get a list of all notification services'
-        ),
-        post=Method(
-            vars=[TitleVariable, URLVariable],
-            description='Add a notification service'
-        )
-    ),
-    methods=['GET', 'POST']
-)
+@api.route('/notificationservices', NotificationServicesData)
 @endpoint_wrapper
 def api_notification_services_list(inputs: Dict[str, str]):
     services = NotificationServices(
@@ -296,27 +239,14 @@ def api_notification_services_list(inputs: Dict[str, str]):
         return return_api(result.todict(), code=201)
 
 
-@api.route(
-    '/notificationservices/available',
-    'Get all available notification services and their url layout',
-    methods=['GET']
-)
+@api.route('/notificationservices/available', AvailableNotificationServicesData)
 @endpoint_wrapper
 def api_notification_service_available(inputs: Dict[str, str]):
     result = get_apprise_services()
     return return_api(result) # type: ignore
 
 
-@api.route(
-    '/notificationservices/test',
-    'Send a test notification using the supplied Apprise URL',
-    Methods(
-        post=Method(
-            vars=[URLVariable]
-        )
-    ),
-    methods=['POST']
-)
+@api.route('/notificationservices/test', TestNotificationServiceURLData)
 @endpoint_wrapper
 def api_test_service(inputs: Dict[str, Any]):
     user_id = api_key_map[g.hashed_api_key].user_data.user_id
@@ -331,21 +261,7 @@ def api_test_service(inputs: Dict[str, Any]):
     )
 
 
-@api.route(
-    '/notificationservices/<int:n_id>',
-    'Manage a specific notification service',
-    Methods(
-        put=Method(
-            vars=[EditTitleVariable, EditURLVariable],
-            description='Edit the notification service'
-        ),
-        delete=Method(
-            vars=[DeleteRemindersUsingVariable],
-            description='Delete the notification service'
-        )
-    ),
-    methods=['GET', 'PUT', 'DELETE']
-)
+@api.route('/notificationservices/<int:n_id>', NotificationServiceData)
 @endpoint_wrapper
 def api_notification_service(inputs: Dict[str, Any], n_id: int):
     user_id = api_key_map[g.hashed_api_key].user_data.user_id
@@ -372,25 +288,7 @@ def api_notification_service(inputs: Dict[str, Any], n_id: int):
 # ===================
 # region Library
 # ===================
-@api.route(
-    '/reminders',
-    'Manage the reminders',
-    Methods(
-        get=Method(
-            vars=[SortByVariable],
-            description='Get a list of all reminders'
-        ),
-        post=Method(
-            vars=[TitleVariable, TimeVariable,
-                NotificationServicesVariable, TextVariable,
-                RepeatQuantityVariable, RepeatIntervalVariable,
-                WeekDaysVariable,
-                ColorVariable],
-            description='Add a reminder'
-        ),
-    ),
-    methods=['GET', 'POST']
-)
+@api.route('/reminders', RemindersData)
 @endpoint_wrapper
 def api_reminders_list(inputs: Dict[str, Any]):
     reminders = Reminders(api_key_map[g.hashed_api_key].user_data.user_id)
@@ -413,16 +311,7 @@ def api_reminders_list(inputs: Dict[str, Any]):
         return return_api(result.get().todict(), code=201)
 
 
-@api.route(
-    '/reminders/search',
-    'Search through the list of reminders',
-    Methods(
-        get=Method(
-            vars=[SortByVariable, QueryVariable]
-        )
-    ),
-    methods=['GET']
-)
+@api.route('/reminders/search', SearchRemindersData)
 @endpoint_wrapper
 def api_reminders_query(inputs: Dict[str, Any]):
     reminders = Reminders(api_key_map[g.hashed_api_key].user_data.user_id)
@@ -430,17 +319,7 @@ def api_reminders_query(inputs: Dict[str, Any]):
     return return_api([r.todict() for r in result])
 
 
-@api.route(
-    '/reminders/test',
-    'Test send a reminder draft',
-    Methods(
-        post=Method(
-            vars=[TitleVariable, NotificationServicesVariable,
-            TextVariable]
-        )
-    ),
-    methods=['POST']
-)
+@api.route('/reminders/test', TestRemindersData)
 @endpoint_wrapper
 def api_test_reminder(inputs: Dict[str, Any]):
     Reminders(
@@ -453,24 +332,7 @@ def api_test_reminder(inputs: Dict[str, Any]):
     return return_api({}, code=201)
 
 
-@api.route(
-    '/reminders/<int:r_id>',
-    'Manage a specific reminder',
-    Methods(
-        put=Method(
-            vars=[EditTitleVariable, EditTimeVariable,
-                EditNotificationServicesVariable, TextVariable,
-                RepeatQuantityVariable, RepeatIntervalVariable,
-                WeekDaysVariable,
-                ColorVariable],
-            description='Edit the reminder'
-        ),
-        delete=Method(
-            description='Delete the reminder'
-        )
-    ),
-    methods=['GET', 'PUT', 'DELETE']
-)
+@api.route('/reminders/<int:r_id>', ReminderData)
 @endpoint_wrapper
 def api_get_reminder(inputs: Dict[str, Any], r_id: int):
     reminders = Reminders(
@@ -502,22 +364,7 @@ def api_get_reminder(inputs: Dict[str, Any], r_id: int):
 # ===================
 # region Template
 # ===================
-@api.route(
-    '/templates',
-    'Manage the templates',
-    Methods(
-        get=Method(
-            vars=[TimelessSortByVariable],
-            description='Get a list of all templates'
-        ),
-        post=Method(
-            vars=[TitleVariable, NotificationServicesVariable,
-                TextVariable, ColorVariable],
-            description='Add a template'
-        )
-    ),
-    methods=['GET', 'POST']
-)
+@api.route('/templates', TemplatesData)
 @endpoint_wrapper
 def api_get_templates(inputs: Dict[str, Any]):
     templates = Templates(
@@ -538,16 +385,7 @@ def api_get_templates(inputs: Dict[str, Any]):
         return return_api(result.get().todict(), code=201)
 
 
-@api.route(
-    '/templates/search',
-    'Search through the list of templates',
-    Methods(
-        get=Method(
-            vars=[TimelessSortByVariable, QueryVariable]
-        )
-    ),
-    methods=['GET']
-)
+@api.route('/templates/search', SearchTemplatesData)
 @endpoint_wrapper
 def api_templates_query(inputs: Dict[str, Any]):
     templates = Templates(
@@ -557,21 +395,7 @@ def api_templates_query(inputs: Dict[str, Any]):
     return return_api([r.todict() for r in result])
 
 
-@api.route(
-    '/templates/<int:t_id>',
-    'Manage a specific template',
-    Methods(
-        put=Method(
-            vars=[EditTitleVariable, EditNotificationServicesVariable,
-                TextVariable, ColorVariable],
-            description='Edit the template'
-        ),
-        delete=Method(
-            description='Delete the template'
-        )
-    ),
-    methods=['GET', 'PUT', 'DELETE']
-)
+@api.route('/templates/<int:t_id>', TemplateData)
 @endpoint_wrapper
 def api_get_template(inputs: Dict[str, Any], t_id: int):
     template = Templates(
@@ -599,22 +423,7 @@ def api_get_template(inputs: Dict[str, Any], t_id: int):
 # ===================
 # region Static Reminder
 # ===================
-@api.route(
-    '/staticreminders',
-    'Manage the static reminders',
-    Methods(
-        get=Method(
-            vars=[TimelessSortByVariable],
-            description='Get a list of all static reminders'
-        ),
-        post=Method(
-            vars=[TitleVariable, NotificationServicesVariable,
-                TextVariable, ColorVariable],
-            description='Add a static reminder'
-        )
-    ),
-    methods=['GET', 'POST']
-)
+@api.route('/staticreminders', StaticRemindersData)
 @endpoint_wrapper
 def api_static_reminders_list(inputs: Dict[str, Any]):
     reminders = StaticReminders(
@@ -635,16 +444,7 @@ def api_static_reminders_list(inputs: Dict[str, Any]):
         return return_api(result.get().todict(), code=201)
 
 
-@api.route(
-    '/staticreminders/search',
-    'Search through the list of staticreminders',
-    Methods(
-        get=Method(
-            vars=[TimelessSortByVariable, QueryVariable]
-        )
-    ),
-    methods=['GET']
-)
+@api.route('/staticreminders/search', SearchStaticRemindersData)
 @endpoint_wrapper
 def api_static_reminders_query(inputs: Dict[str, Any]):
     result = StaticReminders(
@@ -653,24 +453,7 @@ def api_static_reminders_query(inputs: Dict[str, Any]):
     return return_api([r.todict() for r in result])
 
 
-@api.route(
-    '/staticreminders/<int:s_id>',
-    'Manage a specific static reminder',
-    Methods(
-        post=Method(
-            description='Trigger the static reminder'
-        ),
-        put=Method(
-            vars=[EditTitleVariable, EditNotificationServicesVariable,
-                TextVariable, ColorVariable],
-            description='Edit the static reminder'
-        ),
-        delete=Method(
-            description='Delete the static reminder'
-        )
-    ),
-    methods=['GET', 'POST', 'PUT', 'DELETE']
-)
+@api.route('staticreminders/<int:s_id>', StaticReminderData)
 @endpoint_wrapper
 def api_get_static_reminder(inputs: Dict[str, Any], s_id: int):
     reminders = StaticReminders(
@@ -702,66 +485,33 @@ def api_get_static_reminder(inputs: Dict[str, Any], s_id: int):
 # ===================
 # region Admin Panel
 # ===================
-@admin_api.route(
-    '/shutdown',
-    'Shut down the application',
-    methods=['POST']
-)
+@admin_api.route('/shutdown', ShutdownData)
 @endpoint_wrapper
 def api_shutdown(inputs: Dict[str, Any]):
     Server().shutdown()
     return return_api({})
 
 
-@admin_api.route(
-    '/restart',
-    'Restart the application',
-    methods=['POST']
-)
+@admin_api.route('/restart', RestartData)
 @endpoint_wrapper
 def api_restart(inputs: Dict[str, Any]):
     Server().restart()
     return return_api({})
 
 
-@api.route(
-    '/settings',
-    'Get the admin settings',
-    requires_auth=False,
-    methods=['GET']
-)
+@api.route('/settings', PublicSettingsData)
 @endpoint_wrapper
 def api_settings(inputs: Dict[str, Any]):
     return return_api(Settings().get_settings().todict())
 
 
-@api.route(
-    '/about',
-    "Get data about the application and it's environment",
-    requires_auth=False,
-    methods=['GET']
-)
+@api.route('/about', AboutData)
 @endpoint_wrapper
 def api_about(inputs: Dict[str, Any]):
     return return_api(get_about_data())
 
 
-@admin_api.route(
-    '/settings',
-    'Interact with the admin settings',
-    Methods(
-        get=Method(
-            description='Get the admin settings'
-        ),
-        put=Method(
-            vars=[AllowNewAccountsVariable, LoginTimeVariable,
-                LoginTimeResetVariable, HostVariable, PortVariable,
-                UrlPrefixVariable, LogLevelVariable],
-            description='Edit the admin settings. Supplying a hosting setting will automatically restart MIND.'
-        )
-    ),
-    methods=['GET', 'PUT']
-)
+@admin_api.route('/settings', SettingsData)
 @endpoint_wrapper
 def api_admin_settings(inputs: Dict[str, Any]):
     settings = Settings()
@@ -792,11 +542,7 @@ def api_admin_settings(inputs: Dict[str, Any]):
         return return_api({})
 
 
-@admin_api.route(
-    '/logs',
-    'Get the logs as a file',
-    methods=['GET']
-)
+@admin_api.route('/logs', LogfileData)
 @endpoint_wrapper
 def api_admin_logs(inputs: Dict[str, Any]):
     file = get_log_filepath()
@@ -818,20 +564,7 @@ def api_admin_logs(inputs: Dict[str, Any]):
     ), 200
 
 
-@admin_api.route(
-    '/users',
-    'Get all users or add one',
-    Methods(
-        get=Method(
-            description='Get all users'
-        ),
-        post=Method(
-            vars=[UsernameCreateVariable, PasswordCreateVariable],
-            description='Add a new user'
-        )
-    ),
-    methods=['GET', 'POST']
-)
+@admin_api.route('/users', UsersManagementData)
 @endpoint_wrapper
 def api_admin_users(inputs: Dict[str, Any]):
     if request.method == 'GET':
@@ -843,20 +576,7 @@ def api_admin_users(inputs: Dict[str, Any]):
         return return_api({}, code=201)
 
 
-@admin_api.route(
-    '/users/<int:u_id>',
-    'Manage a specific user',
-    Methods(
-        put=Method(
-            vars=[NewPasswordVariable],
-            description='Change the password of the user account'
-        ),
-        delete=Method(
-            description='Delete the user account'
-        )
-    ),
-    methods=['PUT', 'DELETE']
-)
+@admin_api.route('/users/<int:u_id>', UserManagementData)
 @endpoint_wrapper
 def api_admin_user(inputs: Dict[str, Any], u_id: int):
     user = users.get_one(u_id)
@@ -873,20 +593,7 @@ def api_admin_user(inputs: Dict[str, Any], u_id: int):
         return return_api({})
 
 
-@admin_api.route(
-    '/database',
-    'Download and upload the database',
-    Methods(
-        get=Method(
-            description="Download the database file"
-        ),
-        post=Method(
-            vars=[DatabaseFileVariable, CopyHostingSettingsVariable],
-            description="Upload and apply a database file. Will automatically restart MIND."
-        )
-    ),
-    methods=['GET', 'POST']
-)
+@admin_api.route('/database', DatabaseData)
 @endpoint_wrapper
 def api_admin_database(inputs: Dict[str, Any]):
     if request.method == "GET":
