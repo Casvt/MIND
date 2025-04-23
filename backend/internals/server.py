@@ -10,7 +10,7 @@ from os import urandom
 from threading import Timer, current_thread
 from typing import TYPE_CHECKING, Union
 
-from flask import Flask, render_template, request
+from flask import Flask
 from waitress.server import create_server
 from waitress.task import ThreadedTaskDispatcher as TTD
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
@@ -28,14 +28,42 @@ if TYPE_CHECKING:
 
 class ThreadedTaskDispatcher(TTD):
     def handler_thread(self, thread_no: int) -> None:
-        super().handler_thread(thread_no)
+        # Most of this method's content is copied straight from waitress
+        # except for the the part marked. The thread is considered to be
+        # stopped when it's removed from self.threads, so we need to close
+        # the database connection before it.
+        while True:
+            with self.lock:
+                while not self.queue and self.stop_count == 0:
+                    # Mark ourselves as idle before waiting to be
+                    # woken up, then we will once again be active
+                    self.active_count -= 1
+                    self.queue_cv.wait()
+                    self.active_count += 1
 
-        thread_id = current_thread().native_id or -1
-        if (
-            thread_id in DBConnectionManager.instances
-            and not DBConnectionManager.instances[thread_id].closed
-        ):
-            DBConnectionManager.instances[thread_id].close()
+                if self.stop_count > 0:
+                    self.active_count -= 1
+                    self.stop_count -= 1
+
+                    # =================
+                    # Kapowarr part
+                    thread_id = current_thread().native_id or -1
+                    if (
+                        thread_id in DBConnectionManager.instances
+                        and not DBConnectionManager.instances[thread_id].closed
+                    ):
+                        DBConnectionManager.instances[thread_id].close()
+                    # =================
+
+                    self.threads.discard(thread_no)
+                    self.thread_exit_cv.notify()
+                    break
+
+                task = self.queue.popleft()
+            try:
+                task.service()
+            except BaseException:
+                self.logger.exception("Exception when servicing %r", task)
 
         return
 

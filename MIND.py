@@ -14,7 +14,7 @@ from backend.base.definitions import Constants, StartType
 from backend.base.helpers import check_python_version, get_python_exe
 from backend.base.logging import LOGGER, setup_logging
 from backend.features.reminder_handler import ReminderHandler
-from backend.internals.db import close_all_db, set_db_location, setup_db
+from backend.internals.db import set_db_location, setup_db
 from backend.internals.server import Server, handle_start_type
 from backend.internals.settings import Settings
 
@@ -99,7 +99,6 @@ def _main(
 
     finally:
         reminder_handler.stop_handling()
-        close_all_db()
 
         if SERVER.start_type is not None:
             LOGGER.info("Restarting MIND")
