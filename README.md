@@ -3,8 +3,9 @@
 </p>
 <p align="center">
     <a href="https://hub.docker.com/r/mrcas/mind"><img src="https://img.shields.io/docker/pulls/mrcas/mind?color=blue"></a>
-    <a href="https://github.com/Casvt/MIND/blob/Main/LICENSE"><img src="https://img.shields.io/github/license/Casvt/MIND?color=blue"></a>
     <a href="https://github.com/Casvt/MIND"><img src="https://img.shields.io/github/stars/Casvt/MIND?style=flat&color=blue"></a>
+    <a href="https://ko-fi.com/casvt"><img src="https://img.shields.io/badge/Donate-Ko--Fi-blue"></a>
+    <a href="https://github.com/Casvt/MIND/blob/Main/LICENSE"><img src="https://img.shields.io/github/license/Casvt/MIND?color=blue"></a>
 </p>
 
 # MIND
@@ -30,6 +31,7 @@ MIND allows you to set reminders for a given time. They can run just once, or be
 - For instructions on how to install MIND, see the [installation documentation](https://casvt.github.io/MIND/installation/installation).
 - For support, a [discord server](https://discord.gg/nMNdgG7vsE) is available or [make an issue](https://github.com/Casvt/MIND/issues).
 - For all documentation, see the [documentation hub](https://casvt.github.io/MIND).
+- For donations, go to the [Ko-Fi page](https://ko-fi.com/casvt).
 
 ## Screenshots
 
