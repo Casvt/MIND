@@ -57,7 +57,8 @@ class Reminder:
         repeat_quantity: Union[None, RepeatQuantity] = None,
         repeat_interval: Union[None, int] = None,
         weekdays: Union[None, List[WEEKDAY_NUMBER]] = None,
-        color: Union[None, str] = None
+        color: Union[None, str] = None,
+        enabled: Union[None, bool] = None
     ) -> ReminderData:
         """Edit the reminder.
 
@@ -92,6 +93,10 @@ class Reminder:
             of the reminder, which is shown in the web-ui.
                 Defaults to None.
 
+            enabled (Union[None, bool], optional): Whether the reminder should
+            be enabled.
+                Defaults to None.
+
         Note about args:
             Either repeat_quantity and repeat_interval are given, weekdays is
             given or neither, but not both.
@@ -107,7 +112,8 @@ class Reminder:
         LOGGER.info(
             f'Updating notification service {self.id}: '
             + f'{title=}, {time=}, {notification_services=}, {text=}, '
-            + f'{repeat_quantity=}, {repeat_interval=}, {weekdays=}, {color=}'
+            + f'{repeat_quantity=}, {repeat_interval=}, {weekdays=}, {color=}, '
+            + f"{enabled=}"
         )
 
         # Validate data
@@ -151,7 +157,8 @@ class Reminder:
                 lambda w: ",".join(map(str, sorted(w)))
             ),
             'color': color,
-            'notification_services': notification_services
+            'notification_services': notification_services,
+            'enabled': enabled
         }
         for k, v in new_values.items():
             if (
@@ -163,7 +170,7 @@ class Reminder:
         if repeated_reminder:
             next_time = find_next_time(
                 data["time"],
-                data["repeat_quantity"],
+                repeat_quantity,
                 data["repeat_interval"],
                 weekdays
             )
@@ -177,7 +184,8 @@ class Reminder:
                 data["weekdays"],
                 data["time"],
                 data["color"],
-                data["notification_services"]
+                data["notification_services"],
+                data["enabled"]
             )
 
         else:
@@ -192,7 +200,8 @@ class Reminder:
                 data["weekdays"],
                 data["original_time"],
                 data["color"],
-                data["notification_services"]
+                data["notification_services"],
+                data["enabled"]
             )
 
         REMINDER_HANDLER.find_next_reminder(next_time)
@@ -281,7 +290,8 @@ class Reminders:
         repeat_quantity: Union[None, RepeatQuantity] = None,
         repeat_interval: Union[None, int] = None,
         weekdays: Union[None, List[WEEKDAY_NUMBER]] = None,
-        color: Union[None, str] = None
+        color: Union[None, str] = None,
+        enabled: bool = True
     ) -> Reminder:
         """Add a reminder.
 
@@ -312,6 +322,10 @@ class Reminders:
             reminder, which is shown in the web-ui.
                 Defaults to None.
 
+            enabled (Union[None, bool], optional): Whether the reminder should
+            be enabled.
+                Defaults to None.
+
         Note about args:
             Either repeat_quantity and repeat_interval are given,
             weekdays is given or neither, but not both.
@@ -327,7 +341,8 @@ class Reminders:
         """
         LOGGER.info(
             f'Adding reminder with {title=}, {time=}, {notification_services=}, ' +
-            f'{text=}, {repeat_quantity=}, {repeat_interval=}, {weekdays=}, {color=}')
+            f'{text=}, {repeat_quantity=}, {repeat_interval=}, {weekdays=}, {color=}' +
+            f'{enabled=}')
 
         # Validate data
         if time < datetime.utcnow().timestamp():
@@ -377,7 +392,8 @@ class Reminders:
             weekdays_str,
             original_time,
             color,
-            notification_services
+            notification_services,
+            enabled
         )
 
         REMINDER_HANDLER.find_next_reminder(time)

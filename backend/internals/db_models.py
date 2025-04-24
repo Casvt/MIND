@@ -547,7 +547,7 @@ class RemindersDB:
                 id, title, text, color,
                 time, original_time,
                 repeat_quantity, repeat_interval,
-                weekdays AS _weekdays
+                weekdays AS _weekdays, enabled
             FROM reminders
             WHERE user_id = :user_id
                 {id_filter};
@@ -576,7 +576,8 @@ class RemindersDB:
         weekdays: Union[str, None],
         original_time: Union[int, None],
         color: Union[str, None],
-        notification_services: List[int]
+        notification_services: List[int],
+        enabled: bool
     ) -> int:
         new_id = get_db().execute("""
             INSERT INTO reminders(
@@ -586,7 +587,8 @@ class RemindersDB:
                 repeat_quantity, repeat_interval,
                 weekdays,
                 original_time,
-                color
+                color,
+                enabled
             )
             VALUES (
                 :user_id,
@@ -595,7 +597,8 @@ class RemindersDB:
                 :rq, :ri,
                 :wd,
                 :ot,
-                :color
+                :color,
+                :enabled
             );
             """,
             {
@@ -607,7 +610,8 @@ class RemindersDB:
                 "ri": repeat_interval,
                 "wd": weekdays,
                 "ot": original_time,
-                "color": color
+                "color": color,
+                "enabled": enabled
             }
         ).lastrowid
 
@@ -628,7 +632,8 @@ class RemindersDB:
         weekdays: Union[str, None],
         original_time: Union[int, None],
         color: Union[str, None],
-        notification_services: List[int]
+        notification_services: List[int],
+        enabled: bool
     ) -> None:
         get_db().execute("""
             UPDATE reminders
@@ -640,7 +645,8 @@ class RemindersDB:
                 repeat_interval = :ri,
                 weekdays = :wd,
                 original_time = :ot,
-                color = :color
+                color = :color,
+                enabled = :enabled
             WHERE id = :r_id;
             """,
             {
@@ -652,6 +658,7 @@ class RemindersDB:
                 "wd": weekdays,
                 "ot": original_time,
                 "color": color,
+                "enabled": enabled,
                 "r_id": reminder_id
             }
         )
@@ -701,7 +708,14 @@ class UserlessRemindersDB:
         ).exists() or -1
 
     def get_soonest_time(self) -> Union[int, None]:
-        return get_db().execute("SELECT MIN(time) FROM reminders;").exists()
+        """Get the earliest time a reminder goes off that is enabled.
+
+        Returns:
+            Union[int, None]: The time, or None if there are no reminders.
+        """
+        return get_db().execute(
+            "SELECT MIN(time) FROM reminders WHERE enabled = 1;"
+        ).exists()
 
     def fetch(
         self,
@@ -717,7 +731,7 @@ class UserlessRemindersDB:
                 title, text, color,
                 time, original_time,
                 repeat_quantity, repeat_interval,
-                weekdays AS _weekdays
+                weekdays AS _weekdays, enabled
             FROM reminders
             {time_filter};
             """,
@@ -745,7 +759,8 @@ class UserlessRemindersDB:
         weekdays: Union[str, None],
         original_time: Union[int, None],
         color: Union[str, None],
-        notification_services: List[int]
+        notification_services: List[int],
+        enabled: bool
     ) -> int:
         new_id = get_db().execute("""
             INSERT INTO reminders(
@@ -755,7 +770,8 @@ class UserlessRemindersDB:
                 repeat_quantity, repeat_interval,
                 weekdays,
                 original_time,
-                color
+                color,
+                enabled
             )
             VALUES (
                 :user_id,
@@ -764,7 +780,8 @@ class UserlessRemindersDB:
                 :rq, :ri,
                 :wd,
                 :ot,
-                :color
+                :color,
+                :enabled
             );
             """,
             {
@@ -776,7 +793,8 @@ class UserlessRemindersDB:
                 "ri": repeat_interval,
                 "wd": weekdays,
                 "ot": original_time,
-                "color": color
+                "color": color,
+                "enabled": enabled
             }
         ).lastrowid
 

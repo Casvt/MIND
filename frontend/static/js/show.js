@@ -1,5 +1,6 @@
 function showAdd(type) {
 	const default_service = getLocalStorage('default_service')['default_service'];
+	inputs.enabled.checked = true;
 	inputs.template.value = '0';
 	inputs.title.value = '';
 	inputs.text.value = '';
@@ -69,6 +70,7 @@ function showEdit(id, type) {
 		inputs.title.value = json.result.title;
 
 		if (type === Types.reminder) {
+			inputs.enabled.checked = json.result.enabled;
 			var trigger_date = new Date(
 				(json.result.time
 					+ new Date(json.result.time * 1000).getTimezoneOffset()

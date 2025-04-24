@@ -306,6 +306,23 @@ class ColorVariable(NonRequiredInputVariable):
         )
 
 
+class EnabledVariable(NonRequiredInputVariable):
+    name = "enabled"
+    description = "Whether the reminder should be enabled"
+    data_type = [DataType.BOOL]
+    default = True
+
+    def validate(self) -> bool:
+        return isinstance(self.value, bool)
+
+
+class EditEnabledVariable(EnabledVariable):
+    default = None
+
+    def validate(self) -> bool:
+        return self.value is None or super().validate()
+
+
 class QueryVariable(InputVariable):
     name = "query"
     description = "The search term"
@@ -538,7 +555,8 @@ class RemindersData(EndpointData):
                 RepeatQuantityVariable,
                 RepeatIntervalVariable,
                 WeekDaysVariable,
-                ColorVariable
+                ColorVariable,
+                EnabledVariable
             ]
         )
     )
@@ -570,7 +588,8 @@ class ReminderData(EndpointData):
                 RepeatQuantityVariable,
                 RepeatIntervalVariable,
                 WeekDaysVariable,
-                ColorVariable
+                ColorVariable,
+                EditEnabledVariable
             ]
         ),
         delete=(

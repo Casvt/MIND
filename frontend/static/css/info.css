@@ -21,7 +21,7 @@
 	--gap: 1rem;
 	display: flex;
 	justify-content: center;
-	align-items: center;
+	align-items: stretch;
 	flex-wrap: wrap;
 	gap: var(--gap);
 }
@@ -29,7 +29,7 @@
 .sub-inputs > :where(
 	input, select, button, label
 ) {
-	width: calc(50% - (var(--gap) / 2));
+	flex: 1 0;
 }
 
 .form-container > form > button,
@@ -52,6 +52,19 @@
 
 .sub-inputs > button[data-selected="false"] > svg {
 	opacity: 0;
+}
+
+#enabled-container {
+	height: 4rem;
+	flex: 1 0;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-wrap: nowrap;
+	gap: 1rem;
+	
+	padding: 1rem;
 }
 
 #color-button {
@@ -254,6 +267,7 @@ div.options > button {
 	display: none;
 }
 
+#info.show-add-static-reminder #enabled-container,
 #info.show-add-static-reminder #time-input,
 #info.show-add-static-reminder #normal-button,
 #info.show-add-static-reminder #repeat-button,
@@ -274,6 +288,7 @@ div.options > button {
 	width: 100%;
 }
 
+#info.show-add-template #enabled-container,
 #info.show-add-template #template-selection,
 #info.show-add-template #time-input,
 #info.show-add-template #normal-button,
@@ -307,6 +322,7 @@ div.options > button {
 	width: 100%;
 }
 
+#info.show-edit-static-reminder #enabled-container,
 #info.show-edit-static-reminder #template-selection,
 #info.show-edit-static-reminder #time-input,
 #info.show-edit-static-reminder #normal-button,
@@ -326,6 +342,7 @@ div.options > button {
 	width: 100%;
 }
 
+#info.show-edit-template #enabled-container,
 #info.show-edit-template #template-selection,
 #info.show-edit-template #time-input,
 #info.show-edit-template #normal-button,

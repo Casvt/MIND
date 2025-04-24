@@ -1,6 +1,7 @@
 const colors = ["#3c3c3c", "#49191e", "#171a42", "#083b06", "#3b3506", "#300e40"];
 
 const inputs = {
+	'enabled': document.querySelector('#enabled-input'),
 	'template': document.querySelector('#template-selection'),
 	'color_toggle': document.querySelector('#color-toggle'),
 	'color_button': document.querySelector('#color-button'),
@@ -219,6 +220,8 @@ function submitInfo() {
 	const cl = document.getElementById('info').classList;
 	if (cl.contains('show-add-reminder')) {
 		// Add reminder
+		data['enabled'] = inputs.enabled.checked;
+		
 		data['time'] =
 			(new Date(inputs.time.value) / 1000)
 			+ (new Date(inputs.time.value).getTimezoneOffset() * 60);
@@ -262,6 +265,8 @@ function submitInfo() {
 		
 	} else if (cl.contains('show-edit-reminder')) {
 		// Edit reminder
+		data['enabled'] = inputs.enabled.checked;
+		
 		data['time'] =
 			(new Date(inputs.time.value) / 1000)
 			+ (new Date(inputs.time.value).getTimezoneOffset() * 60);

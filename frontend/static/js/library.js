@@ -81,6 +81,9 @@ function fillTable(table, results) {
 			} else if (r.weekdays !== null)
 				formatted_date += ` (each ${r.weekdays.map(d => week_days[d]).join(', ')})`;
 
+			if (!r.enabled)
+				formatted_date += ' (Disabled)';
+
 			time.innerText = formatted_date;
 			entry.appendChild(time);
 		};

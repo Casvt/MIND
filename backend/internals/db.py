@@ -314,6 +314,7 @@ def setup_db() -> None:
             weekdays VARCHAR(13),
 
             color VARCHAR(7),
+            enabled BOOL NOT NULL DEFAULT 1,
 
             FOREIGN KEY (user_id) REFERENCES users(id)
         );

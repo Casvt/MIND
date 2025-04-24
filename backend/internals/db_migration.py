@@ -303,3 +303,18 @@ class MigrateUpdateManifest(DBMigrator):
         # So the migration doesn't do anything anymore, and a function used
         # doesn't exist anymore, so the whole migration is just removed.
         return
+
+
+class MigrateAddEnabled(DBMigrator):
+    start_version = 10
+
+    def run(self) -> None:
+        # V10 -> V11
+
+        from backend.internals.db import get_db
+
+        get_db().execute("""
+            ALTER TABLE reminders
+            ADD enabled BOOL NOT NULL DEFAULT 1;
+        """)
+        return

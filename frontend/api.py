@@ -306,7 +306,8 @@ def api_reminders_list(inputs: Dict[str, Any]):
             repeat_quantity=inputs['repeat_quantity'],
             repeat_interval=inputs['repeat_interval'],
             weekdays=inputs['weekdays'],
-            color=inputs['color']
+            color=inputs['color'],
+            enabled=inputs['enabled']
         )
         return return_api(result.get().todict(), code=201)
 
@@ -344,6 +345,7 @@ def api_get_reminder(inputs: Dict[str, Any], r_id: int):
         return return_api(result.todict())
 
     elif request.method == 'PUT':
+        print(inputs)
         result = reminders.fetchone(r_id).update(
             title=inputs['title'],
             time=inputs['time'],
@@ -352,7 +354,8 @@ def api_get_reminder(inputs: Dict[str, Any], r_id: int):
             repeat_quantity=inputs['repeat_quantity'],
             repeat_interval=inputs['repeat_interval'],
             weekdays=inputs['weekdays'],
-            color=inputs['color']
+            color=inputs['color'],
+            enabled=inputs['enabled']
         )
         return return_api(result.todict())
 
@@ -453,7 +456,7 @@ def api_static_reminders_query(inputs: Dict[str, Any]):
     return return_api([r.todict() for r in result])
 
 
-@api.route('staticreminders/<int:s_id>', StaticReminderData)
+@api.route('/staticreminders/<int:s_id>', StaticReminderData)
 @endpoint_wrapper
 def api_get_static_reminder(inputs: Dict[str, Any], s_id: int):
     reminders = StaticReminders(
