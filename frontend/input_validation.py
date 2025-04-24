@@ -385,6 +385,11 @@ class UrlPrefixVariable(NonRequiredInputVariable):
     name = "url_prefix"
     description = "The base URL to run on. Useful for reverse proxies. Empty string to disable."
 
+    def validate(self) -> bool:
+        return self.value is None or (
+            isinstance(self.value, str)
+        )
+
 
 class LogLevelVariable(NonRequiredInputVariable):
     name = "log_level"

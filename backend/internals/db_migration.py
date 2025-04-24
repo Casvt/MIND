@@ -298,15 +298,8 @@ class MigrateUpdateManifest(DBMigrator):
 
     def run(self) -> None:
         # V9 -> V10
-
-        # Nothing is changed in the database
-        # It's just that this code needs to run once
-        # and the DB migration system does exactly that:
-        # run pieces of code once.
-        from backend.internals.settings import Settings, update_manifest
-
-        update_manifest(
-            Settings().get_settings().url_prefix
-        )
-
+        # There used to be a migration here that fixed the manifest file.
+        # That has since been replaced by the dynamic endpoint serving the JSON.
+        # So the migration doesn't do anything anymore, and a function used
+        # doesn't exist anymore, so the whole migration is just removed.
         return
