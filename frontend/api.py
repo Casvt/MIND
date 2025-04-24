@@ -208,7 +208,7 @@ def api_add_user(inputs: Dict[str, str]):
 def api_manage_user(inputs: Dict[str, Any]):
     user = api_key_map[g.hashed_api_key].user_data
     if request.method == 'PUT':
-        user.update(None, inputs['new_password'])
+        user.update(inputs['new_username'], inputs['new_password'])
         return return_api({})
 
     elif request.method == 'DELETE':
@@ -581,7 +581,7 @@ def api_admin_users(inputs: Dict[str, Any]):
 def api_admin_user(inputs: Dict[str, Any], u_id: int):
     user = users.get_one(u_id)
     if request.method == 'PUT':
-        user.update(None, inputs['new_password'])
+        user.update(inputs['new_username'], inputs['new_password'])
         return return_api({})
 
     elif request.method == 'DELETE':

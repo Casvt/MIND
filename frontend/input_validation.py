@@ -137,10 +137,16 @@ class CreateUsernameVariable(UsernameVariable):
     ]
 
 
-class NewPasswordVariable(InputVariable):
+class NewUsernameVariable(NonRequiredInputVariable):
+    name = "new_username"
+    description = "The new username of the user account"
+    related_exceptions = [InvalidKeyValue, UsernameInvalid, UsernameTaken]
+
+
+class NewPasswordVariable(NonRequiredInputVariable):
     name = "new_password"
     description = "The new password of the user account"
-    related_exceptions = [KeyNotFound]
+    related_exceptions = [InvalidKeyValue]
 
 
 class TitleVariable(InputVariable):
@@ -470,7 +476,7 @@ class UsersData(EndpointData):
     methods = Methods(
         put=(
             "Change the password of the user account",
-            [NewPasswordVariable]
+            [NewUsernameVariable, NewPasswordVariable]
         ),
         delete=(
             "Delete the user account",
@@ -732,7 +738,7 @@ class UserManagementData(EndpointData):
     methods = Methods(
         put=(
             "Change the password of the user account",
-            [NewPasswordVariable]
+            [NewUsernameVariable, NewPasswordVariable]
         ),
         delete=(
             "Delete the user account",

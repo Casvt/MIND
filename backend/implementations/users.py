@@ -81,19 +81,15 @@ class User:
             should not be changed.
 
         Raises:
-            OperationNotAllowed: The user is an admin and is trying to change
-            the username.
             UsernameInvalid: The new username is not valid.
             UsernameTaken: The new username is already taken.
         """
+        if not (new_username or new_password):
+            return
+
         user_data = self.get()
 
         if new_username is not None:
-            if user_data.admin:
-                raise OperationNotAllowed(
-                    "Changing the username of an admin account"
-                )
-
             is_valid_username(new_username)
 
             if self.user_db.taken(new_username):
