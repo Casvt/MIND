@@ -14,6 +14,5 @@ body:
   attributes:
     label: How long do you think it will take to finish it?
     placeholder: Six days, four weeks, three months, ...
-    render: markdown
   validations:
     required: true
