@@ -2,8 +2,9 @@
 
 from dataclasses import _MISSING_TYPE, asdict, dataclass
 from functools import lru_cache
-from json import dump, load
 from logging import DEBUG, INFO
+from os import sep
+from os.path import abspath, isdir
 from typing import Any, Dict, Mapping
 
 from backend.base.custom_exceptions import InvalidKeyValue, KeyNotFound
@@ -13,7 +14,8 @@ from backend.base.logging import LOGGER, set_log_level
 from backend.internals.db import DBConnection, commit, get_db
 from backend.internals.db_migration import get_latest_db_version
 
-THIRTY_DAYS = 2592000
+ONE_DAY = 86400
+THIRTY_DAYS = ONE_DAY * 30
 
 
 @lru_cache(1)
@@ -58,6 +60,11 @@ class SettingsValues:
     allow_new_accounts: bool = True
     login_time: int = 3600
     login_time_reset: bool = True
+
+    db_backup_interval: int = ONE_DAY
+    db_backup_amount: int = 3
+    db_backup_folder: str = ''
+    db_backup_last_run: int = 0
 
     def todict(self) -> Dict[str, Any]:
         return {
@@ -139,13 +146,21 @@ class Settings(metaclass=Singleton):
             reversed_tuples(formatted_data.items())
         )
 
+        old_settings = self.get_settings()
         if (
             'log_level' in data
-            and formatted_data['log_level'] != getattr(
-                self.get_settings(), 'log_level'
-            )
+            and formatted_data['log_level'] != old_settings.log_level
         ):
             set_log_level(formatted_data['log_level'])
+
+        if (
+            'db_backup_interval' in data
+            and formatted_data['db_backup_interval'] != old_settings.db_backup_interval
+        ):
+            from backend.internals.db_backup_import import \
+                DatabaseBackupHandler
+
+            DatabaseBackupHandler().set_backup_timer()
 
         self._fetch_settings()
 
@@ -227,6 +242,23 @@ class Settings(metaclass=Singleton):
 
         elif key == 'log_level':
             if value not in (INFO, DEBUG):
+                raise InvalidKeyValue(key, value)
+
+        elif key == 'db_backup_interval':
+            if value < 3600:
+                raise InvalidKeyValue(key, value)
+
+        elif key == 'db_backup_amount':
+            if value <= 0:
+                raise InvalidKeyValue(key, value)
+
+        elif key == 'db_backup_folder':
+            converted_value = abspath(value.rstrip(sep))
+            if not isdir(converted_value):
+                raise InvalidKeyValue(key, value)
+
+        elif key == 'db_backup_last_run':
+            if value < 0:
                 raise InvalidKeyValue(key, value)
 
         return converted_value

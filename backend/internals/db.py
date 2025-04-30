@@ -6,22 +6,18 @@ Setting up the database and handling connections
 
 from __future__ import annotations
 
-from os import remove
 from os.path import dirname, exists, isdir, isfile, join
-from shutil import move
-from sqlite3 import (PARSE_DECLTYPES, Connection, Cursor,
-                     OperationalError, ProgrammingError, Row,
-                     register_adapter, register_converter)
+from sqlite3 import (PARSE_DECLTYPES, Connection, Cursor, ProgrammingError,
+                     Row, register_adapter, register_converter)
 from threading import current_thread
 from typing import Any, Dict, Generator, Iterable, List, Type, Union
 
 from flask import g
 
-from backend.base.custom_exceptions import InvalidDatabaseFile
-from backend.base.definitions import Constants, ReminderType, StartType, T
+from backend.base.definitions import Constants, ReminderType, T
 from backend.base.helpers import create_folder, folder_path, rename_file
 from backend.base.logging import LOGGER, set_log_level
-from backend.internals.db_migration import get_latest_db_version, migrate_db
+from backend.internals.db_migration import migrate_db
 
 REMINDER_TO_KEY = {
     ReminderType.REMINDER: "reminder_id",
@@ -171,6 +167,8 @@ def set_db_location(
     Raises:
         ValueError: Value of `db_folder` exists but is not a folder.
     """
+    from backend.internals.settings import SettingsValues
+
     if db_folder:
         if exists(db_folder) and not isdir(db_folder):
             raise ValueError('Database location is not a folder')
@@ -191,6 +189,7 @@ def set_db_location(
         )
 
     DBConnection.file = db_file_location
+    SettingsValues.db_backup_folder = dirname(db_file_location)
 
     return
 
@@ -376,119 +375,5 @@ def setup_db() -> None:
             force=True,
             is_admin=True
         )
-
-    return
-
-
-def revert_db_import(
-    swap: bool,
-    imported_db_file: str = ''
-) -> None:
-    """Revert the database import process. The original_db_file is the file
-    currently used (`DBConnection.file`).
-
-    Args:
-        swap (bool): Whether or not to keep the imported_db_file or not,
-        instead of the original_db_file.
-
-        imported_db_file (str, optional): The other database file. Keep empty
-        to use `Constants.DB_ORIGINAL_FILENAME`.
-            Defaults to ''.
-    """
-    original_db_file = DBConnection.file
-    if not imported_db_file:
-        imported_db_file = join(
-            dirname(DBConnection.file),
-            Constants.DB_ORIGINAL_NAME
-        )
-
-    if swap:
-        remove(original_db_file)
-        move(
-            imported_db_file,
-            original_db_file
-        )
-
-    else:
-        remove(imported_db_file)
-
-    return
-
-
-def import_db(
-    new_db_file: str,
-    copy_hosting_settings: bool
-) -> None:
-    """Replace the current database with a new one.
-
-    Args:
-        new_db_file (str): The path to the new database file.
-        copy_hosting_settings (bool): Keep the hosting settings from the current
-        database.
-
-    Raises:
-        InvalidDatabaseFile: The new database file is invalid or unsupported.
-    """
-    LOGGER.info(f'Importing new database; {copy_hosting_settings=}')
-
-    cursor = Connection(new_db_file, timeout=20.0).cursor()
-    try:
-        database_version = cursor.execute(
-            "SELECT value FROM config WHERE key = 'database_version' LIMIT 1;"
-        ).fetchone()[0]
-        if not isinstance(database_version, int):
-            raise InvalidDatabaseFile(new_db_file)
-
-    except (OperationalError, InvalidDatabaseFile):
-        LOGGER.error('Uploaded database is not a MIND database file')
-        cursor.connection.close()
-        revert_db_import(
-            swap=False,
-            imported_db_file=new_db_file
-        )
-        raise InvalidDatabaseFile(new_db_file)
-
-    if database_version > get_latest_db_version():
-        LOGGER.error(
-            'Uploaded database is higher version than this MIND installation can support')
-        revert_db_import(
-            swap=False,
-            imported_db_file=new_db_file
-        )
-        raise InvalidDatabaseFile(new_db_file)
-
-    if copy_hosting_settings:
-        hosting_settings = get_db().execute("""
-			SELECT key, value
-			FROM config
-			WHERE key = 'host'
-				OR key = 'port'
-				OR key = 'url_prefix'
-			LIMIT 3;
-			"""
-        ).fetchalldict()
-        cursor.executemany("""
-			INSERT INTO config(key, value)
-			VALUES (:key, :value)
-			ON CONFLICT(key) DO
-			UPDATE
-			SET value = :value;
-			""",
-            hosting_settings
-        )
-    cursor.connection.commit()
-    cursor.connection.close()
-
-    move(
-        DBConnection.file,
-        join(dirname(DBConnection.file), Constants.DB_ORIGINAL_NAME)
-    )
-    move(
-        new_db_file,
-        DBConnection.file
-    )
-
-    from backend.internals.server import Server
-    Server().restart(StartType.RESTART_DB_CHANGES)
 
     return

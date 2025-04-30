@@ -137,14 +137,17 @@ The following is automatically generated. Please report any issues on [GitHub](h
 
 	| Name | Required | Data type | Description | Allowed values |
 	| ---- | -------- | --------- | ----------- | -------------- |
-	| new_password | Yes | string | The new password of the user account | N/A |
+	| new_username | No | string | The new username of the user account | N/A |
+	| new_password | No | string | The new password of the user account | N/A |
 
 	**Returns**
 
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
-	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
+	| 400 | InvalidKeyValue | The value of a key is invalid |
+	| 400 | UsernameInvalid | The username contains invalid characters or is not allowed |
+	| 400 | UsernameTaken | The username is already taken |
 
 ??? DELETE
 
@@ -322,6 +325,7 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 	| repeat_interval | No | number | The number of the interval | N/A |
 	| weekdays | No | list of numbers | On which days of the week to run the reminder | 0, 1, 2, 3, 4, 5, 6 |
 	| color | No | string | The hex code of the color of the entry, which is shown in the web-UI | N/A |
+	| enabled | No | bool | Whether the reminder should be enabled | N/A |
 
 	**Returns**
 
@@ -416,6 +420,7 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 	| repeat_interval | No | number | The number of the interval | N/A |
 	| weekdays | No | list of numbers | On which days of the week to run the reminder | 0, 1, 2, 3, 4, 5, 6 |
 	| color | No | string | The hex code of the color of the entry, which is shown in the web-UI | N/A |
+	| enabled | No | bool | Whether the reminder should be enabled | N/A |
 
 	**Returns**
 
@@ -626,13 +631,13 @@ Replace `<int:t_id>` with the ID of the entry. For example: `/templates/2`.
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 
-### `staticreminders/<int:s_id>`
+### `/staticreminders/<int:s_id>`
 
 | Requires being logged in | Description |
 | ------------------------ | ----------- |
 | Yes | Manage a specific static reminder |
 
-Replace `<int:s_id>` with the ID of the entry. For example: `staticreminders/2`.
+Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`.
 
 ??? GET
 
@@ -776,6 +781,9 @@ Replace `<int:s_id>` with the ID of the entry. For example: `staticreminders/2`.
 	| port | No | number | The port to listen on | N/A |
 	| url_prefix | No | string | The base URL to run on. Useful for reverse proxies. Empty string to disable. | N/A |
 	| log_level | No | number | The level to log on | 20, 10 |
+	| db_backup_interval | No | number | How often to make a backup of the database | N/A |
+	| db_backup_amount | No | number | How many backups to keep. The oldest one will be removed if needed. | N/A |
+	| db_backup_folder | No | string | The folder to store the backups in | N/A |
 
 	**Returns**
 
@@ -851,14 +859,17 @@ Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
 
 	| Name | Required | Data type | Description | Allowed values |
 	| ---- | -------- | --------- | ----------- | -------------- |
-	| new_password | Yes | string | The new password of the user account | N/A |
+	| new_username | No | string | The new username of the user account | N/A |
+	| new_password | No | string | The new password of the user account | N/A |
 
 	**Returns**
 
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
-	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
+	| 400 | InvalidKeyValue | The value of a key is invalid |
+	| 400 | UsernameInvalid | The username contains invalid characters or is not allowed |
+	| 400 | UsernameTaken | The username is already taken |
 
 ??? DELETE
 
@@ -908,5 +919,57 @@ Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
 	| ---- | ----- | ----------- |
 	| 201 | N/A | Success |
 	| 400 | InvalidDatabaseFile | The uploaded database file is invalid or not supported |
+	| 400 | InvalidKeyValue | The value of a key is invalid |
+	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
+
+### `/admin/database/backups`
+
+| Requires being logged in | Description |
+| ------------------------ | ----------- |
+| Yes | Get a list of the current database backups |
+
+??? GET
+
+	**Returns**
+
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 200 | N/A | Success |
+
+### `/admin/database/backups/<int:b_idx>`
+
+| Requires being logged in | Description |
+| ------------------------ | ----------- |
+| Yes | Manage a specific database backup |
+
+Replace `<int:b_idx>` with the ID of the entry. For example: `/admin/database/backups/2`.
+
+??? GET
+
+	Download the backup
+
+	**Returns**
+
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 200 | N/A | Success |
+	| 400 | DatabaseFileNotFound | The index of the database backup is invalid |
+
+??? POST
+
+	Import the backup, as if it was uploaded and applied. Will automatically restart MIND.
+
+	**Parameters (url)**
+
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| copy_hosting_settings | Yes | bool | Copy the hosting settings from the current database | N/A |
+
+	**Returns**
+
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 201 | N/A | Success |
+	| 400 | DatabaseFileNotFound | The index of the database backup is invalid |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |

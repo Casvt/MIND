@@ -3,7 +3,7 @@
 from datetime import datetime
 from io import BytesIO, StringIO
 from os import remove, urandom
-from os.path import exists
+from os.path import basename, exists
 from time import time as epoch_time
 from typing import Any, Callable, Dict, Tuple, Union
 
@@ -21,14 +21,16 @@ from backend.features.templates import Templates
 from backend.implementations.apprise_parser import get_apprise_services
 from backend.implementations.notification_services import NotificationServices
 from backend.implementations.users import Users
-from backend.internals.db import get_db, import_db
+from backend.internals.db_backup_import import (create_database_copy,
+                                                get_backup, get_backups,
+                                                import_db, import_db_backup)
 from backend.internals.server import Server, diffuse_timers
 from backend.internals.settings import Settings, get_about_data
 from frontend.input_validation import (AboutData, AuthLoginData,
                                        AuthLogoutData, AuthStatusData,
                                        AvailableNotificationServicesData,
-                                       DatabaseData, LogfileData,
-                                       NotificationServiceData,
+                                       BackupData, BackupsData, DatabaseData,
+                                       LogfileData, NotificationServiceData,
                                        NotificationServicesData,
                                        PublicSettingsData, ReminderData,
                                        RemindersData, RestartData,
@@ -600,15 +602,10 @@ def api_admin_user(inputs: Dict[str, Any], u_id: int):
 @endpoint_wrapper
 def api_admin_database(inputs: Dict[str, Any]):
     if request.method == "GET":
-        current_date = datetime.now().strftime(r"%Y_%m_%d_%H_%M")
-        filename = folder_path(
-            'db', f'MIND_{current_date}.db'
-        )
-        get_db().execute(
-            "VACUUM INTO ?;",
-            (filename,)
-        )
+        filename = create_database_copy(folder_path('db'))
 
+        # We cannot simply pass the filename, ass we have to
+        # delete the file, but we cannot do that if we send it.
         with open(filename, 'rb') as database_file:
             bi = BytesIO(database_file.read())
 
@@ -616,9 +613,29 @@ def api_admin_database(inputs: Dict[str, Any]):
         return send_file(
             bi,
             mimetype="application/x-sqlite3",
-            download_name=f'MIND_{current_date}.db'
+            download_name=basename(filename)
         ), 200
 
     elif request.method == "POST":
         import_db(inputs['file'], inputs['copy_hosting_settings'])
+        return return_api({})
+
+
+@admin_api.route('/database/backups', BackupsData)
+@endpoint_wrapper
+def api_admin_backups(inputs: Dict[str, Any]):
+    return return_api(get_backups())
+
+
+@admin_api.route('/database/backups/<int:b_idx>', BackupData)
+@endpoint_wrapper
+def api_admin_backup(inputs: Dict[str, Any], b_idx: int):
+    if request.method == "GET":
+        return send_file(
+            get_backup(b_idx)['filepath'],
+            mimetype="application/x-sqlite3"
+        ), 200
+
+    elif request.method == "POST":
+        import_db_backup(b_idx, inputs['copy_hosting_settings'])
         return return_api({})

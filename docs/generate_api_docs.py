@@ -11,7 +11,8 @@ from typing import List, Type, Union
 path.insert(0, dirname(dirname(__file__)))
 
 import frontend.api
-from backend.base.custom_exceptions import (NotificationServiceNotFound,
+from backend.base.custom_exceptions import (DatabaseFileNotFound,
+                                            NotificationServiceNotFound,
                                             ReminderNotFound, TemplateNotFound)
 from backend.base.definitions import MindException, StartType
 from backend.base.helpers import folder_path
@@ -28,7 +29,8 @@ url_var_map = {
     'int:n_id': NotificationServiceNotFound,
     'int:r_id': ReminderNotFound,
     'int:t_id': TemplateNotFound,
-    'int:s_id': ReminderNotFound
+    'int:s_id': ReminderNotFound,
+    'int:b_idx': DatabaseFileNotFound
 }
 
 result = f"""# API
@@ -249,9 +251,9 @@ if __name__ == '__main__':
         with open(API_FILE, 'w+') as f:
             f.write(result)
 
-        # run(["git", "config", "--global", "user.email", '"casvantijn@gmail.com"'])
-        # run(["git", "config", "--global", "user.name", '"CasVT"'])
-        # run(["git", "checkout", "Development"])
-        # run(["git", "add", API_FILE])
-        # run(["git", "commit", "-m", "Updated API docs"])
-        # run(["git", "push"])
+        run(["git", "config", "--global", "user.email", '"casvantijn@gmail.com"'])
+        run(["git", "config", "--global", "user.name", '"CasVT"'])
+        run(["git", "checkout", "Development"])
+        run(["git", "add", API_FILE])
+        run(["git", "commit", "-m", "Updated API docs"])
+        run(["git", "push"])

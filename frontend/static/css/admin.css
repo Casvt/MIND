@@ -165,7 +165,6 @@ h2 {
 #download-logs-button,
 #save-hosting-button,
 #add-user-button,
-#download-db-button,
 #upload-db-button,
 #restart-button,
 #shutdown-button {
@@ -196,31 +195,32 @@ h2 {
 	width: min-content;
 }
 
-#user-table {
+#user-table,
+#backup-table {
 	min-width: 25rem;
 	border-spacing: 0px;
 }
 
-#user-table :where(th, td) {
+:where(#user-table, #backup-table) :where(th, td) {
 	height: 2.65rem;
 	padding: .25rem .5rem;
 	text-align: left;
 }
 
-#user-table tr td {
+:where(#user-table, #backup-table) tr td {
 	border-top: 1px solid var(--color-gray);
 }
 
-#user-table :where(th, td):first-child {
+:where(#user-table, #backup-table) :where(th, td):first-child {
 	width: 10rem;
 	padding-left: 2rem;
 }
 
-#user-table :where(td, td):nth-child(2) {
+:where(#user-table, #backup-table) :where(th, td):nth-child(2) {
 	width: 15rem;
 }
 
-#user-table :where(th, td):last-child {
+:where(#user-table, #backup-table) :where(th, td):last-child {
 	width: 5.75rem;
 	display: flex;
 	align-items: center;
@@ -228,11 +228,11 @@ h2 {
 	padding-right: 2rem;
 }
 
-#user-table button {
+:where(#user-table, #backup-table) button {
 	height: 1.25rem;
 }
 
-#user-table svg {
+:where(#user-table, #backup-table) svg {
 	aspect-ratio: 1/1;
 	height: 100%;
 	width: auto;
@@ -248,6 +248,8 @@ h2 {
 	flex-direction: column;
 	align-items: center;
 	gap: 1rem;
+
+	margin-block: 2rem 1rem;
 }
 
 #hosting-form > p,
@@ -256,6 +258,10 @@ h2 {
 	margin-inline: auto;
 	text-align: center;
 	word-wrap: break-word;
+}
+
+#backup-table :where(th, td):first-child {
+	width: 20rem;
 }
 
 @media (max-width: 40rem) {

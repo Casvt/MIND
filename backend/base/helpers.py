@@ -8,13 +8,13 @@ from base64 import urlsafe_b64encode
 from datetime import datetime
 from hashlib import pbkdf2_hmac
 from logging import WARNING
-from os import makedirs, symlink
-from os.path import abspath, dirname, exists, join
+from os import makedirs, scandir, symlink
+from os.path import abspath, dirname, exists, join, splitext
 from secrets import token_bytes
 from shutil import copy2, move
 from sys import base_exec_prefix, executable, platform, version_info
 from typing import (Any, Callable, Generator, Iterable,
-                    List, Sequence, Tuple, Union, cast)
+                    List, Sequence, Set, Tuple, Union, cast)
 
 from apprise import Apprise, LogCapture
 from dateutil.relativedelta import relativedelta
@@ -23,6 +23,7 @@ from backend.base.definitions import (WEEKDAY_NUMBER, GeneralReminderData,
                                       RepeatQuantity, SendResult, T, U)
 
 
+# region Python
 def get_python_version() -> str:
     """Get python version as string
 
@@ -76,6 +77,7 @@ def get_python_exe() -> str:
     return executable
 
 
+# region Generic
 def reversed_tuples(
     i: Iterable[Tuple[T, U]]
 ) -> Generator[Tuple[U, T], Any, Any]:
@@ -143,6 +145,7 @@ def search_filter(query: str, result: GeneralReminderData) -> bool:
     )
 
 
+# region Security
 def get_hash(salt: bytes, data: str) -> bytes:
     """Hash a string using the supplied salt
 
@@ -172,6 +175,7 @@ def generate_salt_hash(password: str) -> Tuple[bytes, bytes]:
     return salt, hashed_password
 
 
+# region Apprise
 def send_apprise_notification(
     urls: List[str],
     title: str,
@@ -211,6 +215,7 @@ def send_apprise_notification(
         return SendResult.SUCCESS
 
 
+# region Time
 def next_selected_day(
     weekdays: List[WEEKDAY_NUMBER],
     weekday: WEEKDAY_NUMBER
@@ -318,6 +323,7 @@ def find_next_time(
     return result
 
 
+# region Files
 def folder_path(*folders: str) -> str:
     """Turn filepaths relative to the project folder into absolute paths.
 
@@ -328,6 +334,49 @@ def folder_path(*folders: str) -> str:
         dirname(dirname(dirname(abspath(__file__)))),
         *folders
     )
+
+
+def list_files(folder: str, ext: Iterable[str] = []) -> List[str]:
+    """List all files in a folder recursively with absolute paths. Hidden files
+    (files starting with `.`) are ignored.
+
+    Args:
+        folder (str): The base folder to search through.
+
+        ext (Iterable[str], optional): File extensions to only include.
+        Dot-prefix not necessary.
+            Defaults to [].
+
+    Returns:
+        List[str]: The paths of the files in the folder.
+    """
+    files: List[str] = []
+
+    def _list_files(folder: str, ext: Set[str] = set()):
+        """Internal function to add all files in a folder to the files list.
+
+        Args:
+            folder (str): The base folder to search through.
+            ext (Set[str], optional): A set of lowercase, dot-prefixed,
+            extensions to filter for or empty for no filter. Defaults to set().
+        """
+        for f in scandir(folder):
+            if f.is_dir():
+                _list_files(f.path, ext)
+
+            elif (
+                f.is_file()
+                and not f.name.startswith('.')
+                and (
+                    not ext
+                    or (splitext(f.name)[1].lower() in ext)
+                )
+            ):
+                files.append(f.path)
+
+    ext = {'.' + e.lower().lstrip('.') for e in ext}
+    _list_files(folder, ext)
+    return files
 
 
 def create_folder(
@@ -342,7 +391,23 @@ def create_folder(
     return
 
 
-def __copy2(src, dst, *, follow_symlinks=True):
+def copy(
+    src: str,
+    dst: str,
+    *,
+    follow_symlinks: bool = True
+) -> str:
+    """Copy a file or folder.
+
+    Args:
+        src (str): The source file or folder.
+        dst (str): The destination of the copy.
+        follow_symlinks (bool, optional): Whether to follow symlinks.
+            Defaults to True.
+
+    Returns:
+        str: The destination.
+    """
     try:
         return copy2(src, dst, follow_symlinks=follow_symlinks)
 
@@ -378,11 +443,12 @@ def rename_file(
     """
     create_folder(dirname(after))
 
-    move(before, after, copy_function=__copy2)
+    move(before, after, copy_function=copy)
 
     return
 
 
+# region Classes
 class Singleton(type):
     _instances = {}
 

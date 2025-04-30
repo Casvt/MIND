@@ -388,6 +388,39 @@ class LoginTimeResetVariable(NonRequiredInputVariable):
         )
 
 
+class DBBackupInterval(NonRequiredInputVariable):
+    name = "db_backup_interval"
+    description = "How often to make a backup of the database"
+    data_type = [DataType.INT]
+
+    def validate(self) -> bool:
+        return self.value is None or (
+            isinstance(self.value, int)
+        )
+
+
+class DBBackupAmount(NonRequiredInputVariable):
+    name = "db_backup_amount"
+    description = "How many backups to keep. The oldest one will be removed if needed."
+    data_type = [DataType.INT]
+
+    def validate(self) -> bool:
+        return self.value is None or (
+            isinstance(self.value, int)
+        )
+
+
+class DBBackupFolder(NonRequiredInputVariable):
+    name = "db_backup_folder"
+    description = "The folder to store the backups in"
+    data_type = [DataType.STR]
+
+    def validate(self) -> bool:
+        return self.value is None or (
+            isinstance(self.value, str)
+        )
+
+
 class HostVariable(NonRequiredInputVariable):
     name = "host"
     description = "The IP to bind to. Use 0.0.0.0 to bind to all addresses"
@@ -724,7 +757,10 @@ class SettingsData(EndpointData):
                 HostVariable,
                 PortVariable,
                 UrlPrefixVariable,
-                LogLevelVariable
+                LogLevelVariable,
+                DBBackupInterval,
+                DBBackupAmount,
+                DBBackupFolder
             ]
         )
     )
@@ -776,6 +812,27 @@ class DatabaseData(EndpointData):
         post=(
             "Upload and apply a database file. Will automatically restart MIND.",
             [DatabaseFileVariable, CopyHostingSettingsVariable]
+        )
+    )
+
+
+class BackupsData(EndpointData):
+    description = "Get a list of the current database backups"
+    methods = Methods(
+        get=("", [])
+    )
+
+
+class BackupData(EndpointData):
+    description = "Manage a specific database backup"
+    methods = Methods(
+        get=(
+            "Download the backup",
+            []
+        ),
+        post=(
+            "Import the backup, as if it was uploaded and applied. Will automatically restart MIND.",
+            [CopyHostingSettingsVariable]
         )
     )
 

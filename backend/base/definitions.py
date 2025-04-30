@@ -7,10 +7,10 @@ Definitions of basic types, abstract classes, enums, etc.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import (TYPE_CHECKING, Any, Dict, List, Literal,
-                    Tuple, Type, TypedDict, TypeVar, Union, cast)
+                    Sequence, Tuple, TypedDict, TypeVar, Union, cast)
 
 if TYPE_CHECKING:
     from backend.implementations.users import User
@@ -20,20 +20,17 @@ if TYPE_CHECKING:
 T = TypeVar('T')
 U = TypeVar('U')
 WEEKDAY_NUMBER = Literal[0, 1, 2, 3, 4, 5, 6]
+
 BaseSerialisable = Union[
-    int, float, bool, str, None
+    int, float, bool, str, None, TypedDict
 ]
 Serialisable = Union[
-    List[Union[
-        BaseSerialisable,
-        List[BaseSerialisable],
-        Dict[str, BaseSerialisable]
-    ]],
-    Dict[str, Union[
-        BaseSerialisable,
-        List[BaseSerialisable],
-        Dict[str, BaseSerialisable]
-    ]],
+    TypedDict,
+    Sequence[BaseSerialisable],
+    Sequence[Dict[str, BaseSerialisable]],
+    Dict[str, BaseSerialisable],
+    Dict[str, Sequence[BaseSerialisable]],
+    Dict[str, Dict[str, BaseSerialisable]]
 ]
 
 
@@ -160,6 +157,13 @@ class ApiResponse(TypedDict):
     result: Any
     error: Union[str, None]
     code: int
+
+
+class DatabaseBackupEntry(TypedDict):
+    index: int
+    creation_date: int
+    filepath: str
+    filename: str
 
 
 # region Abstract Classes

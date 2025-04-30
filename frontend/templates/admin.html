@@ -97,6 +97,40 @@
 				<div class="database-container">
 					<button id="download-logs-button" type="button">Download Debug Logs</button>
 				</div>
+				<h2>Database Backups</h2>
+				<div class="settings-table-container">
+					<table class="settings-table">
+						<tbody>
+							<tr>
+								<td><label for="db-backup-interval-input">Database Backup Interval</label></td>
+								<td>
+									<div class="number-input">
+										<input type="number" id="db-backup-interval-input" min="1" required>
+										<p>Hours</p>
+									</div>
+									<p>How often to make a backup of the database.</p>
+								</td>
+							</tr>
+							<tr>
+								<td><label for="db-backup-amount-input">Database Backup Retention</label></td>
+								<td>
+									<div class="number-input">
+										<input type="number" id="db-backup-amount-input" min="1" required>
+										<p>Backups</p>
+									</div>
+									<p>How many backups to keep. The oldest one will be removed if needed.</p>
+								</td>
+							</tr>
+							<tr>
+								<td><label for="db-backup-folder-input">Database Backup Folder</label></td>
+								<td>
+									<input type="text" id="db-backup-folder-input" required>
+									<p>The folder to store the backups in.</p>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 			</form>
 			<form id="hosting-form">
 				<h2>Hosting</h2>
@@ -128,8 +162,8 @@
 					</table>
 					<button type="submit" id="save-hosting-button">Save and Restart</button>
 				</div>
-				<p>IMPORTANT: After saving the hosting settings, it is required to log into the admin panel within 1 minute (60 seconds) in order to keep the new hosting settings. Otherwise, MIND will revert the changes and go back to the old hosting settings.</p>
-				<p>See <a href="https://casvt.github.io/MIND/settings/admin_settings#hosting">the documentation</a> for more information.</p>
+				<p>IMPORTANT: Login into MIND within one minute to keep the new database, or the import will automatically be reverted.
+					See <a href="https://casvt.github.io/MIND/general_info/admin_panel#database">the documentation</a> for more information.</p>
 			</form>
 			<h2>User Management</h2>
 			<div class="add-user-container">
@@ -177,31 +211,57 @@
 				</table>
 			</div>
 			<h2>Database</h2>
-			<div class="database-container">
-				<button id="download-db-button">Download Database</button>
-			</div>
 			<form id="upload-database-form">
 				<div class="settings-table-container">
 					<table class="settings-table">
 						<tbody>
 							<tr>
-								<td><label for="database-file-input">Database File</label></td>
-								<td><input type="file" id="database-file-input" required></td>
-							</tr>
-							<tr>
 								<td><label for="copy-hosting-input">Keep Hosting Settings</label></td>
 								<td>
 									<input type="checkbox" id="copy-hosting-input">
-									<p>Keep the current hosting settings instead of using the settings in the uploaded database.</p>
+									<p>Keep the current hosting settings instead of using the settings in the uploaded database when importing.</p>
+								</td>
+							</tr>
+							<tr>
+								<td><label for="database-file-input">Database File</label></td>
+								<td>
+									<input type="file" id="database-file-input" required>
+									<p>Instead of importing a backup, import a database by uploading the file.</p>
 								</td>
 							</tr>
 						</tbody>
 					</table>
 				</div>
 				<button type="submit" id="upload-db-button">Import Database</button>
-				<p>IMPORTANT: After uploading the backup, it is required to log into the admin panel within 1 minute (60 seconds) in order to keep the new database file. Otherwise, MIND will revert the upload and go back to the old database.</p>
-				<p>See <a href="https://casvt.github.io/MIND/general_info/admin_panel#database">the documentation</a> for more information.</p>
+				<p>IMPORTANT: Login into MIND within one minute to keep the new database, or the import will automatically be reverted.
+					See <a href="https://casvt.github.io/MIND/general_info/admin_panel#database">the documentation</a> for more information.</p>
 			</form>
+			<div class="settings-table-container">
+				<table id="backup-table">
+					<thead>
+						<th>File</th>
+						<th>Creation</th>
+						<th>Actions</th>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Current Database</td>
+							<td></td>
+							<td>
+								<button id="download-db-button">
+									<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" width="512" height="512">
+										<g>
+											<path d="M210.731,386.603c24.986,25.002,65.508,25.015,90.51,0.029c0.01-0.01,0.019-0.019,0.029-0.029l68.501-68.501   c7.902-8.739,7.223-22.23-1.516-30.132c-8.137-7.357-20.527-7.344-28.649,0.03l-62.421,62.443l0.149-329.109   C277.333,9.551,267.782,0,256,0l0,0c-11.782,0-21.333,9.551-21.333,21.333l-0.192,328.704L172.395,288   c-8.336-8.33-21.846-8.325-30.176,0.011c-8.33,8.336-8.325,21.846,0.011,30.176L210.731,386.603z" />
+											<path d="M490.667,341.333L490.667,341.333c-11.782,0-21.333,9.551-21.333,21.333V448c0,11.782-9.551,21.333-21.333,21.333H64   c-11.782,0-21.333-9.551-21.333-21.333v-85.333c0-11.782-9.551-21.333-21.333-21.333l0,0C9.551,341.333,0,350.885,0,362.667V448   c0,35.346,28.654,64,64,64h384c35.346,0,64-28.654,64-64v-85.333C512,350.885,502.449,341.333,490.667,341.333z" />
+										</g>
+									</svg>
+								</button>
+							</td>
+						</tr>
+					</tbody>
+					<tbody id="backup-list"></tbody>
+				</table>
+			</div>
 			<h2>Power</h2>
 			<div class="database-container">
 				<button id="restart-button">Restart</button>

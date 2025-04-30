@@ -2,7 +2,10 @@ const setting_inputs = {
 	allow_new_accounts: document.querySelector('#allow-new-accounts-input'),
 	login_time: document.querySelector('#login-time-input'),
 	login_time_reset: document.querySelector('#login-time-reset-input'),
-	log_level: document.querySelector('#log-level-input')
+	log_level: document.querySelector('#log-level-input'),
+	db_backup_interval: document.querySelector('#db-backup-interval-input'),
+	db_backup_amount: document.querySelector('#db-backup-amount-input'),
+	db_backup_folder: document.querySelector('#db-backup-folder-input')
 };
 
 const hosting_inputs = {
@@ -58,6 +61,9 @@ function loadSettings() {
 		hosting_inputs.host.value = json.result.host;
 		hosting_inputs.port.value = json.result.port;
 		hosting_inputs.url_prefix.value = json.result.url_prefix;
+		setting_inputs.db_backup_interval.value = json.result.db_backup_interval / 3600;
+		setting_inputs.db_backup_amount.value = json.result.db_backup_amount;
+		setting_inputs.db_backup_folder.value = json.result.db_backup_folder;
 	});
 };
 
@@ -66,7 +72,10 @@ function submitSettings() {
 		'allow_new_accounts': setting_inputs.allow_new_accounts.checked,
 		'login_time': setting_inputs.login_time.value * 60,
 		'login_time_reset': setting_inputs.login_time_reset.value === 'true',
-		'log_level': parseInt(setting_inputs.log_level.value)
+		'log_level': parseInt(setting_inputs.log_level.value),
+		'db_backup_interval': parseInt(setting_inputs.db_backup_interval.value) * 3600,
+		'db_backup_amount': parseInt(setting_inputs.db_backup_amount.value),
+		'db_backup_folder': setting_inputs.db_backup_folder.value
 	};
 	fetch(`${url_prefix}/api/admin/settings?api_key=${api_key}`, {
 		'method': 'PUT',
@@ -269,6 +278,61 @@ function upload_database() {
 	});
 };
 
+function loadBackups() {
+	const table = document.querySelector('#backup-list');
+	table.innerHTML = '';
+	fetch(`${url_prefix}/api/admin/database/backups?api_key=${api_key}`)
+	.then(response => response.json())
+	.then(json => {
+		json.result.forEach(backup => {
+			const entry = document.createElement('tr');
+			entry.dataset.index = backup.index;
+
+			const filename = document.createElement('td');
+			filename.innerText = backup.filename;
+			entry.appendChild(filename);
+
+			const creation = document.createElement('td');
+			let formatted_datetime = new
+				Date(backup.creation_date * 1000)
+				.toLocaleString(getLocalStorage('locale')['locale']);
+			creation.innerText = formatted_datetime;
+			entry.appendChild(creation);
+
+			const actions = document.createElement('td');
+			entry.appendChild(actions);
+
+			const download = document.createElement('button');
+			download.onclick =
+				e => window.location.href =
+					`${url_prefix}/api/admin/database/backups/${backup.index}?api_key=${api_key}`;
+			download.innerHTML = Icons.download;
+			download.title = "Download database backup"
+			actions.appendChild(download);
+
+			const upload = document.createElement('button');
+			upload.onclick = e => {
+				upload.innerText = '...';
+				const copy_hosting = import_inputs.copy_hosting.checked ? 'true' : 'false';
+				fetch(`${url_prefix}/api/admin/database/backups/${backup.index}?api_key=${api_key}&copy_hosting_settings=${copy_hosting}`, {
+					method: 'POST',
+				})
+				.then(response =>
+					setTimeout(
+						() => window.location.reload(),
+						1000
+					)
+				);
+			};
+			upload.innerHTML = Icons.upload;
+			upload.title = "Import database backup"
+			actions.appendChild(upload);
+
+			table.appendChild(entry);
+		});
+	});
+}
+
 function restart_app() {
 	power_buttons.restart.innerText = 'Restarting...';
 	fetch(`${url_prefix}/api/admin/restart?api_key=${api_key}`, {
@@ -300,15 +364,20 @@ function shutdown_app() {
 checkLogin();
 loadSettings();
 loadUsers();
+loadBackups();
 
 document.querySelector('#logout-button').onclick = e => logout();
 document.querySelector('#settings-form').action = 'javascript:submitSettings();';
 document.querySelector('#download-logs-button').onclick = e => downloadLogFile();
+
 hosting_inputs.form.action = 'javascript:submitHostingSettings();';
+
 document.querySelector('#add-user-button').onclick = e => toggleAddUser();
 document.querySelector('#add-user-form').action = 'javascript:addUser()';
+
+document.querySelector('#upload-database-form').action = 'javascript:upload_database();';
 document.querySelector('#download-db-button').onclick = e => 
 	window.location.href = `${url_prefix}/api/admin/database?api_key=${api_key}`;
-document.querySelector('#upload-database-form').action = 'javascript:upload_database();';
+
 power_buttons.restart.onclick = e => restart_app();
 power_buttons.shutdown.onclick = e => shutdown_app();

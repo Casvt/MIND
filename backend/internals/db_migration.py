@@ -318,3 +318,19 @@ class MigrateAddEnabled(DBMigrator):
             ADD enabled BOOL NOT NULL DEFAULT 1;
         """)
         return
+
+
+class MigrateSetDBBackupFolder(DBMigrator):
+    start_version = 11
+
+    def run(self) -> None:
+        # V11 -> V12
+
+        from backend.internals.settings import Settings, SettingsValues
+
+        s = Settings()
+        sv = s.get_settings()
+        if sv.db_backup_folder == '':
+            s.update({"db_backup_folder": SettingsValues.db_backup_folder})
+
+        return

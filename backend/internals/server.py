@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from os import urandom
 from threading import Timer, current_thread
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Mapping, Union
 
 from flask import Flask
 from waitress.server import create_server
@@ -18,8 +18,8 @@ from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from backend.base.definitions import Constants, StartType
 from backend.base.helpers import Singleton, folder_path
 from backend.base.logging import LOGGER
-from backend.internals.db import (DBConnectionManager,
-                                  close_db, revert_db_import)
+from backend.internals.db import DBConnectionManager, close_db
+from backend.internals.db_backup_import import revert_db_import
 from backend.internals.settings import Settings
 
 if TYPE_CHECKING:
@@ -117,18 +117,18 @@ class Server(metaclass=Singleton):
     def __init__(self) -> None:
         self.start_type = None
 
-        self.revert_db_timer = Timer(
+        self.revert_db_timer = self.get_db_timer_thread(
             Constants.DB_REVERT_TIME,
             revert_db_import,
+            "DatabaseImportHandler",
             kwargs={"swap": True}
         )
-        self.revert_db_timer.name = "DatabaseImportHandler"
 
-        self.revert_hosting_timer = Timer(
+        self.revert_hosting_timer = self.get_db_timer_thread(
             Constants.HOSTING_REVERT_TIME,
-            self.restore_hosting_settings
+            self.restore_hosting_settings,
+            "HostingHandler"
         )
-        self.revert_hosting_timer.name = "HostingHandler"
 
         return
 
@@ -241,9 +241,11 @@ class Server(metaclass=Singleton):
         """
         Stop the waitress server. Starts a thread that shuts down the server.
         """
-        t = Timer(1.0, self.__shutdown_thread_function)
-        t.name = "InternalStateHandler"
-        t.start()
+        self.get_db_timer_thread(
+            1.0,
+            self.__shutdown_thread_function,
+            "InternalStateHandler"
+        ).start()
         return
 
     def restart(
@@ -262,14 +264,66 @@ class Server(metaclass=Singleton):
         return
 
     def restore_hosting_settings(self) -> None:
-        with self.app.app_context():
-            settings = Settings()
-            values = settings.get_settings()
-            main_settings = {
-                'host': values.backup_host,
-                'port': values.backup_port,
-                'url_prefix': values.backup_url_prefix
-            }
-            settings.update(main_settings)
-            self.restart()
+        "Restore the hosting settings from the backup, and restart."
+        settings = Settings()
+        values = settings.get_settings()
+        main_settings = {
+            'host': values.backup_host,
+            'port': values.backup_port,
+            'url_prefix': values.backup_url_prefix
+        }
+        settings.update(main_settings)
+        self.restart()
         return
+
+    def get_db_timer_thread(
+        self,
+        interval: float,
+        target: Callable[..., object],
+        name: Union[str, None] = None,
+        args: Iterable[Any] = (),
+        kwargs: Mapping[str, Any] = {}
+    ) -> Timer:
+        """Create a timer thread that runs under Flask app context.
+
+        Args:
+            interval (float): The time to wait before running the target.
+
+            target (Callable[..., object]): The function to run in the thread.
+
+            name (Union[str, None], optional): The name of the thread.
+                Defaults to None.
+
+            args (Iterable[Any], optional): The arguments to pass to the function.
+                Defaults to ().
+
+            kwargs (Mapping[str, Any], optional): The keyword arguments to pass
+            to the function.
+                Defaults to {}.
+
+        Returns:
+            Timer: The timer thread instance.
+        """
+        def db_thread(*args, **kwargs) -> None:
+            with self.app.app_context():
+                target(*args, **kwargs)
+
+            thread_id = current_thread().native_id or -1
+            if (
+                thread_id in DBConnectionManager.instances
+                and
+                not DBConnectionManager.instances[thread_id].closed
+            ):
+                DBConnectionManager.instances[thread_id].close()
+
+            return
+
+        t = Timer(
+            interval=interval,
+            function=db_thread,
+            args=args,
+            kwargs=kwargs
+        )
+        if name:
+            t.name = name
+        return t

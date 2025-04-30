@@ -39,7 +39,7 @@ class InvalidKeyValue(MindException):
         self.value = value
         LOGGER.warning(
             "This key in the API request has an invalid value: "
-            "%s = %",
+            "%s = %s",
             key, value
         )
 
@@ -165,6 +165,28 @@ class InvalidDatabaseFile(MindException):
             'error': self.__class__.__name__,
             'result': {
                 'filepath_db': self.filepath_db
+            }
+        }
+
+
+class DatabaseFileNotFound(MindException):
+    "The index of the database backup is invalid"
+
+    def __init__(self, backup_index: int) -> None:
+        self.backup_index = backup_index
+        LOGGER.warning(
+            "The given database backup index is invalid: %d",
+            backup_index
+        )
+        return
+
+    @property
+    def api_response(self) -> ApiResponse:
+        return {
+            'code': 400,
+            'error': self.__class__.__name__,
+            'result': {
+                'index': self.backup_index
             }
         }
 

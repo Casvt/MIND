@@ -15,6 +15,7 @@ from backend.base.helpers import check_python_version, get_python_exe
 from backend.base.logging import LOGGER, setup_logging
 from backend.features.reminder_handler import ReminderHandler
 from backend.internals.db import set_db_location, setup_db
+from backend.internals.db_backup_import import DatabaseBackupHandler
 from backend.internals.server import Server, handle_start_type
 from backend.internals.settings import Settings
 
@@ -92,6 +93,9 @@ def _main(
         reminder_handler = ReminderHandler()
         reminder_handler.find_next_reminder()
 
+        backup_handler = DatabaseBackupHandler()
+        backup_handler.set_backup_timer()
+
     try:
         # =================
         SERVER.run(settings.host, settings.port)
@@ -99,6 +103,7 @@ def _main(
 
     finally:
         reminder_handler.stop_handling()
+        backup_handler.stop_backup_timer()
 
         if SERVER.start_type is not None:
             LOGGER.info("Restarting MIND")
