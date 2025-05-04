@@ -324,6 +324,7 @@ Replace `<int:n_id>` with the ID of the entry. For example: `/notificationservic
 	| repeat_quantity | No | string | The quantity of the repeat_interval | years, months, weeks, days, hours, minutes |
 	| repeat_interval | No | number | The number of the interval | N/A |
 	| weekdays | No | list of numbers | On which days of the week to run the reminder | 0, 1, 2, 3, 4, 5, 6 |
+	| cron_schedule | No | string | The cron schedule that the reminder should run on | N/A |
 	| color | No | string | The hex code of the color of the entry, which is shown in the web-UI | N/A |
 	| enabled | No | bool | Whether the reminder should be enabled | N/A |
 
@@ -419,6 +420,7 @@ Replace `<int:r_id>` with the ID of the entry. For example: `/reminders/2`.
 	| repeat_quantity | No | string | The quantity of the repeat_interval | years, months, weeks, days, hours, minutes |
 	| repeat_interval | No | number | The number of the interval | N/A |
 	| weekdays | No | list of numbers | On which days of the week to run the reminder | 0, 1, 2, 3, 4, 5, 6 |
+	| cron_schedule | No | string | The cron schedule that the reminder should run on | N/A |
 	| color | No | string | The hex code of the color of the entry, which is shown in the web-UI | N/A |
 	| enabled | No | bool | Whether the reminder should be enabled | N/A |
 
