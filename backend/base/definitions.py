@@ -47,6 +47,8 @@ class Constants:
     DB_TIMEOUT = 10.0 # seconds
     DB_REVERT_TIME = 60.0 # seconds
 
+    TZ_CHANGE_CHECK_TIME = (3, 5) # (hour, minute)
+
     LOGGER_NAME = "MIND"
     LOGGER_FILENAME = "MIND.log"
 

@@ -66,11 +66,16 @@ class SettingsValues:
     db_backup_folder: str = ''
     db_backup_last_run: int = 0
 
+    measured_timezone: int = -1 # = no value
+
     def todict(self) -> Dict[str, Any]:
         return {
             k: v
             for k, v in self.__dict__.items()
-            if not k.startswith('backup_')
+            if not (
+                k.startswith('backup_')
+                or k == 'measured_timezone'
+            )
         }
 
 

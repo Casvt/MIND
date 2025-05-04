@@ -822,6 +822,27 @@ class UserlessRemindersDB:
 
         return
 
+    def shift(
+        self,
+        reminder_id: Union[int, None],
+        offset: int
+    ) -> None:
+        reminder_filter = ''
+        if reminder_id:
+            reminder_filter = 'WHERE id = :r_id'
+
+        get_db().execute(f"""
+            UPDATE reminders
+            SET time = time + :offset
+            {reminder_filter};
+            """,
+            {
+                "offset": offset,
+                "r_id": reminder_id
+            }
+        )
+        return
+
     def delete(
         self,
         reminder_id: int

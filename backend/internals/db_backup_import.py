@@ -142,7 +142,8 @@ class DatabaseBackupHandler(metaclass=Singleton):
         from backend.internals.server import Server
         self.backup_timer = Server().get_db_timer_thread(
             sv.db_backup_last_run + sv.db_backup_interval - time(),
-            backup_database
+            backup_database,
+            "DatabaseBackupHandler"
         )
         self.backup_timer.start()
         return

@@ -14,6 +14,7 @@ from backend.base.definitions import Constants, StartType
 from backend.base.helpers import check_python_version, get_python_exe
 from backend.base.logging import LOGGER, setup_logging
 from backend.features.reminder_handler import ReminderHandler
+from backend.features.tz_shifter import TimezoneChangeHandler
 from backend.internals.db import set_db_location, setup_db
 from backend.internals.db_backup_import import DatabaseBackupHandler
 from backend.internals.server import Server, handle_start_type
@@ -96,6 +97,9 @@ def _main(
         backup_handler = DatabaseBackupHandler()
         backup_handler.set_backup_timer()
 
+        tz_change_handler = TimezoneChangeHandler()
+        tz_change_handler.set_detector_timer()
+
     try:
         # =================
         SERVER.run(settings.host, settings.port)
@@ -104,6 +108,7 @@ def _main(
     finally:
         reminder_handler.stop_handling()
         backup_handler.stop_backup_timer()
+        tz_change_handler.stop_detector_timer()
 
         if SERVER.start_type is not None:
             LOGGER.info("Restarting MIND")
