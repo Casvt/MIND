@@ -12,6 +12,7 @@ from typing import Union
 from backend.base.definitions import Constants
 from backend.base.helpers import Singleton
 from backend.base.logging import LOGGER
+from backend.features.reminder_handler import ReminderHandler
 from backend.internals.db_models import UserlessRemindersDB
 from backend.internals.server import Server
 from backend.internals.settings import Settings
@@ -72,6 +73,7 @@ class TimezoneChangeHandler(metaclass=Singleton):
                 offset=shift_delta
             )
             settings.update({"measured_timezone": current_timezone})
+            ReminderHandler().find_next_reminder()
             LOGGER.info(
                 "Detected timezone/DST change (%s to %s), shifted reminders",
                 measured_timezone, current_timezone

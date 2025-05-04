@@ -248,6 +248,7 @@ class ReminderData(GeneralReminderData):
     repeat_quantity: Union[str, None]
     repeat_interval: Union[int, None]
     _weekdays: Union[str, None]
+    cron_schedule: Union[str, None]
     enabled: bool
 
     def __post_init__(self) -> None:

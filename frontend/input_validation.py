@@ -12,6 +12,7 @@ from re import compile
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Tuple, Type, Union
 
 from apprise import Apprise
+from cron_converter import Cron
 from flask import Blueprint, Request, request
 
 from backend.base.custom_exceptions import (AccessUnauthorized,
@@ -293,6 +294,26 @@ class WeekDaysVariable(NonRequiredInputVariable):
             and len(self.value) > 0
             and all(v in self.options for v in self.value)
         )
+
+
+class CronScheduleVariable(NonRequiredInputVariable):
+    name = "cron_schedule"
+    description = "The cron schedule that the reminder should run on"
+
+    def validate(self) -> bool:
+        if self.value is None:
+            return True
+
+        if not isinstance(self.value, str):
+            return False
+
+        try:
+            Cron(self.value)
+
+        except (TypeError, ValueError):
+            return False
+
+        return True
 
 
 class ColorVariable(NonRequiredInputVariable):
@@ -588,6 +609,7 @@ class RemindersData(EndpointData):
                 RepeatQuantityVariable,
                 RepeatIntervalVariable,
                 WeekDaysVariable,
+                CronScheduleVariable,
                 ColorVariable,
                 EnabledVariable
             ]
@@ -621,6 +643,7 @@ class ReminderData(EndpointData):
                 RepeatQuantityVariable,
                 RepeatIntervalVariable,
                 WeekDaysVariable,
+                CronScheduleVariable,
                 ColorVariable,
                 EditEnabledVariable
             ]

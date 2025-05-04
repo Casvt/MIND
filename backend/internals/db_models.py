@@ -547,7 +547,8 @@ class RemindersDB:
                 id, title, text, color,
                 time, original_time,
                 repeat_quantity, repeat_interval,
-                weekdays AS _weekdays, enabled
+                weekdays AS _weekdays, cron_schedule,
+                enabled
             FROM reminders
             WHERE user_id = :user_id
                 {id_filter};
@@ -574,6 +575,7 @@ class RemindersDB:
         repeat_quantity: Union[str, None],
         repeat_interval: Union[int, None],
         weekdays: Union[str, None],
+        cron_schedule: Union[str, None],
         original_time: Union[int, None],
         color: Union[str, None],
         notification_services: List[int],
@@ -585,7 +587,7 @@ class RemindersDB:
                 title, text,
                 time,
                 repeat_quantity, repeat_interval,
-                weekdays,
+                weekdays, cron_schedule,
                 original_time,
                 color,
                 enabled
@@ -595,7 +597,7 @@ class RemindersDB:
                 :title, :text,
                 :time,
                 :rq, :ri,
-                :wd,
+                :wd, :cs,
                 :ot,
                 :color,
                 :enabled
@@ -609,6 +611,7 @@ class RemindersDB:
                 "rq": repeat_quantity,
                 "ri": repeat_interval,
                 "wd": weekdays,
+                "cs": cron_schedule,
                 "ot": original_time,
                 "color": color,
                 "enabled": enabled
@@ -630,6 +633,7 @@ class RemindersDB:
         repeat_quantity: Union[str, None],
         repeat_interval: Union[int, None],
         weekdays: Union[str, None],
+        cron_schedule: Union[str, None],
         original_time: Union[int, None],
         color: Union[str, None],
         notification_services: List[int],
@@ -644,6 +648,7 @@ class RemindersDB:
                 repeat_quantity = :rq,
                 repeat_interval = :ri,
                 weekdays = :wd,
+                cron_schedule = :cs,
                 original_time = :ot,
                 color = :color,
                 enabled = :enabled
@@ -656,6 +661,7 @@ class RemindersDB:
                 "rq": repeat_quantity,
                 "ri": repeat_interval,
                 "wd": weekdays,
+                "cs": cron_schedule,
                 "ot": original_time,
                 "color": color,
                 "enabled": enabled,
@@ -731,7 +737,8 @@ class UserlessRemindersDB:
                 title, text, color,
                 time, original_time,
                 repeat_quantity, repeat_interval,
-                weekdays AS _weekdays, enabled
+                weekdays AS _weekdays, cron_schedule,
+                enabled
             FROM reminders
             {time_filter};
             """,
@@ -757,6 +764,7 @@ class UserlessRemindersDB:
         repeat_quantity: Union[str, None],
         repeat_interval: Union[int, None],
         weekdays: Union[str, None],
+        cron_schedule: Union[str, None],
         original_time: Union[int, None],
         color: Union[str, None],
         notification_services: List[int],
@@ -769,6 +777,7 @@ class UserlessRemindersDB:
                 time,
                 repeat_quantity, repeat_interval,
                 weekdays,
+                cron_schedule,
                 original_time,
                 color,
                 enabled
@@ -779,6 +788,7 @@ class UserlessRemindersDB:
                 :time,
                 :rq, :ri,
                 :wd,
+                :cs,
                 :ot,
                 :color,
                 :enabled
@@ -792,6 +802,7 @@ class UserlessRemindersDB:
                 "rq": repeat_quantity,
                 "ri": repeat_interval,
                 "wd": weekdays,
+                "cs": cron_schedule,
                 "ot": original_time,
                 "color": color,
                 "enabled": enabled

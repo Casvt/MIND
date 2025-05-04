@@ -17,6 +17,7 @@ from typing import (Any, Callable, Generator, Iterable,
                     List, Sequence, Set, Tuple, Union, cast)
 
 from apprise import Apprise, LogCapture
+from cron_converter import Cron
 from dateutil.relativedelta import relativedelta
 
 from backend.base.definitions import (WEEKDAY_NUMBER, GeneralReminderData,
@@ -240,7 +241,8 @@ def find_next_time(
     original_time: int,
     repeat_quantity: Union[RepeatQuantity, None],
     repeat_interval: Union[int, None],
-    weekdays: Union[List[WEEKDAY_NUMBER], None]
+    weekdays: Union[List[WEEKDAY_NUMBER], None],
+    cron_schedule: Union[str, None]
 ) -> int:
     """Calculate the next timestep based on original time and repeat/interval
     values.
@@ -256,6 +258,8 @@ def find_next_time(
         weekdays (Union[List[WEEKDAY_NUMBER], None]): If set, on which days the
         time can continue. Monday is 0, Sunday is 6.
 
+        cron_schedule (Union[str, None]): If set, the cron schedule to follow.
+
     Returns:
         int: The next timestamp in the future.
     """
@@ -266,7 +270,14 @@ def find_next_time(
     original_datetime = datetime.fromtimestamp(original_time)
     new_time = datetime.fromtimestamp(original_time)
 
-    if (
+    if cron_schedule is not None:
+        cron_instance = Cron(cron_schedule)
+        schedule = cron_instance.schedule(current_time)
+        new_time = schedule.next()
+        while new_time <= current_time:
+            new_time = schedule.next()
+
+    elif (
         repeat_quantity is not None
         and repeat_interval is not None
     ):

@@ -334,3 +334,52 @@ class MigrateSetDBBackupFolder(DBMigrator):
             s.update({"db_backup_folder": SettingsValues.db_backup_folder})
 
         return
+
+
+class MigrateAddCronScheduleColumn(DBMigrator):
+    start_version = 12
+
+    def run(self) -> None:
+        # V12 -> V13
+
+        from backend.internals.db import get_db
+
+        get_db().executescript("""
+            BEGIN TRANSACTION;
+            PRAGMA defer_foreign_keys = ON;
+
+            CREATE TEMPORARY TABLE temp_reminders_13 AS
+                SELECT * FROM reminders;
+            DROP TABLE reminders;
+
+            CREATE TABLE IF NOT EXISTS reminders(
+                id INTEGER PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                title VARCHAR(255) NOT NULL,
+                text TEXT,
+                time INTEGER NOT NULL,
+
+                repeat_quantity VARCHAR(15),
+                repeat_interval INTEGER,
+                original_time INTEGER,
+                weekdays VARCHAR(13),
+                cron_schedule VARCHAR(255),
+
+                color VARCHAR(7),
+                enabled BOOL NOT NULL DEFAULT 1,
+
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );
+
+            INSERT INTO reminders
+                SELECT
+                    id, user_id,
+                    title, text, time,
+                    repeat_quantity, repeat_interval,
+                    original_time, weekdays,
+                    NULL AS cron_schedule,
+                    color, enabled
+                FROM temp_reminders_13;
+
+            COMMIT;
+        """)

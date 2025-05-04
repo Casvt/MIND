@@ -308,6 +308,7 @@ def api_reminders_list(inputs: Dict[str, Any]):
             repeat_quantity=inputs['repeat_quantity'],
             repeat_interval=inputs['repeat_interval'],
             weekdays=inputs['weekdays'],
+            cron_schedule=inputs['cron_schedule'],
             color=inputs['color'],
             enabled=inputs['enabled']
         )
@@ -347,7 +348,6 @@ def api_get_reminder(inputs: Dict[str, Any], r_id: int):
         return return_api(result.todict())
 
     elif request.method == 'PUT':
-        print(inputs)
         result = reminders.fetchone(r_id).update(
             title=inputs['title'],
             time=inputs['time'],
@@ -356,6 +356,7 @@ def api_get_reminder(inputs: Dict[str, Any], r_id: int):
             repeat_quantity=inputs['repeat_quantity'],
             repeat_interval=inputs['repeat_interval'],
             weekdays=inputs['weekdays'],
+            cron_schedule=inputs['cron_schedule'],
             color=inputs['color'],
             enabled=inputs['enabled']
         )

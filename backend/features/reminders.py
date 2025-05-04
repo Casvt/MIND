@@ -57,6 +57,7 @@ class Reminder:
         repeat_quantity: Union[None, RepeatQuantity] = None,
         repeat_interval: Union[None, int] = None,
         weekdays: Union[None, List[WEEKDAY_NUMBER]] = None,
+        cron_schedule: Union[None, str] = None,
         color: Union[None, str] = None,
         enabled: Union[None, bool] = None
     ) -> ReminderData:
@@ -89,6 +90,10 @@ class Reminder:
             indexes of the days of the week that the reminder should run.
                 Defaults to None.
 
+            cron_schedule (Union[None, str], optional): The new cron schedule
+            that the reminder should run on.
+                Defaults to None.
+
             color (Union[None, str], optional): The new hex code of the color
             of the reminder, which is shown in the web-ui.
                 Defaults to None.
@@ -112,11 +117,18 @@ class Reminder:
         LOGGER.info(
             f'Updating notification service {self.id}: '
             + f'{title=}, {time=}, {notification_services=}, {text=}, '
-            + f'{repeat_quantity=}, {repeat_interval=}, {weekdays=}, {color=}, '
-            + f"{enabled=}"
+            + f'{repeat_quantity=}, {repeat_interval=}, '
+            + f'{weekdays=}, {cron_schedule=}, '
+            + f'{color=}, {enabled=}'
         )
 
         # Validate data
+        if cron_schedule is not None and (
+            repeat_quantity is not None
+            or repeat_interval is not None
+            or weekdays is not None
+        ):
+            raise InvalidKeyValue('cron_schedule', cron_schedule)
         if repeat_quantity is None and repeat_interval is not None:
             raise InvalidKeyValue('repeat_quantity', repeat_quantity)
         elif repeat_quantity is not None and repeat_interval is None:
@@ -127,6 +139,7 @@ class Reminder:
         repeated_reminder = (
             (repeat_quantity is not None and repeat_interval is not None)
             or weekdays is not None
+            or cron_schedule is not None
         )
 
         if time is not None:
@@ -156,13 +169,18 @@ class Reminder:
                 weekdays,
                 lambda w: ",".join(map(str, sorted(w)))
             ),
+            'cron_schedule': cron_schedule,
             'color': color,
             'notification_services': notification_services,
             'enabled': enabled
         }
         for k, v in new_values.items():
             if (
-                k in ('repeat_quantity', 'repeat_interval', 'weekdays', 'color')
+                k in (
+                    'repeat_quantity', 'repeat_interval',
+                    'weekdays', 'cron_schedule',
+                    'color'
+                )
                 or v is not None
             ):
                 data[k] = v
@@ -172,7 +190,8 @@ class Reminder:
                 data["time"],
                 repeat_quantity,
                 data["repeat_interval"],
-                weekdays
+                weekdays,
+                cron_schedule
             )
             self.reminder_db.update(
                 self.id,
@@ -182,6 +201,7 @@ class Reminder:
                 data["repeat_quantity"],
                 data["repeat_interval"],
                 data["weekdays"],
+                data["cron_schedule"],
                 data["time"],
                 data["color"],
                 data["notification_services"],
@@ -198,6 +218,7 @@ class Reminder:
                 data["repeat_quantity"],
                 data["repeat_interval"],
                 data["weekdays"],
+                data["cron_schedule"],
                 data["original_time"],
                 data["color"],
                 data["notification_services"],
@@ -290,6 +311,7 @@ class Reminders:
         repeat_quantity: Union[None, RepeatQuantity] = None,
         repeat_interval: Union[None, int] = None,
         weekdays: Union[None, List[WEEKDAY_NUMBER]] = None,
+        cron_schedule: Union[None, str] = None,
         color: Union[None, str] = None,
         enabled: bool = True
     ) -> Reminder:
@@ -318,6 +340,10 @@ class Reminders:
             of the days of the week that the reminder should run.
                 Defaults to None.
 
+            cron_schedule (Union[None, str], optional): The cron schedule that
+            the reminder should run on.
+                Defaults to None.
+
             color (Union[None, str], optional): The hex code of the color of the
             reminder, which is shown in the web-ui.
                 Defaults to None.
@@ -328,7 +354,7 @@ class Reminders:
 
         Note about args:
             Either repeat_quantity and repeat_interval are given,
-            weekdays is given or neither, but not both.
+            weekdays is given, cron_schedule is given or none.
 
         Raises:
             NotificationServiceNotFound: One of the notification services was
@@ -341,14 +367,20 @@ class Reminders:
         """
         LOGGER.info(
             f'Adding reminder with {title=}, {time=}, {notification_services=}, ' +
-            f'{text=}, {repeat_quantity=}, {repeat_interval=}, {weekdays=}, {color=}' +
-            f'{enabled=}')
+            f'{text=}, {repeat_quantity=}, {repeat_interval=}, {weekdays=}, ' +
+            f'{cron_schedule=}, {color=}, {enabled=}')
 
         # Validate data
         if time < datetime.utcnow().timestamp():
             raise InvalidTime(time)
         time = round(time)
 
+        if cron_schedule is not None and (
+            repeat_quantity is not None
+            or repeat_interval is not None
+            or weekdays is not None
+        ):
+            raise InvalidKeyValue('cron_schedule', cron_schedule)
         if repeat_quantity is None and repeat_interval is not None:
             raise InvalidKeyValue('repeat_quantity', repeat_quantity)
         elif repeat_quantity is not None and repeat_interval is None:
@@ -365,13 +397,14 @@ class Reminders:
             NotificationService(self.user_id, ns)
 
         # Prepare args
-        if any((repeat_quantity, weekdays)):
+        if any((repeat_quantity, weekdays, cron_schedule)):
             original_time = time
             time = find_next_time(
                 original_time,
                 repeat_quantity,
                 repeat_interval,
-                weekdays
+                weekdays,
+                cron_schedule
             )
         else:
             original_time = None
@@ -390,6 +423,7 @@ class Reminders:
             time, repeat_quantity_str,
             repeat_interval,
             weekdays_str,
+            cron_schedule,
             original_time,
             color,
             notification_services,

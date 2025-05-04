@@ -311,6 +311,7 @@ def setup_db() -> None:
             repeat_interval INTEGER,
             original_time INTEGER,
             weekdays VARCHAR(13),
+            cron_schedule VARCHAR(255),
 
             color VARCHAR(7),
             enabled BOOL NOT NULL DEFAULT 1,

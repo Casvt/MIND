@@ -1,4 +1,5 @@
 apprise ~= 1.4
 python-dateutil ~= 2.8
+cron-converter ~= 1.2
 Flask ~= 3.0
 waitress ~= 2.1

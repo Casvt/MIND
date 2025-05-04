@@ -61,8 +61,9 @@ class ReminderHandler(metaclass=Singleton):
 
                 elif (
                     reminder.repeat_quantity,
-                    reminder.weekdays
-                ) == (None, None):
+                    reminder.weekdays,
+                    reminder.cron_schedule
+                ) == (None, None, None):
                     # Delete the reminder from the database
                     self.reminder_db.delete(reminder.id)
 
@@ -75,7 +76,8 @@ class ReminderHandler(metaclass=Singleton):
                             lambda q: RepeatQuantity(q)
                         ),
                         reminder.repeat_interval,
-                        reminder.weekdays
+                        reminder.weekdays,
+                        reminder.cron_schedule
                     )
 
                     self.reminder_db.update(reminder.id, new_time)
