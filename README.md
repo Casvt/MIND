@@ -17,7 +17,7 @@ MIND allows you to set reminders for a given time. They can run just once, or be
 ## Features
 
 - Notifications are sent with second-precision
-- Fine control over repetition: single time, time interval, certain weekdays or manual trigger
+- Fine control over repetition: single time, time interval, certain weekdays, custom cron schedule or manual trigger
 - Uses the [Apprise library](https://github.com/caronc/apprise), giving you 100+ platforms to send notifications to and the option to send to multiple platforms for each reminder
 - Works cross-timezone
 - Easily manage the reminders with sorting options, color coding and search
