@@ -136,14 +136,6 @@ def endpoint_wrapper(
 
 
 # ===================
-# region General Handling
-# ===================
-@api.errorhandler(404)
-def api_not_found(e):
-    return {'error': "NotFound", "result": {}}, 404
-
-
-# ===================
 # region Auth
 # ===================
 @api.route('/auth/login', AuthLoginData)

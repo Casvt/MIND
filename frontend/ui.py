@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from io import BytesIO
+from json import dumps
 from typing import Any
 
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, send_file
 
 from backend.internals.server import Server
 
@@ -15,18 +17,8 @@ def render(filename: str, **kwargs: Any) -> str:
     return render_template(filename, url_prefix=SERVER.url_prefix, **kwargs)
 
 
-@ui.errorhandler(404)
-def ui_not_found(e):
-    return render('page_not_found.html')
-
-
 @ui.route('/manifest.json', methods=methods)
 def ui_manifest():
-    from io import BytesIO
-    from json import dumps
-
-    from flask import send_file
-
     return send_file(
         BytesIO(dumps(
             {

@@ -10,7 +10,7 @@ from os import urandom
 from threading import Timer, current_thread
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Mapping, Union
 
-from flask import Flask
+from flask import Flask, request
 from waitress.server import create_server
 from waitress.task import ThreadedTaskDispatcher as TTD
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
@@ -136,7 +136,7 @@ class Server(metaclass=Singleton):
         """Creates an flask app instance that can be used to start a web server"""
 
         from frontend.api import admin_api, api
-        from frontend.ui import ui
+        from frontend.ui import render, ui
 
         app = Flask(
             __name__,
@@ -152,6 +152,12 @@ class Server(metaclass=Singleton):
         @app.errorhandler(400)
         def bad_request(e):
             return {'error': "BadRequest", "result": {}}, 400
+
+        @app.errorhandler(404)
+        def not_found(e):
+            if request.path.startswith((self.api_prefix, self.admin_prefix)):
+                return {'error': "NotFound", "result": {}}, 404
+            return render("page_not_found.html")
 
         @app.errorhandler(405)
         def method_not_allowed(e):
