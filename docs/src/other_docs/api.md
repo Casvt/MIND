@@ -794,6 +794,24 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	| 200 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 
+??? DELETE
+
+	Reset the value of setting keys
+
+	**Parameters (body)**
+
+	| Name | Required | Data type | Description | Allowed values |
+	| ---- | -------- | --------- | ----------- | -------------- |
+	| setting_keys | Yes | list of string | The keys of the settings for which to reset the value | N/A |
+
+	**Returns**
+
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 200 | N/A | Success |
+	| 400 | InvalidKeyValue | The value of a key is invalid |
+	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
+
 ### `/admin/logs`
 
 | Requires being logged in | Description |
