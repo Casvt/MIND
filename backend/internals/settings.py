@@ -173,6 +173,24 @@ class Settings(metaclass=Singleton):
 
         return
 
+    def get_default_value(self, key: str) -> Any:
+        """Get the default value of a setting.
+
+        Args:
+            key (str): The key of the setting.
+
+        Returns:
+            Any: The default value.
+        """
+        if not isinstance(
+            SettingsValues.__dataclass_fields__[key].default_factory,
+            _MISSING_TYPE
+        ):
+            return SettingsValues.__dataclass_fields__[key].default_factory()
+
+        else:
+            return SettingsValues.__dataclass_fields__[key].default
+
     def reset(self, key: str) -> None:
         """Reset the value of the key to the default value.
 
@@ -184,17 +202,7 @@ class Settings(metaclass=Singleton):
         """
         LOGGER.debug(f'Setting reset: {key}')
 
-        if not isinstance(
-            SettingsValues.__dataclass_fields__[key].default_factory,
-            _MISSING_TYPE
-        ):
-            self.update({
-                key: SettingsValues.__dataclass_fields__[key].default_factory()
-            })
-        else:
-            self.update({
-                key: SettingsValues.__dataclass_fields__[key].default
-            })
+        self.update({key: self.get_default_value(key)})
 
         return
 

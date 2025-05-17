@@ -145,6 +145,7 @@ class DataType(BaseEnum):
     FLOAT = 'decimal number'
     BOOL = 'bool'
     INT_ARRAY = 'list of numbers'
+    STR_ARRAY = 'list of string'
     NA = 'N/A'
 
 

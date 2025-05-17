@@ -530,6 +530,7 @@ def api_admin_settings(inputs: Dict[str, Any]):
 
         hosting_changes = any(
             inputs[s] is not None
+            and inputs[s] != getattr(settings.sv, s)
             for s in ('host', 'port', 'url_prefix')
         )
 
@@ -541,6 +542,24 @@ def api_admin_settings(inputs: Dict[str, Any]):
             for k, v in inputs.items()
             if v is not None
         })
+
+        if hosting_changes:
+            Server().restart(StartType.RESTART_HOSTING_CHANGES)
+
+        return return_api({})
+
+    elif request.method == 'DELETE':
+        hosting_changes = any(
+            s in inputs["setting_keys"]
+            and settings.get_default_value(s) != getattr(settings.sv, s)
+            for s in ('host', 'port', 'url_prefix')
+        )
+
+        if hosting_changes:
+            settings.backup_hosting_settings()
+
+        for setting in inputs["setting_keys"]:
+            settings.reset(setting)
 
         if hosting_changes:
             Server().restart(StartType.RESTART_HOSTING_CHANGES)

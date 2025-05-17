@@ -26,6 +26,7 @@ from backend.base.definitions import (DataSource, DataType, MindException,
                                       TimelessSortingMethod)
 from backend.base.helpers import folder_path
 from backend.internals.server import Server
+from backend.internals.settings import SettingsValues
 
 if TYPE_CHECKING:
     from flask import Request
@@ -409,7 +410,7 @@ class LoginTimeResetVariable(NonRequiredInputVariable):
         )
 
 
-class DBBackupInterval(NonRequiredInputVariable):
+class DBBackupIntervalVariable(NonRequiredInputVariable):
     name = "db_backup_interval"
     description = "How often to make a backup of the database"
     data_type = [DataType.INT]
@@ -420,7 +421,7 @@ class DBBackupInterval(NonRequiredInputVariable):
         )
 
 
-class DBBackupAmount(NonRequiredInputVariable):
+class DBBackupAmountVariable(NonRequiredInputVariable):
     name = "db_backup_amount"
     description = "How many backups to keep. The oldest one will be removed if needed."
     data_type = [DataType.INT]
@@ -431,7 +432,7 @@ class DBBackupAmount(NonRequiredInputVariable):
         )
 
 
-class DBBackupFolder(NonRequiredInputVariable):
+class DBBackupFolderVariable(NonRequiredInputVariable):
     name = "db_backup_folder"
     description = "The folder to store the backups in"
     data_type = [DataType.STR]
@@ -496,6 +497,8 @@ class DatabaseFileVariable(InputVariable):
             self.value.save(path)
             self.converted_value = path
             return True
+
+        self.converted_value = self.value.filename
         return False
 
 
@@ -510,6 +513,24 @@ class CopyHostingSettingsVariable(InputVariable):
             return False
 
         self.converted_value = self.value == "true"
+        return True
+
+
+class SettingKeysVariable(InputVariable):
+    name = "setting_keys"
+    description = "The keys of the settings for which to reset the value"
+    data_type = [DataType.STR_ARRAY]
+
+    def validate(self) -> bool:
+        if not isinstance(self.value, list):
+            return False
+        if not self.value:
+            return False
+        for v in self.value:
+            if not isinstance(v, str):
+                return False
+            if v not in SettingsValues.__dataclass_fields__:
+                return False
         return True
 
 
@@ -781,10 +802,14 @@ class SettingsData(EndpointData):
                 PortVariable,
                 UrlPrefixVariable,
                 LogLevelVariable,
-                DBBackupInterval,
-                DBBackupAmount,
-                DBBackupFolder
+                DBBackupIntervalVariable,
+                DBBackupAmountVariable,
+                DBBackupFolderVariable
             ]
+        ),
+        delete=(
+            "Reset the value of setting keys",
+            [SettingKeysVariable]
         )
     )
 
@@ -936,7 +961,7 @@ def input_validation() -> Dict[str, Any]:
 
         if not value.validate():
             if isinstance(value, DatabaseFileVariable):
-                raise InvalidDatabaseFile(value.value)
+                raise InvalidDatabaseFile(value.converted_value)
             elif noted_var.source == DataSource.FILES:
                 raise InvalidKeyValue(noted_var.name, input_value.filename)
             else:
