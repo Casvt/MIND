@@ -239,7 +239,7 @@ class UsersDB:
                 id, username, admin, salt, hash
             FROM users
             {id_filter}
-            ORDER BY username, id;
+            ORDER BY admin DESC, LOWER(username);
             """,
             {
                 "id": user_id
