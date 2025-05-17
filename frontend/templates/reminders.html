@@ -14,11 +14,13 @@
 	<link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/x-icon">
 
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/general.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/reminders.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/info.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/library.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/notification.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
 	<script src="{{ url_for('static', filename='js/general.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='js/reminders.js') }}" defer></script>
 	<script src="{{ url_for('static', filename='js/library.js') }}" defer></script>
 	<script src="{{ url_for('static', filename='js/window.js') }}" defer></script>
 	<script src="{{ url_for('static', filename='js/templates.js') }}" defer></script>
@@ -142,7 +144,7 @@
 					<noscript>Javascript is disabled. The web-ui of MIND does not work with JavaScript disabled.</noscript>
 					<form id="search-form">
 						<div class="search-bar">
-							<button type="submit">
+							<button type="submit" class="input-style">
 								<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 513.749 513.749" style="enable-background:new 0 0 512 512" xml:space="preserve">
 									<g>
 										<g>
@@ -151,8 +153,8 @@
 									</g>
 								</svg>
 							</button>
-							<input type="text" id="search-input" required placeholder="Search..." aria-placeholder="Search for reminders">
-							<button type="button" id="clear-button">
+							<input type="text" id="search-input" class="input-style" required placeholder="Search..." aria-placeholder="Search for reminders">
+							<button type="button" id="clear-button" class="input-style">
 								<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512.021 512.021" style="enable-background:new 0 0 512 512" xml:space="preserve">
 									<g>
 										<g>
@@ -161,7 +163,7 @@
 									</g>
 								</svg>
 							</button>
-							<select id="sort-input">
+							<select id="sort-input" class="input-style">
 								<option value="time">Time</option>
 								<option value="time_reversed">Time Reversed</option>
 								<option value="title">Title</option>

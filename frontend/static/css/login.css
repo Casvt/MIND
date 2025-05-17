@@ -1,63 +1,44 @@
 main {
-	height: calc(100vh - var(--header-height));
-
-	overflow-y: hidden;
-}
-
-main:has(#form-switch:checked) .form-container {
-	transform: translateY(-100%);
-}
-
-.form-container {
-	height: inherit;
-
-	display: flex;
-	justify-content: center;
-	align-items: center;
-
-	padding: 1rem;
-
-	transition: transform .25s ease-in-out;
-}
-
-form {
-	width: 30rem;
-	margin-inline: auto;
-
+	height: calc(100% - var(--header-height));
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	gap: 1rem;
+}
+
+.login-container {
+	position: relative;
+	width: min(40rem, 90%);
+	height: 22rem;
 	
+	display: flex;
+	flex-direction: row-reverse;
+	flex-wrap: wrap;
+	overflow: hidden;
+
 	border-radius: 4px;
-	padding: 1rem;
 	background-color: var(--color-gray);
-	color: var(--color-light);
+
+	box-shadow: 0px 0px 20px 3px rgba(0 0 0 / 0.25);
+}
+
+form {
+	height: inherit;
+	flex: 1 0 auto;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	gap: 1rem;
+
+	padding: 2rem;
+	
+	transition: translate 100ms ease-in-out;
 }
 
 form h2 {
 	font-size: clamp(1.2rem, 7vw, 2rem);
-}
-
-#username-error-container,
-#password-error-container {
-	width: 100%;
-
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	gap: .5rem;
-}
-
-form input {
-	width: min(100%, 20rem);
-}
-
-#username-error-container p,
-#password-error-container p {
-	width: min(100%, 19rem);
 }
 
 .switch-button {
@@ -69,12 +50,53 @@ form input {
 	text-align: center;
 }
 
-.switch-button:hover {
-	cursor: pointer;
-}
-
 button[type="submit"] {
+	width: 7rem;
+	
 	padding: .5rem 1rem;
+	border-radius: 4px;
+	background-color: var(--color-mid-gray);
+	color: var(--color-light);
 
 	font-size: 1.1rem;
+	
+	transition:
+		background-color 150ms ease-in-out,
+		box-shadow 150ms ease-in-out;
+}
+
+button[type="submit"]:hover {
+	background-color: var(--color-light-gray);
+	box-shadow: var(--default-shadow);
+}
+
+#form-cover {
+	position: absolute;
+	left: 0;
+	height: 100%;
+	width: 50%;
+	z-index: 2;
+
+	display: flex;
+	
+	padding: 3rem;
+	border-radius: 4px;
+	background-color: var(--color-gray);
+	
+	box-shadow: 0px 0px 20px 3px rgba(0 0 0 / 0.25);
+	transition: left 100ms ease-in-out;
+}
+
+main:has(#form-switch:checked) #form-cover {
+	left: 50%;
+}
+
+@media (max-width: 594px) {
+	#form-cover {
+		display: none;
+	}
+	
+	main:has(#form-switch:checked) form {
+		translate: 0 -100%;
+	}
 }

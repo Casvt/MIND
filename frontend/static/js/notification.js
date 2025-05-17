@@ -88,11 +88,11 @@ function setNoNotificationServiceMsg(json) {
 		LibEls.tab_container.querySelectorAll('.add-entry').forEach(ae => {
 			ae.classList.remove('error', 'error-icon');
 			if (ae.id === 'add-reminder')
-				ae.onclick = e => showAdd(Types.reminder);
+				ae.onclick = e => showAdd(reminderTypes.reminder);
 			else if (ae.id === 'add-static-reminder')
-				ae.onclick = e => showAdd(Types.static_reminder);
+				ae.onclick = e => showAdd(reminderTypes.static_reminder);
 			else if (ae.id === 'add-template')
-				ae.onclick = e => showAdd(Types.template);
+				ae.onclick = e => showAdd(reminderTypes.template);
 		});
 
 	} else {
@@ -104,7 +104,7 @@ function setNoNotificationServiceMsg(json) {
 };
 
 function fillNotificationServices() {
-	fetch(`${url_prefix}/api/notificationservices?api_key=${api_key}`)
+	fetch(`${urlPrefix}/api/notificationservices?api_key=${apiKey}`)
 	.then(response => {
 		if (!response.ok) return Promise.reject(response.status);
 		return response.json();
@@ -116,7 +116,7 @@ function fillNotificationServices() {
 	})
 	.catch(e => {
 		if (e === 401)
-			window.location.href = `${url_prefix}/`;
+			window.location.href = `${urlPrefix}/`;
 		else
 			console.log(e);
 	});
@@ -132,7 +132,7 @@ function saveService(id) {
 		'title': row.querySelector(`td.title-column > input`).value,
 		'url': row.querySelector(`td.url-column > input`).value
 	};
-	fetch(`${url_prefix}/api/notificationservices/${id}?api_key=${api_key}`, {
+	fetch(`${urlPrefix}/api/notificationservices/${id}?api_key=${apiKey}`, {
 		'method': 'PUT',
 		'headers': {'Content-Type': 'application/json'},
 		'body': JSON.stringify(data)
@@ -144,7 +144,7 @@ function saveService(id) {
 	})
 	.catch(e => {
 		if (e === 401)
-			window.location.href = `${url_prefix}/`;
+			window.location.href = `${urlPrefix}/`;
 		else if (e === 400) {
 			save_button.classList.add('error-icon');
 			save_button.title = 'Invalid Apprise URL';
@@ -155,7 +155,7 @@ function saveService(id) {
 
 function deleteService(id, delete_reminders_using=false) {
 	const row = document.querySelector(`tr[data-id="${id}"]`);
-	fetch(`${url_prefix}/api/notificationservices/${id}?api_key=${api_key}&delete_reminders_using=${delete_reminders_using}`, {
+	fetch(`${urlPrefix}/api/notificationservices/${id}?api_key=${apiKey}&delete_reminders_using=${delete_reminders_using}`, {
 		'method': 'DELETE'
 	})
 	.then(response => response.json())
@@ -165,14 +165,14 @@ function deleteService(id, delete_reminders_using=false) {
 		row.remove();
 		fillNotificationServices();
 		if (delete_reminders_using) {
-			fillLibrary(Types.reminder);
-			fillLibrary(Types.static_reminder);
-			fillLibrary(Types.template);
+			fillLibrary(reminderTypes.reminder);
+			fillLibrary(reminderTypes.static_reminder);
+			fillLibrary(reminderTypes.template);
 		};
 	})
 	.catch(e => {
 		if (e.error === 'ApiKeyExpired' || e.error === 'ApiKeyInvalid')
-			window.location.href = `${url_prefix}/`;
+			window.location.href = `${urlPrefix}/`;
 
 		else if (e.error === 'NotificationServiceInUse') {
 			const delete_reminders = confirm(
@@ -200,7 +200,7 @@ function showServiceList(e) {
 	if (notification_services !== null)
 		return;
 
-	fetch(`${url_prefix}/api/notificationservices/available?api_key=${api_key}`)
+	fetch(`${urlPrefix}/api/notificationservices/available?api_key=${apiKey}`)
 	.then(response => response.json())
 	.then(json => {
 		notification_services = json.result;
@@ -322,7 +322,7 @@ function createEntriesList(token) {
 
 	const add_button = document.createElement('button');
 	add_button.type = 'button';
-	add_button.innerHTML = Icons.add;
+	add_button.innerHTML = icons.add;
 	add_button.onclick = e => toggleAddRow(add_row);
 	entries_list.appendChild(add_button);
 	
@@ -568,7 +568,7 @@ function testService() {
 		test_button.title = 'Required field missing';
 		return;
 	};
-	fetch(`${url_prefix}/api/notificationservices/test?api_key=${api_key}`, {
+	fetch(`${urlPrefix}/api/notificationservices/test?api_key=${apiKey}`, {
 		'method': 'POST',
 		'headers': {'Content-Type': 'application/json'},
 		'body': JSON.stringify(data)
@@ -582,7 +582,7 @@ function testService() {
 	})
 	.catch(e => {
 		if (e === 401)
-			window.location.href = `${url_prefix}/`;
+			window.location.href = `${urlPrefix}/`;
 		else if (e === 400) {
 			test_button.classList.add('error-input');
 			test_button.title = 'Invalid Apprise URL';
@@ -624,7 +624,7 @@ function addService() {
 		add_button.title = 'Required field missing';
 		return;
 	};
-	fetch(`${url_prefix}/api/notificationservices?api_key=${api_key}`, {
+	fetch(`${urlPrefix}/api/notificationservices?api_key=${apiKey}`, {
 		'method': 'POST',
 		'headers': {'Content-Type': 'application/json'},
 		'body': JSON.stringify(data)
@@ -641,7 +641,7 @@ function addService() {
 	})
 	.catch(e => {
 		if (e === 401)
-			window.location.href = `${url_prefix}/`;
+			window.location.href = `${urlPrefix}/`;
 		else if (e === 400) {
 			add_button.classList.add('error-input');
 			add_button.title = 'Invalid Apprise URL';

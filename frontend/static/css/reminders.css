@@ -1,0 +1,175 @@
+/*  */
+/* Nav collapse button */
+/*  */
+header > div {
+	height: 100%;
+	transform: translateX(-2.6rem);
+
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+
+	transition: transform .3s ease-in-out;
+}
+
+#toggle-nav {
+	--height: 1.5rem;
+	height: var(--height);
+
+	background-color: transparent;
+}
+
+#toggle-nav svg {
+	height: var(--height);
+	width: var(--height);
+}
+
+/*  */
+/* Nav */
+/*  */
+.nav-divider {
+	position: relative;
+	height: calc(100% - var(--header-height));
+
+	display: flex;
+
+	padding-block: var(--rem-clamp);
+}
+
+body:has(#nav-switch:checked) .nav-divider > nav {
+	left: var(--rem-clamp);
+}
+
+body:has(#nav-switch:checked) .nav-divider > .window-container {
+	margin-left: calc(var(--nav-width) + var(--rem-clamp));
+}
+
+nav {
+	--padding: .5rem;
+	z-index: 1;
+	position: absolute;
+	left: var(--rem-clamp);
+	height: calc(100% - (2 * var(--rem-clamp)));
+	width: var(--nav-width);
+
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	gap: var(--padding);
+	overflow-y: auto;
+
+	padding: var(--padding);
+	border-radius: 4px;
+	background-color: var(--color-gray);
+
+	transition: left .3s ease-in-out;
+}
+
+nav > div {
+	width: 100%;
+
+	display: flex;
+	flex-direction: column;
+	gap: var(--padding);
+}
+
+nav > div > button {
+	width: 100%;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	padding: .5rem;
+	border: 0;
+	border-radius: 4px;
+	background-color: var(--color-dark);
+	color: var(--color-light);
+
+	transition: background-color .1s ease-in-out;
+}
+
+nav > div > button:hover {
+	background-color: var(--color-gray);
+}
+
+nav > div > button svg {
+	height: 1.8rem;
+	width: 2rem;
+}
+
+/*  */
+/* Window management */
+/*  */
+.window-container {
+	margin-left: calc(4rem + var(--rem-clamp));
+	width: 100%;
+
+	display: flex;
+	overflow: hidden;
+
+	transition: margin-left .3s ease-in-out;
+}
+
+.window-container > :where(#home, .extra-window-container) {
+	width: 100%;
+	flex: 0 0 auto;
+
+	translate: 0 0;
+	transition: translate .5s ease-in-out;
+}
+
+.window-container.inter-window-ani > :where(#home, .extra-window-container) {
+	transition: translate .5s ease-in-out,
+				transform .5s ease-in-out;
+}
+
+.extra-window-container {
+	--y-offset: 0%;
+	transform: translateY(var(--y-offset));
+}
+
+.extra-window-container > div {
+	height: 100%;
+	overflow-y: auto;
+}
+
+.window-container.show-window > :where(#home, .extra-window-container) {
+	translate: -100% 0;
+}
+
+.window-container.show-window > .extra-window-container {
+	transform: translateY(var(--y-offset));
+}
+
+/*  */
+/* Styling extra window */
+/*  */
+.extra-window-container > div {
+	padding: var(--rem-clamp);
+}
+
+.extra-window-container > div > h2 {
+	text-align: center;
+	font-size: clamp(1.3rem, 5vw, 2rem);
+	margin-bottom: 2rem;
+}
+
+.extra-window-container > div > h2:not(:first-of-type) {
+	margin-top: 1.5rem;
+}
+
+.extra-window-container > div > p {
+	text-align: center;
+}
+
+@media (max-width: 543px) {
+	.window-container {
+		margin-left: 0;
+	}
+
+	nav {
+		left: -100%;
+	}
+}

@@ -15,6 +15,7 @@
 
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/general.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+	<script src="{{ url_for('static', filename='js/general.js') }}" defer></script>
 	<script src="{{ url_for('static', filename='js/login.js') }}" defer></script>
 
 	<title>Login - MIND</title>
@@ -26,39 +27,41 @@
 	<main>
 		<input type="checkbox" id="form-switch" class="hidden">
 
-		<div class="form-container">
+		<noscript>Javascript is disabled. The web-ui of MIND does not work with JavaScript disabled.</noscript>
+		<div class="login-container">
 			<form id="login-form">
 				<h2>Login</h2>
 
-				<noscript>Javascript is disabled. The web-ui of MIND does not work with JavaScript disabled.</noscript>
-
-				<div id="username-error-container">
-					<input type="text" autocomplete="username" placeholder="Username" required autofocus>
-					<p class="hidden">*Username not found</p>
+				<div class="checked-input-container">
+					<input type="text" id="login-username-input" autocomplete="username" placeholder="Username" class="input-style" required autofocus>
+					<p>Username not found</p>
 				</div>
 
-				<div id="password-error-container">
-					<input type="password" autocomplete="current-password" placeholder="Password" required>
-					<p class="hidden">*Password incorrect</p>
+				<div class="checked-input-container">
+					<input type="password" id="login-password-input" autocomplete="current-password" placeholder="Password" class="input-style" required>
+					<p>Password incorrect</p>
 				</div>
 
 				<label for="form-switch" class="switch-button">Or create an account</label>
 				<button type="submit">Login</button>
 			</form>
-		</div>
-		<div class="form-container">
-			<form id="create-form">
-				<h2>Create</h2>
+			<form id="register-form">
+				<h2>Register</h2>
 
-				<input type="text" autocomplete="username" placeholder="Username" required>
-				<p class="error hidden" id="new-username-error">*Username invalid</p>
-				<p class="error hidden" id="taken-username-error">*Username already taken</p>
+				<div class="checked-input-container">
+					<input type="text" id="register-username-input" autocomplete="username" placeholder="Username" class="input-style" required>
+					<p id="invalid-username-error">Username invalid</p>
+					<p id="taken-username-error">Username already taken</p>
+				</div>
 
-				<input type="password" autocomplete="new-password" placeholder="Password" required>
+				<input type="password" id="register-password-input" autocomplete="new-password" placeholder="Password" class="input-style" required>
 
 				<label for="form-switch" class="switch-button">Or log into an account</label>
-				<button type="submit">Create</button>
+				<button type="submit">Register</button>
 			</form>
+			<div id="form-cover">
+				<img src="{{ url_for('static', filename='img/favicon.svg') }}" alt="">
+			</div>
 		</div>
 	</main>
 </body>

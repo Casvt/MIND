@@ -1,5 +1,5 @@
 function loadTemplateSelection() {
-	fetch(`${url_prefix}/api/templates?api_key=${api_key}`)
+	fetch(`${urlPrefix}/api/templates?api_key=${apiKey}`)
 	.then(response => {
 		if (!response.ok) return Promise.reject(response.status);
 		return response.json();
@@ -17,7 +17,7 @@ function loadTemplateSelection() {
 	})
 	.catch(e => {
 		if (e === 401)
-			window.location.href = `${url_prefix}/`;
+			window.location.href = `${urlPrefix}/`;
 		else
 			console.log(e);
 	});
@@ -33,7 +33,7 @@ function applyTemplate() {
 		selectColor(colors[0]);
 
 	} else {
-		fetch(`${url_prefix}/api/templates/${inputs.template.value}?api_key=${api_key}`)
+		fetch(`${urlPrefix}/api/templates/${inputs.template.value}?api_key=${apiKey}`)
 		.then(response => {
 			if (!response.ok) return Promise.reject(response.status);
 			else return response.json();
@@ -48,7 +48,7 @@ function applyTemplate() {
 		})
 		.catch(e => {
 			if (e === 401)
-				window.location.href = `${url_prefix}/`;
+				window.location.href = `${urlPrefix}/`;
 			else
 				console.log(e);
 		});

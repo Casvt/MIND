@@ -1,7 +1,15 @@
 {
 	"editor.insertSpaces": true,
     "editor.tabSize": 4,
-	
+	"editor.linkedEditing": true,
+
+	"[html]": {
+		"editor.rulers": [120],
+	},
+	"html.format.wrapLineLength": 120,
+	"html.format.wrapAttributes": "aligned-multiple",
+	"html.format.templating": true,
+
 	"[python]": {
 		"editor.formatOnSave": true,
 		"editor.defaultFormatter": "ms-python.autopep8",

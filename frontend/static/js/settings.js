@@ -13,7 +13,7 @@ function loadSettings() {
 
 function updateLocale(e) {
 	setLocalStorage({'locale': e.target.value});
-	fillLibrary(Types.reminder);
+	fillLibrary(reminderTypes.reminder);
 };
 
 function updateDefaultService(e) {
@@ -25,7 +25,7 @@ function changePassword() {
 	const data = {
 		'new_password': document.getElementById('password-input').value
 	};
-	fetch(`${url_prefix}/api/user?api_key=${api_key}`, {
+	fetch(`${urlPrefix}/api/user?api_key=${apiKey}`, {
 		'method': 'PUT',
 		'headers': {'Content-Type': 'application/json'},
 		'body': JSON.stringify(data)
@@ -36,18 +36,18 @@ function changePassword() {
 	})
 	.catch(e => {
 		if (e === 401)
-			window.location.href = `${url_prefix}/`;
+			window.location.href = `${urlPrefix}/`;
 		else
 			console.log(e);
 	});
 };
 
 function deleteAccount() {
-	fetch(`${url_prefix}/api/user?api_key=${api_key}`, {
+	fetch(`${urlPrefix}/api/user?api_key=${apiKey}`, {
 		'method': 'DELETE'
 	})
 	.then(response => {
-		window.location.href = `${url_prefix}/`;
+		window.location.href = `${urlPrefix}/`;
 	});
 };
 

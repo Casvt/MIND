@@ -22,11 +22,11 @@ const LibEls = {
 //
 function getSorting(type, key=false) {
 	let sorting_key;
-	if (type === Types.reminder)
+	if (type === reminderTypes.reminder)
 		sorting_key = 'sorting_reminders';
-	else if (type === Types.static_reminder)
+	else if (type === reminderTypes.static_reminder)
 		sorting_key = 'sorting_static';
-	else if (type === Types.template)
+	else if (type === reminderTypes.template)
 		sorting_key = 'sorting_templates';
 
 	if (key)
@@ -36,7 +36,7 @@ function getSorting(type, key=false) {
 };
 
 function getActiveTab() {
-	for (let t of Object.values(Types)) {
+	for (let t of Object.values(reminderTypes)) {
 		if (getComputedStyle(t).display === 'flex')
 			return t
 	};
@@ -63,7 +63,7 @@ function fillTable(table, results) {
 		title.innerText = r.title;
 		entry.appendChild(title);
 
-		if (table === Types.reminder) {
+		if (table === reminderTypes.reminder) {
 			const time = document.createElement('p');
 			let offset = new Date(r.time * 1000).getTimezoneOffset() * -60;
 			let d = new Date((r.time + offset) * 1000);
@@ -97,21 +97,21 @@ function fillLibrary(type=null) {
 	let tab_type = type || getActiveTab();
 
 	let url;
-	if (tab_type === Types.reminder)
-		url = `${url_prefix}/api/reminders`;
-	else if (tab_type === Types.static_reminder)
-		url = `${url_prefix}/api/staticreminders`;
-	else if (tab_type === Types.template)
-		url = `${url_prefix}/api/templates`;
+	if (tab_type === reminderTypes.reminder)
+		url = `${urlPrefix}/api/reminders`;
+	else if (tab_type === reminderTypes.static_reminder)
+		url = `${urlPrefix}/api/staticreminders`;
+	else if (tab_type === reminderTypes.template)
+		url = `${urlPrefix}/api/templates`;
 	else
 		return;
 
 	const sorting = getSorting(tab_type);
 	const query = LibEls.search_bar.input.value;
 	if (query)
-		url = `${url}/search?api_key=${api_key}&sort_by=${sorting}&query=${query}`;
+		url = `${url}/search?api_key=${apiKey}&sort_by=${sorting}&query=${query}`;
 	else
-		url = `${url}?api_key=${api_key}&sort_by=${sorting}`;
+		url = `${url}?api_key=${apiKey}&sort_by=${sorting}`;
 
 	fetch(url)
 	.then(response => {
@@ -121,7 +121,7 @@ function fillLibrary(type=null) {
 	.then(json => fillTable(tab_type, json.result))
 	.catch(e => {
 		if (e === 401)
-			window.location.href = `${url_prefix}/`;
+			window.location.href = `${urlPrefix}/`;
 		else
 			console.log(e);
 	});
@@ -148,8 +148,8 @@ function evaluateSizing() {
 
 // code run on load
 
-Object.values(Types).forEach(t => fillLibrary(t));
-setInterval(() => fillLibrary(Types.reminder), 60000);
+Object.values(reminderTypes).forEach(t => fillLibrary(t));
+setInterval(() => fillLibrary(reminderTypes.reminder), 60000);
 
 const week_days = ["Mo", "Tu", "We", "Thu", "Fr", "Sa", "Su"];
 

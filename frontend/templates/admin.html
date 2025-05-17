@@ -25,40 +25,265 @@
 		<img src="{{ url_for('static', filename='img/favicon.svg') }}" alt="">
 	</header>
 	<main>
-		<section class="action-buttons">
-			<button id="save-button" title="Save Settings" type="submit" form="settings-form">
+		<dialog id="reset-settings-dialog">
+			<div class="dialog-container">
+				<div class="dialog-header">
+					<h2>Reset Settings</h2>
+				</div>
+				<div class="dialog-content">
+					<form id="reset-settings-form">
+						<div class="table-container">
+							<table id="reset-table" class="entries-table">
+								<tbody id="reset-list">
+									<tr>
+										<td><input type="checkbox" data-setting="allow_new_accounts"></td>
+										<td>Allow New Accounts</td>
+									</tr>
+									<tr>
+										<td><input type="checkbox" data-setting="login_time"></td>
+										<td>Login Time</td>
+									</tr>
+									<tr>
+										<td><input type="checkbox" data-setting="login_time_reset"></td>
+										<td>Login Time Trigger</td>
+									</tr>
+									<tr>
+										<td><input type="checkbox" data-setting="host"></td>
+										<td>Host</td>
+									</tr>
+									<tr>
+										<td><input type="checkbox" data-setting="port"></td>
+										<td>Port</td>
+									</tr>
+									<tr>
+										<td><input type="checkbox" data-setting="url_prefix"></td>
+										<td>URL Prefix</td>
+									</tr>
+									<tr>
+										<td><input type="checkbox" data-setting="log_level"></td>
+										<td>Logging Level</td>
+									</tr>
+									<tr>
+										<td><input type="checkbox" data-setting="db_backup_interval"></td>
+										<td>Database Backup Interval</td>
+									</tr>
+									<tr>
+										<td><input type="checkbox" data-setting="db_backup_amount"></td>
+										<td>Database Backup Retention</td>
+									</tr>
+									<tr>
+										<td><input type="checkbox" data-setting="db_backup_folder"></td>
+										<td>Database Backup Folder</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</form>
+				</div>
+				<div class="dialog-footer">
+					<button id="close-reset-settings" class="input-style">Cancel</button>
+					<button type="submit" id="submit-reset-button" form="reset-settings-form" class="input-style">Reset</button>
+				</div>
+			</div>
+		</dialog>
+		<dialog id="add-user-dialog">
+			<div class="dialog-container">
+				<div class="dialog-header">
+					<h2>Add User</h2>
+				</div>
+				<div class="dialog-content">
+					<form id="add-user-form">
+						<div class="checked-input-container">
+							<input type="text" id="add-user-username-input" autocomplete="username" placeholder="Username" class="input-style" required>
+							<p id="add-invalid-username-error">Username invalid</p>
+							<p id="add-taken-username-error">Username already taken</p>
+						</div>
+
+						<input type="password" id="add-user-password-input" autocomplete="new-password" placeholder="Password" class="input-style" required>
+					</form>
+				</div>
+				<div class="dialog-footer">
+					<button id="close-add-user" class="input-style">Cancel</button>
+					<button type="submit" form="add-user-form" class="input-style">Add</button>
+				</div>
+			</div>
+		</dialog>
+		<dialog id="edit-user-dialog">
+			<div class="dialog-container">
+				<div class="dialog-header">
+					<h2>Edit User</h2>
+				</div>
+				<div class="dialog-content">
+					<p>Leave fields empty to not change for <span id="username-edit-user"></span></p>
+					<form id="edit-user-form">
+						<div class="checked-input-container">
+							<input type="text" id="edit-user-username-input" autocomplete="username" placeholder="New username" class="input-style">
+							<p id="edit-invalid-username-error">Username invalid</p>
+							<p id="edit-taken-username-error">Username already taken</p>
+						</div>
+
+						<input type="password" id="edit-user-password-input" autocomplete="new-password" placeholder="New password" class="input-style">
+					</form>
+				</div>
+				<div class="dialog-footer">
+					<button id="close-edit-user" class="input-style">Cancel</button>
+					<button type="submit" form="edit-user-form" class="input-style">Save</button>
+				</div>
+			</div>
+		</dialog>
+		<dialog id="delete-user-dialog">
+			<div class="dialog-container">
+				<div class="dialog-content">
+					<p>Are you sure you want to delete the user <span id="username-delete-user"></span>?</p>
+					<div class="confirm-container">
+						<button id="confirm-delete-user" class="input-style">Confirm</button>
+						<button id="close-delete-user" class="input-style">Cancel</button>
+					</div>
+				</div>
+			</div>
+		</dialog>
+		<dialog id="upload-db-dialog">
+			<div class="dialog-container">
+				<div class="dialog-header">
+					<h2>Upload Database</h2>
+				</div>
+				<div class="dialog-content">
+					<p>You will be uploading a database file. Login into MIND within one minute to keep the new database, or the upload will automatically be reverted.</p>
+					<form id="upload-db-form">
+						<div class="table-container">
+							<table class="collaps-table">
+								<tbody>
+									<tr>
+										<td><label for="database-file-input">Database File</label></td>
+										<td>
+											<div class="checked-input-container">
+												<input type="file" id="database-file-input" class="input-style" required>
+												<p>Invalid database file</p>
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td><label for="copy-hosting-input-upload">Keep Hosting Settings</label></td>
+										<td>
+											<input type="checkbox" id="copy-hosting-input-upload">
+											<p>Keep the current hosting settings instead of using the settings in the uploaded database when importing.</p>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</form>
+				</div>
+				<div class="dialog-footer">
+					<button id="close-upload-db" class="input-style">Cancel</button>
+					<button type="submit" form="upload-db-form" class="input-style">Import</button>
+				</div>
+			</div>
+		</dialog>
+		<dialog id="import-db-dialog">
+			<div class="dialog-container">
+				<div class="dialog-header">
+					<h2>Import Database</h2>
+				</div>
+				<div class="dialog-content">
+					<p>You will be importing database backup <span id="db-backup-name"></span>, created on <span id="db-creation-date"></span>.
+						Login into MIND within one minute to keep the new database, or the import will automatically be reverted.</p>
+					<form id="import-db-form">
+						<div class="table-container">
+							<table class="collaps-table">
+								<tbody>
+									<tr>
+										<td><label for="copy-hosting-input-import">Keep Hosting Settings</label></td>
+										<td>
+											<input type="checkbox" id="copy-hosting-input-import">
+											<p>Keep the current hosting settings instead of using the settings in the selected database backup when importing.</p>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</form>
+				</div>
+				<div class="dialog-footer">
+					<button id="close-import-db" class="input-style">Cancel</button>
+					<button type="submit" form="import-db-form" class="input-style">Import</button>
+				</div>
+			</div>
+		</dialog>
+
+		<form id="settings-form"></form>
+		<section class="action-buttons" aria-label="Actions">
+			<button id="save-button" aria-label="Save settings" title="Save Settings" type="submit" form="settings-form">
+				<span id="changes-count" data-count="0">0 changes</span>
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512">
 					<path d="M12,10a4,4,0,1,0,4,4A4,4,0,0,0,12,10Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,16Z"/>
 					<path d="M22.536,4.122,19.878,1.464A4.966,4.966,0,0,0,16.343,0H5A5.006,5.006,0,0,0,0,5V19a5.006,5.006,0,0,0,5,5H19a5.006,5.006,0,0,0,5-5V7.657A4.966,4.966,0,0,0,22.536,4.122ZM17,2.08V3a3,3,0,0,1-3,3H10A3,3,0,0,1,7,3V2h9.343A2.953,2.953,0,0,1,17,2.08ZM22,19a3,3,0,0,1-3,3H5a3,3,0,0,1-3-3V5A3,3,0,0,1,5,2V3a5.006,5.006,0,0,0,5,5h4a4.991,4.991,0,0,0,4.962-4.624l2.16,2.16A3.02,3.02,0,0,1,22,7.657Z"/>
 				</svg>
 			</button>
-			<button id="logout-button" aria-label="Log out of MIND" title="Logout">
-				<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve">
+			<button id="logout-button" aria-label="Log out of MIND" title="Log out of MIND">
+				<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" xml:space="preserve">
 					<g>
 						<path d="M11.476,15a1,1,0,0,0-1,1v3a3,3,0,0,1-3,3H5a3,3,0,0,1-3-3V5A3,3,0,0,1,5,2H7.476a3,3,0,0,1,3,3V8a1,1,0,0,0,2,0V5a5.006,5.006,0,0,0-5-5H5A5.006,5.006,0,0,0,0,5V19a5.006,5.006,0,0,0,5,5H7.476a5.006,5.006,0,0,0,5-5V16A1,1,0,0,0,11.476,15Z"></path>
 						<path d="M22.867,9.879,18.281,5.293a1,1,0,1,0-1.414,1.414l4.262,4.263L6,11a1,1,0,0,0,0,2H6l15.188-.031-4.323,4.324a1,1,0,1,0,1.414,1.414l4.586-4.586A3,3,0,0,0,22.867,9.879Z"></path>
 					</g>
 				</svg>
+				<span>Log out</span>
 			</button>
 		</section>
-		<div class="form-container">
-			<form id="settings-form">
-				<h2>Authentication</h2>
-				<div class="settings-table-container">
-					<table class="settings-table">
+		<div id="grid-container">
+			<section id="about-section">
+				<h2>About</h2>
+				<div class="table-container">
+					<table class="collaps-table">
 						<tbody>
 							<tr>
-								<td><label for="allow-new-accounts-input">Allow New Accounts</label></td>
+								<th>MIND Version</th>
+								<td id="mind-version"></td>
+							</tr>
+							<tr>
+								<th>Python Version</th>
+								<td id="python-version"></td>
+							</tr>
+							<tr>
+								<th>Database Version</th>
+								<td id="db-version"></td>
+							</tr>
+							<tr>
+								<th>Database Location</th>
+								<td id="db-location"></td>
+							</tr>
+							<tr>
+								<th>Data Folder</th>
+								<td id="data-folder"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</section>
+			<section id="power-section">
+				<h2>Power</h2>
+				<div class="table-container">
+					<button id="restart-button" class="input-style">Restart</button>
+					<button id="shutdown-button" class="input-style">Shutdown</button>
+				</div>
+			</section>
+			<section id="auth-section">
+				<h2>Authentication</h2>
+				<div class="table-container">
+					<table class="collaps-table">
+						<tbody>
+							<tr>
+								<th><label for="allow-new-accounts-input">Allow New Accounts</label></th>
 								<td>
-									<input type="checkbox" id="allow-new-accounts-input">
+									<input type="checkbox" id="allow-new-accounts-input" form="settings-form">
 									<p>Allow users to register a new account. The admin can always add a new account from this panel.</p>
 								</td>
 							</tr>
 							<tr>
-								<td><label for="login-time-input">Login Time</label></td>
+								<th><label for="login-time-input">Login Time</label></th>
 								<td>
-									<div class="number-input">
-										<input type="number" id="login-time-input" min="1" max="43200" required>
+									<div class="input-style">
+										<input type="number" id="login-time-input" form="settings-form" min="1" max="43200" required>
 										<p>Min</p>
 									</div>
 									<p>For how long users stay logged in before having to authenticate again. Between 1 minute and 1 month.</p>
@@ -66,9 +291,9 @@
 								</td>
 							</tr>
 							<tr>
-								<td><label for="login-time-reset-input">Login Time Trigger</label></td>
+								<th><label for="login-time-reset-input">Login Time Trigger</label></th>
 								<td>
-									<select id="login-time-reset-input">
+									<select id="login-time-reset-input" class="input-style" form="settings-form" required>
 										<option value="true">After Last Use</option>
 										<option value="false">After Login</option>
 									</select>
@@ -78,195 +303,163 @@
 						</tbody>
 					</table>
 				</div>
-				<h2>Logging</h2>
-				<div class="settings-table-container">
-					<table class="settings-table">
+			</section>
+			<section id="hosting-section">
+				<h2>Hosting</h2>
+				<div class="table-container">
+					<table class="collaps-table">
 						<tbody>
 							<tr>
-								<td><label for="log-level-input">Logging Level</label></td>
+								<th><label for="host-input">Host</label></th>
 								<td>
-									<select id="log-level-input">
-										<option value="20">Info</option>
-										<option value="10">Debug</option>
-									</select>
+									<input type="text" id="host-input" class="input-style" form="settings-form" spellcheck="false" required>
+									<p>Valid IPv4 address (default is '0.0.0.0' for all available interfaces).</p>
+								</td>
+							</tr>
+							<tr>
+								<th><label for="port-input">Port</label></th>
+								<td>
+									<input type="number" id="port-input" class="input-style" form="settings-form" min="1" max="65535" required>
+									<p>The port used to access the web UI (default is '8080').</p>
+								</td>
+							</tr>
+							<tr>
+								<th><label for="url-prefix-input">URL Prefix</label></th>
+								<td>
+									<input type="text" id="url-prefix-input" class="input-style" form="settings-form" spellcheck="false">
+									<p>For reverse proxy support (default is empty).</p>
 								</td>
 							</tr>
 						</tbody>
 					</table>
 				</div>
-				<div class="database-container">
-					<button id="download-logs-button" type="button">Download Debug Logs</button>
-				</div>
-				<h2>Database Backups</h2>
-				<div class="settings-table-container">
-					<table class="settings-table">
+			</section>
+			<section id="logging-section">
+				<h2>Logging and Resetting</h2>
+				<div class="table-container">
+					<table class="collaps-table">
 						<tbody>
 							<tr>
-								<td><label for="db-backup-interval-input">Database Backup Interval</label></td>
+								<th><label for="log-level-input">Logging Level</label></th>
 								<td>
-									<div class="number-input">
-										<input type="number" id="db-backup-interval-input" min="1" required>
+									<select id="log-level-input" class="input-style" form="settings-form" required>
+										<option value="20">Info</option>
+										<option value="10">Debug</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<th><label for="download-logs-button">Download Logs</label></th>
+								<td>
+									<button id="download-logs-button" class="input-style">Download Debug Logs</button>
+								</td>
+							</tr>
+							<tr>
+								<th><label for="open-reset-button">Reset Setting</label></th>
+								<td>
+									<button id="open-reset-button" class="input-style">Reset Setting</button>
+									<p>Opens a window to select settings for which to reset their value.</p>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</section>
+			<section id="backup-settings-section">
+				<h2>Database Backup Settings</h2>
+				<div class="table-container">
+					<table class="collaps-table">
+						<tbody>
+							<tr>
+								<th><label for="db-backup-interval-input">Database Backup Interval</label></th>
+								<td>
+									<div class="input-style">
+										<input type="number" id="db-backup-interval-input" form="settings-form" min="1" required>
 										<p>Hours</p>
 									</div>
 									<p>How often to make a backup of the database.</p>
 								</td>
 							</tr>
 							<tr>
-								<td><label for="db-backup-amount-input">Database Backup Retention</label></td>
+								<th><label for="db-backup-amount-input">Database Backup Retention</label></th>
 								<td>
-									<div class="number-input">
-										<input type="number" id="db-backup-amount-input" min="1" required>
+									<div class="input-style">
+										<input type="number" id="db-backup-amount-input" form="settings-form" min="1" required>
 										<p>Backups</p>
 									</div>
 									<p>How many backups to keep. The oldest one will be removed if needed.</p>
 								</td>
 							</tr>
 							<tr>
-								<td><label for="db-backup-folder-input">Database Backup Folder</label></td>
+								<th><label for="db-backup-folder-input">Database Backup Folder</label></th>
 								<td>
-									<input type="text" id="db-backup-folder-input" required>
+									<div class="checked-input-container">
+										<input type="text" id="db-backup-folder-input" class="input-style long-input-style" form="settings-form" spellcheck="false" required>
+										<p>Path doesn't exist or isn't a folder</p>
+									</div>
 									<p>The folder to store the backups in.</p>
 								</td>
 							</tr>
 						</tbody>
 					</table>
 				</div>
-			</form>
-			<form id="hosting-form">
-				<h2>Hosting</h2>
-				<div class="settings-table-container">
-					<table class="settings-table">
-						<tbody>
-							<tr>
-								<td><label for="host-input">Host</label></td>
-								<td>
-									<input type="text" id="host-input" required>
-									<p>Valid IPv4 address (default is '0.0.0.0' for all available interfaces).</p>
-								</td>
-							</tr>
-							<tr>
-								<td><label for="port-input">Port</label></td>
-								<td>
-									<input type="number" id="port-input" min="1" max="65535" required>
-									<p>The port used to access the web UI (default is '8080').</p>
-								</td>
-							</tr>
-							<tr>
-								<td><label for="url-prefix-input">URL Prefix</label></td>
-								<td>
-									<input type="text" id="url-prefix-input">
-									<p>For reverse proxy support (default is empty).</p>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-					<button type="submit" id="save-hosting-button">Save and Restart</button>
-				</div>
-				<p>IMPORTANT: Login into MIND within one minute to keep the new database, or the import will automatically be reverted.
-					See <a href="https://casvt.github.io/MIND/general_info/admin_panel#database">the documentation</a> for more information.</p>
-			</form>
-			<h2>User Management</h2>
-			<div class="add-user-container">
-				<button id="add-user-button">
-					<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
-						<g>
+			</section>
+			<section id="user-section">
+				<h2>User Management</h2>
+				<div class="add-item-container">
+					<button id="add-user-button" class="input-style">
+						<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" xml:space="preserve">
 							<g>
-								<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
+								<g>
+									<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
+								</g>
 							</g>
-						</g>
-					</svg>
-				</button>
-			</div>
-			<div class="user-table-container">
-				<form id="add-user-form"></form>
-				<table id="user-table">
-					<thead>
-						<th>User</th>
-						<th></th>
-						<th>Actions</th>
-					</thead>
-					<tbody id="add-user-row" class="hidden">
-						<tr>
-							<td>
-								<input type="text" id="new-username-input" form="add-user-form" placeholder="Username" required>
-							</td>
-							<td>
-								<input type="password" id="new-password-input" form="add-user-form" placeholder="Password" required>
-							</td>
-							<td>
-								<button type="submit" form="add-user-form">
-									<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
-										<g>
-											<g>
-												<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
-											</g>
-										</g>
-									</svg>
-								</button>
-							</td>
-						</tr>
-					</tbody>
-					<tbody id="user-list">
-					</tbody>
-				</table>
-			</div>
-			<h2>Database</h2>
-			<form id="upload-database-form">
-				<div class="settings-table-container">
-					<table class="settings-table">
-						<tbody>
-							<tr>
-								<td><label for="copy-hosting-input">Keep Hosting Settings</label></td>
-								<td>
-									<input type="checkbox" id="copy-hosting-input">
-									<p>Keep the current hosting settings instead of using the settings in the uploaded database when importing.</p>
-								</td>
-							</tr>
-							<tr>
-								<td><label for="database-file-input">Database File</label></td>
-								<td>
-									<input type="file" id="database-file-input" required>
-									<p>Instead of importing a backup, import a database by uploading the file.</p>
-								</td>
-							</tr>
+						</svg>
+					</button>
+				</div>
+				<div class="table-container">
+					<table id="user-table" class="entries-table">
+						<thead>
+							<th>User</th>
+							<th>Actions</th>
+						</thead>
+						<tbody id="user-list">
 						</tbody>
 					</table>
 				</div>
-				<button type="submit" id="upload-db-button">Import Database</button>
-				<p>IMPORTANT: Login into MIND within one minute to keep the new database, or the import will automatically be reverted.
-					See <a href="https://casvt.github.io/MIND/general_info/admin_panel#database">the documentation</a> for more information.</p>
-			</form>
-			<div class="settings-table-container">
-				<table id="backup-table">
-					<thead>
-						<th>File</th>
-						<th>Creation</th>
-						<th>Actions</th>
-					</thead>
-					<tbody>
-						<tr>
-							<td>Current Database</td>
-							<td></td>
-							<td>
-								<button id="download-db-button">
-									<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" width="512" height="512">
-										<g>
-											<path d="M210.731,386.603c24.986,25.002,65.508,25.015,90.51,0.029c0.01-0.01,0.019-0.019,0.029-0.029l68.501-68.501   c7.902-8.739,7.223-22.23-1.516-30.132c-8.137-7.357-20.527-7.344-28.649,0.03l-62.421,62.443l0.149-329.109   C277.333,9.551,267.782,0,256,0l0,0c-11.782,0-21.333,9.551-21.333,21.333l-0.192,328.704L172.395,288   c-8.336-8.33-21.846-8.325-30.176,0.011c-8.33,8.336-8.325,21.846,0.011,30.176L210.731,386.603z" />
-											<path d="M490.667,341.333L490.667,341.333c-11.782,0-21.333,9.551-21.333,21.333V448c0,11.782-9.551,21.333-21.333,21.333H64   c-11.782,0-21.333-9.551-21.333-21.333v-85.333c0-11.782-9.551-21.333-21.333-21.333l0,0C9.551,341.333,0,350.885,0,362.667V448   c0,35.346,28.654,64,64,64h384c35.346,0,64-28.654,64-64v-85.333C512,350.885,502.449,341.333,490.667,341.333z" />
-										</g>
-									</svg>
-								</button>
-							</td>
-						</tr>
-					</tbody>
-					<tbody id="backup-list"></tbody>
-				</table>
-			</div>
-			<h2>Power</h2>
-			<div class="database-container">
-				<button id="restart-button">Restart</button>
-				<button id="shutdown-button">Shutdown</button>
-			</div>
+			</section>
+			<section id="backup-management-section">
+				<h2>Database Backup Management</h2>
+				<div class="add-item-container">
+					<button id="upload-db-button" class="input-style">Upload Database</button>
+				</div>
+				<div class="table-container">
+					<table id="backup-table" class="entries-table">
+						<thead>
+							<th>File</th>
+							<th>Creation</th>
+							<th>Actions</th>
+						</thead>
+						<tbody>
+							<tr>
+								<td>Current Database</td>
+								<td></td>
+								<td>
+									<button id="download-db-button" title="Download current database">
+										<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve" width="512" height="512">
+											<g>
+												<path d="M210.731,386.603c24.986,25.002,65.508,25.015,90.51,0.029c0.01-0.01,0.019-0.019,0.029-0.029l68.501-68.501   c7.902-8.739,7.223-22.23-1.516-30.132c-8.137-7.357-20.527-7.344-28.649,0.03l-62.421,62.443l0.149-329.109   C277.333,9.551,267.782,0,256,0l0,0c-11.782,0-21.333,9.551-21.333,21.333l-0.192,328.704L172.395,288   c-8.336-8.33-21.846-8.325-30.176,0.011c-8.33,8.336-8.325,21.846,0.011,30.176L210.731,386.603z" />
+												<path d="M490.667,341.333L490.667,341.333c-11.782,0-21.333,9.551-21.333,21.333V448c0,11.782-9.551,21.333-21.333,21.333H64   c-11.782,0-21.333-9.551-21.333-21.333v-85.333c0-11.782-9.551-21.333-21.333-21.333l0,0C9.551,341.333,0,350.885,0,362.667V448   c0,35.346,28.654,64,64,64h384c35.346,0,64-28.654,64-64v-85.333C512,350.885,502.449,341.333,490.667,341.333z" />
+											</g>
+										</svg>
+									</button>
+								</td>
+							</tr>
+						</tbody>
+						<tbody id="backup-list"></tbody>
+					</table>
+				</div>
+			</section>
 		</div>
 	</main>
 </body>

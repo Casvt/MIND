@@ -126,6 +126,7 @@ body:has(#wide-toggle:checked) .tab-container > div {
 	border-radius: 4px;
 	padding: .75rem;
 	background-color: var(--color);
+	color: var(--color-light);
 }
 
 button.entry.fit {

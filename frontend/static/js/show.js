@@ -19,21 +19,21 @@ function showAdd(type) {
 
 	const cl = document.getElementById('info').classList;
 	cl.forEach(c => {
-		if (InfoClasses.includes(c)) cl.remove(c)
+		if (infoClasses.includes(c)) cl.remove(c)
 	});
 	document.querySelector('.options > button[type="submit"]').innerText = 'Add';
 	
 	document.querySelector('#test-reminder > div:first-child').innerText = 'Test';
 	const title = document.querySelector('#info h2');
-	if (type === Types.reminder) {
+	if (type === reminderTypes.reminder) {
 		cl.add('show-add-reminder');
 		title.innerText = 'Add a reminder';
 		inputs.time.setAttribute('required', '');
-	} else if (type === Types.template) {
+	} else if (type === reminderTypes.template) {
 		cl.add('show-add-template');
 		title.innerText = 'Add a template';
 		inputs.time.removeAttribute('required');
-	} else if (type === Types.static_reminder) {
+	} else if (type === reminderTypes.static_reminder) {
 		cl.add('show-add-static-reminder');
 		title.innerText = 'Add a static reminder';
 		inputs.time.removeAttribute('required');
@@ -44,15 +44,15 @@ function showAdd(type) {
 
 function showEdit(id, type) {
 	let url;
-	if (type === Types.reminder) {
-		url = `${url_prefix}/api/reminders/${id}?api_key=${api_key}`;
+	if (type === reminderTypes.reminder) {
+		url = `${urlPrefix}/api/reminders/${id}?api_key=${apiKey}`;
 		inputs.time.setAttribute('required', '');
-	} else if (type === Types.template) {
-		url = `${url_prefix}/api/templates/${id}?api_key=${api_key}`;
+	} else if (type === reminderTypes.template) {
+		url = `${urlPrefix}/api/templates/${id}?api_key=${apiKey}`;
 		inputs.time.removeAttribute('required');
 		type_buttons.repeat_interval.removeAttribute('required');
-	} else if (type === Types.static_reminder) {
-		url = `${url_prefix}/api/staticreminders/${id}?api_key=${api_key}`;
+	} else if (type === reminderTypes.static_reminder) {
+		url = `${urlPrefix}/api/staticreminders/${id}?api_key=${apiKey}`;
 		document.getElementById('test-reminder').classList.remove('show-sent');
 		inputs.time.removeAttribute('required');
 		type_buttons.repeat_interval.removeAttribute('required');
@@ -69,7 +69,7 @@ function showEdit(id, type) {
 		selectColor(json.result.color || colors[0]);
 		inputs.title.value = json.result.title;
 
-		if (type === Types.reminder) {
+		if (type === reminderTypes.reminder) {
 			inputs.enabled.checked = json.result.enabled;
 			var trigger_date = new Date(
 				(json.result.time
@@ -86,7 +86,7 @@ function showEdit(id, type) {
 			c => c.checked = json.result.notification_services.includes(parseInt(c.dataset.id))
 		);
 
-		if (type == Types.reminder) {
+		if (type == reminderTypes.reminder) {
 			if (json.result.repeat_interval !== null) {
 				toggleRepeated();
 				type_buttons.repeat_interval.value = json.result.repeat_interval;
@@ -107,27 +107,27 @@ function showEdit(id, type) {
 	})
 	.catch(e => {
 		if (e === 401) 
-			window.location.href = `${url_prefix}/`;
+			window.location.href = `${urlPrefix}/`;
 		else 
 			console.log(e);
 	});
 	
 	const cl = document.getElementById('info').classList;
 	cl.forEach(c => {
-		if (InfoClasses.includes(c)) cl.remove(c)
+		if (infoClasses.includes(c)) cl.remove(c)
 	});
 	document.querySelector('.options > button[type="submit"]').innerText = 'Save';
 	const title = document.querySelector('#info h2');
 	const test_text = document.querySelector('#test-reminder > div:first-child');
-	if (type === Types.reminder) {
+	if (type === reminderTypes.reminder) {
 		cl.add('show-edit-reminder');
 		title.innerText = 'Edit a reminder';
 		test_text.innerText = 'Test';
-	} else if (type === Types.template) {
+	} else if (type === reminderTypes.template) {
 		cl.add('show-edit-template');
 		title.innerText = 'Edit a template';
 		test_text.innerText = 'Test';
-	} else if (type === Types.static_reminder) {
+	} else if (type === reminderTypes.static_reminder) {
 		cl.add('show-edit-static-reminder');
 		title.innerText = 'Edit a static reminder';
 		test_text.innerText = 'Trigger';
