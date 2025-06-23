@@ -6,6 +6,7 @@
 				Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
 				'Helvetica Neue', sans-serif;
 	font-size: 1rem;
+	-webkit-tap-highlight-color: transparent;
 }
 
 :root {
@@ -22,9 +23,12 @@
 
 	--header-height: 4.5rem;
 	--nav-width: 4rem;
+	--nav-show-speed: 300ms;
+	--nav-button-spacing: .5rem;
 	--scrollbar-width: 12px;
 
-	--rem-clamp: clamp(.5rem, 2vw, 1rem);
+	--dyn-spacing: clamp(.5rem, 2vw, 1rem);
+	--playful-curve: cubic-bezier(0.87, 0, 0.13, 1);
 	--default-shadow:
 		0 1px 2px 0 rgb(0 0 0 / 60%),
 		0 2px 6px 2px rgb(0 0 0 / 30%);
@@ -104,10 +108,8 @@ table {
 	display: block !important;
 }
 
-.error-icon path,
-.error-icon rect,
-.error-container path,
-.error-container rect {
+.error-icon :where(path, rect),
+.error-container :where(path, rect) {
 	fill: var(--color-error) !important;
 }
 
@@ -145,10 +147,10 @@ svg.spinning {
 	transition: background-color 150ms ease-in-out;
 
 	font-size: 1rem;
-}
-
-:where(input, textarea, select, button, div).input-style:focus-within {
-	border-color: var(--color-light-gray);
+	
+	&:focus-within {
+		border-color: var(--color-light-gray);
+	}
 }
 
 :where(input, textarea, select, button).input-style,
@@ -397,7 +399,7 @@ header {
 	display: flex;
 	align-items: center;
 
-	padding: 1rem;
+	padding: .25rem calc(var(--dyn-spacing) + .75rem);
 	border-bottom-left-radius: 6px;
 	border-bottom-right-radius: 6px;
 	background-color: var(--color-gray);

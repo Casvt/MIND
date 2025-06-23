@@ -191,10 +191,6 @@ button.entry.fit {
 }
 
 @media (max-width: 543px) {
-	header > div {
-		transform: translateX(0);
-	}
-	
 	.tab-selector > label {
 		flex: 1 0 25%;
 	}

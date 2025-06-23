@@ -36,3 +36,5 @@ function showWindow(id) {
 }
 
 checkLogin()
+
+document.querySelector("header img").onclick = e => showWindow("home")

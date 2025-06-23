@@ -2,114 +2,130 @@
 /* Nav collapse button */
 /*  */
 header > div {
-	height: 100%;
-	transform: translateX(-2.6rem);
+	transform: translateX(-3.8rem);
 
 	display: flex;
 	align-items: center;
 	gap: 1rem;
 
-	transition: transform .3s ease-in-out;
+	transition: transform var(--nav-show-speed) var(--playful-curve);
 }
 
 #toggle-nav {
-	--height: 1.5rem;
-	height: var(--height);
+	height: 2.5rem;
+	width: 2.5rem;
 
 	background-color: transparent;
 }
 
 #toggle-nav svg {
-	height: var(--height);
-	width: var(--height);
+	height: 100%;
+	width: auto;
+	padding: 0.45rem;
+}
+
+#toggle-nav:hover svg :where(path, rect) {
+	animation: flash-nav-colour .2s forwards;
+}
+
+@keyframes flash-nav-colour {
+	0% {
+		fill: var(--color-light);
+	}
+	50% {
+		fill: var(--color-light-gray);
+	}
+	100% {
+		fill: var(--color-light);
+	}
+}
+
+header img:hover {
+	cursor: pointer;
+}
+
+/*  */
+/* Nav collapse */
+/*  */
+.nav-divider {
+	height: calc(100% - var(--header-height));
+
+	display: grid;
+	grid-template-columns: calc(var(--nav-width) + var(--dyn-spacing)) 1fr;
+
+	transition: grid-template-columns var(--nav-show-speed) var(--playful-curve);
+}
+
+.nav-container {
+	height: 100%;
+	overflow-x: hidden;
+
+	display: flex;
+	justify-content: flex-end;
 }
 
 /*  */
 /* Nav */
 /*  */
-.nav-divider {
-	position: relative;
-	height: calc(100% - var(--header-height));
-
-	display: flex;
-
-	padding-block: var(--rem-clamp);
-}
-
-body:has(#nav-switch:checked) .nav-divider > nav {
-	left: var(--rem-clamp);
-}
-
-body:has(#nav-switch:checked) .nav-divider > .window-container {
-	margin-left: calc(var(--nav-width) + var(--rem-clamp));
-}
-
 nav {
-	--padding: .5rem;
-	z-index: 1;
-	position: absolute;
-	left: var(--rem-clamp);
-	height: calc(100% - (2 * var(--rem-clamp)));
+	height: calc(100% - 2 * var(--dyn-spacing));
 	width: var(--nav-width);
+	margin: var(--dyn-spacing);
+	margin-right: 0rem;
+	flex: 0 0 auto;
 
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
 	align-items: center;
-	gap: var(--padding);
+	gap: var(--nav-button-spacing);
 	overflow-y: auto;
 
-	padding: var(--padding);
+	padding: var(--nav-button-spacing);
 	border-radius: 4px;
 	background-color: var(--color-gray);
-
-	transition: left .3s ease-in-out;
+	
+	&::-webkit-scrollbar {
+		width: 0rem;
+	}
 }
 
 nav > div {
-	width: 100%;
-
 	display: flex;
 	flex-direction: column;
-	gap: var(--padding);
+	gap: var(--nav-button-spacing);
 }
 
 nav > div > button {
-	width: 100%;
-
 	display: flex;
 	justify-content: center;
 	align-items: center;
 
-	padding: .5rem;
-	border: 0;
+	padding: var(--nav-button-spacing);
 	border-radius: 4px;
 	background-color: var(--color-dark);
 	color: var(--color-light);
 
-	transition: background-color .1s ease-in-out;
-}
-
-nav > div > button:hover {
-	background-color: var(--color-gray);
-}
-
-nav > div > button svg {
-	height: 1.8rem;
-	width: 2rem;
+	transition: background-color 150ms ease-in-out;
+	
+	&:hover {
+		background-color: var(--color-light-gray);
+	}
+	
+	& svg {
+		height: 1.8rem;
+		width: 2rem;
+	}
 }
 
 /*  */
 /* Window management */
 /*  */
 .window-container {
-	margin-left: calc(4rem + var(--rem-clamp));
 	width: 100%;
 
 	display: flex;
 	overflow: hidden;
-
-	transition: margin-left .3s ease-in-out;
 }
 
 .window-container > :where(#home, .extra-window-container) {
@@ -147,7 +163,7 @@ nav > div > button svg {
 /* Styling extra window */
 /*  */
 .extra-window-container > div {
-	padding: var(--rem-clamp);
+	padding: var(--dyn-spacing);
 }
 
 .extra-window-container > div > h2 {
@@ -164,12 +180,12 @@ nav > div > button svg {
 	text-align: center;
 }
 
-@media (max-width: 543px) {
-	.window-container {
-		margin-left: 0;
+@media (max-width: 34rem) {
+	header > div {
+		transform: translateX(0);
 	}
 
-	nav {
-		left: -100%;
+	body:has(#nav-toggle:checked) .nav-divider {
+		grid-template-columns: 0 auto;
 	}
 }
