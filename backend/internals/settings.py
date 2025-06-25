@@ -8,6 +8,7 @@ from os.path import abspath, isdir
 from typing import Any, Dict, Mapping
 
 from backend.base.custom_exceptions import InvalidKeyValue, KeyNotFound
+from backend.base.definitions import Constants
 from backend.base.helpers import (Singleton, folder_path,
                                   get_python_version, reversed_tuples)
 from backend.base.logging import LOGGER, set_log_level
@@ -63,7 +64,7 @@ class SettingsValues:
 
     db_backup_interval: int = ONE_DAY
     db_backup_amount: int = 3
-    db_backup_folder: str = ''
+    db_backup_folder: str = folder_path(*Constants.DB_FOLDER)
     db_backup_last_run: int = 0
 
     measured_timezone: int = -1 # = no value
