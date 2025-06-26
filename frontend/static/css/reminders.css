@@ -168,8 +168,8 @@ nav > div > button {
 
 .extra-window-container > div > h2 {
 	text-align: center;
-	font-size: clamp(1.3rem, 5vw, 2rem);
-	margin-bottom: 2rem;
+	font-size: clamp(1.5rem, 8vw, 2rem);
+	margin-bottom: 1rem;
 }
 
 .extra-window-container > div > h2:not(:first-of-type) {
