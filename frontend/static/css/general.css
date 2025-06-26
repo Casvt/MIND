@@ -27,6 +27,7 @@
 	--nav-button-spacing: .5rem;
 	--scrollbar-width: 12px;
 
+	--window-slice-duration: 500ms;
 	--dyn-spacing: clamp(.5rem, 2vw, 1rem);
 	--playful-curve: cubic-bezier(0.87, 0, 0.13, 1);
 	--default-shadow:

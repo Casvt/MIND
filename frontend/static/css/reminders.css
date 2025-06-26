@@ -133,12 +133,12 @@ nav > div > button {
 	flex: 0 0 auto;
 
 	translate: 0 0;
-	transition: translate .5s ease-in-out;
+	transition: translate var(--window-slice-duration) ease-in-out;
 }
 
 .window-container.inter-window-ani > :where(#home, .extra-window-container) {
-	transition: translate .5s ease-in-out,
-				transform .5s ease-in-out;
+	transition: translate var(--window-slice-duration) ease-in-out,
+				transform var(--window-slice-duration) ease-in-out;
 }
 
 .extra-window-container {
