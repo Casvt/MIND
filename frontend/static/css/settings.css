@@ -33,6 +33,10 @@
 	background-color: var(--color-error);
 }
 
+#delete-user-dialog .dialog-content p {
+	text-align: center;
+}
+
 .contact-list {
 	width: min(100%, 31rem);
 	margin: auto;
