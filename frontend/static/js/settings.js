@@ -1,61 +1,76 @@
-const SettingsEls = {
-	locale_input: document.querySelector('#locale-input'),
-	default_service_input: document.querySelector('#default-service-input'),
-	change_password_form: document.querySelector('#change-password-form'),
-	delete_account_button: document.querySelector('#delete-account-button')
-};
+const settingsEls = {
+	settings: {
+		locale: document.querySelector('#locale-input'),
+		defaultService: document.querySelector('#default-service-input'),
+	},
+	changePassword: {
+		form: document.querySelector('#change-password-form'),
+		input: document.querySelector('#change-password-input'),
+		submit: document.querySelector('#change-password-form button')
+	},
+	deleteAccount: {
+		dialog: document.querySelector('#delete-user-dialog'),
+		close: document.querySelector('#close-delete-user'),
+		confirm: document.querySelector('#confirm-delete-user'),
+		button: document.querySelector('#delete-account-button')
+	}
+}
 
 function loadSettings() {
+	settingsEls.settings.locale.value =
+		getLocalStorage('locale')['locale']
 	// Default Service is handled by notification.fillNotificationSelection()
-	document.getElementById('locale-input').value =
-		getLocalStorage('locale')['locale'];
-};
+}
 
-function updateLocale(e) {
-	setLocalStorage({'locale': e.target.value});
-	fillLibrary(reminderTypes.reminder);
-};
+function updateLocale() {
+	setLocalStorage({'locale': settingsEls.settings.locale.value})
+	fillLibrary(reminderTypes.reminder)
+}
 
-function updateDefaultService(e) {
-	setLocalStorage({'default_service': parseInt(e.target.value)});
+function updateDefaultService() {
+	setLocalStorage({'default_service': parseInt(settingsEls.settings.defaultService.value)})
 	// Add window is handled by show.showAdd()
-};
+}
 
 function changePassword() {
 	const data = {
-		'new_password': document.getElementById('password-input').value
-	};
-	fetch(`${urlPrefix}/api/user?api_key=${apiKey}`, {
-		'method': 'PUT',
-		'headers': {'Content-Type': 'application/json'},
-		'body': JSON.stringify(data)
-	})
+		'new_password': settingsEls.changePassword.input.value
+	}
+	sendAPI("PUT", "/user", {}, data)
 	.then(response => {
-		if (!response.ok) return Promise.reject(response.status);
-		window.location.reload();
+		settingsEls.changePassword.input.value = ""
+		settingsEls.changePassword.submit.style.backgroundColor = "var(--color-success)"
+		settingsEls.changePassword.submit.innerText = "Changed"
+		setTimeout(() => {
+				settingsEls.changePassword.submit.style.backgroundColor = ""
+				settingsEls.changePassword.submit.innerText = "Change"
+			},
+			2000
+		)
 	})
-	.catch(e => {
-		if (e === 401)
-			window.location.href = `${urlPrefix}/`;
-		else
-			console.log(e);
-	});
-};
+	.catch(e => console.log(e))
+}
 
 function deleteAccount() {
-	fetch(`${urlPrefix}/api/user?api_key=${apiKey}`, {
-		'method': 'DELETE'
-	})
+	sendAPI("DELETE", "/user")
 	.then(response => {
-		window.location.href = `${urlPrefix}/`;
-	});
-};
+		window.location.href = `${urlPrefix}/`
+	})
+}
 
-// code run on load
+loadSettings()
 
-loadSettings();
+settingsEls.settings.locale.onchange = e => updateLocale()
+settingsEls.settings.defaultService.onchange = e => updateDefaultService()
+settingsEls.changePassword.form.action = 'javascript:changePassword();'
+settingsEls.deleteAccount.button.onclick = e => 
+	settingsEls.deleteAccount.dialog.showModal()
 
-SettingsEls.locale_input.onchange = updateLocale;
-SettingsEls.default_service_input.onchange = updateDefaultService;
-SettingsEls.change_password_form.action = 'javascript:changePassword();';
-SettingsEls.delete_account_button.onclick = e => deleteAccount();
+settingsEls.deleteAccount.dialog.onclick = e => {
+	if (e.target === e.currentTarget) {
+		e.stopPropagation()
+		settingsEls.deleteAccount.dialog.close()
+	}
+}
+settingsEls.deleteAccount.close.onclick = e => settingsEls.deleteAccount.dialog.close()
+settingsEls.deleteAccount.confirm.onclick = e => deleteAccount()

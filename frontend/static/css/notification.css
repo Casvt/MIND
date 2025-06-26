@@ -1,4 +1,4 @@
-.table-container {
+.ns-table-container {
 	margin-top: 2rem;
 
 	display: flex;
@@ -25,7 +25,7 @@
 	transition: transform .125s linear;
 }
 
-.table-container:has(#service-list-toggle:checked) #add-service-button > svg {
+.ns-table-container:has(#service-list-toggle:checked) #add-service-button > svg {
 	transform: rotate(45deg);
 }
 

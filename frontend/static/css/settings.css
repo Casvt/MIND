@@ -1,46 +1,42 @@
 #settings-table {
+	--min-width: 0;
+	--max-width: 40rem;
+	--min-data-width: 16rem;
+
 	margin-inline: auto;
-	width: min(100%, 50rem);
 }
 
-#settings-table td {
-	padding: .5rem;
-	width: 50%;
-}
-
-#settings-table tr > td:first-child {
-	text-align: right;
-	font-weight: 500;
-}
-
-#settings-table button {
-	padding: .5rem 2rem;
-	background-color: var(--color-gray);
-	
-	box-shadow: var(--default-shadow);
-}
-
-#settings-table tr:has(#default-service-input) {
-	display: none;
-}
-
-#settings-table tr:has(#default-service-input option) {
-	display: table-row;
+#settings-table tr {
+	& th {
+		padding-top: .5rem;
+	}
+	&:first-child td {
+		padding-top: 0;
+	}
 }
 
 #change-password-form {
 	display: flex;
+	flex-direction: column;
 	gap: 1rem;
 }
 
-#settings-table #delete-account-button {
+#change-password-form input {
+	width: 16rem;
+}
+
+#delete-account-button {
+	background-color: var(--color-dim-error);
+}
+
+#delete-account-button:hover {
 	background-color: var(--color-error);
 }
 
 .contact-list {
 	width: min(100%, 31rem);
 	margin: auto;
-	
+
 	display: flex;
 	justify-content: center;
 	gap: 1rem;
@@ -50,15 +46,37 @@
 .contact-list > a {
 	height: 5rem;
 	width: 15rem;
-	
+
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	
+
 	border-radius: 6px;
+	border: 2px solid var(--color-mid-gray);
 	background-color: var(--color-gray);
 	color: var(--color-light);
 
 	text-decoration: none;
 	font-size: 1.2rem;
+
+	transition:
+		background-color 200ms ease-in-out,
+		box-shadow 200ms ease-in-out;
+
+	&:hover {
+		background-color: var(--color-mid-gray);
+		box-shadow: 0px 0px 9px 5px rgba(0, 0, 0, .8);
+	}
+	
+	&:first-child:hover {
+		background-color: var(--color-success);
+	}
+	
+	&:nth-child(3):hover {
+		background-color: var(--color-changed);
+	}
+	
+	&:nth-child(4):hover {
+		background-color: darkblue;
+	}
 }
