@@ -58,7 +58,7 @@ const defaultValues = {
  * @param {string | string[] | null | undefined} keys The keys to fetch, or all
  * if null or undefined.
  * 
- * @returns {Map<string, any>} The keys and their values.
+ * @returns {Object} The keys and their values.
  */
 function getLocalStorage(keys) {
 	const storage = JSON.parse(localStorage.getItem('MIND'))
@@ -79,7 +79,7 @@ function getLocalStorage(keys) {
 
 /**
  * Update the configuration stored in the local storage of the client (browser).
- * @param {Map<string, any>} keys_values The new values for the given keys.
+ * @param {Object} keys_values The new values for the given keys.
  */
 function setLocalStorage(keys_values) {
 	const storage = JSON.parse(localStorage.getItem('MIND'))
@@ -121,7 +121,7 @@ function setupLocalStorage() {
  * @param {string} endpoint The endpoint to make the request to, without API URL
  * prefix.
  * 
- * @param {Map<string, any>} params The URL parameters to use in the request.
+ * @param {Object} params The URL parameters to use in the request.
  * API key doesn't need to be supplied.
  * 
  * @param {bool} jsonReturn Whether to return the json response, or the raw
@@ -167,7 +167,7 @@ async function fetchAPI(endpoint, params={}, jsonReturn=true, checkAuth=true) {
  * @param {string} endpoint The endpoint to make the request to, without API URL
  * prefix.
  * 
- * @param {Map<string, any>} params The URL parameters to use in the request.
+ * @param {Object} params The URL parameters to use in the request.
  * API key doesn't need to be supplied.
  * 
  * @param {any} body The JSON to supply in the body of the request.
