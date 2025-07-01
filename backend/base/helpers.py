@@ -139,10 +139,11 @@ def search_filter(query: str, result: GeneralReminderData) -> bool:
     Returns:
         bool: Whether or not the result passes the filter.
     """
-    query = query.lower()
+    query = query.lower().replace(' ', '')
     return (
-        query in result.title.lower()
-        or query in (result.text or '').lower()
+        query.lower().replace(' ', '')
+        in
+        (result.title + (result.text or '')).lower().replace(' ', '')
     )
 
 

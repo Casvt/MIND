@@ -13,7 +13,7 @@ class Test_Reminder_Handler(unittest.TestCase):
             color=None,
             notification_services=[]
         )
-        for test_case in ('', 'title', 'ex'):
+        for test_case in ('', 'TITLE', 'ex', 'ti tle'):
             self.assertTrue(search_filter(test_case, p))
-        for test_case in (' ', 'Hello'):
+        for test_case in ('TEXTTITLE', 'Hello'):
             self.assertFalse(search_filter(test_case, p))
