@@ -5,7 +5,13 @@ const constants = {
     /**
      * The duration of the animation set for the window translation
      */
-    windowAnimationDuration: 500
+    windowAnimationDuration: 500,
+
+	/**
+	 * The amount of time to wait after the user stops typing to automatically
+	 * trigger the search
+	 */
+	autoSearchTimeout: 500
 }
 
 const icons = {
@@ -49,6 +55,7 @@ const defaultValues = {
 	sorting_reminders: 'time',
 	sorting_static: 'title',
 	sorting_templates: 'title',
+	wide_library_view: false,
 	allow_new_accounts_cache: true
 }
 

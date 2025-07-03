@@ -1,5 +1,55 @@
 /*  */
-/* SEARCH BAR */
+/* Tab selector */
+/*  */
+.tab-selector {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 1rem;
+
+	padding-inline: 1rem;
+	padding-top: 1rem;
+}
+
+.tab-selector > input {
+	display: none;
+}
+
+.tab-selector > label {
+	min-width: 9.55rem;
+
+	padding: .5rem 1rem;
+	border-radius: 4px;
+	border: 2px solid var(--color-gray);
+	background-color: var(--color-dark);
+	color: var(--color-light);
+
+	text-align: center;
+
+	transition:
+		background-color 150ms ease-in-out,
+		box-shadow 150ms ease-in-out;
+}
+
+.tab-selector > label:hover {
+	background-color: var(--color-light-gray);
+	box-shadow: var(--default-shadow);
+}
+
+.tab-selector > input:checked + label {
+	background-color: var(--color-gray);
+}
+
+.window-container:has(#reminder-tab-selector:checked) #reminder-tab,
+.window-container:has(#static-tab-selector:checked) #static-reminder-tab,
+.window-container:has(#template-tab-selector:checked) #template-tab {
+	display: flex;
+}
+
+/*  */
+/* Search bar */
 /*  */
 .search-container {
 	max-width: 40rem;
@@ -13,6 +63,7 @@
 }
 
 .search-bar {
+	--button-width: clamp(2.4rem, 7.5vw, 3rem);
 	display: flex;
 
 	border: 2px solid var(--color-gray);
@@ -22,22 +73,72 @@
 }
 
 .search-bar :where(button, label) {
-	width: clamp(2rem, 7.5vw, 3rem);
+	width: var(--button-width);
 	flex-shrink: 0;
 
 	display: flex;
 	justify-content: center;
 	align-items: center;
+
+	background-color: transparent;
+
+	& svg {
+		height: 1rem;
+		width: auto;
+	}
 }
 
-.search-bar :where(button, label) svg {
-	height: 1rem;
-}
-
-.search-bar input {
+.search-input-container {
+	flex-grow: 1;
 	width: 100%;
+	position: relative;
+}
+
+.search-input-container::before {
+	content: "/";
+	position: absolute;
+	z-index: -1;
+	inset: .5rem auto .5rem 100%;
+	height: 1.7rem;
+	width: 1.7rem;
+	margin-inline: calc((var(--button-width) - 1.7rem) / 2);
+
+	opacity: 0;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	border-radius: 4px;
+	border: 2px solid var(--color-gray);
+	background-color: transparent;
+	color: var(--color-mid-gray);
+
+	font-size: .7rem;
+
+	transition: opacity .1s linear;
+}
+
+.search-bar:not(:focus-within) .search-input-container::before {
+	opacity: 1;
+}
+
+.search-input-container::after {
+	content: "";
+	position: absolute;
+	inset: 0 .5rem 0 auto;
+
+	width: .7rem;
+	background: linear-gradient(270deg, var(--color-dark), transparent);
+}
+
+#search-input {
+	width: 100%;
+	max-width: unset;
+	position: relative;
+
 	border: 0;
-	padding-block: 1rem;
+
 	box-shadow: none;
 }
 
@@ -51,10 +152,57 @@
 	opacity: 1;
 }
 
+#sort-input,
+#sort-input::picker(select) {
+	appearance: base-select;
+}
+
 #sort-input {
-	width: clamp(6rem, 25vw, 12rem);
 	border: 0;
-	box-shadow: none;
+	background-color: var(--color-dark);
+	color: var(--color-light);
+
+	&:not(:has(button)) {
+		width: clamp(6rem, 25vw, 12rem);
+		padding: .5rem;
+	}
+
+	&:hover {
+		cursor: pointer;
+	}
+}
+
+#sort-input::picker-icon {
+	display: none;
+}
+
+#sort-input::picker(select) {
+	width: 12.5rem;
+
+	border-radius: 6px;
+	border: 3px solid var(--color-gray);
+	background-color: var(--color-dark);
+	color: var(--color-light);
+
+	box-shadow: 0 0 6px 4px rgb(0 0 0 / 60%);
+}
+
+#sort-input option {
+	padding: .5rem;
+
+	transition: background-color 150ms ease-in-out;
+
+	&:hover {
+		background-color: var(--color-mid-gray);
+	}
+
+	&:checked {
+		background-color: var(--color-light-gray);
+	}
+
+	&::checkmark {
+		display: none;
+	}
 }
 
 .window-container:has(
@@ -66,22 +214,20 @@
 }
 
 /*  */
-/* REMINDER LIST */
+/* Reminder list */
 /*  */
 .tab-container > div {
 	--gap: 1rem;
 	--entry-width: 13rem;
 	max-width: 43rem;
 	margin-inline: auto;
-	
+
 	display: none;
 	justify-content: left;
 	gap: var(--gap);
 	flex-wrap: wrap;
-	
+
 	padding: 1rem;
-	
-	transition: max-width .75s ease-in-out;
 }
 
 body:has(#wide-toggle:checked) .tab-container > div {
@@ -90,6 +236,16 @@ body:has(#wide-toggle:checked) .tab-container > div {
 
 #home {
 	overflow-y: auto;
+}
+
+#home::after {
+	content: "";
+	position: sticky;
+	display: block;
+	inset: auto 0 0 0;
+	height: 1.5rem;
+
+	background: linear-gradient(0deg, var(--color-dark), 30%, transparent);
 }
 
 .entry.add-entry {
@@ -122,7 +278,7 @@ body:has(#wide-toggle:checked) .tab-container > div {
 	flex-direction: column;
 	justify-content: space-between;
 	gap: .1rem;
-	
+
 	border-radius: 4px;
 	padding: .75rem;
 	background-color: var(--color);
@@ -140,61 +296,18 @@ button.entry.fit {
 .entry h2 {
 	overflow-y: hidden;
 	height: 100%;
-	
+
 	text-align: left;
 	font-size: 1.25em;
 	line-height: 1.18;
 	font-weight: 500;
 }
 
-/*  */
-/* Tab selector */
-/*  */
-.tab-selector {
-	width: 100%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 1rem;
-
-	padding-inline: 1rem;
-	padding-top: 1rem;
-}
-
-.tab-selector > input {
-	display: none;
-}
-
-.tab-selector > label {
-	min-width: 9.55rem;
-
-	padding: .5rem 1rem;
-	border-radius: 4px;
-	border: 2px solid var(--color-gray);
-	background-color: var(--color-dark);
-	color: var(--color-light);
-	
-	text-align: center;
-
-	transition: background-color .3s ease-in-out;
-}
-
-.tab-selector > input:checked + label {
-	background-color: var(--color-gray);
-}
-
-.window-container:has(#reminder-tab-selector:checked) #reminder-tab,
-.window-container:has(#static-tab-selector:checked) #static-reminder-tab,
-.window-container:has(#template-tab-selector:checked) #template-tab {
-	display: flex;
-}
-
 @media (max-width: 543px) {
 	.tab-selector > label {
 		flex: 1 0 25%;
 	}
-	
+
 	#wide-button {
 		display: none;
 	}

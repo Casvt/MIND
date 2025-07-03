@@ -16,13 +16,24 @@ function showWindow(id) {
             'show-window',
             'inter-window-ani'
         )
+        
+        document.body.onkeydown = e => {
+            if (
+                e.key === '/'
+                && document.activeElement !== LibEls.search_bar.input
+            ) {
+                LibEls.search_bar.input.focus()
+                e.preventDefault()
+            }
+        }
+
     } else {
         const extra_window_container = document.querySelector('.extra-window-container')
-
+        
         const offset = [
             ...extra_window_container.children
         ].indexOf(document.getElementById(id)) * -100
-
+        
         extra_window_container.style.setProperty(
             '--y-offset',
             `${offset}%`
@@ -32,9 +43,12 @@ function showWindow(id) {
             () => window_container.classList.add('inter-window-ani'),
             constants.windowAnimationDuration
         )
+
+        document.body.onkeydown = null;
     }
 }
 
 checkLogin()
 
+showWindow("home")
 document.querySelector("header img").onclick = e => showWindow("home")

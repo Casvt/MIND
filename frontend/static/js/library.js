@@ -14,7 +14,8 @@ const LibEls = {
 		clear: document.querySelector('#clear-button'),
 		sort: document.querySelector('#sort-input'),
 		wide: document.querySelector('#wide-button')
-	}
+	},
+	wide_toggle: document.querySelector('#wide-toggle')
 };
 
 //
@@ -94,6 +95,9 @@ function fillTable(table, results) {
 };
 
 function fillLibrary(type=null) {
+	if (autoSearchTimer !== null)
+		clearTimeout(autoSearchTimer)
+
 	let tab_type = type || getActiveTab();
 
 	let url;
@@ -148,6 +152,8 @@ function evaluateSizing() {
 
 // code run on load
 
+var autoSearchTimer = null
+
 Object.values(reminderTypes).forEach(t => fillLibrary(t));
 setInterval(() => fillLibrary(reminderTypes.reminder), 60000);
 
@@ -159,6 +165,14 @@ NavButtons.settings.onclick = e => showWindow("settings");
 NavButtons.log_out.onclick = e => logout();
 
 LibEls.search_bar.form.action = 'javascript:fillLibrary();'
+
+LibEls.search_bar.input.onkeydown = e => {
+	if (autoSearchTimer !== null)
+		clearTimeout(autoSearchTimer)
+
+	autoSearchTimer = setTimeout(fillLibrary, constants.autoSearchTimeout)
+}
+
 LibEls.search_bar.sort.value = getSorting(getActiveTab());
 LibEls.search_bar.sort.onchange = e => {
 	saveSorting();
@@ -168,6 +182,10 @@ LibEls.search_bar.clear.onclick = e => {
 	LibEls.search_bar.input.value = '';
 	fillLibrary();
 };
+LibEls.wide_toggle.onchange = e => {
+	setLocalStorage({wide_library_view: LibEls.wide_toggle.checked});
+};
+LibEls.wide_toggle.checked = getLocalStorage('wide_library_view')['wide_library_view'];
 
 LibEls.tab_selector.querySelectorAll('input').forEach(r => r.onchange = e => {
 	evaluateSizing();
