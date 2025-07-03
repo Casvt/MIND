@@ -1,7 +1,7 @@
 /*  */
 /* Nav collapse button */
 /*  */
-header > div {
+header > div:first-child {
 	transform: translateX(-3.8rem);
 
 	display: flex;
@@ -62,6 +62,25 @@ header img:hover {
 
 	display: flex;
 	justify-content: flex-end;
+}
+
+/*  */
+/* Clock */
+/*  */
+#clock-container {
+	display: flex;
+	flex-direction: column;
+}
+
+#clock-time {
+	text-align: right;
+	font-weight: bold;
+	font-size: 1.5rem;
+}
+
+#clock-date {
+	text-align: right;
+	font-size: .9rem;
 }
 
 /*  */
@@ -181,7 +200,7 @@ nav > div > button {
 }
 
 @media (max-width: 34rem) {
-	header > div {
+	header > div:first-child {
 		transform: translateX(0);
 	}
 

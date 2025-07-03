@@ -1,5 +1,6 @@
 const settingsEls = {
 	settings: {
+		showClock: document.querySelector('#clock-input'),
 		locale: document.querySelector('#locale-input'),
 		defaultService: document.querySelector('#default-service-input'),
 	},
@@ -17,19 +18,26 @@ const settingsEls = {
 }
 
 function loadSettings() {
-	settingsEls.settings.locale.value =
-		getLocalStorage('locale')['locale']
+	const values = getLocalStorage()
+	settingsEls.settings.locale.value = values['locale']
+	settingsEls.settings.showClock.value = values['show_clock']
 	// Default Service is handled by notification.fillNotificationSelection()
 }
 
 function updateLocale() {
 	setLocalStorage({'locale': settingsEls.settings.locale.value})
 	fillLibrary(reminderTypes.reminder)
+	setupClock()
 }
 
 function updateDefaultService() {
 	setLocalStorage({'default_service': parseInt(settingsEls.settings.defaultService.value)})
 	// Add window is handled by show.showAdd()
+}
+
+function updateClockSetting() {
+	setLocalStorage({'show_clock': settingsEls.settings.showClock.value})
+	setupClock()
 }
 
 function changePassword() {
@@ -60,6 +68,7 @@ function deleteAccount() {
 
 loadSettings()
 
+settingsEls.settings.showClock.onchange = e => updateClockSetting()
 settingsEls.settings.locale.onchange = e => updateLocale()
 settingsEls.settings.defaultService.onchange = e => updateDefaultService()
 settingsEls.changePassword.form.action = 'javascript:changePassword();'

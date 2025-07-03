@@ -56,7 +56,8 @@ const defaultValues = {
 	sorting_static: 'title',
 	sorting_templates: 'title',
 	wide_library_view: false,
-	allow_new_accounts_cache: true
+	allow_new_accounts_cache: true,
+	show_clock: 'no'
 }
 
 /**

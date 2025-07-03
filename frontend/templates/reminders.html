@@ -105,6 +105,10 @@
 			<img src="{{ url_for('static', filename='img/favicon.svg') }}" alt="">
 			<h1>MIND</h1>
 		</div>
+		<div id="clock-container">
+			<div id="clock-time"></div>
+			<div id="clock-date"></div>
+		</div>
 	</header>
 	<div class="nav-divider">
 		<div class="nav-container">
@@ -387,6 +391,16 @@
 					<div class="table-container">
 						<table id="settings-table" class="collaps-table">
 							<tbody>
+								<tr id="clock-setting-row">
+									<th><label for="clock-input">Show Clock</label></th>
+									<td>
+										<select id="clock-input" class="input-style">
+											<option value="no">No</option>
+											<option value="without_seconds">Show, but not seconds</option>
+											<option value="with_seconds">Show, with seconds</option>
+										</select>
+									</td>
+								</tr>
 								<tr>
 									<th><label for="locale-input">Locale</label></th>
 									<td>

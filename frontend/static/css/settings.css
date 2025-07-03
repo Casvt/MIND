@@ -84,3 +84,13 @@
 		background-color: darkblue;
 	}
 }
+
+@media (max-width: 22rem) {
+	#clock-container {
+		display: none;
+	}
+	
+	#clock-setting-row {
+		display: none;
+	}
+}
