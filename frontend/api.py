@@ -9,8 +9,9 @@ from typing import Any, Callable, Dict, Tuple, Union
 
 from flask import Response, g, request, send_file
 
-from backend.base.custom_exceptions import (APIKeyExpired, APIKeyInvalid,
-                                            LogFileNotFound)
+from backend.base.custom_exceptions import (AccessUnauthorized,
+                                            APIKeyExpired, APIKeyInvalid,
+                                            LogFileNotFound, UserNotFound)
 from backend.base.definitions import (ApiKeyEntry, MindException,
                                       SendResult, Serialisable, StartType)
 from backend.base.helpers import folder_path
@@ -127,6 +128,17 @@ def endpoint_wrapper(
             result = method(inputs, *args, **kwargs)
 
         except MindException as e:
+            if isinstance(
+                e,
+                (APIKeyInvalid, APIKeyExpired,
+                UserNotFound, AccessUnauthorized)
+            ):
+                ip = request.environ.get(
+                    'HTTP_X_FORWARDED_FOR',
+                    request.remote_addr
+                )
+                LOGGER.warning(f'Unauthorised request from {ip}')
+
             result = return_api(**e.api_response)
 
         return result
