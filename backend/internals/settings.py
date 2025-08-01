@@ -9,8 +9,7 @@ from typing import Any, Dict, Mapping
 
 from backend.base.custom_exceptions import InvalidKeyValue, KeyNotFound
 from backend.base.definitions import Constants
-from backend.base.helpers import (Singleton, folder_path,
-                                  get_python_version, reversed_tuples)
+from backend.base.helpers import Singleton, folder_path, get_python_version
 from backend.base.logging import LOGGER, set_log_level
 from backend.internals.db import DBConnection, commit, get_db
 from backend.internals.db_migration import get_latest_db_version
@@ -149,7 +148,7 @@ class Settings(metaclass=Singleton):
 
         get_db().executemany(
             "UPDATE config SET value = ? WHERE key = ?;",
-            reversed_tuples(formatted_data.items())
+            ((v, k) for k, v in formatted_data.items())
         )
 
         old_settings = self.get_settings()

@@ -36,6 +36,8 @@ Serialisable = Union[
 
 # region Constants
 class Constants:
+    MIN_PYTHON_VERSION = (3, 8, 0)
+
     SUB_PROCESS_TIMEOUT = 20.0 # seconds
 
     HOSTING_THREADS = 10

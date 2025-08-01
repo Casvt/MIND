@@ -5,7 +5,7 @@ from typing import List, Union
 from backend.base.definitions import (NotificationServiceData, ReminderData,
                                       ReminderType, StaticReminderData,
                                       TemplateData, UserData)
-from backend.base.helpers import first_of_column
+from backend.base.helpers import first_of_subarrays
 from backend.internals.db import REMINDER_TO_KEY, get_db
 
 
@@ -117,7 +117,7 @@ class ReminderServicesDB:
             List[int]: A list of the notification service ID's that are linked to
             the given reminder, static reminder or template.
         """
-        result = first_of_column(get_db().execute(
+        result = first_of_subarrays(get_db().execute(
             f"""
             SELECT notification_service_id
             FROM reminder_services
@@ -183,7 +183,7 @@ class ReminderServicesDB:
             List[int]: The ID's of the reminders (only of the given type) that
             use the notification service.
         """
-        return first_of_column(get_db().execute(
+        return first_of_subarrays(get_db().execute(
             f"""
             SELECT {self.key}
             FROM reminder_services

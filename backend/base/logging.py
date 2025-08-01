@@ -6,7 +6,6 @@ from os.path import exists, isdir, join
 from typing import Any, Union
 
 from backend.base.definitions import Constants
-from backend.base.helpers import create_folder, folder_path
 
 
 class UpToInfoFilter(logging.Filter):
@@ -92,6 +91,8 @@ def setup_logging(log_folder: Union[str, None]) -> None:
     Raises:
         ValueError: The given log folder is not a folder.
     """
+    from backend.base.helpers import create_folder, folder_path
+
     if log_folder:
         if exists(log_folder) and not isdir(log_folder):
             raise ValueError("Logging folder is not a folder")
@@ -137,7 +138,11 @@ def setup_logging(log_folder: Union[str, None]) -> None:
 
 
 def get_log_filepath() -> str:
-    "Get the filepath to the logging file"
+    """Get the filepath to the logging file.
+
+    Returns:
+        str: The filepath.
+    """
     return LOGGING_CONFIG["handlers"]["file"]["filename"]
 
 
