@@ -25,7 +25,7 @@
 	--nav-width: 4rem;
 	--nav-show-speed: 300ms;
 	--nav-button-spacing: .5rem;
-	--scrollbar-width: 12px;
+	--scrollbar-width: 10px;
 
 	--window-slide-duration: 500ms;
 	--dyn-spacing: clamp(.5rem, 2vw, 1rem);
@@ -78,7 +78,9 @@ table {
 }
 
 ::-webkit-scrollbar {
+	/* For vertical scrollbars */
 	width: var(--scrollbar-width);
+	/* For horizontal scrollbars */
 	height: var(--scrollbar-width);
 	background-color: var(--color-dark);
 }
@@ -562,6 +564,7 @@ dialog[open]::backdrop {
 @media (max-width: 34rem) {
 	:root {
 		--window-slide-duration: 200ms;
+		--scrollbar-width: 4px;
 	}
 }
 
