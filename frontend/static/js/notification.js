@@ -1,5 +1,6 @@
 const NotiEls = {
 	services_list: document.querySelector('#services-list'),
+	search_input: document.querySelector('#ns-search-input'),
 	service_list: document.querySelector('#service-list'),
 	default_service_input: document.querySelector('#default-service-input'),
 	service_selection: document.querySelector('.notification-service-selection'),
@@ -8,6 +9,27 @@ const NotiEls = {
 	triggers: {
 		add_service: document.querySelector('#add-service-toggle'),
 		service_list: document.querySelector('#service-list-toggle')
+	},
+	windows: {
+		editService: {
+			dialog: document.querySelector("#edit-ns-dialog"),
+			form: document.querySelector("#edit-ns-form"),
+			close: document.querySelector("#close-edit-ns"),
+			inputContainers: {
+				url: document.querySelector("#edit-ns-form .checked-input-container:has(#edit-ns-url-input)")
+			},
+			inputs: {
+				title: document.querySelector("#edit-ns-title-input"),
+				url: document.querySelector("#edit-ns-url-input")
+			},
+			error: document.querySelector("#edit-ns-url-error")
+		},
+		deleteService: {
+			dialog: document.querySelector("#delete-ns-dialog"),
+			error: document.querySelector("#delete-ns-error"),
+			close: document.querySelector("#close-delete-ns"),
+			confirm: document.querySelector("#confirm-delete-ns")
+		}
 	}
 };
 
@@ -15,33 +37,24 @@ const NotiEls = {
 // Fill lists and tables
 //
 function fillNotificationTable(json) {
-	NotiEls.services_list.innerHTML = '';
+	NotiEls.services_list.querySelectorAll("tr[data-id]").forEach(
+		e => e.remove()
+	)
 	json.result.forEach(service => {
-		const entry = NotiEls.notification_service_row.cloneNode(true);
-		entry.dataset.id = service.id;
+		const entry = NotiEls.notification_service_row.cloneNode(true)
+		entry.dataset.id = service.id
 
-		entry.querySelector('.title-column input').value = service.title;
+		entry.querySelector('.title-column').innerText = service.title
+		entry.querySelector('.url-column').innerText = service.url
 
-		const url_input = entry.querySelector('.url-column input');
-		url_input.value = service.url;
-		url_input.onkeydown = e => {
-			if (e.key === 'Enter')
-				saveService(service.id);
-		};
+		entry.querySelector('button[data-type="edit"]').onclick =
+			e => openEditNotificationService(service.id)
 
-		entry.querySelector('button[data-type="edit"]').onclick = e =>
-			document.querySelectorAll(`tr[data-id="${service.id}"] input`).forEach(
-				e => e.removeAttribute('readonly')
-			);
+		entry.querySelector('button[data-type="delete"]').onclick =
+			e => openDeleteNotificationService(service.id)
 
-		entry.querySelector('button[data-type="save"]').onclick = e =>
-			saveService(service.id);
-
-		entry.querySelector('button[data-type="delete"]').onclick = e =>
-			deleteService(service.id);
-
-		NotiEls.services_list.appendChild(entry);
-	});
+		NotiEls.services_list.appendChild(entry)
+	})
 };
 
 function fillNotificationSelection(json) {
@@ -58,7 +71,7 @@ function fillNotificationSelection(json) {
 	});
 
 	if (!NotiEls.default_service_input.querySelector(`option[value="${default_service}"]`))
-		setLocalStorage({'default_service': 
+		setLocalStorage({'default_service':
 			parseInt(NotiEls.default_service_input.querySelector('option')?.value)
 			|| null
 		});
@@ -122,75 +135,83 @@ function fillNotificationServices() {
 	});
 };
 
-// 
+//
 // Actions for table
 //
-function saveService(id) {
-	const row = document.querySelector(`tr[data-id="${id}"]`);
-	const save_button = row.querySelector('button[data-type="save"]');
+function openEditNotificationService(serviceId) {
+	NotiEls.windows.editService.dialog.dataset.id = serviceId;
+	const row = NotiEls.services_list.querySelector(`tr[data-id="${serviceId}"]`);
+	NotiEls.windows.editService.inputs.title.value = row.querySelector('.title-column').innerText;
+	NotiEls.windows.editService.inputs.url.value = row.querySelector('.url-column').innerText;
+	NotiEls.windows.editService.inputContainers.url.classList.remove('error-input-container');
+	NotiEls.windows.editService.dialog.showModal();
+};
+
+function editNotificationService() {
+	NotiEls.windows.editService.inputContainers.url.classList.remove('error-input-container')
 	const data = {
-		'title': row.querySelector(`td.title-column > input`).value,
-		'url': row.querySelector(`td.url-column > input`).value
-	};
-	fetch(`${urlPrefix}/api/notificationservices/${id}?api_key=${apiKey}`, {
-		'method': 'PUT',
-		'headers': {'Content-Type': 'application/json'},
-		'body': JSON.stringify(data)
-	})
-	.then(response => {
-		if (!response.ok) return Promise.reject(response.status);
+		title: NotiEls.windows.editService.inputs.title.value,
+		url: NotiEls.windows.editService.inputs.url.value
+	}
 
-		fillNotificationServices();
-	})
-	.catch(e => {
-		if (e === 401)
-			window.location.href = `${urlPrefix}/`;
-		else if (e === 400) {
-			save_button.classList.add('error-icon');
-			save_button.title = 'Invalid Apprise URL';
-		} else
-			console.log(e);
-	});
-};
-
-function deleteService(id, delete_reminders_using=false) {
-	const row = document.querySelector(`tr[data-id="${id}"]`);
-	fetch(`${urlPrefix}/api/notificationservices/${id}?api_key=${apiKey}&delete_reminders_using=${delete_reminders_using}`, {
-		'method': 'DELETE'
-	})
-	.then(response => response.json())
+	const id = parseInt(NotiEls.windows.editService.dialog.dataset.id)
+	sendAPI("PUT", `/notificationservices/${id}`, {}, data)
 	.then(json => {
-		if (json.error !== null) return Promise.reject(json);
-		
-		row.remove();
-		fillNotificationServices();
-		if (delete_reminders_using) {
-			fillLibrary(reminderTypes.reminder);
-			fillLibrary(reminderTypes.static_reminder);
-			fillLibrary(reminderTypes.template);
-		};
+		fillNotificationServices()
+		NotiEls.windows.editService.dialog.close()
 	})
 	.catch(e => {
-		if (e.error === 'ApiKeyExpired' || e.error === 'ApiKeyInvalid')
-			window.location.href = `${urlPrefix}/`;
+		e.json().then(json => {
+			if (json.error === "URLInvalid" || json.error === "InvalidKeyValue") {
+				NotiEls.windows.editService.error.innerText = json.result.reason || "Syntax of URL invalid"
+				hide([], [NotiEls.windows.editService.error])
+				NotiEls.windows.editService.inputContainers.url.classList.add('error-input-container')
+			}
+			else
+				console.log(json)
+		})
+	})
+}
 
-		else if (e.error === 'NotificationServiceInUse') {
-			const delete_reminders = confirm(
-				`The notification service is still in use by a ${e.result.reminder_type.toLowerCase()}. Do you want to delete all ${e.result.reminder_type.toLowerCase()}s that are using the notification service?`
-			);
-			
-			if (delete_reminders)
-				deleteService(id, delete_reminders_using=true);
-			return;
+function openDeleteNotificationService(serviceId) {
+	NotiEls.windows.deleteService.dialog.dataset.id = serviceId
+	NotiEls.windows.deleteService.error.classList.add("hidden")
+	NotiEls.windows.deleteService.confirm.innerText = "Delete"
+	NotiEls.windows.deleteService.confirm.onclick = e => deleteService()
+	NotiEls.windows.deleteService.dialog.showModal()
+}
 
-		} else
-			console.log(e);
-	});
-};
+function deleteService(delete_reminders_using=false) {
+	const id = parseInt(NotiEls.windows.deleteService.dialog.dataset.id)
+	sendAPI("DELETE", `/notificationservices/${id}`, {delete_reminders_using: delete_reminders_using})
+	.then(json => {
+		NotiEls.windows.deleteService.error.classList.add('hidden')
+		fillNotificationServices()
+		if (delete_reminders_using) {
+			fillLibrary(reminderTypes.reminder)
+			fillLibrary(reminderTypes.static_reminder)
+			fillLibrary(reminderTypes.template)
+		}
+		NotiEls.windows.deleteService.dialog.close()
+	})
+	.catch(e => {
+		e.json().then(json => {
+			if (json.error === 'NotificationServiceInUse') {
+				NotiEls.windows.deleteService.error.innerText =
+					`The notification service is still in use by a ${json.result.reminder_type.toLowerCase()}. Do you want to delete all ${json.result.reminder_type.toLowerCase()}s that are using the notification service?`
+				NotiEls.windows.deleteService.error.classList.remove('hidden')
+				NotiEls.windows.deleteService.confirm.innerText = "Delete Anyway"
+				NotiEls.windows.deleteService.confirm.onclick = e => deleteService(delete_reminders_using=true)
+			}
+			else
+				console.log(json)
+		})
+	})
+}
 
-// 
+//
 // Adding a service
-// 
+//
 function showServiceList(e) {
 	if (!e.target.checked)
 		return;
@@ -208,13 +229,51 @@ function showServiceList(e) {
 			const entry = document.createElement('button');
 			entry.innerText = result.name;
 			entry.onclick = e => showAddServiceWindow(index);
+			entry.style.viewTransitionName = `ns-${index}`;
 			NotiEls.service_list.appendChild(entry);
 		});
 	});
 };
 
+function searchServiceList() {
+	if (autoSearchTimerNs !== null)
+		clearTimeout(autoSearchTimerNs)
+
+	const f = () => {
+		const query = NotiEls.search_input.value
+			.toLowerCase()
+			.replace('-', '')
+			.replace('_', '')
+			.replace(' ', '');
+	
+		if (query === '')
+			NotiEls.service_list.querySelectorAll('button').forEach(
+				e => e.classList.remove('hidden')
+			);
+	
+		else
+			NotiEls.service_list.querySelectorAll('button').forEach(
+				e => e.classList.toggle(
+					'hidden',
+					!e.innerText
+						.toLowerCase()
+						.replace('-', '')
+						.replace('_', '')
+						.replace(' ', '')
+						.includes(query)
+				)
+			);
+	};
+	
+	if (!document.startViewTransition)
+		f();
+	else
+		document.startViewTransition(f);
+};
+
 function createTitle() {
 	const service_title = document.createElement('input');
+	service_title.classList.add('input-style');
 	service_title.id = 'service-title';
 	service_title.type = 'text';
 	service_title.placeholder = 'Service Title';
@@ -224,9 +283,13 @@ function createTitle() {
 
 function createChoice(token) {
 	const choice = document.createElement('select');
+	choice.classList.add('input-style');
 	choice.dataset.map = token.map_to || '';
 	choice.dataset.prefix = '';
-	choice.dataset.default = token.default || '';
+	if (![null, undefined, ''].includes(token.default))
+		choice.dataset.default = token.default
+	else
+		choice.dataset.default = ''
 	choice.placeholder = token.name;
 	choice.required = token.required;
 	token.options.forEach(option => {
@@ -235,7 +298,7 @@ function createChoice(token) {
 		entry.innerText = option;
 		choice.appendChild(entry);
 	});
-	if (token.default)
+	if (![null, undefined, ''].includes(token.default))
 		choice.querySelector(`option[value="${token.default}"]`).setAttribute('selected', '');
 
 	return choice;
@@ -243,6 +306,7 @@ function createChoice(token) {
 
 function createString(token) {
 	const str_input = document.createElement('input');
+	str_input.classList.add('input-style');
 	str_input.dataset.map = token.map_to || '';
 	str_input.dataset.prefix = token.prefix || '';
 	str_input.dataset.regex = token.regex || '';
@@ -255,9 +319,13 @@ function createString(token) {
 
 function createInt(token) {
 	const int_input = document.createElement('input');
+	int_input.classList.add('input-style');
 	int_input.dataset.map = token.map_to || '';
 	int_input.dataset.prefix = token.prefix || '';
-	int_input.dataset.default = token.default || '';
+	if (![null, undefined, ''].includes(token.default))
+		int_input.dataset.default = token.default
+	else
+		int_input.dataset.default = ''	
 	int_input.type = 'number';
 	int_input.placeholder = `${token.name}${!token.required ? ' (Optional)' : ''}`;
 	int_input.required = token.required;
@@ -268,11 +336,35 @@ function createInt(token) {
 	return int_input;
 };
 
+function createFloat(token) {
+	const float_input = document.createElement('input');
+	float_input.classList.add('input-style');
+	float_input.dataset.map = token.map_to || '';
+	float_input.dataset.prefix = token.prefix || '';
+	if (![null, undefined, ''].includes(token.default))
+		float_input.dataset.default = token.default
+	else
+		float_input.dataset.default = ''
+	float_input.type = 'number';
+	float_input.step = 0.1;
+	float_input.placeholder = `${token.name}${!token.required ? ' (Optional)' : ''}`;
+	float_input.required = token.required;
+	if (token.min !== null)
+		float_input.min = token.min;
+	if (token.max !== null)
+		float_input.max = token.max;
+	return float_input;
+};
+
 function createBool(token) {
 	const bool_input = document.createElement('select');
+	bool_input.classList.add('input-style');
 	bool_input.dataset.map = token.map_to || '';
 	bool_input.dataset.prefix = '';
-	bool_input.dataset.default = token.default || '';
+	if (![null, undefined, ''].includes(token.default))
+		bool_input.dataset.default = token.default
+	else
+		bool_input.dataset.default = ''
 	bool_input.placeholder = token.name;
 	bool_input.required = token.required;
 	[['Yes', 'true'], ['No', 'false']].forEach(option => {
@@ -282,7 +374,7 @@ function createBool(token) {
 		bool_input.appendChild(entry);
 	});
 	bool_input.querySelector(`option[value="${token.default}"]`).setAttribute('selected', '');
-	
+
 	return bool_input;
 };
 
@@ -304,6 +396,7 @@ function createEntriesList(token) {
 	const add_row = document.createElement('div');
 	add_row.classList.add('add-row', 'hidden');
 	const add_input = document.createElement('input');
+	add_input.classList.add('input-style');
 	add_input.type = 'text';
 	add_input.onkeydown = e => {
 		if (e.key === "Enter") {
@@ -314,6 +407,7 @@ function createEntriesList(token) {
 	};
 	add_row.appendChild(add_input);
 	const add_entry_button = document.createElement('button');
+	add_entry_button.classList.add('input-style');
 	add_entry_button.type = 'button';
 	add_entry_button.innerText = 'Add';
 	add_entry_button.onclick = e => addEntry(entries_list);
@@ -321,19 +415,22 @@ function createEntriesList(token) {
 	entries_list.appendChild(add_row);
 
 	const add_button = document.createElement('button');
+	add_button.classList.add('input-style');
 	add_button.type = 'button';
 	add_button.innerHTML = icons.add;
 	add_button.onclick = e => toggleAddRow(add_row);
 	entries_list.appendChild(add_button);
-	
+
 	return entries_list;
 };
 
 function toggleAddRow(row) {
 	if (row.classList.contains('hidden')) {
 		// Show row
-		row.querySelector('input').value = '';
+		const add_input = row.querySelector('input');
+		add_input.value = '';
 		row.classList.remove('hidden');
+		add_input.focus();
 	} else {
 		// Hide row
 		row.classList.add('hidden');
@@ -355,7 +452,7 @@ function showAddServiceWindow(index) {
 
 	const data = notification_services[index];
 	console.log(data);
-	
+
 	const title = document.createElement('h3');
 	title.innerText = data.name;
 	window.appendChild(title);
@@ -366,12 +463,13 @@ function showAddServiceWindow(index) {
 	docs.innerText = 'Documentation';
 	window.appendChild(docs);
 
-	window.appendChild(createTitle());	
-	
+	window.appendChild(createTitle());
+
 	[[data.details.tokens, 'tokens'], [data.details.args, 'args']].forEach(vars => {
 		if (vars[1] === 'args' && vars[0].length > 0) {
 			// The args are hidden behind a "Show Advanced Settings" button
 			const show_args = document.createElement('button');
+			show_args.classList.add('input-style');
 			show_args.type = 'button';
 			show_args.innerText = 'Show Advanced Settings';
 			show_args.onclick = e => {
@@ -389,29 +487,31 @@ function showAddServiceWindow(index) {
 				desc.dataset.is_arg = vars[1] === 'args';
 				window.appendChild(desc);
 				result = createChoice(token);
-	
+
 			} else if (token.type === 'list') {
 				const joint_list = document.createElement('div');
 				joint_list.dataset.map = token.map_to;
 				joint_list.dataset.delim = token.delim;
-	
+
 				const desc = document.createElement('p');
 				desc.innerText = `${token.name}${!token.required ? ' (Optional)' : ''}`;
 				joint_list.appendChild(desc);
-			
+
 				if (token.content.length === 0)
 					joint_list.appendChild(createEntriesList(token));
 				else
 					token.content.forEach(content =>
 						joint_list.appendChild(createEntriesList(content))
 					);
-	
+
 				result = joint_list;
-	
+
 			} else if (token.type === 'string')
 				result = createString(token);
 			else if (token.type === 'int')
 				result = createInt(token);
+			else if (token.type === 'float')
+				result = createFloat(token);
 			else if (token.type === 'bool') {
 				const desc = document.createElement('p');
 				desc.innerText = `${token.name}${!token.required ? ' (Optional)' : ''}`;
@@ -423,24 +523,26 @@ function showAddServiceWindow(index) {
 			result.dataset.is_arg = vars[1] === 'args';
 			window.appendChild(result);
 		});
-		
+
 		if (vars[1] === 'args' && vars[0].length > 0)
 			window.querySelectorAll('[data-is_arg="true"]').forEach(
 				el => el.classList.toggle('hidden')
 			);
 	})
-	
+
 	// Bottom options
 	const options = document.createElement('div');
 	options.classList.add('options');
 
 	const cancel = document.createElement('button');
+	cancel.classList.add('input-style');
 	cancel.type = 'button';
 	cancel.innerText = 'Cancel';
 	cancel.onclick = e => NotiEls.triggers.add_service.checked = false;
 	options.appendChild(cancel);
 
 	const test = document.createElement('button');
+	test.classList.add('input-style');
 	test.id = 'test-service';
 	test.type = 'button';
 	test.onclick = e => testService();
@@ -453,6 +555,7 @@ function showAddServiceWindow(index) {
 	test.appendChild(test_sent_text);
 
 	const add = document.createElement('button');
+	add.classList.add('input-style');
 	add.type = 'submit';
 	add.innerText = 'Add';
 	options.appendChild(add);
@@ -476,7 +579,7 @@ function buildAppriseURL() {
 		} else if (i.nodeName === 'DIV') {
 			let value =
 				[...i.querySelectorAll('.entries-list')]
-				.map(l => 
+				.map(l =>
 					[...l.querySelectorAll('.input-entries > div')]
 					.map(e => `${l.dataset.prefix || ''}${e.innerText}`)
 				)
@@ -493,7 +596,7 @@ function buildAppriseURL() {
 	const matching_templates = data.details.templates.filter(template =>
 		input_keys === template.replaceAll('}', '{').split('{').filter((e, i) => i % 2).sort().join()
 	);
-	
+
 	if (!matching_templates.length)
 		return null;
 
@@ -509,9 +612,9 @@ function buildAppriseURL() {
 			if (['INPUT', 'SELECT'].includes(el.nodeName) && el.value && el.value !== el.dataset.default)
 				return `${el.dataset.map}=${el.value}`;
 			else if (el.nodeName == 'DIV') {
-				let value = 
+				let value =
 					[...el.querySelectorAll('.entries-list')]
-					.map(l => 
+					.map(l =>
 						[...l.querySelectorAll('.input-entries > div')]
 						.map(e => `${l.dataset.prefix || ''}${e.innerText}`)
 					)
@@ -575,7 +678,7 @@ function testService() {
 	})
 	.then(response => {
 		if (!response.ok) return Promise.reject(response.status);
-		
+
 		test_button.classList.remove('error-input');
 		test_button.title = '';
 		test_button.classList.add('show-sent');
@@ -593,14 +696,14 @@ function testService() {
 
 function addService() {
 	const add_button = NotiEls.add_service_window.querySelector('.options > button[type="submit"]');
-	
+
 	// Check regexes for input's
 	[...NotiEls.add_service_window.querySelectorAll('input:not([data-regex=""])[data-regex]')]
 		.forEach(el => el.classList.remove('error-input'));
 
 	const faulty_inputs =
 		[...NotiEls.add_service_window.querySelectorAll('input:not([data-regex=""])[data-regex]')]
-			.filter(el => 
+			.filter(el =>
 				!(
 					(!el.required && el.value === '')
 					||
@@ -631,7 +734,7 @@ function addService() {
 	})
 	.then(response => {
 		if (!response.ok) return Promise.reject(response.status);
-		
+
 		add_button.classList.remove('error-input');
 		add_button.title = '';
 
@@ -658,3 +761,28 @@ let notification_services = null;
 
 NotiEls.triggers.service_list.onchange = showServiceList;
 NotiEls.add_service_window.action = 'javascript:addService();';
+
+NotiEls.windows.editService.dialog.onclick = e => {
+	if (e.target === e.currentTarget) {
+		e.stopPropagation()
+		NotiEls.windows.editService.dialog.close();
+	}
+}
+NotiEls.windows.editService.form.action = 'javascript:editNotificationService()'
+NotiEls.windows.editService.close.onclick = e => NotiEls.windows.editService.dialog.close();
+
+NotiEls.windows.deleteService.dialog.onclick = e => {
+	if (e.target === e.currentTarget) {
+		e.stopPropagation()
+		NotiEls.windows.deleteService.dialog.close()
+	}
+}
+NotiEls.windows.deleteService.close.onclick = e => NotiEls.windows.deleteService.dialog.close()
+
+var autoSearchTimerNs = null
+NotiEls.search_input.oninput = e => {
+	if (autoSearchTimerNs !== null)
+		clearTimeout(autoSearchTimerNs)
+
+	autoSearchTimerNs = setTimeout(searchServiceList, constants.autoSearchTimeoutNs)
+}

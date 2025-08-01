@@ -38,12 +38,8 @@
 		<table>
 			<tbody>
 				<tr class="notification-service-row" data-id="">
-					<td class="title-column">
-						<input type="text" readonly>
-					</td>
-					<td class="url-column">
-						<input type="text" readonly>
-					</td>
+					<td class="title-column"></td>
+					<td class="url-column"></td>
 					<td class="action-column">
 						<button data-type="edit" title="Edit">
 							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" xml:space="preserve">
@@ -51,14 +47,6 @@
 									<g>
 										<path d="M22.94,1.06a3.626,3.626,0,0,0-5.124,0L0,18.876V24H5.124L22.94,6.184A3.627,3.627,0,0,0,22.94,1.06ZM4.3,22H2V19.7L15.31,6.4l2.3,2.3ZM21.526,4.77,19.019,7.277l-2.295-2.3L19.23,2.474a1.624,1.624,0,0,1,2.3,2.3Z"></path>
 									</g>
-								</g>
-							</svg>
-						</button>
-						<button data-type="save" title="Save Edits">
-							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" xml:space="preserve">
-								<g>
-									<path d="M12,10a4,4,0,1,0,4,4A4,4,0,0,0,12,10Zm0,6a2,2,0,1,1,2-2A2,2,0,0,1,12,16Z"></path>
-									<path d="M22.536,4.122,19.878,1.464A4.966,4.966,0,0,0,16.343,0H5A5.006,5.006,0,0,0,0,5V19a5.006,5.006,0,0,0,5,5H19a5.006,5.006,0,0,0,5-5V7.657A4.966,4.966,0,0,0,22.536,4.122ZM17,2.08V3a3,3,0,0,1-3,3H10A3,3,0,0,1,7,3V2h9.343A2.953,2.953,0,0,1,17,2.08ZM22,19a3,3,0,0,1-3,3H5a3,3,0,0,1-3-3V5A3,3,0,0,1,5,2V3a5.006,5.006,0,0,0,5,5h4a4.991,4.991,0,0,0,4.962-4.624l2.16,2.16A3.02,3.02,0,0,1,22,7.657Z"></path>
 								</g>
 							</svg>
 						</button>
@@ -86,6 +74,41 @@
 				<div class="confirm-container">
 					<button id="confirm-delete-user" class="input-style">Confirm</button>
 					<button id="close-delete-user" class="input-style">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</dialog>
+
+	<dialog id="edit-ns-dialog">
+		<div class="dialog-container">
+			<div class="dialog-header">
+				<h2>Edit Notification Service</h2>
+			</div>
+			<div class="dialog-content">
+				<form id="edit-ns-form">
+					<input type="text" id="edit-ns-title-input" placeholder="Title" class="input-style" required>
+
+					<div class="checked-input-container">
+						<input type="text" id="edit-ns-url-input" placeholder="Apprise URL" class="input-style" required>
+						<p id="edit-ns-url-error">Invalid URL</p>
+					</div>
+				</form>
+			</div>
+			<div class="dialog-footer">
+				<button id="close-edit-ns" class="input-style">Cancel</button>
+				<button type="submit" form="edit-ns-form" class="input-style">Save</button>
+			</div>
+		</div>
+	</dialog>
+
+	<dialog id="delete-ns-dialog">
+		<div class="dialog-container">
+			<div class="dialog-content">
+				<p>Are you sure you want to permanently delete this notification service?</p>
+				<p class="error hidden" id="delete-ns-error">Failed to delete notification service</p>
+				<div class="confirm-container">
+					<button id="confirm-delete-ns" class="input-style">Delete</button>
+					<button id="close-delete-ns" class="input-style">Cancel</button>
 				</div>
 			</div>
 		</div>
@@ -341,47 +364,39 @@
 
 				<div id="notification">
 					<h2>Notification Services</h2>
-					<p>Setup your notification providers here</p>
-					<div class="ns-table-container">
-						<label
-							id="add-service-button"
-							title="Toggle adding notification service"
-							for="service-list-toggle"
-						>
-							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
+					<label id="add-service-button" for="service-list-toggle" title="Toggle adding notification service">
+						<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" xml:space="preserve">
+							<g>
 								<g>
-									<g>
-										<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
-									</g>
+									<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
 								</g>
-							</svg>
-						</label>
-						<div class="overflow-container">
-							<input type="checkbox" id="service-list-toggle" class="hidden">
-							<input type="checkbox" id="add-service-toggle" class="hidden">
-							<table>
-								<thead>
-									<tr>
-										<th class="title-column">Title</th>
-										<th class="url-column">Apprise URL</th>
-										<th title="Actions" aria-label="Actions" class="action-column">
-											<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve">
-												<g>
-													<path d="M11.24,24a2.262,2.262,0,0,1-.948-.212,2.18,2.18,0,0,1-1.2-2.622L10.653,16H6.975A3,3,0,0,1,4.1,12.131l3.024-10A2.983,2.983,0,0,1,10,0h3.693a2.6,2.6,0,0,1,2.433,3.511L14.443,8H17a3,3,0,0,1,2.483,4.684l-6.4,10.3A2.2,2.2,0,0,1,11.24,24ZM10,2a1,1,0,0,0-.958.71l-3.024,10A1,1,0,0,0,6.975,14H12a1,1,0,0,1,.957,1.29L11.01,21.732a.183.183,0,0,0,.121.241A.188.188,0,0,0,11.4,21.9l6.4-10.3a1,1,0,0,0,.078-1.063A.979.979,0,0,0,17,10H13a1,1,0,0,1-.937-1.351l2.19-5.84A.6.6,0,0,0,13.693,2Z"></path>
-												</g>
-											</svg>
-										</th>
-									</tr>
-								</thead>
-								<tbody id="services-list">
-								</tbody>
-							</table>
-							<div id="add-service-container">
-								<div id="service-list">
-								</div>
-								<form id="add-service-window"></form>
-							</div>
+							</g>
+						</svg>
+					</label>
+					<input type="checkbox" id="service-list-toggle" class="hidden">
+					<input type="checkbox" id="add-service-toggle" class="hidden">
+					<div class="table-container">
+						<table class="entries-table">
+							<thead>
+								<tr>
+									<th class="title-column">Title</th>
+									<th class="url-column">Apprise URL</th>
+									<th title="Actions">Actions</th>
+								</tr>
+							</thead>
+							<tbody id="services-list">
+								<tr class="empty-row">
+									<td colspan="3">No Services</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div id="add-service-container">
+						<input type="text" id="ns-search-input" class="input-style" placeholder="Type '/' to search services...">
+						<div id="service-list">
+							<p>No Results</p>
 						</div>
+						<form id="add-service-window"></form>
 					</div>
 				</div>
 

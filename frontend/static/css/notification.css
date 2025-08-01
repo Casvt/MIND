@@ -1,15 +1,7 @@
-.ns-table-container {
-	margin-top: 2rem;
-
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 1rem;
-}
-
 #add-service-button {
 	width: min(100%, 17rem);
 	height: 2rem;
+	margin-inline: auto;
 
 	display: flex;
 	justify-content: center;
@@ -25,129 +17,139 @@
 	transition: transform .125s linear;
 }
 
-.ns-table-container:has(#service-list-toggle:checked) #add-service-button > svg {
+#notification:has(#service-list-toggle:checked) #add-service-button > svg {
 	transform: rotate(45deg);
 }
 
-.overflow-container {
+#notification .entries-table {
 	margin-inline: auto;
-	width: min(100%, 50rem);
 
-	overflow-x: auto;
+	--inline-padding: .5rem;
 }
 
-.overflow-container > table {
-	border-spacing: 0px;
+#services-list .empty-row td {
+	text-align: center;
 }
 
-.overflow-container > table:not(:has(tbody > tr)) {
+#services-list:has(tr:not(.empty-row)) .empty-row {
 	display: none;
-}
-
-.overflow-container > table th,
-.overflow-container > table td {
-	text-align: left;
-}
-
-.overflow-container > table th {
-	padding: .5rem;
-}
-
-.overflow-container td {
-	border-top: 1px solid var(--color-gray);
-	padding: .25rem;
 }
 
 .title-column {
 	min-width: 9.5rem;
 	width: 25%;
-
-	padding-left: 1.5rem;
-	padding-right: 1rem;
 }
 
 .url-column {
-	min-width: 26rem;
-	width: 65%;
+	width: 26rem;
+	text-wrap-mode: nowrap;
 }
 
-.overflow-container table input {
-	width: 100%;
-	border-radius: 4px;
-	padding: .25rem;
-	box-shadow: none;
-}
-
-.overflow-container input:read-only {
-	border-color: transparent;
-}
-
-.overflow-container .action-column {
+.action-column {
 	min-width: 4rem;
-	width: 20%;
-	
-	display: flex;
-	gap: .5rem;
-	
-	padding: calc(.5rem + 2px);
-	padding-right: 1.5rem;
 }
 
-.action-column > button {
+/*  */
+/* Edit and delete windows */
+/*  */
+#edit-ns-form {
+	width: 100%;
+	height: 10rem;
+
 	display: flex;
-	justify-content: center;
+	flex-direction: column;
 	align-items: center;
+	gap: 1rem;
+
+	padding: 1rem;
+
+	& > * {
+		max-width: 24rem;
+
+		&.checked-input-container > input {
+			max-width: inherit;
+		}
+	}
 }
 
-.overflow-container .action-column svg {
-	width: 1.25rem;
-	height: 1.25rem;
+#delete-ns-dialog p {
+	padding-inline: 1rem;
+	text-align: center;
 }
 
-tr:has(input:not(:read-only)) button[data-type="save"],
-tr:has(input:read-only) button[data-type="edit"] {
-	display: flex;
-}
+#confirm-delete-ns {
+	min-width: 6rem;
+	width: unset;
 
-tr:has(input:not(:read-only)) button[data-type="edit"],
-tr:has(input:read-only) button[data-type="save"] {
-	display: none;
+	padding-inline: 1rem;
 }
 
 /*  */
 /* Add service */
 /*  */
 #add-service-container {
+	margin-top: 1rem;
 	display: none;
+	flex-direction: column;
+	align-items: center;
 }
 
-.overflow-container:has(#service-list-toggle:checked) table {
-	display: none;
+#notification:has(#service-list-toggle:checked) {
+	& table {
+		display: none;
+	}
+
+	& #add-service-container {
+		display: flex;
+	}
 }
 
-.overflow-container:has(#service-list-toggle:checked) #add-service-container {
-	display: block;
+#notification:has(#add-service-toggle:checked) {
+	& #service-list,
+	& #ns-search-input {
+		display: none;
+	}
+
+	& #add-service-window {
+		display: flex;
+	}
 }
 
-.overflow-container:has(#add-service-toggle:checked) #service-list {
-	display: none;
-}
+#ns-search-input {
+	margin-bottom: 1rem;
 
-.overflow-container:has(#add-service-toggle:checked) #add-service-window {
-	display: flex;
+	max-width: 26rem;
+	height: 2rem;
+
+	padding: .25rem .5rem;
 }
 
 #service-list {
+	width: min(100%, 48rem);
+	margin-inline: auto;
+
 	display: flex;
 	gap: 1rem;
 	flex-wrap: wrap;
 	justify-content: center;
 }
 
+#service-list p {
+	width: 100%;
+	text-align: center;
+}
+
+#service-list:not(:has(button)) > p,
+#service-list:has(button:not(.hidden)) > p {
+	display: none;
+}
+
 #service-list button {
-	width: max(30%, 10rem);
+	width: 12rem;
+	max-width: 15rem;
 	height: 6rem;
-	
+	flex-grow: 1;
+
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -155,15 +157,25 @@ tr:has(input:read-only) button[data-type="save"] {
 	padding: .75rem;
 	border-radius: 4px;
 	border: 2px solid var(--color-gray);
-	
+	background-color: var(--color-dark);
+	color: var(--color-light);
+
 	text-align: center;
 	font-size: 1.1rem;
+
+	box-shadow: var(--default-shadow);
+	transition: background-color 150ms ease-in-out;
+
+	&:hover {
+		background-color: var(--color-gray);
+	}
 }
 
 /*  */
 /* Add service form */
 /*  */
 #add-service-window {
+	width: 100%;
 	max-width: 30rem;
 	margin: auto;
 
@@ -171,8 +183,16 @@ tr:has(input:read-only) button[data-type="save"] {
 	flex-direction: column;
 	justify-content: center;
 	gap: 1rem;
-	
+
 	text-align: center;
+}
+
+#add-service-window .input-style {
+	max-width: 100%;
+
+	&::placeholder {
+		color: var(--color-mid-gray);
+	}
 }
 
 #add-service-window > h3 {
@@ -180,69 +200,68 @@ tr:has(input:read-only) button[data-type="save"] {
 }
 
 #add-service-window > p {
+	height: 2.7rem;
 	margin-bottom: calc((1rem + 2px) * -1);
-	
+
+	display: flex;
+	align-items: center;
+
 	border: 2px solid var(--color-gray);
 	border-top-left-radius: 4px;
 	border-top-right-radius: 4px;
-	padding: .75rem 1rem;
-	color: var(--color-gray);
+	padding-inline: .5rem;
+	color: var(--color-mid-gray);
 
-	text-align: left;
-	
 	box-shadow: var(--default-shadow);
 }
 
-#add-service-window > button {
-	border-radius: 4px;
-	border: 2px solid var(--color-gray);
-	padding: .75rem;
-}
-
-#add-service-window > a,
-#add-service-window > p > a {
+#add-service-window > a {
 	color: var(--color-light);
 }
 
-#add-service-window > div[data-map],
-#add-service-window > div[data-map] > .entries-list {
+#add-service-window > div[data-map] {
 	display: flex;
 	flex-direction: column;
-	gap: inherit;
-}
+	gap: .6rem;
 
-#add-service-window > div[data-map] {
 	padding: .5rem;
 	border: 2px solid var(--color-gray);
 	border-radius: 4px;
 	box-shadow: var(--default-shadow);
-}
 
-#add-service-window > div[data-map] > p {
-	color: var(--color-gray);
-	font-size: 1.1rem;
+	& > p {
+		color: var(--color-mid-gray);
+		font-size: 1.1rem;
+	}
 }
 
 .entries-list {
-	min-height: 5rem;
-	max-height: 15rem;
-	overflow-y: auto;
-
+	display: flex;
+	flex-direction: column;
 	align-items: center;
+	gap: .6rem;
 
 	background-color: var(--color-dark);
 	color: var(--color-light);
 	border: 2px solid var(--color-gray);
 	border-radius: 4px;
-	padding: .75rem;
+	padding: .5rem;
 	box-shadow: var(--default-shadow);
 
 	font-size: 1rem;
 }
 
 .entries-list > p:first-child {
-	color: var(--color-gray);
+	color: var(--color-mid-gray);
 	font-size: 1.1rem;
+}
+
+.input-entries {
+	width: 100%;
+	max-height: 12rem;
+	width: 100%;
+
+	overflow-y: auto;
 }
 
 .input-entries:not(:has(div)) {
@@ -250,50 +269,35 @@ tr:has(input:read-only) button[data-type="save"] {
 }
 
 .add-row {
-	width: min(100%, 21rem);
+	width: 100%;
 
 	display: flex;
 	justify-content: center;
-	flex-wrap: wrap;
 	gap: 1rem;
 }
 
 .add-row input {
-	flex-grow: 1;
 	height: 2rem;
-	min-width: 0rem;
 	font-size: .8rem;
 }
 
 .add-row button {
+	width: 6rem;
 	height: 2rem;
-	padding: .35rem .75rem;
-	background-color: var(--color-gray);
-	border-radius: 4px;
+
+	padding: 0rem;
 }
 
 .entries-list > button {
-	height: 1.5rem;
-	width: min(100%, 21rem);
-	
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	
-	background-color: var(--color-gray);
-}
+	height: 1.9rem;
 
-.entries-list > button svg {
-	height: 60%;
-}
+	& > svg {
+		height: 1rem;
 
-.entries-list > button path {
-	height: inherit;
-	fill: var(--color-dark);
-}
-
-@media (max-width: 543px) {
-	#service-list button {
-		flex-grow: 1;
+		transition: transform 125ms linear;
 	}
+}
+
+.entries-list:has(.add-row:not(.hidden)) > button > svg {
+	transform: rotate(45deg);
 }

@@ -49,7 +49,21 @@ function showWindow(id) {
             constants.windowAnimationDuration
         )
 
-        document.body.onkeydown = null
+        if (id === "notification") {
+            document.body.onkeydown = e => {
+                if (
+                    e.key === '/'
+                    && NotiEls.triggers.service_list.checked
+                    && !NotiEls.triggers.add_service.checked
+                    && document.activeElement !== NotiEls.search_input
+                ) {
+                    NotiEls.search_input.focus()
+                    e.preventDefault()
+                }
+            }
+        }
+        else
+            document.body.onkeydown = null
     }
 }
 
