@@ -17,7 +17,6 @@ from flask import g
 from backend.base.definitions import Constants, ReminderType, T
 from backend.base.helpers import create_folder, folder_path, rename_file
 from backend.base.logging import LOGGER, set_log_level
-from backend.internals.db_migration import migrate_db
 
 REMINDER_TO_KEY = {
     ReminderType.REMINDER: "reminder_id",
@@ -277,6 +276,7 @@ def setup_db() -> None:
     Setup the database tables and default config when they aren't setup yet
     """
     from backend.implementations.users import Users
+    from backend.internals.db_migration import migrate_db
     from backend.internals.settings import Settings
 
     cursor = get_db()
