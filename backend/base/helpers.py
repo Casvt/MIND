@@ -13,6 +13,7 @@ from os.path import abspath, dirname, exists, isfile, join, splitext
 from secrets import token_bytes
 from shutil import copy2, move
 from sys import base_exec_prefix, executable, platform, version_info
+from threading import current_thread
 from typing import Callable, Iterable, List, Sequence, Set, Tuple, Union, cast
 
 from apprise import Apprise, LogCapture
@@ -167,6 +168,15 @@ def search_filter(query: str, result: GeneralReminderData) -> bool:
         in
         (result.title + (result.text or '')).lower().replace(' ', '')
     )
+
+
+def current_thread_id() -> int:
+    """Get the ID of the current thread.
+
+    Returns:
+        int: The ID.
+    """
+    return current_thread().native_id or -1
 
 
 # region Security

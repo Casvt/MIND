@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Setting up the database and handling connections
+Setting up the database, handling connections, using it and closing it.
 """
 
 from __future__ import annotations
@@ -15,7 +15,8 @@ from typing import Any, Dict, Generator, Iterable, List, Type, Union
 from flask import g
 
 from backend.base.definitions import Constants, ReminderType, T
-from backend.base.helpers import create_folder, folder_path, rename_file
+from backend.base.helpers import (create_folder, current_thread_id,
+                                  folder_path, rename_file)
 from backend.base.logging import LOGGER, set_log_level
 
 REMINDER_TO_KEY = {
@@ -37,7 +38,7 @@ class MindCursor(Cursor):
         """Same as `fetchone` but convert the Row object to a dict.
 
         Returns:
-            Union[Dict[str, Any], None]: The dict or None i.c.o. no result.
+            Union[Dict[str, Any], None]: The dict or None in case of no result.
         """
         r = self.fetchone()
         if r is None:
@@ -76,12 +77,29 @@ class MindCursor(Cursor):
             return r
         return r[0]
 
+    def __enter__(self):
+        """Start a transaction"""
+        self.connection.isolation_level = None
+        self.execute("BEGIN TRANSACTION;")
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Commit the transaction or rollback if an exception occurred"""
+        if self.connection.in_transaction:
+            if exc_type is not None:
+                self.execute("ROLLBACK;")
+            else:
+                self.execute("COMMIT;")
+
+        self.connection.isolation_level = ""
+        return
+
 
 class DBConnectionManager(type):
     instances: Dict[int, DBConnection] = {}
 
     def __call__(cls, *args: Any, **kwargs: Any) -> DBConnection:
-        thread_id = current_thread().native_id or -1
+        thread_id = current_thread_id()
 
         if (
             not thread_id in cls.instances
@@ -115,11 +133,11 @@ class DBConnection(Connection, metaclass=DBConnectionManager):
         self,
         force_new: bool = False
     ) -> MindCursor:
-        """Get a database cursor from the connection.
+        """Get a database cursor of the connection.
 
         Args:
             force_new (bool, optional): Get a new cursor instead of the cached
-            one.
+                one.
                 Defaults to False.
 
         Returns:
@@ -160,8 +178,8 @@ def set_db_location(
 
     Args:
         db_folder (Union[str, None], optional): The folder in which the database
-        will be stored or in which a database is for MIND to use. Give
-        `None` for the default location.
+            will be stored or in which a database is for MIND to use. Give
+            `None` for the default location.
 
     Raises:
         ValueError: Value of `db_folder` exists but is not a folder.
@@ -197,8 +215,8 @@ def get_db(force_new: bool = False) -> MindCursor:
     """Get a database cursor instance or create a new one if needed.
 
     Args:
-        force_new (bool, optional): Decides if a new cursor is
-        returned instead of the standard one.
+        force_new (bool, optional): Decides whether a new cursor is
+            returned instead of the standard one.
             Defaults to False.
 
     Returns:
@@ -212,20 +230,27 @@ def get_db(force_new: bool = False) -> MindCursor:
 
 
 def commit() -> None:
-    """Commit the database"""
+    """Commit the database changes"""
     get_db().connection.commit()
     return
 
 
-def iter_commit(iterable: Iterable[T]) -> Generator[T, Any, Any]:
-    """Commit the database after each iteration. Also commits just before the
-    first iteration starts.
+def iter_commit(iterable: Iterable[T]) -> Generator[T]:
+    """Commit the database after yielding each value in the iterable. Also
+    commits just before the first iteration starts.
+
+    ```
+    # commits
+    for i in iter_commit(iterable):
+        cursor.execute(...)
+        # commits
+    ```
 
     Args:
         iterable (Iterable[T]): Iterable that will be iterated over like normal.
 
     Yields:
-        Generator[T, Any, Any]: Items of iterable.
+        Generator[T]: Items of iterable.
     """
     commit = get_db().connection.commit
     commit()
@@ -241,6 +266,9 @@ def close_db(e: Union[None, BaseException] = None) -> None:
     Args:
         e (Union[None, BaseException], optional): Error. Defaults to None.
     """
+    if not hasattr(g, 'cursors'):
+        return
+
     try:
         cursors = g.cursors
         db: DBConnection = cursors[0].connection
@@ -251,112 +279,30 @@ def close_db(e: Union[None, BaseException] = None) -> None:
         if not current_thread().name.startswith('waitress-'):
             db.close()
 
-    except (AttributeError, ProgrammingError):
+    except ProgrammingError:
         pass
 
     return
 
 
-def close_all_db() -> None:
-    "Close all non-temporary database connections that are still open"
-    LOGGER.debug('Closing any open database connections')
-
-    for i in DBConnectionManager.instances.values():
-        if not i.closed:
-            i.close()
-
-    c = DBConnection(timeout=20.0)
-    c.commit()
-    c.close()
+def setup_db_adapters_and_converters() -> None:
+    """Add DB adapters and converters for custom types and bool"""
+    register_adapter(bool, lambda b: int(b))
+    register_converter("BOOL", lambda b: b == b'1')
     return
 
 
 def setup_db() -> None:
-    """
-    Setup the database tables and default config when they aren't setup yet
-    """
+    """Setup the default config and database connection and tables"""
     from backend.implementations.users import Users
     from backend.internals.db_migration import migrate_db
     from backend.internals.settings import Settings
 
     cursor = get_db()
     cursor.execute("PRAGMA journal_mode = wal;")
-    register_adapter(bool, lambda b: int(b))
-    register_converter("BOOL", lambda b: b == b'1')
+    setup_db_adapters_and_converters()
 
-    cursor.executescript("""
-        CREATE TABLE IF NOT EXISTS users(
-            id INTEGER PRIMARY KEY,
-            username VARCHAR(255) UNIQUE NOT NULL,
-            salt VARCHAR(40) NOT NULL,
-            hash VARCHAR(100) NOT NULL,
-            admin BOOL NOT NULL DEFAULT 0
-        );
-        CREATE TABLE IF NOT EXISTS notification_services(
-            id INTEGER PRIMARY KEY,
-            user_id INTEGER NOT NULL,
-            title VARCHAR(255),
-            url TEXT,
-
-            FOREIGN KEY (user_id) REFERENCES users(id)
-        );
-        CREATE TABLE IF NOT EXISTS reminders(
-            id INTEGER PRIMARY KEY,
-            user_id INTEGER NOT NULL,
-            title VARCHAR(255) NOT NULL,
-            text TEXT,
-            time INTEGER NOT NULL,
-
-            repeat_quantity VARCHAR(15),
-            repeat_interval INTEGER,
-            original_time INTEGER,
-            weekdays VARCHAR(13),
-            cron_schedule VARCHAR(255),
-
-            color VARCHAR(7),
-            enabled BOOL NOT NULL DEFAULT 1,
-
-            FOREIGN KEY (user_id) REFERENCES users(id)
-        );
-        CREATE TABLE IF NOT EXISTS templates(
-            id INTEGER PRIMARY KEY,
-            user_id INTEGER NOT NULL,
-            title VARCHAR(255) NOT NULL,
-            text TEXT,
-
-            color VARCHAR(7),
-
-            FOREIGN KEY (user_id) REFERENCES users(id)
-        );
-        CREATE TABLE IF NOT EXISTS static_reminders(
-            id INTEGER PRIMARY KEY,
-            user_id INTEGER NOT NULL,
-            title VARCHAR(255) NOT NULL,
-            text TEXT,
-
-            color VARCHAR(7),
-
-            FOREIGN KEY (user_id) REFERENCES users(id)
-        );
-        CREATE TABLE IF NOT EXISTS reminder_services(
-            reminder_id INTEGER,
-            static_reminder_id INTEGER,
-            template_id INTEGER,
-            notification_service_id INTEGER NOT NULL,
-
-            FOREIGN KEY (reminder_id) REFERENCES reminders(id)
-                ON DELETE CASCADE,
-            FOREIGN KEY (static_reminder_id) REFERENCES static_reminders(id)
-                ON DELETE CASCADE,
-            FOREIGN KEY (template_id) REFERENCES templates(id)
-                ON DELETE CASCADE,
-            FOREIGN KEY (notification_service_id) REFERENCES notification_services(id)
-        );
-        CREATE TABLE IF NOT EXISTS config(
-            key VARCHAR(255) PRIMARY KEY,
-            value BLOB NOT NULL
-        );
-	""")
+    cursor.executescript(DB_SCHEMA)
 
     settings = Settings()
     settings_values = settings.get_settings()
@@ -378,3 +324,78 @@ def setup_db() -> None:
         )
 
     return
+
+
+DB_SCHEMA = """
+    CREATE TABLE IF NOT EXISTS users(
+        id INTEGER PRIMARY KEY,
+        username VARCHAR(255) UNIQUE NOT NULL,
+        salt VARCHAR(40) NOT NULL,
+        hash VARCHAR(100) NOT NULL,
+        admin BOOL NOT NULL DEFAULT 0
+    );
+    CREATE TABLE IF NOT EXISTS notification_services(
+        id INTEGER PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        title VARCHAR(255),
+        url TEXT,
+
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+    CREATE TABLE IF NOT EXISTS reminders(
+        id INTEGER PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        text TEXT,
+        time INTEGER NOT NULL,
+
+        repeat_quantity VARCHAR(15),
+        repeat_interval INTEGER,
+        original_time INTEGER,
+        weekdays VARCHAR(13),
+        cron_schedule VARCHAR(255),
+
+        color VARCHAR(7),
+        enabled BOOL NOT NULL DEFAULT 1,
+
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+    CREATE TABLE IF NOT EXISTS templates(
+        id INTEGER PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        text TEXT,
+
+        color VARCHAR(7),
+
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+    CREATE TABLE IF NOT EXISTS static_reminders(
+        id INTEGER PRIMARY KEY,
+        user_id INTEGER NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        text TEXT,
+
+        color VARCHAR(7),
+
+        FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+    CREATE TABLE IF NOT EXISTS reminder_services(
+        reminder_id INTEGER,
+        static_reminder_id INTEGER,
+        template_id INTEGER,
+        notification_service_id INTEGER NOT NULL,
+
+        FOREIGN KEY (reminder_id) REFERENCES reminders(id)
+            ON DELETE CASCADE,
+        FOREIGN KEY (static_reminder_id) REFERENCES static_reminders(id)
+            ON DELETE CASCADE,
+        FOREIGN KEY (template_id) REFERENCES templates(id)
+            ON DELETE CASCADE,
+        FOREIGN KEY (notification_service_id) REFERENCES notification_services(id)
+    );
+    CREATE TABLE IF NOT EXISTS config(
+        key VARCHAR(255) PRIMARY KEY,
+        value BLOB NOT NULL
+    );
+"""
