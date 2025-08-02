@@ -961,7 +961,10 @@ def input_validation() -> Dict[str, Any]:
 
         if not value.validate():
             if isinstance(value, DatabaseFileVariable):
-                raise InvalidDatabaseFile(value.converted_value)
+                raise InvalidDatabaseFile(
+                    value.converted_value,
+                    "File is not a database file"
+                )
             elif noted_var.source == DataSource.FILES:
                 raise InvalidKeyValue(noted_var.name, input_value.filename)
             else:

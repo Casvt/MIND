@@ -1,12 +1,46 @@
 # -*- coding: utf-8 -*-
 
-from typing import List, Union
+from typing import Any, List, Tuple, Union
 
 from backend.base.definitions import (NotificationServiceData, ReminderData,
                                       ReminderType, StaticReminderData,
                                       TemplateData, UserData)
 from backend.base.helpers import first_of_subarrays
-from backend.internals.db import REMINDER_TO_KEY, get_db
+from backend.internals.db import REMINDER_TO_KEY, MindCursor, get_db
+
+
+class ConfigDB:
+    def __init__(self, cursor: Union[MindCursor, None] = None) -> None:
+        if cursor is None:
+            self.cursor = get_db()
+        else:
+            self.cursor = cursor
+        return
+
+    def fetch_all(self) -> List[Tuple[str, Any]]:
+        return self.cursor.execute(
+            "SELECT key, value FROM config;"
+        ).fetchall()
+
+    def fetch_key(self, key: str) -> Any:
+        return self.cursor.execute(
+            "SELECT value FROM config WHERE key = ? LIMIT 1;",
+            (key,)
+        ).exists()
+
+    def insert(self, key: str, value: Any) -> None:
+        self.cursor.execute(
+            "INSERT OR IGNORE INTO config(key, value) VALUES (?, ?);",
+            (key, value)
+        )
+        return
+
+    def update(self, key: str, value: Any) -> None:
+        self.cursor.execute(
+            "UPDATE config SET value = ? WHERE key = ?;",
+            (value, key)
+        )
+        return
 
 
 class NotificationServicesDB:

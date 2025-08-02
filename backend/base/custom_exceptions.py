@@ -150,11 +150,12 @@ class NewAccountsNotAllowed(MindException):
 class InvalidDatabaseFile(MindException):
     "The uploaded database file is invalid or not supported"
 
-    def __init__(self, filepath_db: str) -> None:
+    def __init__(self, filepath_db: str, reason: str) -> None:
         self.filepath_db = filepath_db
+        self.reason = reason
         LOGGER.warning(
-            "The given database file is invalid: %s",
-            filepath_db
+            "The given database file is invalid: %s (reason=%s)",
+            filepath_db, reason
         )
         return
 
@@ -164,7 +165,8 @@ class InvalidDatabaseFile(MindException):
             'code': 400,
             'error': self.__class__.__name__,
             'result': {
-                'filepath_db': self.filepath_db
+                'filepath_db': self.filepath_db,
+                'reason': self.reason
             }
         }
 

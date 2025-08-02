@@ -4,28 +4,28 @@ from __future__ import annotations
 
 from datetime import datetime
 from os import remove
-from os.path import basename, dirname, join
+from os.path import basename, dirname, exists, join
 from re import compile
 from shutil import move
-from sqlite3 import Connection, OperationalError
+from sqlite3 import Connection, OperationalError, Row
 from time import time
 from typing import TYPE_CHECKING, List, Union
 
 from backend.base.custom_exceptions import (DatabaseFileNotFound,
                                             InvalidDatabaseFile)
 from backend.base.definitions import Constants, DatabaseBackupEntry, StartType
-from backend.base.helpers import Singleton, copy, folder_path, list_files
+from backend.base.helpers import copy, folder_path, list_files
 from backend.base.logging import LOGGER
-from backend.internals.db import DBConnection, get_db
+from backend.internals.db import DBConnection, MindCursor, get_db
 from backend.internals.db_migration import get_latest_db_version
+from backend.internals.db_models import ConfigDB
 from backend.internals.settings import Settings
 
 if TYPE_CHECKING:
     from threading import Timer
 
-# ===================
+
 # region Backup
-# ===================
 DB_FILE_REGEX = compile(
     r'MIND_(?P<year>\d{4})_(?P<month>\d{2})_(?P<day>\d{2})_(?P<hour>\d{2})_(?P<minute>\d{2}).db'
 )
@@ -70,7 +70,7 @@ def get_backup(index: int) -> DatabaseBackupEntry:
     """Get info on a specific database backup.
 
     Args:
-        index (int): The index (supplied by `get_backups()`) of the backup.
+        index (int): The index of the backup (supplied by `get_backups()`).
 
     Raises:
         DatabaseFileNotFound: No backup entry with the given index.
@@ -126,7 +126,7 @@ def backup_database() -> None:
     return
 
 
-class DatabaseBackupHandler(metaclass=Singleton):
+class DatabaseBackupHandler:
     backup_timer: Union[Timer, None] = None
 
     def set_backup_timer(self) -> None:
@@ -134,61 +134,68 @@ class DatabaseBackupHandler(metaclass=Singleton):
         already. Replace it if it does already exist, in case the interval
         setting has a new value.
         """
+        from backend.internals.server import Server
+
         sv = Settings().get_settings()
 
-        if self.backup_timer is not None:
-            self.backup_timer.cancel()
+        if self.__class__.backup_timer is not None:
+            self.__class__.backup_timer.cancel()
 
-        from backend.internals.server import Server
-        self.backup_timer = Server().get_db_timer_thread(
+        self.__class__.backup_timer = Server().get_db_timer_thread(
             sv.db_backup_last_run + sv.db_backup_interval - time(),
             backup_database,
             "DatabaseBackupHandler"
         )
-        self.backup_timer.start()
+        self.__class__.backup_timer.start()
         return
 
     def stop_backup_timer(self) -> None:
         "If the backup timer is running, stop it"
-        if self.backup_timer is not None:
-            self.backup_timer.cancel()
+        if self.__class__.backup_timer is not None:
+            self.__class__.backup_timer.cancel()
         return
 
 
-# ===================
 # region Import
-# ===================
 def revert_db_import(
     swap: bool,
-    imported_db_file: str = ''
+    other_db_file: str = ''
 ) -> None:
-    """Revert the database import process. The original_db_file is the file
-    currently used (`DBConnection.file`).
+    """Revert the database import process.
 
     Args:
-        swap (bool): Whether or not to keep the imported_db_file or not,
-        instead of the original_db_file.
+        swap (bool): Keep the other database file instead of the current
+            database file.
 
-        imported_db_file (str, optional): The other database file. Keep empty
-        to use `Constants.DB_ORIGINAL_FILENAME`.
+        other_db_file (str, optional): The other database file. Keep empty to
+            use `Constants.DB_ORIGINAL_FILENAME`.
             Defaults to ''.
+
+    Raises:
+        InvalidDatabaseFile: The other database file does not exist.
     """
     original_db_file = DBConnection.file
-    if not imported_db_file:
-        imported_db_file = join(
+    if not other_db_file:
+        other_db_file = join(
             dirname(DBConnection.file),
             Constants.DB_ORIGINAL_NAME
+        )
+
+    if not exists(other_db_file):
+        raise InvalidDatabaseFile(
+            other_db_file,
+            "Database file does not exist"
         )
 
     if swap:
         remove(original_db_file)
         move(
-            imported_db_file,
+            other_db_file,
             original_db_file
         )
 
     else:
-        remove(imported_db_file)
+        remove(other_db_file)
 
     return
 
@@ -202,60 +209,54 @@ def import_db(
     Args:
         new_db_file (str): The path to the new database file.
         copy_hosting_settings (bool): Keep the hosting settings from the current
-        database.
+            database.
 
     Raises:
         InvalidDatabaseFile: The new database file is invalid or unsupported.
     """
-    LOGGER.info(f'Importing new database; {copy_hosting_settings=}')
+    from backend.internals.server import Server
 
-    cursor = Connection(new_db_file, timeout=20.0).cursor()
+    LOGGER.info(f"Importing new database; {copy_hosting_settings=}")
+
+    cursor_new = MindCursor(
+        Connection(new_db_file, timeout=Constants.DB_TIMEOUT)
+    )
+    cursor_new.row_factory = Row
+    config_current = ConfigDB()
+    config_new = ConfigDB(cursor_new)
+
     try:
-        database_version = cursor.execute(
-            "SELECT value FROM config WHERE key = 'database_version' LIMIT 1;"
-        ).fetchone()[0]
-        if not isinstance(database_version, int):
-            raise InvalidDatabaseFile(new_db_file)
+        try:
+            database_version = config_new.fetch_key("database_version")
+            if not isinstance(database_version, int):
+                raise OperationalError
+        except OperationalError:
+            raise InvalidDatabaseFile(
+                new_db_file,
+                "Uploaded database is not a MIND database file"
+            )
 
-    except (OperationalError, InvalidDatabaseFile):
-        LOGGER.error('Uploaded database is not a MIND database file')
-        cursor.connection.close()
+        if database_version > get_latest_db_version():
+            raise InvalidDatabaseFile(
+                new_db_file,
+                "Uploaded database is higher version than this MIND installation can support")
+
+    except InvalidDatabaseFile:
+        cursor_new.connection.close()
         revert_db_import(
             swap=False,
-            imported_db_file=new_db_file
+            other_db_file=new_db_file
         )
-        raise InvalidDatabaseFile(new_db_file)
-
-    if database_version > get_latest_db_version():
-        LOGGER.error(
-            'Uploaded database is higher version than this MIND installation can support')
-        revert_db_import(
-            swap=False,
-            imported_db_file=new_db_file
-        )
-        raise InvalidDatabaseFile(new_db_file)
+        raise
 
     if copy_hosting_settings:
-        hosting_settings = get_db().execute("""
-			SELECT key, value
-			FROM config
-			WHERE key = 'host'
-				OR key = 'port'
-				OR key = 'url_prefix'
-			LIMIT 3;
-			"""
-        ).fetchalldict()
-        cursor.executemany("""
-			INSERT INTO config(key, value)
-			VALUES (:key, :value)
-			ON CONFLICT(key) DO
-			UPDATE
-			SET value = :value;
-			""",
-            hosting_settings
-        )
-    cursor.connection.commit()
-    cursor.connection.close()
+        hosting_settings = config_current.fetch_all()
+        for key, value in hosting_settings:
+            if key in ('host', 'port', 'url_prefix'):
+                config_new.update(key, value)
+
+    cursor_new.connection.commit()
+    cursor_new.connection.close()
 
     move(
         DBConnection.file,
@@ -266,7 +267,6 @@ def import_db(
         DBConnection.file
     )
 
-    from backend.internals.server import Server
     Server().restart(StartType.RESTART_DB_CHANGES)
 
     return
@@ -279,9 +279,9 @@ def import_db_backup(
     """Replace the current database with a backup.
 
     Args:
-        index (int): The index (supplied by `get_backups()`) of the backup.
+        index (int): The index of the backup (supplied by `get_backups()`).
         copy_hosting_settings (bool): Keep the hosting settings from the current
-        database.
+            database.
 
     Raises:
         DatabaseFileNotFound: No backup entry with the given index.
