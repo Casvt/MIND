@@ -252,6 +252,7 @@ def import_db(
     cursor_new.connection.commit()
     cursor_new.connection.close()
 
+    DBConnection().merge_wal_files()
     move(
         DBConnection.default_file,
         join(dirname(DBConnection.default_file), Constants.DB_ORIGINAL_NAME)

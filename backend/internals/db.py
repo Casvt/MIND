@@ -198,6 +198,11 @@ class DBConnection(Connection, metaclass=DBConnectionManager):
         )
         return
 
+    def merge_wal_files(self) -> None:
+        """Merge the WAL files into the main database file"""
+        self.execute("PRAGMA wal_checkpoint(TRUNCATE);")
+        return
+
     def close(self) -> None:
         """Close the database connection"""
         LOGGER.debug(f'Closing connection {self}')
