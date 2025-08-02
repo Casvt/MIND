@@ -619,7 +619,7 @@ function closeImportDb() {
 
 function importDb() {
 	const index = parseInt(windows.importDb.dialog.dataset.index)
-	const copyHosting = windows.importDb.inputs.keepHostingSettings ? 'true' : 'false'
+	const copyHosting = windows.importDb.inputs.keepHostingSettings.checked ? 'true' : 'false'
 	windows.importDb.submit.innerHTML = icons.loading
 	windows.importDb.submit.classList.add('spinning')
 	sendAPI("POST", `/admin/database/backups/${index}`, {
