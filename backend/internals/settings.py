@@ -40,7 +40,7 @@ def get_about_data() -> Dict[str, Any]:
         "version": version,
         "python_version": get_python_version(),
         "database_version": get_latest_db_version(),
-        "database_location": DBConnection.file,
+        "database_location": DBConnection.default_file,
         "data_folder": folder_path()
     }
 

@@ -7,7 +7,7 @@ from os import remove
 from os.path import basename, dirname, exists, join
 from re import compile
 from shutil import move
-from sqlite3 import Connection, OperationalError, Row
+from sqlite3 import OperationalError
 from time import time
 from typing import TYPE_CHECKING, List, Union
 
@@ -16,7 +16,7 @@ from backend.base.custom_exceptions import (DatabaseFileNotFound,
 from backend.base.definitions import Constants, DatabaseBackupEntry, StartType
 from backend.base.helpers import copy, folder_path, list_files
 from backend.base.logging import LOGGER
-from backend.internals.db import DBConnection, MindCursor, get_db
+from backend.internals.db import DBConnection
 from backend.internals.db_migration import get_latest_db_version
 from backend.internals.db_models import ConfigDB
 from backend.internals.settings import Settings
@@ -95,10 +95,7 @@ def create_database_copy(folder: str) -> str:
     """
     current_date = datetime.now().strftime(r"%Y_%m_%d_%H_%M")
     filename = join(folder, f'MIND_{current_date}.db')
-    get_db().execute(
-        "VACUUM INTO ?;",
-        (filename,)
-    )
+    DBConnection().create_backup(filename)
     return filename
 
 
@@ -174,10 +171,10 @@ def revert_db_import(
     Raises:
         InvalidDatabaseFile: The other database file does not exist.
     """
-    original_db_file = DBConnection.file
+    original_db_file = DBConnection.default_file
     if not other_db_file:
         other_db_file = join(
-            dirname(DBConnection.file),
+            dirname(DBConnection.default_file),
             Constants.DB_ORIGINAL_NAME
         )
 
@@ -218,10 +215,7 @@ def import_db(
 
     LOGGER.info(f"Importing new database; {copy_hosting_settings=}")
 
-    cursor_new = MindCursor(
-        Connection(new_db_file, timeout=Constants.DB_TIMEOUT)
-    )
-    cursor_new.row_factory = Row
+    cursor_new = DBConnection(db_file=new_db_file).cursor()
     config_current = ConfigDB()
     config_new = ConfigDB(cursor_new)
 
@@ -259,12 +253,12 @@ def import_db(
     cursor_new.connection.close()
 
     move(
-        DBConnection.file,
-        join(dirname(DBConnection.file), Constants.DB_ORIGINAL_NAME)
+        DBConnection.default_file,
+        join(dirname(DBConnection.default_file), Constants.DB_ORIGINAL_NAME)
     )
     move(
         new_db_file,
-        DBConnection.file
+        DBConnection.default_file
     )
 
     Server().restart(StartType.RESTART_DB_CHANGES)

@@ -12,7 +12,7 @@ class Test_DB(unittest.TestCase):
         app = Flask(__name__)
         app.teardown_appcontext(close_db)
 
-        DBConnection.file = join(
+        DBConnection.default_file = join(
             folder_path(*Constants.DB_FOLDER),
             Constants.DB_NAME
         )

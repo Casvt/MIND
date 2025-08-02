@@ -34,6 +34,14 @@ class MindCursor(Cursor):
     def lastrowid(self) -> int:
         return super().lastrowid or 1
 
+    @property
+    def connection(self) -> DBConnection:
+        return super().connection # type: ignore
+
+    def __init__(self, cursor: DBConnection, /) -> None:
+        super().__init__(cursor)
+        return
+
     def fetchonedict(self) -> Union[Dict[str, Any], None]:
         """Same as `fetchone` but convert the Row object to a dict.
 
@@ -98,30 +106,46 @@ class MindCursor(Cursor):
 class DBConnectionManager(type):
     instances: Dict[int, DBConnection] = {}
 
-    def __call__(cls, *args: Any, **kwargs: Any) -> DBConnection:
+    def __call__(cls, **kwargs: Any) -> DBConnection:
+        if kwargs.get('db_file'):
+            return super().__call__(**kwargs)
+
         thread_id = current_thread_id()
 
         if (
             not thread_id in cls.instances
             or cls.instances[thread_id].closed
         ):
-            cls.instances[thread_id] = super().__call__(*args, **kwargs)
+            cls.instances[thread_id] = super().__call__(**kwargs)
 
         return cls.instances[thread_id]
 
 
 class DBConnection(Connection, metaclass=DBConnectionManager):
-    file = ''
+    default_file = ''
 
-    def __init__(self, timeout: float) -> None:
+    def __init__(
+        self, *,
+        db_file: Union[str, None] = None,
+        timeout: float = Constants.DB_TIMEOUT
+    ) -> None:
         """Create a connection with a database.
 
         Args:
-            timeout (float): How long to wait before giving up on a command.
+            db_file (Union[str, None], optional): The database file to connect
+                to. If `None`, the default file will be used. If something else
+                than the default file is given, then a new connection will
+                always be returned.
+                Defaults to None.
+
+            timeout (float, optional): How long to wait before giving up
+                on a command.
+                Defaults to Constants.DB_TIMEOUT.
         """
         LOGGER.debug(f'Creating connection {self}')
+        self.db_file = db_file or self.default_file
         super().__init__(
-            self.file,
+            self.db_file,
             timeout=timeout,
             detect_types=PARSE_DECLTYPES
         )
@@ -144,20 +168,35 @@ class DBConnection(Connection, metaclass=DBConnectionManager):
             MindCursor: The database cursor.
         """
         if not hasattr(g, 'cursors'):
-            g.cursors = []
+            g.cursors = {}
 
-        if not g.cursors:
+        if self.db_file not in g.cursors:
+            g.cursors[self.db_file] = []
+
+        if not g.cursors[self.db_file]:
             c = MindCursor(self)
             c.row_factory = Row
-            g.cursors.append(c)
+            g.cursors[self.db_file].append(c)
 
         if not force_new:
-            return g.cursors[0]
+            return g.cursors[self.db_file][0]
         else:
             c = MindCursor(self)
             c.row_factory = Row
-            g.cursors.append(c)
-            return g.cursors[-1]
+            g.cursors[self.db_file].append(c)
+            return g.cursors[self.db_file][-1]
+
+    def create_backup(self, filepath: str) -> None:
+        """Create a backup of the current database.
+
+        Args:
+            filepath (str): What the filepath of the backup will be.
+        """
+        self.execute(
+            "VACUUM INTO ?;",
+            (filepath,)
+        )
+        return
 
     def close(self) -> None:
         """Close the database connection"""
@@ -205,7 +244,7 @@ def set_db_location(
             db_file_location
         )
 
-    DBConnection.file = db_file_location
+    DBConnection.default_file = db_file_location
     SettingsValues.db_backup_folder = dirname(db_file_location)
 
     return
@@ -222,11 +261,7 @@ def get_db(force_new: bool = False) -> MindCursor:
     Returns:
         MindCursor: Database cursor instance that outputs Row objects.
     """
-    cursor = (
-        DBConnection(timeout=Constants.DB_TIMEOUT)
-        .cursor(force_new=force_new)
-    )
-    return cursor
+    return DBConnection().cursor(force_new=force_new)
 
 
 def commit() -> None:
@@ -271,13 +306,14 @@ def close_db(e: Union[None, BaseException] = None) -> None:
 
     try:
         cursors = g.cursors
-        db: DBConnection = cursors[0].connection
-        for c in cursors:
-            c.close()
+        for cursors in g.cursors.values():
+            db: DBConnection = cursors[0].connection
+            for c in cursors:
+                c.close()
+            db.commit()
+            if not current_thread().name.startswith('waitress-'):
+                db.close()
         delattr(g, 'cursors')
-        db.commit()
-        if not current_thread().name.startswith('waitress-'):
-            db.close()
 
     except ProgrammingError:
         pass
