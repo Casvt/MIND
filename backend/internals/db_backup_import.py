@@ -243,11 +243,16 @@ def import_db(
         )
         raise
 
-    if copy_hosting_settings:
-        hosting_settings = config_current.fetch_all()
-        for key, value in hosting_settings:
-            if key in ('host', 'port', 'url_prefix'):
-                config_new.update(key, value)
+    hosting_settings = config_current.fetch_all()
+    for key, value in hosting_settings:
+        if (
+            key == 'db_backup_last_run'
+            or (
+                copy_hosting_settings
+                and key in ('host', 'port', 'url_prefix')
+            )
+        ):
+            config_new.update(key, value)
 
     cursor_new.connection.commit()
     cursor_new.connection.close()
