@@ -81,6 +81,15 @@ class StartType(BaseEnum):
     RESTART_DB_CHANGES = 133
 
 
+class Interval(BaseEnum):
+    "Time intervals where the value is in seconds"
+
+    ONE_MINUTE = 60
+    ONE_HOUR = ONE_MINUTE * 60
+    ONE_DAY = ONE_HOUR * 24
+    THIRTY_DAYS = ONE_DAY * 30
+
+
 class InvalidUsernameReason(BaseEnum):
     ONLY_NUMBERS = "Username can not only be numbers"
     NOT_ALLOWED = "Username is not allowed"

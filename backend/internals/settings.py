@@ -8,14 +8,13 @@ from os.path import abspath, isdir
 from typing import Any, Dict, Mapping
 
 from backend.base.custom_exceptions import InvalidKeyValue, KeyNotFound
-from backend.base.definitions import Constants
-from backend.base.helpers import Singleton, folder_path, get_python_version
+from backend.base.definitions import Constants, Interval
+from backend.base.helpers import (Singleton, folder_path, get_python_version,
+                                  get_version_from_pyproject)
 from backend.base.logging import LOGGER, set_log_level
-from backend.internals.db import DBConnection, commit, get_db
+from backend.internals.db import DBConnection, commit
 from backend.internals.db_migration import get_latest_db_version
-
-ONE_DAY = 86400
-THIRTY_DAYS = ONE_DAY * 30
+from backend.internals.db_models import ConfigDB
 
 
 @lru_cache(1)
@@ -23,21 +22,13 @@ def get_about_data() -> Dict[str, Any]:
     """Get data about the application and it's environment.
 
     Raises:
-        RuntimeError: If the version is not found in the pyproject.toml file.
+        RuntimeError: Application version not found in pyproject file.
 
     Returns:
         Dict[str, Any]: The information.
     """
-    with open(folder_path("pyproject.toml"), "r") as f:
-        for line in f:
-            if line.startswith("version = "):
-                version = "V" + line.split('"')[1]
-                break
-        else:
-            raise RuntimeError("Version not found in pyproject.toml")
-
     return {
-        "version": version,
+        "version": get_version_from_pyproject(folder_path("pyproject.toml")),
         "python_version": get_python_version(),
         "database_version": get_latest_db_version(),
         "database_location": DBConnection.default_file,
@@ -58,10 +49,10 @@ class SettingsValues:
     backup_url_prefix: str = ''
 
     allow_new_accounts: bool = True
-    login_time: int = 3600
+    login_time: int = Interval.ONE_HOUR.value
     login_time_reset: bool = True
 
-    db_backup_interval: int = ONE_DAY
+    db_backup_interval: int = Interval.ONE_DAY.value
     db_backup_amount: int = 3
     db_backup_folder: str = folder_path(*Constants.DB_FOLDER)
     db_backup_last_run: int = 0
@@ -87,10 +78,9 @@ class Settings(metaclass=Singleton):
 
     def _insert_missing_settings(self) -> None:
         "Insert any missing keys from the settings into the database."
-        get_db().executemany(
-            "INSERT OR IGNORE INTO config(key, value) VALUES (?, ?);",
-            asdict(SettingsValues()).items()
-        )
+        config_db = ConfigDB()
+        for key, value in asdict(SettingsValues()).items():
+            config_db.insert(key, value)
         commit()
         return
 
@@ -98,9 +88,7 @@ class Settings(metaclass=Singleton):
         "Load the settings from the database into the cache."
         db_values = {
             k: v
-            for k, v in get_db().execute(
-                "SELECT key, value FROM config;"
-            )
+            for k, v in ConfigDB().fetch_all()
             if k in SettingsValues.__dataclass_fields__
         }
 
@@ -146,10 +134,9 @@ class Settings(metaclass=Singleton):
         for key, value in data.items():
             formatted_data[key] = self.__format_setting(key, value)
 
-        get_db().executemany(
-            "UPDATE config SET value = ? WHERE key = ?;",
-            ((v, k) for k, v in formatted_data.items())
-        )
+        config_db = ConfigDB()
+        for key, value in formatted_data.items():
+            config_db.update(key, value)
 
         old_settings = self.get_settings()
         if (
@@ -242,7 +229,11 @@ class Settings(metaclass=Singleton):
             raise InvalidKeyValue(key, value)
 
         if key == 'login_time':
-            if not 60 <= value <= THIRTY_DAYS:
+            if not (
+                Interval.ONE_MINUTE.value
+                <= value
+                <= Interval.THIRTY_DAYS.value
+            ):
                 raise InvalidKeyValue(key, value)
 
         elif key in ('port', 'backup_port'):
@@ -258,7 +249,7 @@ class Settings(metaclass=Singleton):
                 raise InvalidKeyValue(key, value)
 
         elif key == 'db_backup_interval':
-            if value < 3600:
+            if value < Interval.ONE_HOUR.value:
                 raise InvalidKeyValue(key, value)
 
         elif key == 'db_backup_amount':
