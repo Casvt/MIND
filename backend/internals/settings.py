@@ -37,16 +37,13 @@ def get_about_data() -> Dict[str, Any]:
 
 
 @dataclass(frozen=True)
-class SettingsValues:
+class PublicSettingsValues:
     database_version: int = get_latest_db_version()
     log_level: int = INFO
 
     host: str = '0.0.0.0'
     port: int = 8080
     url_prefix: str = ''
-    backup_host: str = '0.0.0.0'
-    backup_port: int = 8080
-    backup_url_prefix: str = ''
 
     allow_new_accounts: bool = True
     login_time: int = Interval.ONE_HOUR.value
@@ -57,23 +54,22 @@ class SettingsValues:
     db_backup_folder: str = folder_path(*Constants.DB_FOLDER)
     db_backup_last_run: int = 0
 
-    measured_timezone: int = -1 # = no value
-
     def todict(self) -> Dict[str, Any]:
-        return {
-            k: v
-            for k, v in self.__dict__.items()
-            if not (
-                k.startswith('backup_')
-                or k == 'measured_timezone'
-            )
-        }
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class SettingsValues(PublicSettingsValues):
+    backup_host: str = '0.0.0.0'
+    backup_port: int = 8080
+    backup_url_prefix: str = ''
+
+    measured_timezone: int = -1 # = no value
 
 
 class Settings(metaclass=Singleton):
     def __init__(self) -> None:
         self._insert_missing_settings()
-        self._fetch_settings()
         return
 
     def _insert_missing_settings(self) -> None:
@@ -84,8 +80,13 @@ class Settings(metaclass=Singleton):
         commit()
         return
 
-    def _fetch_settings(self) -> None:
-        "Load the settings from the database into the cache."
+    @lru_cache(1)
+    def get_settings(self) -> SettingsValues:
+        """Get the settings, including internal ones.
+
+        Returns:
+            SettingsValues: The settings.
+        """
         db_values = {
             k: v
             for k, v in ConfigDB().fetch_all()
@@ -95,27 +96,39 @@ class Settings(metaclass=Singleton):
         for b_key in ('allow_new_accounts', 'login_time_reset'):
             db_values[b_key] = bool(db_values[b_key])
 
-        self.__cached_values = SettingsValues(**db_values)
-        return
+        return SettingsValues(**db_values)
 
-    def get_settings(self) -> SettingsValues:
-        """Get the settings from the cache.
+    @lru_cache(1)
+    def get_public_settings(self) -> PublicSettingsValues:
+        """Get the public settings, so excluding internal ones.
 
         Returns:
-            SettingsValues: The settings.
+            PublicSettingsValues: The public settings.
         """
-        return self.__cached_values
+        return PublicSettingsValues(
+            **{
+                k: v
+                for k, v in self.get_settings().todict().items()
+                if k in PublicSettingsValues.__dataclass_fields__
+            }
+        )
+
+    def clear_cache(self) -> None:
+        """Clear the cache of the settings"""
+        self.get_settings.cache_clear()
+        self.get_public_settings.cache_clear()
+        return
 
     # Alias, better in one-liners
     # sv = Settings Values
     @property
     def sv(self) -> SettingsValues:
-        """Get the settings from the cache.
+        """Get the settings, including internal ones.
 
         Returns:
             SettingsValues: The settings.
         """
-        return self.__cached_values
+        return self.get_settings()
 
     def update(
         self,
@@ -154,7 +167,7 @@ class Settings(metaclass=Singleton):
 
             DatabaseBackupHandler().set_backup_timer()
 
-        self._fetch_settings()
+        self.clear_cache()
 
         LOGGER.info(f"Settings changed: {formatted_data}")
 

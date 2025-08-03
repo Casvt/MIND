@@ -512,7 +512,7 @@ def api_restart(inputs: Dict[str, Any]):
 @api.route('/settings', PublicSettingsData)
 @endpoint_wrapper
 def api_settings(inputs: Dict[str, Any]):
-    return return_api(Settings().get_settings().todict())
+    return return_api(Settings().get_public_settings().todict())
 
 
 @api.route('/about', AboutData)
@@ -527,7 +527,7 @@ def api_admin_settings(inputs: Dict[str, Any]):
     settings = Settings()
 
     if request.method == 'GET':
-        return return_api(settings.get_settings().todict())
+        return return_api(settings.get_public_settings().todict())
 
     elif request.method == 'PUT':
         LOGGER.info(f'Submitting admin settings: {inputs}')

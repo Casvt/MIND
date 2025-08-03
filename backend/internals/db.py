@@ -352,8 +352,9 @@ def setup_db() -> None:
 
     migrate_db()
 
-    # DB Migration might change settings, so update cache just to be sure.
-    settings._fetch_settings()
+    # DB Migration might change settings directly in database,
+    # so clear cache just to be sure.
+    settings.clear_cache()
 
     # Add admin user if it doesn't exist
     users = Users()

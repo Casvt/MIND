@@ -60,7 +60,7 @@ def migrate_db() -> None:
         s.update({"database_version": start_version + 1})
 
     get_db().execute("VACUUM;")
-    s._fetch_settings()
+    s.clear_cache()
     get_db_migration_map.cache_clear()
 
     return
