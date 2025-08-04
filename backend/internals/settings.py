@@ -38,7 +38,6 @@ def get_about_data() -> Dict[str, Any]:
 
 @dataclass(frozen=True)
 class PublicSettingsValues:
-    database_version: int = get_latest_db_version()
     log_level: int = INFO
 
     host: str = '0.0.0.0'
@@ -60,6 +59,8 @@ class PublicSettingsValues:
 
 @dataclass(frozen=True)
 class SettingsValues(PublicSettingsValues):
+    database_version: int = get_latest_db_version()
+
     backup_host: str = '0.0.0.0'
     backup_port: int = 8080
     backup_url_prefix: str = ''
@@ -73,7 +74,7 @@ class Settings(metaclass=Singleton):
         return
 
     def _insert_missing_settings(self) -> None:
-        "Insert any missing keys from the settings into the database."
+        """Insert any missing keys from the settings into the database"""
         config_db = ConfigDB()
         for key, value in asdict(SettingsValues()).items():
             config_db.insert(key, value)
@@ -93,7 +94,13 @@ class Settings(metaclass=Singleton):
             if k in SettingsValues.__dataclass_fields__
         }
 
-        for b_key in ('allow_new_accounts', 'login_time_reset'):
+        bool_fields = (
+            field.name
+            for field in SettingsValues.__dataclass_fields__.values()
+            if field.type is bool
+        )
+
+        for b_key in bool_fields:
             db_values[b_key] = bool(db_values[b_key])
 
         return SettingsValues(**db_values)
@@ -132,12 +139,17 @@ class Settings(metaclass=Singleton):
 
     def update(
         self,
-        data: Mapping[str, Any]
+        data: Mapping[str, Any],
+        from_public: bool = False
     ) -> None:
         """Change the settings, in a `dict.update()` type of way.
 
         Args:
             data (Mapping[str, Any]): The keys and their new values.
+
+            from_public (bool, optional): If True, only allow public settings to
+                be changed.
+                Defaults to False.
 
         Raises:
             KeyNotFound: Key is not a setting.
@@ -145,7 +157,7 @@ class Settings(metaclass=Singleton):
         """
         formatted_data = {}
         for key, value in data.items():
-            formatted_data[key] = self.__format_setting(key, value)
+            formatted_data[key] = self.__format_setting(key, value, from_public)
 
         config_db = ConfigDB()
         for key, value in formatted_data.items():
@@ -191,23 +203,25 @@ class Settings(metaclass=Singleton):
         else:
             return SettingsValues.__dataclass_fields__[key].default
 
-    def reset(self, key: str) -> None:
+    def reset(self, key: str, from_public: bool) -> None:
         """Reset the value of the key to the default value.
 
         Args:
             key (str): The key of which to reset the value.
+            from_public (bool): If True, only allow public settings to
+                be reset.
 
         Raises:
             KeyNotFound: Key is not a setting.
         """
         LOGGER.debug(f'Setting reset: {key}')
 
-        self.update({key: self.get_default_value(key)})
+        self.update({key: self.get_default_value(key)}, from_public=from_public)
 
         return
 
     def backup_hosting_settings(self) -> None:
-        "Backup the hosting settings in the database."
+        """Backup the hosting settings in the database"""
         s = self.get_settings()
         backup_settings = {
             'backup_host': s.host,
@@ -217,12 +231,14 @@ class Settings(metaclass=Singleton):
         self.update(backup_settings)
         return
 
-    def __format_setting(self, key: str, value: Any) -> Any:
+    def __format_setting(self, key: str, value: Any, from_public: bool) -> Any:
         """Check if the value of a setting is allowed and convert if needed.
 
         Args:
             key (str): Key of setting.
             value (Any): Value of setting.
+            from_public (bool): If True, only allow public settings
+                to be changed.
 
         Raises:
             KeyNotFound: Key is not a setting.
@@ -233,10 +249,12 @@ class Settings(metaclass=Singleton):
         """
         converted_value = value
 
-        if key not in SettingsValues.__dataclass_fields__:
+        KeyCollection = PublicSettingsValues if from_public else SettingsValues
+
+        if key not in KeyCollection.__dataclass_fields__:
             raise KeyNotFound(key)
 
-        key_data = SettingsValues.__dataclass_fields__[key]
+        key_data = KeyCollection.__dataclass_fields__[key]
 
         if not isinstance(value, key_data.type):
             raise InvalidKeyValue(key, value)

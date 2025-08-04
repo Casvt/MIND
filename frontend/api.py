@@ -541,11 +541,14 @@ def api_admin_settings(inputs: Dict[str, Any]):
         if hosting_changes:
             settings.backup_hosting_settings()
 
-        settings.update({
-            k: v
-            for k, v in inputs.items()
-            if v is not None
-        })
+        settings.update(
+            {
+                k: v
+                for k, v in inputs.items()
+                if v is not None
+            },
+            from_public=True
+        )
 
         if hosting_changes:
             Server().restart(StartType.RESTART_HOSTING_CHANGES)
@@ -563,7 +566,7 @@ def api_admin_settings(inputs: Dict[str, Any]):
             settings.backup_hosting_settings()
 
         for setting in inputs["setting_keys"]:
-            settings.reset(setting)
+            settings.reset(setting, from_public=True)
 
         if hosting_changes:
             Server().restart(StartType.RESTART_HOSTING_CHANGES)
