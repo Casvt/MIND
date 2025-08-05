@@ -120,6 +120,18 @@ class DBConnectionManager(type):
 
         return cls.instances[thread_id]
 
+    @classmethod
+    def close_connection_of_thread(cls) -> None:
+        """Close the DB connection of the current thread"""
+        thread_id = current_thread_id()
+        if (
+            thread_id in cls.instances
+            and not cls.instances[thread_id].closed
+        ):
+            cls.instances[thread_id].close()
+            del cls.instances[thread_id]
+        return
+
 
 class DBConnection(Connection, metaclass=DBConnectionManager):
     default_file = ''
