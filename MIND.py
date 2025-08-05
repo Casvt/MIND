@@ -94,8 +94,7 @@ def _main(
         reminder_handler = ReminderHandler()
         reminder_handler.find_next_reminder()
 
-        backup_handler = DatabaseBackupHandler()
-        backup_handler.set_backup_timer()
+        DatabaseBackupHandler.set_backup_timer()
 
         tz_change_handler = TimezoneChangeHandler()
         tz_change_handler.set_detector_timer()
@@ -107,7 +106,7 @@ def _main(
 
     finally:
         reminder_handler.stop_handling()
-        backup_handler.stop_backup_timer()
+        DatabaseBackupHandler.stop_backup_timer()
         tz_change_handler.stop_detector_timer()
 
         if SERVER.start_type is not None:

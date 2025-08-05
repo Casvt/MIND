@@ -177,7 +177,7 @@ class Settings(metaclass=Singleton):
             from backend.internals.db_backup_import import \
                 DatabaseBackupHandler
 
-            DatabaseBackupHandler().set_backup_timer()
+            DatabaseBackupHandler.set_backup_timer()
 
         self.clear_cache()
 

@@ -118,7 +118,7 @@ def backup_database() -> None:
 
     settings.update({"db_backup_last_run": int(time())})
 
-    DatabaseBackupHandler().set_backup_timer()
+    DatabaseBackupHandler.set_backup_timer()
 
     return
 
@@ -126,7 +126,8 @@ def backup_database() -> None:
 class DatabaseBackupHandler:
     backup_timer: Union[Timer, None] = None
 
-    def set_backup_timer(self) -> None:
+    @classmethod
+    def set_backup_timer(cls) -> None:
         """Update the timer for the backup process. Start one if it hasn't
         already. Replace it if it does already exist, in case the interval
         setting has a new value.
@@ -135,21 +136,22 @@ class DatabaseBackupHandler:
 
         sv = Settings().get_settings()
 
-        if self.__class__.backup_timer is not None:
-            self.__class__.backup_timer.cancel()
+        if cls.backup_timer is not None:
+            cls.backup_timer.cancel()
 
-        self.__class__.backup_timer = Server().get_db_timer_thread(
+        cls.backup_timer = Server().get_db_timer_thread(
             sv.db_backup_last_run + sv.db_backup_interval - time(),
             backup_database,
             "DatabaseBackupHandler"
         )
-        self.__class__.backup_timer.start()
+        cls.backup_timer.start()
         return
 
-    def stop_backup_timer(self) -> None:
+    @classmethod
+    def stop_backup_timer(cls) -> None:
         "If the backup timer is running, stop it"
-        if self.__class__.backup_timer is not None:
-            self.__class__.backup_timer.cancel()
+        if cls.backup_timer is not None:
+            cls.backup_timer.cancel()
         return
 
 
