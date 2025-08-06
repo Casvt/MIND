@@ -198,6 +198,31 @@ class MindException(Exception, ABC):
         ...
 
 
+class StartTypeHandler(ABC):
+    description: str
+    """A short description of what the start type is for"""
+
+    timeout: float
+    """The amount of time in seconds before reverting"""
+
+    restart_on_timeout: bool
+    """"Whether the application should restart once the timeout is reached"""
+
+    @abstractmethod
+    def on_timeout(self) -> None:
+        """
+        Called when the timeout is reached. Generally reverts changes.
+        """
+        ...
+
+    @abstractmethod
+    def on_diffuse(self) -> None:
+        """
+        Called when the timer is diffused. Generally finalises changes.
+        """
+        ...
+
+
 # region Dataclasses
 @dataclass
 class ApiKeyEntry:

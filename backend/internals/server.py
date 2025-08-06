@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
-Setting up, running and shutting down the API and web-ui
+Setting up, running and shutting down the webserver.
+Also handling startup types.
 """
 
 from __future__ import annotations
@@ -15,7 +16,7 @@ from waitress.server import create_server
 from waitress.task import ThreadedTaskDispatcher as TTD
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
-from backend.base.definitions import Constants, StartType
+from backend.base.definitions import Constants, StartType, StartTypeHandler
 from backend.base.helpers import Singleton, folder_path
 from backend.base.logging import LOGGER
 from backend.internals.db import DBConnectionManager, close_db
@@ -26,6 +27,7 @@ if TYPE_CHECKING:
     from waitress.server import BaseWSGIServer, MultiSocketServer
 
 
+# region Thread Manager
 class ThreadedTaskDispatcher(TTD):
     def __init__(self) -> None:
         super().__init__()
@@ -51,40 +53,7 @@ class ThreadedTaskDispatcher(TTD):
         return result
 
 
-def handle_start_type(start_type: StartType) -> None:
-    """Do special actions needed based on restart version.
-
-    Args:
-        start_type (StartType): The restart version.
-    """
-    if start_type == StartType.RESTART_HOSTING_CHANGES:
-        LOGGER.info("Starting timer for hosting changes")
-        Server().revert_hosting_timer.start()
-
-    elif start_type == StartType.RESTART_DB_CHANGES:
-        LOGGER.info("Starting timer for database import")
-        Server().revert_db_timer.start()
-
-    return
-
-
-def diffuse_timers() -> None:
-    """Stop any timers running after doing a special restart."""
-
-    SERVER = Server()
-
-    if SERVER.revert_hosting_timer.is_alive():
-        LOGGER.info("Timer for hosting changes diffused")
-        SERVER.revert_hosting_timer.cancel()
-
-    elif SERVER.revert_db_timer.is_alive():
-        LOGGER.info("Timer for database import diffused")
-        SERVER.revert_db_timer.cancel()
-        revert_db_import(swap=False)
-
-    return
-
-
+# region Server
 class Server(metaclass=Singleton):
     api_prefix = "/api"
     admin_api_extension = "/admin"
@@ -93,20 +62,6 @@ class Server(metaclass=Singleton):
 
     def __init__(self) -> None:
         self.start_type = None
-
-        self.revert_db_timer = self.get_db_timer_thread(
-            Constants.DB_REVERT_TIME,
-            revert_db_import,
-            "DatabaseImportHandler",
-            kwargs={"swap": True}
-        )
-
-        self.revert_hosting_timer = self.get_db_timer_thread(
-            Constants.HOSTING_REVERT_TIME,
-            self.restore_hosting_settings,
-            "HostingHandler"
-        )
-
         return
 
     def create_app(self) -> None:
@@ -246,19 +201,6 @@ class Server(metaclass=Singleton):
         self.shutdown()
         return
 
-    def restore_hosting_settings(self) -> None:
-        "Restore the hosting settings from the backup, and restart."
-        settings = Settings()
-        values = settings.get_settings()
-        main_settings = {
-            'host': values.backup_host,
-            'port': values.backup_port,
-            'url_prefix': values.backup_url_prefix
-        }
-        settings.update(main_settings)
-        self.restart()
-        return
-
     def get_db_timer_thread(
         self,
         interval: float,
@@ -303,3 +245,121 @@ class Server(metaclass=Singleton):
         if name:
             t.name = name
         return t
+
+
+# region StartType Handling
+class StartTypeHandlers:
+    handlers: dict[StartType, StartTypeHandler] = {}
+    timeout_thread: Union[Timer, None] = None
+    running_handler: Union[StartType, None] = None
+
+    @classmethod
+    def register_handler(cls, start_type: StartType):
+        """Class decorator to register a StartTypeHandler for a certain start
+        type.
+
+        ```
+        @StartTypeHandlers.register_handler(example_type)
+        class ExampleHandler(StartTypeHandler):
+            ...
+        ```
+
+        Args:
+            start_type (StartType): The start type that the StartTypeHandler is
+                for.
+        """
+        def wrapper(
+            handler_class: type[StartTypeHandler]
+        ) -> type[StartTypeHandler]:
+            cls.handlers[start_type] = handler_class()
+            return handler_class
+        return wrapper
+
+    @staticmethod
+    def _on_timeout_wrapper(
+        on_timeout: Callable[[], None],
+        restart_on_timeout: bool
+    ) -> None:
+        on_timeout()
+        if restart_on_timeout:
+            Server().restart()
+        return
+
+    @classmethod
+    def start_timer(cls, start_type: StartType) -> None:
+        """Start the timer for a start type.
+
+        Args:
+            start_type (StartType): The start type to start the timer for.
+        """
+        if start_type not in cls.handlers:
+            return
+
+        if cls.timeout_thread and cls.timeout_thread.is_alive():
+            cls.timeout_thread.cancel()
+
+        handler = cls.handlers[start_type]
+        cls.running_handler = start_type
+        cls.timeout_thread = Server().get_db_timer_thread(
+            interval=handler.timeout,
+            target=cls._on_timeout_wrapper,
+            name="StartTypeHandler",
+            args=(handler.on_timeout, handler.restart_on_timeout)
+        )
+        cls.timeout_thread.start()
+        LOGGER.info(
+            "Starting timer for %s (%d seconds)",
+            handler.description, handler.timeout
+        )
+        return
+
+    @classmethod
+    def diffuse_timer(cls, start_type: StartType) -> None:
+        """Stop/Diffuse the timer for a start type.
+
+        Args:
+            start_type (StartType): The start type to stop the timer for.
+        """
+        if cls.running_handler != start_type:
+            return
+
+        if cls.timeout_thread and cls.timeout_thread.is_alive():
+            handler = cls.handlers[start_type]
+            LOGGER.info(
+                "Timer for %s diffused",
+                handler.description
+            )
+            cls.timeout_thread.cancel()
+            cls.timeout_thread = None
+            cls.running_handler = None
+            handler.on_diffuse()
+        return
+
+
+@StartTypeHandlers.register_handler(StartType.RESTART_HOSTING_CHANGES)
+class HostingChangesHandler(StartTypeHandler):
+    description = "hosting changes"
+    timeout = Constants.HOSTING_REVERT_TIME
+    restart_on_timeout = True
+
+    def on_timeout(self) -> None:
+        Settings().restore_hosting_settings()
+        return
+
+    def on_diffuse(self) -> None:
+        return
+
+
+@StartTypeHandlers.register_handler(StartType.RESTART_DB_CHANGES)
+class DatabaseChangesHandler(StartTypeHandler):
+    description = "database import"
+    timeout = Constants.DB_REVERT_TIME
+    restart_on_timeout = True
+
+    def on_timeout(self) -> None:
+        revert_db_import(swap=True)
+        return
+
+    def on_diffuse(self) -> None:
+        revert_db_import(swap=False)
+        return

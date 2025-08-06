@@ -17,7 +17,7 @@ from backend.features.reminder_handler import ReminderHandler
 from backend.features.tz_shifter import TimezoneChangeHandler
 from backend.internals.db import set_db_location, setup_db
 from backend.internals.db_backup_import import DatabaseBackupHandler
-from backend.internals.server import Server, handle_start_type
+from backend.internals.server import Server, StartTypeHandlers
 from backend.internals.settings import Settings
 
 
@@ -65,7 +65,7 @@ def _main(
     SERVER = Server()
     SERVER.create_app()
     with SERVER.app.app_context():
-        handle_start_type(start_type)
+        StartTypeHandlers.start_timer(start_type)
         setup_db()
 
         s = Settings()

@@ -231,6 +231,17 @@ class Settings(metaclass=Singleton):
         self.update(backup_settings)
         return
 
+    def restore_hosting_settings(self) -> None:
+        """Restore the hosting settings from the database"""
+        s = self.get_settings()
+        restore_settings = {
+            'host': s.backup_host,
+            'port': s.backup_port,
+            'url_prefix': s.backup_url_prefix
+        }
+        self.update(restore_settings)
+        return
+
     def __format_setting(self, key: str, value: Any, from_public: bool) -> Any:
         """Check if the value of a setting is allowed and convert if needed.
 

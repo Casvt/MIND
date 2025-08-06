@@ -25,7 +25,7 @@ from backend.implementations.users import Users
 from backend.internals.db_backup_import import (create_database_copy,
                                                 get_backup, get_backups,
                                                 import_db, import_db_backup)
-from backend.internals.server import Server, diffuse_timers
+from backend.internals.server import Server, StartTypeHandlers
 from backend.internals.settings import Settings, get_about_data
 from frontend.input_validation import (AboutData, AuthLoginData,
                                        AuthLogoutData, AuthStatusData,
@@ -157,7 +157,8 @@ def api_login(inputs: Dict[str, Any]):
 
     # Login successful
 
-    diffuse_timers()
+    StartTypeHandlers.diffuse_timer(StartType.RESTART_DB_CHANGES)
+    StartTypeHandlers.diffuse_timer(StartType.RESTART_HOSTING_CHANGES)
 
     # Generate an API key until one
     # is generated that isn't used already
