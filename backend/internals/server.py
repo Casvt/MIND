@@ -12,6 +12,7 @@ from threading import Timer
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Mapping, Union
 
 from flask import Flask, request
+from flask.json.provider import DefaultJSONProvider
 from waitress.server import create_server
 from waitress.task import ThreadedTaskDispatcher as TTD
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
@@ -74,8 +75,11 @@ class Server(metaclass=Singleton):
             static_url_path='/static'
         )
         app.config['SECRET_KEY'] = urandom(32)
-        app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
-        app.config['JSON_SORT_KEYS'] = False
+
+        json_provider = DefaultJSONProvider(app)
+        json_provider.sort_keys = False
+        json_provider.compact = False
+        app.json = json_provider
 
         # Add error handlers
         @app.errorhandler(400)
