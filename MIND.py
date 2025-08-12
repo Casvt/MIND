@@ -99,9 +99,10 @@ def _main(
         tz_change_handler = TimezoneChangeHandler()
         tz_change_handler.set_detector_timer()
 
+    restart_type = None
     try:
         # =================
-        SERVER.run(settings.host, settings.port)
+        restart_type = SERVER.run(settings.host, settings.port)
         # =================
 
     finally:
@@ -109,9 +110,9 @@ def _main(
         DatabaseBackupHandler.stop_backup_timer()
         tz_change_handler.stop_detector_timer()
 
-        if SERVER.start_type is not None:
+        if restart_type is not None:
             LOGGER.info("Restarting MIND")
-            exit(SERVER.start_type.value)
+            exit(restart_type.value)
 
         exit(0)
 

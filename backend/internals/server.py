@@ -58,7 +58,7 @@ class Server(metaclass=Singleton):
     url_prefix = ''
 
     def __init__(self) -> None:
-        self.start_type = None
+        self.__start_type = None
         return
 
     def create_app(self) -> None:
@@ -150,22 +150,25 @@ class Server(metaclass=Singleton):
         )
         return server
 
-    def run(self, host: str, port: int) -> None:
+    def run(self, host: str, port: int) -> Union[StartType, None]:
         """Start the webserver.
 
         Args:
             host (str): Where to host the server on (e.g. `0.0.0.0`).
             port (int): The port to host the server on (e.g. `5656`).
+
+        Returns:
+            Union[StartType, None]: `None` on shutdown, `StartType` on restart.
         """
         self.server = self.__create_waitress_server(host, port)
+
         LOGGER.info(f'MIND running on http://{host}:{port}{self.url_prefix}')
         self.server.run()
 
-        return
+        return self.__start_type
 
-    def __shutdown_thread_function(self) -> None:
-        """Shutdown waitress server. Intended to be run in a thread.
-        """
+    def __trigger_server_shutdown(self) -> None:
+        """Shutdown waitress server. Intended to be run in a thread."""
         if not hasattr(self, 'server'):
             return
 
@@ -176,27 +179,28 @@ class Server(metaclass=Singleton):
 
     def shutdown(self) -> None:
         """
-        Stop the waitress server. Starts a thread that shuts down the server.
+        Stop the waitress server. Starts a thread that will trigger the server
+        shutdown after one second.
         """
         self.get_db_timer_thread(
             1.0,
-            self.__shutdown_thread_function,
+            self.__trigger_server_shutdown,
             "InternalStateHandler"
         ).start()
         return
 
     def restart(
         self,
-        start_type: StartType = StartType.STARTUP
+        start_type: StartType = StartType.RESTART
     ) -> None:
         """Same as `self.shutdown()`, but restart instead of shutting down.
 
         Args:
             start_type (StartType, optional): Why Kapowarr should
             restart.
-                Defaults to StartType.STARTUP.
+                Defaults to StartType.RESTART.
         """
-        self.start_type = start_type
+        self.__start_type = start_type
         self.shutdown()
         return
 
