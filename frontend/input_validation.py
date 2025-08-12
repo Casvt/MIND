@@ -21,11 +21,10 @@ from backend.base.custom_exceptions import (AccessUnauthorized,
                                             KeyNotFound, NewAccountsNotAllowed,
                                             NotificationServiceNotFound,
                                             UsernameInvalid, UsernameTaken)
-from backend.base.definitions import (DataSource, DataType, MindException,
-                                      RepeatQuantity, SortingMethod,
-                                      TimelessSortingMethod)
+from backend.base.definitions import (Constants, DataSource, DataType,
+                                      MindException, RepeatQuantity,
+                                      SortingMethod, TimelessSortingMethod)
 from backend.base.helpers import folder_path
-from backend.internals.server import Server
 from backend.internals.settings import SettingsValues
 
 if TYPE_CHECKING:
@@ -918,13 +917,13 @@ def get_api_docs(request: Request) -> Type[EndpointData]:
     """
     assert request.url_rule is not None
 
-    if request.path.startswith(Server.admin_prefix):
+    if request.path.startswith(Constants.ADMIN_PREFIX):
         url = (
-            Server.admin_api_extension +
-            request.url_rule.rule.split(Server.admin_prefix)[1]
+            Constants.ADMIN_API_EXTENSION +
+            request.url_rule.rule.split(Constants.ADMIN_PREFIX)[1]
         )
     else:
-        url = request.url_rule.rule.split(Server.api_prefix)[1]
+        url = request.url_rule.rule.split(Constants.API_PREFIX)[1]
 
     return API_DOCS[url]
 
@@ -986,7 +985,7 @@ class APIBlueprint(Blueprint):
         if self == api:
             processed_rule = rule
         elif self == admin_api:
-            processed_rule = Server.admin_api_extension + rule
+            processed_rule = Constants.ADMIN_API_EXTENSION + rule
         else:
             raise NotImplementedError
 

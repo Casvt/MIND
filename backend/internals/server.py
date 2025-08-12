@@ -55,9 +55,6 @@ class ThreadedTaskDispatcher(TTD):
 
 # region Server
 class Server(metaclass=Singleton):
-    api_prefix = "/api"
-    admin_api_extension = "/admin"
-    admin_prefix = "/api/admin"
     url_prefix = ''
 
     def __init__(self) -> None:
@@ -87,7 +84,9 @@ class Server(metaclass=Singleton):
 
         @app.errorhandler(404)
         def not_found(e):
-            if request.path.startswith((self.api_prefix, self.admin_prefix)):
+            if request.path.startswith(
+                (Constants.API_PREFIX, Constants.ADMIN_PREFIX)
+            ):
                 return {'error': "NotFound", "result": {}}, 404
             return render("page_not_found.html")
 
@@ -101,8 +100,8 @@ class Server(metaclass=Singleton):
 
         # Add endpoints
         app.register_blueprint(ui)
-        app.register_blueprint(api, url_prefix=self.api_prefix)
-        app.register_blueprint(admin_api, url_prefix=self.admin_prefix)
+        app.register_blueprint(api, url_prefix=Constants.API_PREFIX)
+        app.register_blueprint(admin_api, url_prefix=Constants.ADMIN_PREFIX)
 
         # Setup db handling
         app.teardown_appcontext(close_db)

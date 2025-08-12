@@ -42,6 +42,9 @@ class Constants:
 
     HOSTING_THREADS = 10
     HOSTING_REVERT_TIME = 60.0 # seconds
+    API_PREFIX = "/api"
+    ADMIN_API_EXTENSION = "/admin"
+    ADMIN_PREFIX = API_PREFIX + ADMIN_API_EXTENSION
 
     DB_FOLDER = ("db",)
     DB_NAME = "MIND.db"

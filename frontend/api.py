@@ -12,7 +12,7 @@ from flask import Response, g, request, send_file
 from backend.base.custom_exceptions import (AccessUnauthorized,
                                             APIKeyExpired, APIKeyInvalid,
                                             LogFileNotFound, UserNotFound)
-from backend.base.definitions import (ApiKeyEntry, MindException,
+from backend.base.definitions import (ApiKeyEntry, Constants, MindException,
                                       SendResult, Serialisable, StartType)
 from backend.base.helpers import folder_path
 from backend.base.logging import LOGGER, get_log_filepath
@@ -81,7 +81,7 @@ def auth() -> None:
     if (
         user_data.admin
         and not request.path.startswith(
-            (Server.admin_prefix, Server.api_prefix + '/auth')
+            (Constants.ADMIN_PREFIX, Constants.API_PREFIX + '/auth')
         )
     ):
         raise APIKeyInvalid(api_key)
@@ -89,7 +89,7 @@ def auth() -> None:
     if (
         not user_data.admin
         and
-        request.path.startswith(Server.admin_prefix)
+        request.path.startswith(Constants.ADMIN_PREFIX)
     ):
         raise APIKeyInvalid(api_key)
 

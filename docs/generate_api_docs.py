@@ -14,15 +14,14 @@ import frontend.api
 from backend.base.custom_exceptions import (DatabaseFileNotFound,
                                             NotificationServiceNotFound,
                                             ReminderNotFound, TemplateNotFound)
-from backend.base.definitions import MindException, StartType
+from backend.base.definitions import Constants, MindException, StartType
 from backend.base.helpers import folder_path
-from backend.internals.server import Server
 from frontend.input_validation import API_DOCS, DataSource, InputVariable
 
 # autopep8: on
 
-API_PREFIX = Server.api_prefix
-ADMIN_PREFIX = Server.admin_prefix
+API_PREFIX = Constants.API_PREFIX
+ADMIN_PREFIX = Constants.ADMIN_PREFIX
 API_FILE = folder_path('docs', 'src', 'other_docs', 'api.md')
 
 url_var_map = {
