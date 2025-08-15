@@ -14,14 +14,16 @@ from secrets import token_bytes
 from shutil import copy2, move
 from sys import base_exec_prefix, executable, platform, version_info
 from threading import current_thread
-from typing import Callable, Iterable, List, Sequence, Set, Tuple, Union, cast
+from typing import (Any, Callable, Dict, Iterable, List,
+                    Sequence, Set, Tuple, Union, cast)
 
 from apprise import Apprise, LogCapture
 from cron_converter import Cron
 from dateutil.relativedelta import relativedelta
 
 from backend.base.definitions import (WEEKDAY_NUMBER, GeneralReminderData,
-                                      RepeatQuantity, SendResult, T, U)
+                                      RepeatQuantity, SendResult,
+                                      Serialisable, T, U)
 from backend.base.logging import LOGGER
 
 
@@ -197,6 +199,14 @@ def current_thread_id() -> int:
         int: The ID.
     """
     return current_thread().native_id or -1
+
+
+def return_api(
+    result: Serialisable,
+    error: Union[str, None] = None,
+    code: int = 200
+) -> Tuple[Dict[str, Any], int]:
+    return {'error': error, 'result': result}, code
 
 
 # region Security

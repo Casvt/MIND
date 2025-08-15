@@ -9,12 +9,11 @@ from typing import Any, Callable, Dict, Tuple, Union
 
 from flask import Response, g, request, send_file
 
-from backend.base.custom_exceptions import (AccessUnauthorized,
-                                            APIKeyExpired, APIKeyInvalid,
-                                            LogFileNotFound, UserNotFound)
-from backend.base.definitions import (ApiKeyEntry, Constants, MindException,
-                                      SendResult, Serialisable, StartType)
-from backend.base.helpers import folder_path
+from backend.base.custom_exceptions import (APIKeyExpired, APIKeyInvalid,
+                                            LogFileNotFound)
+from backend.base.definitions import (ApiKeyEntry, Constants,
+                                      SendResult, StartType)
+from backend.base.helpers import folder_path, return_api
 from backend.base.logging import LOGGER, get_log_filepath
 from backend.features.reminders import Reminders
 from backend.features.static_reminders import StaticReminders
@@ -52,14 +51,6 @@ from frontend.input_validation import (AboutData, AuthLoginData,
 # ===================
 users = Users()
 api_key_map: Dict[int, ApiKeyEntry] = {}
-
-
-def return_api(
-    result: Serialisable,
-    error: Union[str, None] = None,
-    code: int = 200
-) -> Tuple[Dict[str, Any], int]:
-    return {'error': error, 'result': result}, code
 
 
 def auth() -> None:
@@ -120,28 +111,11 @@ def endpoint_wrapper(
     def wrapper(*args, **kwargs):
         requires_auth = get_api_docs(request).requires_auth
 
-        try:
-            if requires_auth:
-                auth()
+        if requires_auth:
+            auth()
 
-            inputs = input_validation()
-            result = method(inputs, *args, **kwargs)
-
-        except MindException as e:
-            if isinstance(
-                e,
-                (APIKeyInvalid, APIKeyExpired,
-                UserNotFound, AccessUnauthorized)
-            ):
-                ip = request.environ.get(
-                    'HTTP_X_FORWARDED_FOR',
-                    request.remote_addr
-                )
-                LOGGER.warning(f'Unauthorised request from {ip}')
-
-            result = return_api(**e.api_response)
-
-        return result
+        inputs = input_validation()
+        return method(inputs, *args, **kwargs)
 
     wrapper.__name__ = method.__name__
     return wrapper

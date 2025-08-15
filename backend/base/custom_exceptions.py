@@ -7,6 +7,54 @@ from backend.base.definitions import (ApiResponse, InvalidUsernameReason,
 from backend.base.logging import LOGGER
 
 
+class LogUnauthMindException(MindException):
+    """
+    MindExceptions that inherit from this one will trigger a log of the
+    requester's IP address once raised.
+    """
+
+
+# region REST responses
+class NotFound(MindException):
+    @property
+    def api_response(self) -> ApiResponse:
+        return {
+            'code': 404,
+            'error': self.__class__.__name__,
+            'result': {}
+        }
+
+
+class BadRequest(MindException):
+    @property
+    def api_response(self) -> ApiResponse:
+        return {
+            'code': 400,
+            'error': self.__class__.__name__,
+            'result': {}
+        }
+
+
+class MethodNotAllowed(MindException):
+    @property
+    def api_response(self) -> ApiResponse:
+        return {
+            'code': 405,
+            'error': self.__class__.__name__,
+            'result': {}
+        }
+
+
+class InternalError(MindException):
+    @property
+    def api_response(self) -> ApiResponse:
+        return {
+            'code': 500,
+            'error': self.__class__.__name__,
+            'result': {}
+        }
+
+
 # region Input/Output
 class KeyNotFound(MindException):
     "A key was not found in the input that is required to be given"
@@ -56,7 +104,7 @@ class InvalidKeyValue(MindException):
 
 
 # region Auth
-class AccessUnauthorized(MindException):
+class AccessUnauthorized(LogUnauthMindException):
     "The password given is not correct"
 
     def __init__(self) -> None:
@@ -74,7 +122,7 @@ class AccessUnauthorized(MindException):
         }
 
 
-class APIKeyInvalid(MindException):
+class APIKeyInvalid(LogUnauthMindException):
     "The API key is not correct"
 
     def __init__(self, api_key: str) -> None:
@@ -92,7 +140,7 @@ class APIKeyInvalid(MindException):
         }
 
 
-class APIKeyExpired(MindException):
+class APIKeyExpired(LogUnauthMindException):
     "The API key has expired"
 
     def __init__(self, api_key: str) -> None:
@@ -129,7 +177,7 @@ class OperationNotAllowed(MindException):
         }
 
 
-class NewAccountsNotAllowed(MindException):
+class NewAccountsNotAllowed(LogUnauthMindException):
     "It's not allowed to create a new account except for the admin"
 
     def __init__(self) -> None:
@@ -266,7 +314,7 @@ class UsernameInvalid(MindException):
         }
 
 
-class UserNotFound(MindException):
+class UserNotFound(LogUnauthMindException):
     "The user requested can not be found"
 
     def __init__(

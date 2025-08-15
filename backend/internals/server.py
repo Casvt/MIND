@@ -17,8 +17,12 @@ from waitress.server import create_server
 from waitress.task import ThreadedTaskDispatcher as TTD
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 
-from backend.base.definitions import Constants, StartType, StartTypeHandler
-from backend.base.helpers import Singleton, folder_path
+from backend.base.custom_exceptions import (BadRequest, InternalError,
+                                            LogUnauthMindException,
+                                            MethodNotAllowed, NotFound)
+from backend.base.definitions import (Constants, MindException,
+                                      StartType, StartTypeHandler)
+from backend.base.helpers import Singleton, folder_path, return_api
 from backend.base.logging import LOGGER
 from backend.internals.db import DBConnectionManager, close_db
 from backend.internals.db_backup_import import revert_db_import
@@ -84,23 +88,34 @@ class Server(metaclass=Singleton):
         # Add error handlers
         @app.errorhandler(400)
         def bad_request(e):
-            return {'error': "BadRequest", "result": {}}, 400
+            return return_api(**BadRequest().api_response)
 
         @app.errorhandler(404)
         def not_found(e):
             if request.path.startswith(
                 (Constants.API_PREFIX, Constants.ADMIN_PREFIX)
             ):
-                return {'error': "NotFound", "result": {}}, 404
+                return return_api(**NotFound().api_response)
             return render("page_not_found.html")
 
         @app.errorhandler(405)
         def method_not_allowed(e):
-            return {'error': "MethodNotAllowed", "result": {}}, 405
+            return return_api(**MethodNotAllowed().api_response)
 
         @app.errorhandler(500)
         def internal_error(e):
-            return {'error': "InternalError", "result": {}}, 500
+            return return_api(**InternalError().api_response)
+
+        @app.errorhandler(MindException)
+        def mind_exception(e: MindException):
+            if isinstance(e, LogUnauthMindException):
+                ip = request.environ.get(
+                    'HTTP_X_FORWARDED_FOR',
+                    request.remote_addr
+                )
+                LOGGER.warning(f'Unauthorised request from {ip}')
+
+            return return_api(**e.api_response)
 
         # Add endpoints
         app.register_blueprint(ui)
