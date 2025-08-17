@@ -254,8 +254,6 @@ class Server(metaclass=Singleton):
         def db_thread(*args, **kwargs) -> None:
             with self.app.app_context():
                 target(*args, **kwargs)
-
-            DBConnectionManager.close_connection_of_thread()
             return
 
         t = Timer(

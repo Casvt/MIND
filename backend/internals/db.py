@@ -154,15 +154,16 @@ class DBConnection(Connection, metaclass=DBConnectionManager):
                 on a command.
                 Defaults to Constants.DB_TIMEOUT.
         """
-        LOGGER.debug(f'Creating connection {self}')
+        self.closed = False
         self.db_file = db_file or self.default_file
+
+        LOGGER.debug(f'Creating connection {self}')
         super().__init__(
             self.db_file,
             timeout=timeout,
             detect_types=PARSE_DECLTYPES
         )
         super().cursor().execute("PRAGMA foreign_keys = ON;")
-        self.closed = False
         return
 
     def cursor( # type: ignore
@@ -223,7 +224,7 @@ class DBConnection(Connection, metaclass=DBConnectionManager):
         return
 
     def __repr__(self) -> str:
-        return f'<{self.__class__.__name__}; {current_thread().name}; {id(self)}>'
+        return f'<{self.__class__.__name__}; {current_thread().name}; {id(self)}; closed={self.closed}>'
 
 
 def set_db_location(
