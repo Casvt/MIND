@@ -64,11 +64,16 @@ class Server(metaclass=Singleton):
 
     def __init__(self) -> None:
         self.__start_type = None
+        self.app = self._create_app()
         return
 
-    def create_app(self) -> None:
-        """Creates an flask app instance that can be used to start a web server"""
+    @staticmethod
+    def _create_app() -> Flask:
+        """Creates a flask app instance that can be used to start a web server.
 
+        Returns:
+            Flask: The instance.
+        """
         from frontend.api import admin_api, api
         from frontend.ui import render, ui
 
@@ -125,8 +130,7 @@ class Server(metaclass=Singleton):
         # Setup db handling
         app.teardown_appcontext(close_db)
 
-        self.app = app
-        return
+        return app
 
     def set_url_prefix(self, url_prefix: str) -> None:
         """Change the URL prefix of the server.
@@ -139,7 +143,7 @@ class Server(metaclass=Singleton):
             Flask(__name__),
             {url_prefix: self.app.wsgi_app}
         )
-        self.url_prefix = url_prefix
+        self.__class__.url_prefix = url_prefix
         return
 
     def __create_waitress_server(

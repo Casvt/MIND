@@ -10,7 +10,6 @@ from frontend.ui import ui
 class Test_MIND(unittest.TestCase):
     def test_create_app(self):
         SERVER = Server()
-        SERVER.create_app()
         self.assertTrue(hasattr(SERVER, 'app'))
         app = SERVER.app
         self.assertIsInstance(app, Flask)

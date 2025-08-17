@@ -63,7 +63,6 @@ def _main(
     set_db_location(db_folder)
 
     SERVER = Server()
-    SERVER.create_app()
     with SERVER.app.app_context():
         StartTypeHandlers.start_timer(start_type)
         setup_db()

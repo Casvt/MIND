@@ -10,11 +10,10 @@ from backend.internals.server import Server
 
 ui = Blueprint('ui', __name__)
 methods = ['GET']
-SERVER = Server()
 
 
 def render(filename: str, **kwargs: Any) -> str:
-    return render_template(filename, url_prefix=SERVER.url_prefix, **kwargs)
+    return render_template(filename, url_prefix=Server.url_prefix, **kwargs)
 
 
 @ui.route('/manifest.json', methods=methods)
@@ -27,14 +26,14 @@ def ui_manifest():
                 "description": "MIND is a simple self hosted reminder application that can send push notifications to your device. Set the reminder and forget about it!",
                 "display": "standalone",
                 "orientation": "portrait-primary",
-                "start_url": f"{SERVER.url_prefix}/",
-                "scope": f"{SERVER.url_prefix}/",
-                "id": f"{SERVER.url_prefix}/",
+                "start_url": f"{Server.url_prefix}/",
+                "scope": f"{Server.url_prefix}/",
+                "id": f"{Server.url_prefix}/",
                 "background_color": "#1b1b1b",
                 "theme_color": "#6b6b6b",
                 "icons": [
                     {
-                        "src": f"{SERVER.url_prefix}/static/img/favicon.svg",
+                        "src": f"{Server.url_prefix}/static/img/favicon.svg",
                         "type": "image/svg+xml",
                         "sizes": "any"
                     }
