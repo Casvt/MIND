@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from os import urandom
 from threading import Timer
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Mapping, Union
+from typing import Any, Callable, Iterable, Mapping, Union
 
 from flask import Flask, request
 from flask.json.provider import DefaultJSONProvider
@@ -27,9 +27,6 @@ from backend.base.logging import LOGGER
 from backend.internals.db import DBConnectionManager, close_db
 from backend.internals.db_backup_import import revert_db_import
 from backend.internals.settings import Settings
-
-if TYPE_CHECKING:
-    from waitress.server import BaseWSGIServer, MultiSocketServer
 
 
 # region Thread Manager
@@ -132,11 +129,22 @@ class Server(metaclass=Singleton):
 
         return app
 
-    def set_url_prefix(self, url_prefix: str) -> None:
-        """Change the URL prefix of the server.
+    def run(
+        self,
+        host: str,
+        port: int,
+        url_prefix: str
+    ) -> Union[StartType, None]:
+        """Start the webserver.
 
         Args:
-            url_prefix (str): The desired URL prefix to set it to.
+            host (str): IP address to bind to, or `0.0.0.0` for all.
+            port (int): The port to listen on.
+            url_prefix (str): The url prefix/base to host the endpoints on, or
+                an empty string for no prefix.
+
+        Returns:
+            Union[StartType, None]: `None` on shutdown, `StartType` on restart.
         """
         self.app.config["APPLICATION_ROOT"] = url_prefix
         self.app.wsgi_app = DispatcherMiddleware( # type: ignore
@@ -144,46 +152,17 @@ class Server(metaclass=Singleton):
             {url_prefix: self.app.wsgi_app}
         )
         self.__class__.url_prefix = url_prefix
-        return
 
-    def __create_waitress_server(
-        self,
-        host: str,
-        port: int
-    ) -> Union[MultiSocketServer, BaseWSGIServer]:
-        """From the `Flask` instance created in `self.create_app()`, create
-        a waitress server instance.
-
-        Args:
-            host (str): Where to host the server on (e.g. `0.0.0.0`).
-            port (int): The port to host the server on (e.g. `5656`).
-
-        Returns:
-            Union[MultiSocketServer, BaseWSGIServer]: The waitress server instance.
-        """
         dispatcher = ThreadedTaskDispatcher()
         dispatcher.set_thread_count(Constants.HOSTING_THREADS)
 
-        server = create_server(
+        self.server = create_server(
             self.app,
             _dispatcher=dispatcher,
             host=host,
             port=port,
             threads=Constants.HOSTING_THREADS
         )
-        return server
-
-    def run(self, host: str, port: int) -> Union[StartType, None]:
-        """Start the webserver.
-
-        Args:
-            host (str): Where to host the server on (e.g. `0.0.0.0`).
-            port (int): The port to host the server on (e.g. `5656`).
-
-        Returns:
-            Union[StartType, None]: `None` on shutdown, `StartType` on restart.
-        """
-        self.server = self.__create_waitress_server(host, port)
 
         LOGGER.info(f'MIND running on http://{host}:{port}{self.url_prefix}')
         self.server.run()

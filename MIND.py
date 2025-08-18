@@ -88,7 +88,6 @@ def _main(
                 raise ValueError("Invalid url prefix value")
 
         settings = s.get_settings()
-        SERVER.set_url_prefix(settings.url_prefix)
 
         reminder_handler = ReminderHandler()
         reminder_handler.find_next_reminder()
@@ -101,7 +100,9 @@ def _main(
     restart_type = None
     try:
         # =================
-        restart_type = SERVER.run(settings.host, settings.port)
+        restart_type = SERVER.run(
+            settings.host, settings.port, settings.url_prefix
+        )
         # =================
 
     finally:
