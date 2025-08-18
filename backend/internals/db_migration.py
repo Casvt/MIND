@@ -273,10 +273,7 @@ class MigrateAddAdmin(DBMigrator):
         if 'admin' in users:
             users.get_one(
                 users.user_db.username_to_id('admin')
-            ).update(
-                new_username='admin_old',
-                new_password=None
-            )
+            ).update_username('admin_old')
 
         users.add(
             Constants.ADMIN_USERNAME, Constants.ADMIN_PASSWORD,

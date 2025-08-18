@@ -260,6 +260,11 @@ class UsersDB:
             (username,)
         ).fetchone()[0]
 
+    def admin_id(self) -> Union[int, None]:
+        return get_db().execute(
+            "SELECT id FROM users WHERE admin = 1 LIMIT 1;"
+        ).exists()
+
     def fetch(
         self,
         user_id: Union[int, None] = None

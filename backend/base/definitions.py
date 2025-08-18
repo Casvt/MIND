@@ -59,7 +59,7 @@ class Constants:
 
     ADMIN_USERNAME = "admin"
     ADMIN_PASSWORD = "admin"
-    INVALID_USERNAMES = ("reminders", "api")
+    INVALID_USERNAMES = ("", "reminders", "api")
     USERNAME_CHARACTERS = 'abcedfghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.!@$'
 
     CONNECTION_ERROR_TIMEOUT = 120 # seconds
