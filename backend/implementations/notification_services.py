@@ -108,9 +108,9 @@ class NotificationService:
         Raises:
             NotificationServiceInUse: The service is still used by a reminder.
         """
-        from backend.features.reminders import Reminder
-        from backend.features.static_reminders import StaticReminder
-        from backend.features.templates import Template
+        from backend.implementations.reminders import Reminder
+        from backend.implementations.static_reminders import StaticReminder
+        from backend.implementations.templates import Template
 
         LOGGER.info(f'Deleting notification service {self.id}')
 

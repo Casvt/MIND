@@ -15,11 +15,11 @@ from backend.base.definitions import (ApiKeyEntry, Constants,
                                       SendResult, StartType)
 from backend.base.helpers import folder_path, return_api
 from backend.base.logging import LOGGER, get_log_filepath
-from backend.features.reminders import Reminders
-from backend.features.static_reminders import StaticReminders
-from backend.features.templates import Templates
 from backend.implementations.apprise_parser import get_apprise_services
 from backend.implementations.notification_services import NotificationServices
+from backend.implementations.reminders import Reminders
+from backend.implementations.static_reminders import StaticReminders
+from backend.implementations.templates import Templates
 from backend.implementations.users import Users
 from backend.internals.db_backup_import import (create_database_copy,
                                                 get_backup, get_backups,
