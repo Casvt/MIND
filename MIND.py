@@ -89,8 +89,7 @@ def _main(
 
         settings = s.get_settings()
 
-        reminder_handler = ReminderHandler()
-        reminder_handler.find_next_reminder()
+        ReminderHandler.set_reminder_timer()
 
         DatabaseBackupHandler.set_backup_timer()
 
@@ -106,7 +105,7 @@ def _main(
         # =================
 
     finally:
-        reminder_handler.stop_handling()
+        ReminderHandler.stop_reminder_timer()
         DatabaseBackupHandler.stop_backup_timer()
         tz_change_handler.stop_detector_timer()
 

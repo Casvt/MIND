@@ -244,7 +244,7 @@ class Reminder:
                 data["enabled"]
             )
 
-        ReminderHandler().find_next_reminder(next_time)
+        ReminderHandler.set_reminder_timer(next_time)
         return self.get()
 
     def delete(self) -> None:
@@ -253,7 +253,7 @@ class Reminder:
 
         LOGGER.info(f'Deleting reminder {self.id}')
         self.reminder_db.delete(self.id)
-        ReminderHandler().find_next_reminder()
+        ReminderHandler.set_reminder_timer()
         return
 
 
@@ -456,7 +456,7 @@ class Reminders:
             enabled
         )
 
-        ReminderHandler().find_next_reminder(time)
+        ReminderHandler.set_reminder_timer(time)
 
         return self.get_one(new_id)
 

@@ -73,7 +73,7 @@ class TimezoneChangeHandler(metaclass=Singleton):
                 offset=shift_delta
             )
             settings.update({"measured_timezone": current_timezone})
-            ReminderHandler().find_next_reminder()
+            ReminderHandler.set_reminder_timer()
             LOGGER.info(
                 "Detected timezone/DST change (%s to %s), shifted reminders",
                 measured_timezone, current_timezone
