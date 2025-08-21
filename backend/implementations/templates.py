@@ -48,11 +48,11 @@ class Template:
         """Edit the template.
 
         Args:
-            title (Union[str, None]): The new title of the template.
+            title (Union[str, None], optional): The new title of the template.
                 Defaults to None.
 
-            notification_services (Union[List[int], None]): The new IDs of the
-                notification services to use to send the reminder.
+            notification_services (Union[List[int], None], optional): The new
+                IDs of the notification services to use to send the reminder.
                 Defaults to None.
 
             text (Union[str, None], optional): The new body of the template.
