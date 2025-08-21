@@ -151,7 +151,7 @@ class Users:
         """Get a user instance based on the ID.
 
         Args:
-            id (int): The ID of the user.
+            user_id (int): The ID of the user.
 
         Returns:
             User: The user instance.
@@ -179,7 +179,7 @@ class Users:
         """Check if a user ID is taken.
 
         Args:
-            id (int): The user ID to check.
+            user_id (int): The user ID to check.
 
         Returns:
             bool: Whether the user ID is already taken.
