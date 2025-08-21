@@ -650,7 +650,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
-	| 404 | ReminderNotFound | The reminder was not found |
+	| 404 | StaticReminderNotFound | The static reminder was not found |
 
 ??? POST
 
@@ -661,7 +661,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 201 | N/A | Success |
-	| 404 | ReminderNotFound | The reminder was not found |
+	| 404 | StaticReminderNotFound | The static reminder was not found |
 
 ??? PUT
 
@@ -683,7 +683,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	| 200 | N/A | Success |
 	| 400 | InvalidKeyValue | The value of a key is invalid |
 	| 404 | NotificationServiceNotFound | The notification service was not found |
-	| 404 | ReminderNotFound | The reminder was not found |
+	| 404 | StaticReminderNotFound | The static reminder was not found |
 
 ??? DELETE
 
@@ -694,7 +694,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 200 | N/A | Success |
-	| 404 | ReminderNotFound | The reminder was not found |
+	| 404 | StaticReminderNotFound | The static reminder was not found |
 
 ### `/admin/shutdown`
 
