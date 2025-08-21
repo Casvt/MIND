@@ -358,7 +358,7 @@ def api_get_templates(inputs: Dict[str, Any]):
     )
 
     if request.method == 'GET':
-        result = templates.fetchall(inputs['sort_by'])
+        result = templates.get_all(inputs['sort_by'])
         return return_api([r.todict() for r in result])
 
     elif request.method == 'POST':
@@ -386,7 +386,7 @@ def api_templates_query(inputs: Dict[str, Any]):
 def api_get_template(inputs: Dict[str, Any], t_id: int):
     template = Templates(
         api_key_map[g.hashed_api_key].user_data.user_id
-    ).fetchone(t_id)
+    ).get_one(t_id)
 
     if request.method == 'GET':
         result = template.get()
