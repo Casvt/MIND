@@ -147,7 +147,7 @@ class Users:
         """
         return self.user_db.fetch()
 
-    def get_one(self, id: int) -> User:
+    def get_one(self, user_id: int) -> User:
         """Get a user instance based on the ID.
 
         Args:
@@ -156,7 +156,7 @@ class Users:
         Returns:
             User: The user instance.
         """
-        return User(id)
+        return User(user_id)
 
     def __contains__(self, username_or_id: Union[str, int]) -> bool:
         if isinstance(username_or_id, str):
@@ -175,7 +175,7 @@ class Users:
         """
         return self.user_db.taken(username)
 
-    def id_taken(self, id: int) -> bool:
+    def id_taken(self, user_id: int) -> bool:
         """Check if a user ID is taken.
 
         Args:
@@ -184,7 +184,7 @@ class Users:
         Returns:
             bool: Whether the user ID is already taken.
         """
-        return self.user_db.exists(id)
+        return self.user_db.exists(user_id)
 
     def login(
         self,
