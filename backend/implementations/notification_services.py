@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from dataclasses import asdict
 from typing import List, Union
 
 from backend.base.custom_exceptions import (NotificationServiceInUse,
@@ -20,19 +19,18 @@ class NotificationService:
         user_id: int,
         notification_service_id: int
     ) -> None:
-        """Create an representation of a notification service.
+        """Create an instance.
 
         Args:
-            user_id (int): The ID that the service belongs to.
+            user_id (int): The user ID that the service belongs to.
             notification_service_id (int): The ID of the service itself.
 
         Raises:
             NotificationServiceNotFound: The user does not own a notification
-            service with the given ID.
+                service with the given ID.
         """
         self.user_id = user_id
         self.id = notification_service_id
-
         self.ns_db = NotificationServicesDB(self.user_id)
 
         if not self.ns_db.exists(self.id):
@@ -63,6 +61,9 @@ class NotificationService:
             url (Union[str, None], optional): The new url of the service.
                 Defaults to None.
 
+        Raises:
+            URLInvalid: The url is invalid.
+
         Returns:
             NotificationServiceData: The new info about the service.
         """
@@ -71,8 +72,8 @@ class NotificationService:
         )
 
         # Get current data and update it with new values
-        data = asdict(self.get())
-        test_url = data["url"] != url
+        data = self.get().todict()
+        is_url_updated = data["url"] != url
 
         new_values = {
             'title': title,
@@ -82,8 +83,8 @@ class NotificationService:
             if v is not None:
                 data[k] = v
 
-        if test_url:
-            test_result = NotificationServices(self.user_id).test(
+        if is_url_updated:
+            test_result = NotificationServices.test(
                 data['url']
             )
             if test_result != SendResult.SUCCESS:
@@ -101,12 +102,13 @@ class NotificationService:
 
         Args:
             delete_reminders_using (bool, optional): Instead of throwing an
-            error when there are still reminders using the service, delete
-            the reminders.
+                error when there are still reminders using the service, delete
+                the reminders.
                 Defaults to False.
 
         Raises:
-            NotificationServiceInUse: The service is still used by a reminder.
+            NotificationServiceInUse: The service is still used by a reminder
+                and delete_reminders_using is False.
         """
         from backend.implementations.reminders import Reminder
         from backend.implementations.static_reminders import StaticReminder
@@ -114,21 +116,23 @@ class NotificationService:
 
         LOGGER.info(f'Deleting notification service {self.id}')
 
-        for r_type, RClass in (
+        for reminder_type, ReminderClass in (
             (ReminderType.REMINDER, Reminder),
             (ReminderType.STATIC_REMINDER, StaticReminder),
             (ReminderType.TEMPLATE, Template)
         ):
-            uses = ReminderServicesDB(r_type).uses_ns(self.id)
-            if uses:
-                if not delete_reminders_using:
-                    raise NotificationServiceInUse(
-                        self.id,
-                        r_type.value
-                    )
+            uses = ReminderServicesDB(reminder_type).uses_ns(self.id)
+            if not uses:
+                continue
 
-                for r_id in uses:
-                    RClass(self.user_id, r_id).delete()
+            if not delete_reminders_using:
+                raise NotificationServiceInUse(
+                    self.id,
+                    reminder_type.value
+                )
+
+            for r_id in uses:
+                ReminderClass(self.user_id, r_id).delete()
 
         self.ns_db.delete(self.id)
         return
@@ -136,7 +140,7 @@ class NotificationService:
 
 class NotificationServices:
     def __init__(self, user_id: int) -> None:
-        """Represent the notification services of a user.
+        """Create an instance.
 
         Args:
             user_id (int): The ID of the user.
@@ -145,23 +149,24 @@ class NotificationServices:
         self.ns_db = NotificationServicesDB(self.user_id)
         return
 
-    def fetchall(self) -> List[NotificationServiceData]:
+    def get_all(self) -> List[NotificationServiceData]:
         """Get a list of all notification services.
 
         Returns:
-            List[NotificationServiceData]: The list of all notification services.
+            List[NotificationServiceData]: The info about all
+                notification services.
         """
         return self.ns_db.fetch()
 
-    def fetchone(self, notification_service_id: int) -> NotificationService:
-        """Get one notification service based on it's id.
+    def get_one(self, notification_service_id: int) -> NotificationService:
+        """Get a notification service instance based on the ID.
 
         Args:
-            notification_service_id (int): The id of the desired service.
+            notification_service_id (int): The ID of the service.
 
         Raises:
             NotificationServiceNotFound: The user does not own a notification
-            service with the given ID.
+                service with the given ID.
 
         Returns:
             NotificationService: Instance of NotificationService.
@@ -190,9 +195,10 @@ class NotificationServices:
 
         new_id = self.ns_db.add(title, url)
 
-        return self.fetchone(new_id)
+        return self.get_one(new_id)
 
-    def test(self, url: str) -> SendResult:
+    @staticmethod
+    def test(url: str) -> SendResult:
         """Test a notification service by sending a test notification to it.
 
         Args:

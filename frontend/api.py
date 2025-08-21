@@ -212,7 +212,7 @@ def api_notification_services_list(inputs: Dict[str, str]):
     )
 
     if request.method == 'GET':
-        result = services.fetchall()
+        result = services.get_all()
         return return_api(result=[r.todict() for r in result])
 
     elif request.method == 'POST':
@@ -233,9 +233,7 @@ def api_notification_service_available(inputs: Dict[str, str]):
 @api.route('/notificationservices/test', TestNotificationServiceURLData)
 @endpoint_wrapper
 def api_test_service(inputs: Dict[str, Any]):
-    user_id = api_key_map[g.hashed_api_key].user_data.user_id
-
-    success = NotificationServices(user_id).test(inputs['url'])
+    success = NotificationServices.test(inputs['url'])
     return return_api(
         {
             'success': success == SendResult.SUCCESS,
@@ -249,7 +247,7 @@ def api_test_service(inputs: Dict[str, Any]):
 @endpoint_wrapper
 def api_notification_service(inputs: Dict[str, Any], n_id: int):
     user_id = api_key_map[g.hashed_api_key].user_data.user_id
-    service = NotificationServices(user_id).fetchone(n_id)
+    service = NotificationServices(user_id).get_one(n_id)
 
     if request.method == 'GET':
         result = service.get()
