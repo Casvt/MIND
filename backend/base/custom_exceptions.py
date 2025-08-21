@@ -458,6 +458,29 @@ class TemplateNotFound(MindException):
         }
 
 
+# region Static Reminders
+class StaticReminderNotFound(MindException):
+    "The static reminder was not found"
+
+    def __init__(self, static_reminder_id: int) -> None:
+        self.static_reminder_id = static_reminder_id
+        LOGGER.warning(
+            "The static reminder with the given ID cannot be found: %d",
+            static_reminder_id
+        )
+        return
+
+    @property
+    def api_response(self) -> ApiResponse:
+        return {
+            'code': 404,
+            'error': self.__class__.__name__,
+            'result': {
+                'static_reminder_id': self.static_reminder_id
+            }
+        }
+
+
 # region Reminders
 class ReminderNotFound(MindException):
     "The reminder was not found"

@@ -13,7 +13,9 @@ path.insert(0, dirname(dirname(__file__)))
 import frontend.api
 from backend.base.custom_exceptions import (DatabaseFileNotFound,
                                             NotificationServiceNotFound,
-                                            ReminderNotFound, TemplateNotFound)
+                                            ReminderNotFound,
+                                            StaticReminderNotFound,
+                                            TemplateNotFound)
 from backend.base.definitions import Constants, MindException, StartType
 from backend.base.helpers import folder_path
 from frontend.input_validation import API_DOCS, DataSource, InputVariable
@@ -28,7 +30,7 @@ url_var_map = {
     'int:n_id': NotificationServiceNotFound,
     'int:r_id': ReminderNotFound,
     'int:t_id': TemplateNotFound,
-    'int:s_id': ReminderNotFound,
+    'int:s_id': StaticReminderNotFound,
     'int:b_idx': DatabaseFileNotFound
 }
 

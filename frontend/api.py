@@ -417,7 +417,7 @@ def api_static_reminders_list(inputs: Dict[str, Any]):
     )
 
     if request.method == 'GET':
-        result = reminders.fetchall(inputs['sort_by'])
+        result = reminders.get_all(inputs['sort_by'])
         return return_api([r.todict() for r in result])
 
     elif request.method == 'POST':
@@ -447,15 +447,15 @@ def api_get_static_reminder(inputs: Dict[str, Any], s_id: int):
     )
 
     if request.method == 'GET':
-        result = reminders.fetchone(s_id).get()
+        result = reminders.get_one(s_id).get()
         return return_api(result.todict())
 
     elif request.method == 'POST':
-        reminders.fetchone(s_id).trigger_reminder()
+        reminders.get_one(s_id).trigger_reminder()
         return return_api({}, code=201)
 
     elif request.method == 'PUT':
-        result = reminders.fetchone(s_id).update(
+        result = reminders.get_one(s_id).update(
             title=inputs['title'],
             notification_services=inputs['notification_services'],
             text=inputs['text'],
@@ -464,7 +464,7 @@ def api_get_static_reminder(inputs: Dict[str, Any], s_id: int):
         return return_api(result.todict())
 
     elif request.method == 'DELETE':
-        reminders.fetchone(s_id).delete()
+        reminders.get_one(s_id).delete()
         return return_api({})
 
 

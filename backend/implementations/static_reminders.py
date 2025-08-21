@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from dataclasses import asdict
 from typing import List, Union
 
-from backend.base.custom_exceptions import ReminderNotFound
+from backend.base.custom_exceptions import StaticReminderNotFound
 from backend.base.definitions import (SendResult, StaticReminderData,
                                       TimelessSortingMethod)
 from backend.base.helpers import search_filter, send_apprise_notification
@@ -13,24 +12,23 @@ from backend.internals.db_models import StaticRemindersDB
 
 
 class StaticReminder:
-    def __init__(self, user_id: int, reminder_id: int) -> None:
-        """Represent a static reminder.
+    def __init__(self, user_id: int, static_reminder_id: int) -> None:
+        """Create an instance.
 
         Args:
             user_id (int): The ID of the user.
-            reminder_id (int): The ID of the reminder.
+            static_reminder_id (int): The ID of the static reminder.
 
         Raises:
-            ReminderNotFound: Reminder with given ID does not exist or is not
-            owned by user.
+            StaticReminderNotFound: Reminder with given ID does not exist or is
+                not owned by user.
         """
         self.user_id = user_id
-        self.id = reminder_id
-
+        self.id = static_reminder_id
         self.reminder_db = StaticRemindersDB(self.user_id)
 
         if not self.reminder_db.exists(self.id):
-            raise ReminderNotFound(reminder_id)
+            raise StaticReminderNotFound(static_reminder_id)
         return
 
     def get(self) -> StaticReminderData:
@@ -51,11 +49,13 @@ class StaticReminder:
 
         reminder_data = self.get()
 
+        urls = [
+            NotificationService(self.user_id, ns_id).get().url
+            for ns_id in reminder_data.notification_services
+        ]
+
         return send_apprise_notification(
-            [
-                NotificationService(self.user_id, ns_id).get().url
-                for ns_id in reminder_data.notification_services
-            ],
+            urls,
             reminder_data.title,
             reminder_data.text
         )
@@ -70,23 +70,25 @@ class StaticReminder:
         """Edit the static reminder.
 
         Args:
-            title (Union[str, None], optional): The new title of the entry.
+            title (Union[str, None], optional): The new title of the
+                static reminder.
                 Defaults to None.
 
             notification_services (Union[List[int], None], optional): The new
-            id's of the notification services to use to send the reminder.
+                IDs of the notification services to use to send the reminder.
                 Defaults to None.
 
-            text (Union[str, None], optional): The new body of the reminder.
+            text (Union[str, None], optional): The new body of the
+                static reminder.
                 Defaults to None.
 
-            color (Union[str, None], optional): The new hex code of the color
-            of the reminder, which is shown in the web-ui.
+            color (Union[str, None], optional): The new hex code of the color of
+                the static reminder, which is shown in the web-ui.
                 Defaults to None.
 
         Raises:
             NotificationServiceNotFound: One of the notification services was
-            not found.
+                not found.
 
         Returns:
             StaticReminderData: The new static reminder info.
@@ -97,12 +99,12 @@ class StaticReminder:
         )
 
         if notification_services:
-            # Check whether all notification services exist
+            # Check if all notification services exist. Creating an instance
+            # raises NotificationServiceNotFound if the ID is not valid.
             for ns in notification_services:
                 NotificationService(self.user_id, ns)
 
-        # Get current data and update it with new values
-        data = asdict(self.get())
+        data = self.get().todict()
 
         new_values = {
             'title': title,
@@ -111,7 +113,7 @@ class StaticReminder:
             'notification_services': notification_services
         }
         for k, v in new_values.items():
-            if k in ('color',) or v is not None:
+            if k == 'color' or v is not None:
                 data[k] = v
 
         self.reminder_db.update(
@@ -142,18 +144,20 @@ class StaticReminders:
         self.reminder_db = StaticRemindersDB(self.user_id)
         return
 
-    def fetchall(
+    def get_all(
         self,
         sort_by: TimelessSortingMethod = TimelessSortingMethod.TITLE
     ) -> List[StaticReminderData]:
-        """Get all static reminders.
+        """Get all static reminders of the user.
 
         Args:
-            sort_by (TimelessSortingMethod, optional): How to sort the result.
+            sort_by (TimelessSortingMethod, optional): How to sort the
+                static reminders.
                 Defaults to TimelessSortingMethod.TITLE.
 
         Returns:
-            List[StaticReminderData]: The info of each static reminder.
+            List[StaticReminderData]: The info about all static reminders of
+                the user.
         """
         reminders = self.reminder_db.fetch()
         reminders.sort(key=sort_by.value[0], reverse=sort_by.value[1])
@@ -168,36 +172,34 @@ class StaticReminders:
 
         Args:
             query (str): The term to search for.
-
-            sort_by (TimelessSortingMethod, optional): The sorting method of
-            the resulting list.
+            sort_by (TimelessSortingMethod, optional): How to sort the
+                static reminders.
                 Defaults to TimelessSortingMethod.TITLE.
 
         Returns:
-            List[StaticReminderData]: All static reminders that match.
-            Similar output to `self.fetchall`
+            List[StaticReminderData]: the info about all static reminders of
+                the user that match the search term.
         """
-        static_reminders = [
+        return [
             r
-            for r in self.fetchall(sort_by)
+            for r in self.get_all(sort_by)
             if search_filter(query, r)
         ]
-        return static_reminders
 
-    def fetchone(self, reminder_id: int) -> StaticReminder:
-        """Get one static reminder.
+    def get_one(self, static_reminder_id: int) -> StaticReminder:
+        """Get a static reminder instance based on the ID.
 
         Args:
             reminder_id (int): The id of the static reminder to fetch.
 
         Raises:
-            ReminderNotFound: The static reminder with the given ID does not
-            exist or is not owned by the user.
+            StaticReminderNotFound: The user does not own a static reminder
+                with the given ID.
 
         Returns:
-            StaticReminder: A StaticReminder instance.
+            StaticReminder: Instance of StaticReminder.
         """
-        return StaticReminder(self.user_id, reminder_id)
+        return StaticReminder(self.user_id, static_reminder_id)
 
     def add(
         self,
@@ -211,28 +213,30 @@ class StaticReminders:
         Args:
             title (str): The title of the entry.
 
-            notification_services (List[int]): The id's of the
-            notification services to use to send the reminder.
+            notification_services (List[int]): The IDs of the notification
+                services to use to send the static reminder.
 
-            text (str, optional): The body of the reminder.
+            text (str, optional): The body of the static reminder.
                 Defaults to ''.
 
             color (Union[str, None], optional): The hex code of the color of the
-            template, which is shown in the web-ui.
+                static reminder, which is shown in the web-ui.
                 Defaults to None.
 
         Raises:
             NotificationServiceNotFound: One of the notification services was
-            not found.
+                not found.
 
         Returns:
-            StaticReminder: The info about the static reminder
+            StaticReminder: The info about the static reminder.
         """
         LOGGER.info(
-            f'Adding static reminder with {title=}, {notification_services=}, {text=}, {color=}'
+            f'Adding static reminder with {title=}, {notification_services=}, '
+            f'{text=}, {color=}'
         )
 
-        # Check if all notification services exist
+        # Check if all notification services exist. Creating an instance
+        # raises NotificationServiceNotFound if the ID is not valid.
         for ns in notification_services:
             NotificationService(self.user_id, ns)
 
@@ -241,4 +245,4 @@ class StaticReminders:
             notification_services
         )
 
-        return self.fetchone(new_id)
+        return self.get_one(new_id)
