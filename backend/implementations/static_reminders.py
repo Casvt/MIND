@@ -177,7 +177,7 @@ class StaticReminders:
                 Defaults to TimelessSortingMethod.TITLE.
 
         Returns:
-            List[StaticReminderData]: the info about all static reminders of
+            List[StaticReminderData]: The info about all static reminders of
                 the user that match the search term.
         """
         return [
@@ -211,7 +211,7 @@ class StaticReminders:
         """Add a static reminder.
 
         Args:
-            title (str): The title of the entry.
+            title (str): The title of the static reminder.
 
             notification_services (List[int]): The IDs of the notification
                 services to use to send the static reminder.

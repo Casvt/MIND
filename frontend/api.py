@@ -276,7 +276,7 @@ def api_reminders_list(inputs: Dict[str, Any]):
     reminders = Reminders(api_key_map[g.hashed_api_key].user_data.user_id)
 
     if request.method == 'GET':
-        result = reminders.fetchall(inputs['sort_by'])
+        result = reminders.get_all(inputs['sort_by'])
         return return_api([r.todict() for r in result])
 
     elif request.method == 'POST':
@@ -324,11 +324,11 @@ def api_get_reminder(inputs: Dict[str, Any], r_id: int):
     )
 
     if request.method == 'GET':
-        result = reminders.fetchone(r_id).get()
+        result = reminders.get_one(r_id).get()
         return return_api(result.todict())
 
     elif request.method == 'PUT':
-        result = reminders.fetchone(r_id).update(
+        result = reminders.get_one(r_id).update(
             title=inputs['title'],
             time=inputs['time'],
             notification_services=inputs['notification_services'],
@@ -343,7 +343,7 @@ def api_get_reminder(inputs: Dict[str, Any], r_id: int):
         return return_api(result.todict())
 
     elif request.method == 'DELETE':
-        reminders.fetchone(r_id).delete()
+        reminders.get_one(r_id).delete()
         return return_api({})
 
 

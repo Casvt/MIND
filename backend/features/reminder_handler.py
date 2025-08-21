@@ -6,10 +6,9 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Union
 
 from backend.base.definitions import Constants, RepeatQuantity, SendResult
-from backend.base.helpers import (Singleton, find_next_time,
-                                  send_apprise_notification, when_not_none)
+from backend.base.helpers import Singleton, find_next_time, when_not_none
 from backend.base.logging import LOGGER
-from backend.implementations.notification_services import NotificationService
+from backend.implementations.reminders import Reminder
 from backend.internals.db_models import UserlessRemindersDB
 from backend.internals.server import Server
 
@@ -40,14 +39,7 @@ class ReminderHandler(metaclass=Singleton):
                 user_id = self.reminder_db.reminder_id_to_user_id(
                     reminder.id
                 )
-                result = send_apprise_notification(
-                    [
-                        NotificationService(user_id, ns).get().url
-                        for ns in reminder.notification_services
-                    ],
-                    reminder.title,
-                    reminder.text
-                )
+                result = Reminder(user_id, reminder.id).trigger_reminder()
 
                 self.thread = None
                 self.time = None
