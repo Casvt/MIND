@@ -22,8 +22,8 @@ from cron_converter import Cron
 from dateutil.relativedelta import relativedelta
 
 from backend.base.definitions import (WEEKDAY_NUMBER, GeneralReminderData,
-                                      RepeatQuantity, SendResult,
-                                      Serialisable, T, U)
+                                      JSONSerialisable, RepeatQuantity,
+                                      SendResult, T, U)
 from backend.base.logging import LOGGER
 
 
@@ -202,7 +202,7 @@ def current_thread_id() -> int:
 
 
 def return_api(
-    result: Serialisable,
+    result: JSONSerialisable,
     error: Union[str, None] = None,
     code: int = 200
 ) -> Tuple[Dict[str, Any], int]:

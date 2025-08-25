@@ -5,14 +5,14 @@ from io import BytesIO, StringIO
 from os import remove, urandom
 from os.path import basename, exists
 from time import time as epoch_time
-from typing import Any, Callable, Dict, Tuple, Union
+from typing import Any, Callable, Dict
 
-from flask import Response, g, request, send_file
+from flask import g, request, send_file
 
 from backend.base.custom_exceptions import (APIKeyExpired, APIKeyInvalid,
                                             LogFileNotFound)
 from backend.base.definitions import (ApiKeyEntry, Constants,
-                                      SendResult, StartType)
+                                      EndpointHandler, SendResult, StartType)
 from backend.base.helpers import folder_path, return_api
 from backend.base.logging import LOGGER, get_log_filepath
 from backend.implementations.apprise_parser import get_apprise_services
@@ -46,9 +46,7 @@ from frontend.input_validation import (AboutData, AuthLoginData,
                                        UsersManagementData, admin_api, api,
                                        get_api_docs, input_validation)
 
-# ===================
 # region General variables and functions
-# ===================
 users = Users()
 api_key_map: Dict[int, ApiKeyEntry] = {}
 
@@ -102,12 +100,7 @@ def auth() -> None:
     return
 
 
-def endpoint_wrapper(
-    method: Union[
-        Callable[[Dict[str, Any]], Union[Tuple[Union[Dict[str, Any], Response], int], None]],
-        Callable[[Dict[str, Any], int], Union[Tuple[Union[Dict[str, Any], Response], int], None]]
-    ]
-) -> Callable:
+def endpoint_wrapper(method: EndpointHandler) -> Callable:
     def wrapper(*args, **kwargs):
         requires_auth = get_api_docs(request).requires_auth
 
@@ -121,9 +114,7 @@ def endpoint_wrapper(
     return wrapper
 
 
-# ===================
 # region Auth
-# ===================
 @api.route('/auth/login', AuthLoginData)
 @endpoint_wrapper
 def api_login(inputs: Dict[str, Any]):
@@ -174,9 +165,7 @@ def api_status(inputs: Dict[str, Any]):
     return return_api(result)
 
 
-# ===================
 # region User
-# ===================
 @api.route('/user/add', UsersAddData)
 @endpoint_wrapper
 def api_add_user(inputs: Dict[str, str]):
@@ -201,9 +190,7 @@ def api_manage_user(inputs: Dict[str, Any]):
         return return_api({})
 
 
-# ===================
 # region Notification Service
-# ===================
 @api.route('/notificationservices', NotificationServicesData)
 @endpoint_wrapper
 def api_notification_services_list(inputs: Dict[str, str]):
@@ -267,9 +254,7 @@ def api_notification_service(inputs: Dict[str, Any], n_id: int):
         return return_api({})
 
 
-# ===================
 # region Library
-# ===================
 @api.route('/reminders', RemindersData)
 @endpoint_wrapper
 def api_reminders_list(inputs: Dict[str, Any]):
@@ -347,9 +332,7 @@ def api_get_reminder(inputs: Dict[str, Any], r_id: int):
         return return_api({})
 
 
-# ===================
 # region Template
-# ===================
 @api.route('/templates', TemplatesData)
 @endpoint_wrapper
 def api_get_templates(inputs: Dict[str, Any]):
@@ -406,9 +389,7 @@ def api_get_template(inputs: Dict[str, Any], t_id: int):
         return return_api({})
 
 
-# ===================
 # region Static Reminder
-# ===================
 @api.route('/staticreminders', StaticRemindersData)
 @endpoint_wrapper
 def api_static_reminders_list(inputs: Dict[str, Any]):
@@ -468,9 +449,7 @@ def api_get_static_reminder(inputs: Dict[str, Any], s_id: int):
         return return_api({})
 
 
-# ===================
 # region Admin Panel
-# ===================
 @admin_api.route('/shutdown', ShutdownData)
 @endpoint_wrapper
 def api_shutdown(inputs: Dict[str, Any]):

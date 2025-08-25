@@ -9,8 +9,10 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import (TYPE_CHECKING, Any, Dict, List, Literal,
+from typing import (TYPE_CHECKING, Any, Callable, Dict, List, Literal,
                     Sequence, Tuple, TypedDict, TypeVar, Union, cast)
+
+from flask import Response
 
 if TYPE_CHECKING:
     from backend.implementations.users import User
@@ -21,16 +23,23 @@ T = TypeVar('T')
 U = TypeVar('U')
 WEEKDAY_NUMBER = Literal[0, 1, 2, 3, 4, 5, 6]
 
-BaseSerialisable = Union[
+BaseJSONSerialisable = Union[
     int, float, bool, str, None, TypedDict
 ]
-Serialisable = Union[
+JSONSerialisable = Union[
+    BaseJSONSerialisable,
     TypedDict,
-    Sequence[BaseSerialisable],
-    Sequence[Dict[str, BaseSerialisable]],
-    Dict[str, BaseSerialisable],
-    Dict[str, Sequence[BaseSerialisable]],
-    Dict[str, Dict[str, BaseSerialisable]]
+    Sequence["JSONSerialisable"],
+    Dict[str, "JSONSerialisable"]
+]
+EndpointResponse = Union[
+    Tuple[Dict[str, JSONSerialisable], int],
+    Tuple[Response, int],
+    None
+]
+EndpointHandler = Union[
+    Callable[[Dict[str, Any]], EndpointResponse],
+    Callable[[Dict[str, Any], int], EndpointResponse]
 ]
 
 
