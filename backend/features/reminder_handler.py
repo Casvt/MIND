@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""
+Handling of the reminders such that they are sent at their scheduled time.
+"""
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -17,10 +21,6 @@ if TYPE_CHECKING:
 
 
 class ReminderHandler:
-    """
-    Handling of the reminders such that they are sent at their scheduled time.
-    """
-
     reminder_timer: Union[Timer, None] = None
     next_trigger_time: Union[int, None] = None
     reminder_db = UserlessRemindersDB()
