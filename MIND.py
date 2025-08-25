@@ -91,6 +91,7 @@ def _main(
 
         ReminderHandler.set_reminder_timer()
         DatabaseBackupHandler.set_backup_timer()
+        TimezoneChangeHandler.detect_and_handle_timezone_change()
         TimezoneChangeHandler.set_detector_timer()
 
     restart_type = None

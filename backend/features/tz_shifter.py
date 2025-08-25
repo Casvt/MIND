@@ -59,7 +59,7 @@ class TimezoneChangeHandler:
         return int(target_time.timestamp())
 
     @classmethod
-    def _detect_timezone_change(cls) -> None:
+    def detect_and_handle_timezone_change(cls) -> None:
         """
         Check whether a change in timezone/DST has happened and if so shift
         all reminders. Also update DB on last measured timezone.
@@ -103,7 +103,7 @@ class TimezoneChangeHandler:
 
         cls.detector_timer = Server().get_db_timer_thread(
             cls.__get_next_trigger_time() - time.time(),
-            cls._detect_timezone_change,
+            cls.detect_and_handle_timezone_change,
             "TimezoneChangeHandler"
         )
         cls.detector_timer.start()
