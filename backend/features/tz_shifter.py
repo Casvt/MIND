@@ -4,18 +4,21 @@
 Detector of timezone/DST changes and shifts reminder times to counter it.
 """
 
+from __future__ import annotations
+
 import time
 from datetime import datetime, timedelta
-from threading import Timer
-from typing import Union
+from typing import TYPE_CHECKING, Union
 
 from backend.base.definitions import Constants
-from backend.base.helpers import Singleton
 from backend.base.logging import LOGGER
 from backend.features.reminder_handler import ReminderHandler
 from backend.internals.db_models import UserlessRemindersDB
 from backend.internals.server import Server
 from backend.internals.settings import Settings
+
+if TYPE_CHECKING:
+    from threading import Timer
 
 
 def get_timezone_offset() -> int:
@@ -30,14 +33,16 @@ def get_timezone_offset() -> int:
     return -time.altzone
 
 
-class TimezoneChangeHandler(metaclass=Singleton):
-    checker_timer: Union[Timer, None] = None
+class TimezoneChangeHandler:
+    detector_timer: Union[Timer, None] = None
 
-    def __get_next_trigger_time(self) -> int:
-        """Get a timestamp of the next time the timer should be triggered.
+    @staticmethod
+    def __get_next_trigger_time() -> int:
+        """Get the epoch timestamp of the next time a timezone change check
+        should be done.
 
         Returns:
-            int: The timestamp.
+            int: The epoch timestamp.
         """
         # Get current time, but set hour and minute to desired trigger time
         current_time = datetime.now()
@@ -53,7 +58,8 @@ class TimezoneChangeHandler(metaclass=Singleton):
 
         return int(target_time.timestamp())
 
-    def _detect_timezone_change(self) -> None:
+    @classmethod
+    def _detect_timezone_change(cls) -> None:
         """
         Check whether a change in timezone/DST has happened and if so shift
         all reminders. Also update DB on last measured timezone.
@@ -63,44 +69,49 @@ class TimezoneChangeHandler(metaclass=Singleton):
         current_timezone = get_timezone_offset()
 
         if measured_timezone == -1:
+            # First measurement, so nothing to compare against
             settings.update({"measured_timezone": current_timezone})
 
         elif measured_timezone != current_timezone:
             # Timezone change
+            settings.update({"measured_timezone": current_timezone})
+
             shift_delta = measured_timezone - current_timezone
             UserlessRemindersDB().shift(
                 reminder_id=None,
                 offset=shift_delta
             )
-            settings.update({"measured_timezone": current_timezone})
             ReminderHandler.set_reminder_timer()
+
             LOGGER.info(
                 "Detected timezone/DST change (%s to %s), shifted reminders",
                 measured_timezone, current_timezone
             )
 
-        self.checker_timer = None
-        self.set_detector_timer()
+        cls.detector_timer = None
+        cls.set_detector_timer()
         return
 
-    def set_detector_timer(self) -> None:
+    @classmethod
+    def set_detector_timer(cls) -> None:
         """
-        Set the timer for the timezone change detection process. Start one if it
-        hasn't already. Don't do anything if it's already set.
+        Set the timer for checking on a change in timezone and handling it if
+        so. Doesn't do anything if timer is already set.
         """
-        if self.checker_timer is not None:
+        if cls.detector_timer is not None:
             return
 
-        self.checker_timer = Server().get_db_timer_thread(
-            self.__get_next_trigger_time() - time.time(),
-            self._detect_timezone_change,
+        cls.detector_timer = Server().get_db_timer_thread(
+            cls.__get_next_trigger_time() - time.time(),
+            cls._detect_timezone_change,
             "TimezoneChangeHandler"
         )
-        self.checker_timer.start()
+        cls.detector_timer.start()
         return
 
-    def stop_detector_timer(self) -> None:
+    @classmethod
+    def stop_detector_timer(cls) -> None:
         "If the timezone change detection timer is running, stop it"
-        if self.checker_timer is not None:
-            self.checker_timer.cancel()
+        if cls.detector_timer is not None:
+            cls.detector_timer.cancel()
         return

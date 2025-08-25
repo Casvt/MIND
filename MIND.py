@@ -90,11 +90,8 @@ def _main(
         settings = s.get_settings()
 
         ReminderHandler.set_reminder_timer()
-
         DatabaseBackupHandler.set_backup_timer()
-
-        tz_change_handler = TimezoneChangeHandler()
-        tz_change_handler.set_detector_timer()
+        TimezoneChangeHandler.set_detector_timer()
 
     restart_type = None
     try:
@@ -107,7 +104,7 @@ def _main(
     finally:
         ReminderHandler.stop_reminder_timer()
         DatabaseBackupHandler.stop_backup_timer()
-        tz_change_handler.stop_detector_timer()
+        TimezoneChangeHandler.stop_detector_timer()
 
         if restart_type is not None:
             LOGGER.info("Restarting MIND")
