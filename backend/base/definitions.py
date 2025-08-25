@@ -54,6 +54,7 @@ class Constants:
     API_PREFIX = "/api"
     ADMIN_API_EXTENSION = "/admin"
     ADMIN_PREFIX = API_PREFIX + ADMIN_API_EXTENSION
+    API_KEY_LENGTH = 32 # hexadecimal characters
 
     DB_FOLDER = ("db",)
     DB_NAME = "MIND.db"

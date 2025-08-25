@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
+from hashlib import sha256
 from io import BytesIO, StringIO
-from os import remove, urandom
+from os import remove
 from os.path import basename, exists
+from secrets import token_hex
 from time import time as epoch_time
 from typing import Any, Dict
 
@@ -48,7 +50,7 @@ from frontend.input_validation import (AboutData, AuthLoginData,
 
 # region Auth and input
 users = Users()
-api_key_map: Dict[int, ApiKeyEntry] = {}
+api_key_map: Dict[str, ApiKeyEntry] = {}
 
 
 def auth() -> None:
@@ -59,7 +61,7 @@ def auth() -> None:
         APIKeyExpired: The api key supplied has expired.
     """
     api_key = request.values.get('api_key', '')
-    hashed_api_key = hash(api_key)
+    hashed_api_key = sha256(api_key.encode('utf-8')).hexdigest()
 
     if hashed_api_key not in api_key_map:
         raise APIKeyInvalid(api_key)
@@ -123,11 +125,12 @@ def api_login():
     StartTypeHandlers.diffuse_timer(StartType.RESTART_DB_CHANGES)
     StartTypeHandlers.diffuse_timer(StartType.RESTART_HOSTING_CHANGES)
 
-    # Generate an API key until one
-    # is generated that isn't used already
+    # Generate an API key until one is generated that isn't used already
     while True:
-        api_key = urandom(16).hex() # <- length api key / 2
-        hashed_api_key = hash(api_key)
+        # Each byte is represented by two hexadecimal characters, so halve
+        # the desired amount of bytes.
+        api_key = token_hex(Constants.API_KEY_LENGTH // 2)
+        hashed_api_key = sha256(api_key.encode('utf-8')).hexdigest()
         if hashed_api_key not in api_key_map:
             break
 
