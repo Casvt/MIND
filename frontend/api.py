@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-from hashlib import sha256
 from io import BytesIO, StringIO
 from os import remove
 from os.path import basename, exists
-from secrets import token_hex
 from time import time as epoch_time
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict, cast
 
-from flask import g, request, send_file
+from flask import g as flask_g, request, send_file
 
 from backend.base.custom_exceptions import (APIKeyExpired, APIKeyInvalid,
                                             LogFileNotFound)
 from backend.base.definitions import (ApiKeyEntry, Constants,
-                                      SendResult, StartType)
-from backend.base.helpers import folder_path, return_api
+                                      SendResult, StartType, UserData)
+from backend.base.helpers import (folder_path, generate_api_key,
+                                  hash_api_key, return_api)
 from backend.base.logging import LOGGER, get_log_filepath
 from backend.implementations.apprise_parser import get_apprise_services
 from backend.implementations.notification_services import NotificationServices
@@ -53,6 +52,18 @@ users = Users()
 api_key_map: Dict[str, ApiKeyEntry] = {}
 
 
+if TYPE_CHECKING:
+    class TypedAppCtxGlobals:
+        hashed_api_key: str
+        exp: int
+        user_data: UserData
+        inputs: Dict[str, Any]
+
+    g = cast(TypedAppCtxGlobals, flask_g)
+else:
+    g = flask_g
+
+
 def auth() -> None:
     """Checks if the client is logged in.
 
@@ -61,13 +72,13 @@ def auth() -> None:
         APIKeyExpired: The api key supplied has expired.
     """
     api_key = request.values.get('api_key', '')
-    hashed_api_key = sha256(api_key.encode('utf-8')).hexdigest()
+    hashed_api_key = hash_api_key(api_key)
 
     if hashed_api_key not in api_key_map:
         raise APIKeyInvalid(api_key)
 
     map_entry = api_key_map[hashed_api_key]
-    user_data = map_entry.user_data.get()
+    user_data = map_entry.user_data
 
     if (
         user_data.admin
@@ -90,14 +101,13 @@ def auth() -> None:
     # Api key valid
     sv = Settings().get_settings()
     if sv.login_time_reset:
-        g.exp = map_entry.exp = (
+        map_entry.exp = (
             int(epoch_time()) + sv.login_time
         )
-    else:
-        g.exp = map_entry.exp
 
     g.hashed_api_key = hashed_api_key
-    g.user_data = map_entry.user_data
+    g.user_data = user_data
+    g.exp = map_entry.exp
 
     return
 
@@ -117,8 +127,7 @@ def api_auth_and_input_validation() -> None:
 # region Auth
 @api.route('/auth/login', AuthLoginData)
 def api_login():
-    inputs: Dict[str, Any] = g.inputs
-    user = users.login(inputs['username'], inputs['password'])
+    user_data = users.login(g.inputs['username'], g.inputs['password']).get()
 
     # Login successful
 
@@ -127,21 +136,19 @@ def api_login():
 
     # Generate an API key until one is generated that isn't used already
     while True:
-        # Each byte is represented by two hexadecimal characters, so halve
-        # the desired amount of bytes.
-        api_key = token_hex(Constants.API_KEY_LENGTH // 2)
-        hashed_api_key = sha256(api_key.encode('utf-8')).hexdigest()
+        api_key = generate_api_key()
+        hashed_api_key = hash_api_key(api_key)
         if hashed_api_key not in api_key_map:
             break
 
     login_time = Settings().sv.login_time
     exp = int(epoch_time()) + login_time
-    api_key_map[hashed_api_key] = ApiKeyEntry(exp, user)
+    api_key_map[hashed_api_key] = ApiKeyEntry(exp, user_data)
 
     result = {
         'api_key': api_key,
         'expires': exp,
-        'admin': user.get().admin
+        'admin': user_data.admin
     }
     return return_api(result, code=201)
 
@@ -154,12 +161,10 @@ def api_logout():
 
 @api.route('/auth/status', AuthStatusData)
 def api_status():
-    map_entry = api_key_map[g.hashed_api_key]
-    user_data = map_entry.user_data.get()
     result = {
-        'expires': map_entry.exp,
-        'username': user_data.username,
-        'admin': user_data.admin
+        'expires': g.exp,
+        'username': g.user_data.username,
+        'admin': g.user_data.admin
     }
     return return_api(result)
 
@@ -167,16 +172,16 @@ def api_status():
 # region User
 @api.route('/user/add', UsersAddData)
 def api_add_user():
-    inputs: Dict[str, Any] = g.inputs
+    inputs = g.inputs
     users.add(inputs['username'], inputs['password'])
     return return_api({}, code=201)
 
 
 @api.route('/user', UsersData)
 def api_manage_user():
-    user = api_key_map[g.hashed_api_key].user_data
+    user = users.get_one(g.user_data.id)
     if request.method == 'PUT':
-        inputs: Dict[str, Any] = g.inputs
+        inputs = g.inputs
         if inputs['new_username']:
             user.update_username(inputs['new_username'])
         if inputs['new_password']:
@@ -192,16 +197,14 @@ def api_manage_user():
 # region Notification Service
 @api.route('/notificationservices', NotificationServicesData)
 def api_notification_services_list():
-    services = NotificationServices(
-        api_key_map[g.hashed_api_key].user_data.user_id
-    )
+    services = NotificationServices(g.user_data.id)
 
     if request.method == 'GET':
         result = services.get_all()
         return return_api(result=[r.todict() for r in result])
 
     elif request.method == 'POST':
-        inputs: Dict[str, Any] = g.inputs
+        inputs = g.inputs
         result = services.add(
             title=inputs['title'],
             url=inputs['url']
@@ -212,7 +215,7 @@ def api_notification_services_list():
 @api.route('/notificationservices/available', AvailableNotificationServicesData)
 def api_notification_service_available():
     result = get_apprise_services()
-    return return_api(result) # type: ignore
+    return return_api(result)
 
 
 @api.route('/notificationservices/test', TestNotificationServiceURLData)
@@ -229,9 +232,8 @@ def api_test_service():
 
 @api.route('/notificationservices/<int:n_id>', NotificationServiceData)
 def api_notification_service(n_id: int):
-    inputs: Dict[str, Any] = g.inputs
-    user_id = api_key_map[g.hashed_api_key].user_data.user_id
-    service = NotificationServices(user_id).get_one(n_id)
+    inputs = g.inputs
+    service = NotificationServices(g.user_data.id).get_one(n_id)
 
     if request.method == 'GET':
         result = service.get()
@@ -254,8 +256,8 @@ def api_notification_service(n_id: int):
 # region Library
 @api.route('/reminders', RemindersData)
 def api_reminders_list():
-    inputs: Dict[str, Any] = g.inputs
-    reminders = Reminders(api_key_map[g.hashed_api_key].user_data.user_id)
+    inputs = g.inputs
+    reminders = Reminders(g.user_data.id)
 
     if request.method == 'GET':
         result = reminders.get_all(inputs['sort_by'])
@@ -279,18 +281,16 @@ def api_reminders_list():
 
 @api.route('/reminders/search', SearchRemindersData)
 def api_reminders_query():
-    inputs: Dict[str, Any] = g.inputs
-    reminders = Reminders(api_key_map[g.hashed_api_key].user_data.user_id)
+    inputs = g.inputs
+    reminders = Reminders(g.user_data.id)
     result = reminders.search(inputs['query'], inputs['sort_by'])
     return return_api([r.todict() for r in result])
 
 
 @api.route('/reminders/test', TestRemindersData)
 def api_test_reminder():
-    inputs: Dict[str, Any] = g.inputs
-    Reminders(
-        api_key_map[g.hashed_api_key].user_data.user_id
-    ).test_reminder(
+    inputs = g.inputs
+    Reminders(g.user_data.id).test_reminder(
         inputs['title'],
         inputs['notification_services'],
         inputs['text']
@@ -300,16 +300,14 @@ def api_test_reminder():
 
 @api.route('/reminders/<int:r_id>', ReminderData)
 def api_get_reminder(r_id: int):
-    reminders = Reminders(
-        api_key_map[g.hashed_api_key].user_data.user_id
-    )
+    reminders = Reminders(g.user_data.id)
 
     if request.method == 'GET':
         result = reminders.get_one(r_id).get()
         return return_api(result.todict())
 
     elif request.method == 'PUT':
-        inputs: Dict[str, Any] = g.inputs
+        inputs = g.inputs
         result = reminders.get_one(r_id).update(
             title=inputs['title'],
             time=inputs['time'],
@@ -332,10 +330,8 @@ def api_get_reminder(r_id: int):
 # region Template
 @api.route('/templates', TemplatesData)
 def api_get_templates():
-    inputs: Dict[str, Any] = g.inputs
-    templates = Templates(
-        api_key_map[g.hashed_api_key].user_data.user_id
-    )
+    inputs = g.inputs
+    templates = Templates(g.user_data.id)
 
     if request.method == 'GET':
         result = templates.get_all(inputs['sort_by'])
@@ -353,26 +349,22 @@ def api_get_templates():
 
 @api.route('/templates/search', SearchTemplatesData)
 def api_templates_query():
-    inputs: Dict[str, Any] = g.inputs
-    templates = Templates(
-        api_key_map[g.hashed_api_key].user_data.user_id
-    )
+    inputs = g.inputs
+    templates = Templates(g.user_data.id)
     result = templates.search(inputs['query'], inputs['sort_by'])
     return return_api([r.todict() for r in result])
 
 
 @api.route('/templates/<int:t_id>', TemplateData)
 def api_get_template(t_id: int):
-    template = Templates(
-        api_key_map[g.hashed_api_key].user_data.user_id
-    ).get_one(t_id)
+    template = Templates(g.user_data.id).get_one(t_id)
 
     if request.method == 'GET':
         result = template.get()
         return return_api(result.todict())
 
     elif request.method == 'PUT':
-        inputs: Dict[str, Any] = g.inputs
+        inputs = g.inputs
         result = template.update(
             title=inputs['title'],
             notification_services=inputs['notification_services'],
@@ -389,10 +381,8 @@ def api_get_template(t_id: int):
 # region Static Reminder
 @api.route('/staticreminders', StaticRemindersData)
 def api_static_reminders_list():
-    inputs: Dict[str, Any] = g.inputs
-    reminders = StaticReminders(
-        api_key_map[g.hashed_api_key].user_data.user_id
-    )
+    inputs = g.inputs
+    reminders = StaticReminders(g.user_data.id)
 
     if request.method == 'GET':
         result = reminders.get_all(inputs['sort_by'])
@@ -410,18 +400,16 @@ def api_static_reminders_list():
 
 @api.route('/staticreminders/search', SearchStaticRemindersData)
 def api_static_reminders_query():
-    inputs: Dict[str, Any] = g.inputs
-    result = StaticReminders(
-        api_key_map[g.hashed_api_key].user_data.user_id
-    ).search(inputs['query'], inputs['sort_by'])
+    inputs = g.inputs
+    result = StaticReminders(g.user_data.id).search(
+        inputs['query'], inputs['sort_by']
+    )
     return return_api([r.todict() for r in result])
 
 
 @api.route('/staticreminders/<int:s_id>', StaticReminderData)
 def api_get_static_reminder(s_id: int):
-    reminders = StaticReminders(
-        api_key_map[g.hashed_api_key].user_data.user_id
-    )
+    reminders = StaticReminders(g.user_data.id)
 
     if request.method == 'GET':
         result = reminders.get_one(s_id).get()
@@ -432,7 +420,7 @@ def api_get_static_reminder(s_id: int):
         return return_api({}, code=201)
 
     elif request.method == 'PUT':
-        inputs: Dict[str, Any] = g.inputs
+        inputs = g.inputs
         result = reminders.get_one(s_id).update(
             title=inputs['title'],
             notification_services=inputs['notification_services'],
@@ -471,7 +459,7 @@ def api_about():
 
 @admin_api.route('/settings', SettingsData)
 def api_admin_settings():
-    inputs: Dict[str, Any] = g.inputs
+    inputs = g.inputs
     settings = Settings()
 
     if request.method == 'GET':
@@ -550,7 +538,7 @@ def api_admin_users():
         return return_api([r.todict() for r in result])
 
     elif request.method == 'POST':
-        inputs: Dict[str, Any] = g.inputs
+        inputs = g.inputs
         users.add(inputs['username'], inputs['password'], True)
         return return_api({}, code=201)
 
@@ -559,7 +547,7 @@ def api_admin_users():
 def api_admin_user(u_id: int):
     user = users.get_one(u_id)
     if request.method == 'PUT':
-        inputs: Dict[str, Any] = g.inputs
+        inputs = g.inputs
         if inputs['new_username']:
             user.update_username(inputs['new_username'])
         if inputs['new_password']:
@@ -569,7 +557,7 @@ def api_admin_user(u_id: int):
     elif request.method == 'DELETE':
         user.delete()
         for key, value in api_key_map.items():
-            if value.user_data.user_id == u_id:
+            if value.user_data.id == u_id:
                 del api_key_map[key]
                 break
         return return_api({})
@@ -593,7 +581,7 @@ def api_admin_database():
         ), 200
 
     elif request.method == "POST":
-        inputs: Dict[str, Any] = g.inputs
+        inputs = g.inputs
         import_db(inputs['file'], inputs['copy_hosting_settings'])
         return return_api({})
 
@@ -612,6 +600,5 @@ def api_admin_backup(b_idx: int):
         ), 200
 
     elif request.method == "POST":
-        inputs: Dict[str, Any] = g.inputs
-        import_db_backup(b_idx, inputs['copy_hosting_settings'])
+        import_db_backup(b_idx, g.inputs['copy_hosting_settings'])
         return return_api({})

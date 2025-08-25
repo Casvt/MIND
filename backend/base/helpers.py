@@ -6,11 +6,11 @@ General "helper" functions and classes
 
 from base64 import urlsafe_b64encode
 from datetime import datetime
-from hashlib import pbkdf2_hmac
+from hashlib import pbkdf2_hmac, sha256
 from logging import WARNING
 from os import makedirs, scandir, symlink
 from os.path import abspath, dirname, exists, isfile, join, splitext
-from secrets import token_bytes
+from secrets import token_bytes, token_hex
 from shutil import copy2, move
 from sys import base_exec_prefix, executable, platform, version_info
 from threading import current_thread
@@ -21,9 +21,9 @@ from apprise import Apprise, LogCapture
 from cron_converter import Cron
 from dateutil.relativedelta import relativedelta
 
-from backend.base.definitions import (WEEKDAY_NUMBER, GeneralReminderData,
-                                      JSONSerialisable, RepeatQuantity,
-                                      SendResult, T, U)
+from backend.base.definitions import (WEEKDAY_NUMBER, Constants,
+                                      GeneralReminderData, JSONSerialisable,
+                                      RepeatQuantity, SendResult, T, U)
 from backend.base.logging import LOGGER
 
 
@@ -237,6 +237,29 @@ def generate_salt_hash(password: str) -> Tuple[bytes, bytes]:
     salt = token_bytes()
     hashed_password = get_hash(salt, password)
     return salt, hashed_password
+
+
+def hash_api_key(api_key: str) -> str:
+    """Hashes an API key using SHA-256.
+
+    Args:
+        api_key (str): The API key to hash.
+
+    Returns:
+        str: The hashed API key as a hexadecimal string.
+    """
+    return sha256(api_key.encode('utf-8')).hexdigest()
+
+
+def generate_api_key() -> str:
+    """Generate an API key.
+
+    Returns:
+        str: The API key.
+    """
+    # Each byte is represented by two hexadecimal characters, so halve
+    # the desired amount of bytes.
+    return token_hex(Constants.API_KEY_LENGTH // 2)
 
 
 # region Apprise

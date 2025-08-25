@@ -240,7 +240,7 @@ class StartTypeHandler(ABC):
 @dataclass
 class ApiKeyEntry:
     exp: int
-    user_data: User
+    user_data: UserData
 
 
 @dataclass(frozen=True, order=True)
