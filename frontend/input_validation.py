@@ -22,14 +22,14 @@ from backend.base.custom_exceptions import (AccessUnauthorized,
                                             NotificationServiceNotFound,
                                             UsernameInvalid, UsernameTaken)
 from backend.base.definitions import (Constants, DataSource, DataType,
-                                      MindException, RepeatQuantity,
-                                      SortingMethod, TimelessSortingMethod)
+                                      EndpointHandler, MindException,
+                                      RepeatQuantity, SortingMethod,
+                                      TimelessSortingMethod)
 from backend.base.helpers import folder_path
 from backend.internals.settings import SettingsValues
 
 if TYPE_CHECKING:
     from flask import Request
-    from flask.sansio.scaffold import T_route
 
 
 # ===================
@@ -980,8 +980,7 @@ class APIBlueprint(Blueprint):
         rule: str,
         endpoint_data: Type[EndpointData],
         **options: Any
-    ) -> Callable[[T_route], T_route]:
-
+    ) -> Callable[[EndpointHandler], EndpointHandler]:
         if self == api:
             processed_rule = rule
         elif self == admin_api:
@@ -994,7 +993,7 @@ class APIBlueprint(Blueprint):
         if "methods" not in options:
             options["methods"] = API_DOCS[processed_rule].methods.used_methods()
 
-        return super().route(rule, **options)
+        return super().route(rule, **options) # type: ignore
 
 
 api = APIBlueprint('api', __name__)

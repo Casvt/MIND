@@ -38,8 +38,8 @@ EndpointResponse = Union[
     None
 ]
 EndpointHandler = Union[
-    Callable[[Dict[str, Any]], EndpointResponse],
-    Callable[[Dict[str, Any], int], EndpointResponse]
+    Callable[[], EndpointResponse],
+    Callable[[int], EndpointResponse]
 ]
 
 
