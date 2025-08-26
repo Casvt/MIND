@@ -52,6 +52,28 @@ users = Users()
 api_key_map: Dict[str, ApiKeyEntry] = {}
 
 
+class ApiKeyMapping:
+    _next_run: int = 0
+
+    @classmethod
+    def cleanup(cls) -> None:
+        """Cleans up expired API keys from the mapping."""
+        now = int(epoch_time())
+        if now < cls._next_run:
+            return
+        cls._next_run = now + Constants.API_KEY_CLEANUP_INTERVAL
+
+        to_delete = [
+            k
+            for k, v in api_key_map.items()
+            if v.exp + 86400 <= now
+        ]
+        for k in to_delete:
+            del api_key_map[k]
+
+        return
+
+
 if TYPE_CHECKING:
     class TypedAppCtxGlobals:
         hashed_api_key: str
@@ -96,6 +118,7 @@ def auth() -> None:
         raise APIKeyInvalid(api_key)
 
     if map_entry.exp <= epoch_time():
+        del api_key_map[hashed_api_key]
         raise APIKeyExpired(api_key)
 
     # Api key valid
@@ -133,6 +156,7 @@ def api_login():
 
     StartTypeHandlers.diffuse_timer(StartType.RESTART_DB_CHANGES)
     StartTypeHandlers.diffuse_timer(StartType.RESTART_HOSTING_CHANGES)
+    ApiKeyMapping.cleanup()
 
     # Generate an API key until one is generated that isn't used already
     while True:
@@ -155,7 +179,7 @@ def api_login():
 
 @api.route('/auth/logout', AuthLogoutData)
 def api_logout():
-    api_key_map.pop(g.hashed_api_key)
+    del api_key_map[g.hashed_api_key]
     return return_api({}, code=201)
 
 
@@ -190,7 +214,7 @@ def api_manage_user():
 
     elif request.method == 'DELETE':
         user.delete()
-        api_key_map.pop(g.hashed_api_key)
+        del api_key_map[g.hashed_api_key]
         return return_api({})
 
 
