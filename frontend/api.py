@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-from io import BytesIO, StringIO
+from io import BytesIO
 from os import remove
-from os.path import basename, exists
+from os.path import basename
 from time import time as epoch_time
 from typing import TYPE_CHECKING, Any, Dict, cast
 
-from flask import g as flask_g, request, send_file
+from flask import after_this_request, g as flask_g, request, send_file
 
-from backend.base.custom_exceptions import (APIKeyExpired, APIKeyInvalid,
-                                            LogFileNotFound)
+from backend.base.custom_exceptions import APIKeyExpired, APIKeyInvalid
 from backend.base.definitions import (ApiKeyEntry, Constants,
                                       SendResult, StartType, UserData)
 from backend.base.helpers import (folder_path, generate_api_key,
                                   hash_api_key, return_api)
-from backend.base.logging import LOGGER, get_log_filepath
+from backend.base.logging import LOGGER, get_log_file_contents
 from backend.implementations.apprise_parser import get_apprise_services
 from backend.implementations.notification_services import NotificationServices
 from backend.implementations.reminders import Reminders
@@ -71,6 +70,14 @@ class ApiKeyMapping:
         for k in to_delete:
             del api_key_map[k]
 
+        return
+
+    @staticmethod
+    def remove_user(user_id: int) -> None:
+        for key, value in api_key_map.items():
+            if value.user_data.id == user_id:
+                del api_key_map[key]
+                break
         return
 
 
@@ -193,7 +200,7 @@ def api_status():
     return return_api(result)
 
 
-# region User
+# region Users
 @api.route('/user/add', UsersAddData)
 def api_add_user():
     inputs = g.inputs
@@ -204,12 +211,16 @@ def api_add_user():
 @api.route('/user', UsersData)
 def api_manage_user():
     user = users.get_one(g.user_data.id)
+
     if request.method == 'PUT':
-        inputs = g.inputs
-        if inputs['new_username']:
-            user.update_username(inputs['new_username'])
-        if inputs['new_password']:
-            user.update_password(inputs['new_password'])
+        new_username = g.inputs['new_username']
+        new_password = g.inputs['new_password']
+
+        if new_username:
+            user.update_username(new_username)
+        if new_password:
+            user.update_password(new_password)
+
         return return_api({})
 
     elif request.method == 'DELETE':
@@ -218,14 +229,14 @@ def api_manage_user():
         return return_api({})
 
 
-# region Notification Service
+# region Notification Services
 @api.route('/notificationservices', NotificationServicesData)
 def api_notification_services_list():
     services = NotificationServices(g.user_data.id)
 
     if request.method == 'GET':
         result = services.get_all()
-        return return_api(result=[r.todict() for r in result])
+        return return_api([r.todict() for r in result])
 
     elif request.method == 'POST':
         inputs = g.inputs
@@ -277,7 +288,7 @@ def api_notification_service(n_id: int):
         return return_api({})
 
 
-# region Library
+# region Reminders
 @api.route('/reminders', RemindersData)
 def api_reminders_list():
     inputs = g.inputs
@@ -314,25 +325,31 @@ def api_reminders_query():
 @api.route('/reminders/test', TestRemindersData)
 def api_test_reminder():
     inputs = g.inputs
-    Reminders(g.user_data.id).test_reminder(
+    success = Reminders(g.user_data.id).test_reminder(
         inputs['title'],
         inputs['notification_services'],
         inputs['text']
     )
-    return return_api({}, code=201)
+    return return_api(
+        {
+            'success': success == SendResult.SUCCESS,
+            'description': success.value
+        },
+        code=201
+    )
 
 
 @api.route('/reminders/<int:r_id>', ReminderData)
 def api_get_reminder(r_id: int):
-    reminders = Reminders(g.user_data.id)
+    reminder = Reminders(g.user_data.id).get_one(r_id)
 
     if request.method == 'GET':
-        result = reminders.get_one(r_id).get()
+        result = reminder.get()
         return return_api(result.todict())
 
     elif request.method == 'PUT':
         inputs = g.inputs
-        result = reminders.get_one(r_id).update(
+        result = reminder.update(
             title=inputs['title'],
             time=inputs['time'],
             notification_services=inputs['notification_services'],
@@ -347,11 +364,11 @@ def api_get_reminder(r_id: int):
         return return_api(result.todict())
 
     elif request.method == 'DELETE':
-        reminders.get_one(r_id).delete()
+        reminder.delete()
         return return_api({})
 
 
-# region Template
+# region Templates
 @api.route('/templates', TemplatesData)
 def api_get_templates():
     inputs = g.inputs
@@ -402,7 +419,7 @@ def api_get_template(t_id: int):
         return return_api({})
 
 
-# region Static Reminder
+# region Static Reminders
 @api.route('/staticreminders', StaticRemindersData)
 def api_static_reminders_list():
     inputs = g.inputs
@@ -433,19 +450,25 @@ def api_static_reminders_query():
 
 @api.route('/staticreminders/<int:s_id>', StaticReminderData)
 def api_get_static_reminder(s_id: int):
-    reminders = StaticReminders(g.user_data.id)
+    reminder = StaticReminders(g.user_data.id).get_one(s_id)
 
     if request.method == 'GET':
-        result = reminders.get_one(s_id).get()
+        result = reminder.get()
         return return_api(result.todict())
 
     elif request.method == 'POST':
-        reminders.get_one(s_id).trigger_reminder()
-        return return_api({}, code=201)
+        success = reminder.trigger_reminder()
+        return return_api(
+            {
+                'success': success == SendResult.SUCCESS,
+                'description': success.value
+            },
+            code=201
+        )
 
     elif request.method == 'PUT':
         inputs = g.inputs
-        result = reminders.get_one(s_id).update(
+        result = reminder.update(
             title=inputs['title'],
             notification_services=inputs['notification_services'],
             text=inputs['text'],
@@ -454,11 +477,11 @@ def api_get_static_reminder(s_id: int):
         return return_api(result.todict())
 
     elif request.method == 'DELETE':
-        reminders.get_one(s_id).delete()
+        reminder.delete()
         return return_api({})
 
 
-# region Admin Panel
+# region Admin Settings
 @admin_api.route('/shutdown', ShutdownData)
 def api_shutdown():
     Server().shutdown()
@@ -536,17 +559,7 @@ def api_admin_settings():
 
 @admin_api.route('/logs', LogfileData)
 def api_admin_logs():
-    file = get_log_filepath()
-    if not exists(file):
-        raise LogFileNotFound(file)
-
-    sio = StringIO()
-    for ext in ('.1', ''):
-        lf = file + ext
-        if not exists(lf):
-            continue
-        with open(lf, 'r') as f:
-            sio.writelines(f)
+    sio = get_log_file_contents()
 
     return send_file(
         BytesIO(sio.getvalue().encode('utf-8')),
@@ -555,6 +568,7 @@ def api_admin_logs():
     ), 200
 
 
+# region Admin Users
 @admin_api.route('/users', UsersManagementData)
 def api_admin_users():
     if request.method == 'GET':
@@ -563,7 +577,10 @@ def api_admin_users():
 
     elif request.method == 'POST':
         inputs = g.inputs
-        users.add(inputs['username'], inputs['password'], True)
+        users.add(
+            inputs['username'], inputs['password'],
+            force=True
+        )
         return return_api({}, code=201)
 
 
@@ -571,37 +588,37 @@ def api_admin_users():
 def api_admin_user(u_id: int):
     user = users.get_one(u_id)
     if request.method == 'PUT':
-        inputs = g.inputs
-        if inputs['new_username']:
-            user.update_username(inputs['new_username'])
-        if inputs['new_password']:
-            user.update_password(inputs['new_password'])
+        new_username = g.inputs['new_username']
+        new_password = g.inputs['new_password']
+
+        if new_username:
+            user.update_username(new_username)
+        if new_password:
+            user.update_password(new_password)
+
         return return_api({})
 
     elif request.method == 'DELETE':
         user.delete()
-        for key, value in api_key_map.items():
-            if value.user_data.id == u_id:
-                del api_key_map[key]
-                break
+        ApiKeyMapping.remove_user(u_id)
         return return_api({})
 
 
+# region Admin Database
 @admin_api.route('/database', DatabaseData)
 def api_admin_database():
     if request.method == "GET":
-        filename = create_database_copy(folder_path('db'))
+        filepath = create_database_copy(folder_path('db'))
 
-        # We cannot simply pass the filename, ass we have to
-        # delete the file, but we cannot do that if we send it.
-        with open(filename, 'rb') as database_file:
-            bi = BytesIO(database_file.read())
+        @after_this_request
+        def remove_file(response):
+            remove(filepath)
+            return response
 
-        remove(filename)
         return send_file(
-            bi,
+            filepath,
             mimetype="application/x-sqlite3",
-            download_name=basename(filename)
+            download_name=basename(filepath)
         ), 200
 
     elif request.method == "POST":
@@ -618,9 +635,11 @@ def api_admin_backups():
 @admin_api.route('/database/backups/<int:b_idx>', BackupData)
 def api_admin_backup(b_idx: int):
     if request.method == "GET":
+        filepath = get_backup(b_idx)['filepath']
         return send_file(
-            get_backup(b_idx)['filepath'],
-            mimetype="application/x-sqlite3"
+            filepath,
+            mimetype="application/x-sqlite3",
+            download_name=basename(filepath)
         ), 200
 
     elif request.method == "POST":
