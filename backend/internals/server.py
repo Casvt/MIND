@@ -199,7 +199,7 @@ class Server(metaclass=Singleton):
 
         Args:
             start_type (StartType, optional): Why Kapowarr should
-            restart.
+                restart.
                 Defaults to StartType.RESTART.
         """
         self.__start_type = start_type
@@ -228,7 +228,7 @@ class Server(metaclass=Singleton):
                 Defaults to ().
 
             kwargs (Mapping[str, Any], optional): The keyword arguments to pass
-            to the function.
+                to the function.
                 Defaults to {}.
 
         Returns:
