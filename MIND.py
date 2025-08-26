@@ -21,7 +21,7 @@ from backend.internals.server import Server, StartTypeHandlers
 from backend.internals.settings import Settings
 
 
-def _main(
+def subprocess_main(
     start_type: StartType,
     db_folder: Union[str, None] = None,
     log_folder: Union[str, None] = None,
@@ -29,30 +29,36 @@ def _main(
     port: Union[int, None] = None,
     url_prefix: Union[str, None] = None
 ) -> NoReturn:
-    """The main function of the MIND sub-process
+    """The main function of the MIND sub-process.
 
     Args:
         start_type (StartType): The type of (re)start.
+
         db_folder (Union[str, None], optional): The folder in which the database
-        will be stored or in which a database is for MIND to use.
+            will be stored or in which a database is for MIND to use.
             Defaults to None.
+
         log_folder (Union[str, None], optional): The folder in which the logs
-        from MIND will be stored.
+            from MIND will be stored.
             Defaults to None.
+
         host (Union[str, None], optional): The host to bind the server to.
             Defaults to None.
+
         port (Union[int, None], optional): The port to bind the server to.
             Defaults to None.
+
         url_prefix (Union[str, None], optional): The URL prefix to use for the
-        server.
+            server.
             Defaults to None.
 
     Raises:
-        ValueError: One of the arguments has an invalid value.
+        InvalidKeyValue: One of the hosting arguments has an invalid value.
+        ValueError: One of the folder arguments has an invalid value.
 
     Returns:
-        NoReturn: Exit code 0 means to shutdown.
-        Exit code 131 or higher means to restart with possibly special reasons.
+        NoReturn: Exit code 0 means to shutdown. Exit code 131 or higher means
+            to restart with possibly special reasons.
     """
     setup_logging(log_folder)
     LOGGER.info('Starting up MIND')
@@ -70,22 +76,11 @@ def _main(
         s = Settings()
 
         if host:
-            try:
-                s.update({"host": host})
-            except InvalidKeyValue:
-                raise ValueError("Invalid host value")
-
+            s.update({"host": host})
         if port:
-            try:
-                s.update({"port": port})
-            except InvalidKeyValue:
-                raise ValueError("Invalid port value")
-
+            s.update({"port": port})
         if url_prefix:
-            try:
-                s.update({"url_prefix": url_prefix})
-            except InvalidKeyValue:
-                raise ValueError("Invalid url prefix value")
+            s.update({"url_prefix": url_prefix})
 
         settings = s.get_settings()
 
@@ -180,7 +175,7 @@ def _run_sub_process(
         return 0
 
 
-def MIND() -> int:
+def main() -> int:
     """The main function of MIND.
 
     Returns:
@@ -198,14 +193,17 @@ def MIND() -> int:
 if __name__ == "__main__":
     if environ.get("MIND_RUN_MAIN") == "1":
 
-        parser = ArgumentParser(
-            description="MIND is a simple self hosted reminder application that can send push notifications to your device. Set the reminder and forget about it!")
+        parser = ArgumentParser(description="""
+            MIND is a simple self hosted reminder application that can send push
+            notifications to your device. Set the reminder and forget about it!
+        """)
 
         fs = parser.add_argument_group(title="Folders")
         fs.add_argument(
             '-d', '--DatabaseFolder',
             type=str,
-            help="The folder in which the database will be stored or in which a database is for MIND to use"
+            help=("The folder in which the database will be stored or in which "
+                "a database is for MIND to use")
         )
         fs.add_argument(
             '-l', '--LogFolder',
@@ -232,7 +230,7 @@ if __name__ == "__main__":
 
         args = parser.parse_args()
 
-        st = StartType(int(environ.get(
+        start_type = StartType(int(environ.get(
             "MIND_START_TYPE",
             StartType.STARTUP.value
         )))
@@ -242,14 +240,14 @@ if __name__ == "__main__":
         host: Union[str, None] = None
         port: Union[int, None] = None
         url_prefix: Union[str, None] = None
-        if st == StartType.STARTUP:
+        if start_type == StartType.STARTUP:
             host = args.Host
             port = args.Port
             url_prefix = args.UrlPrefix
 
         try:
-            _main(
-                start_type=st,
+            subprocess_main(
+                start_type=start_type,
                 db_folder=db_folder,
                 log_folder=log_folder,
                 host=host,
@@ -257,31 +255,18 @@ if __name__ == "__main__":
                 url_prefix=url_prefix
             )
 
-        except ValueError as e:
-            if not e.args:
-                raise e
-
-            elif e.args[0] == 'Database location is not a folder':
-                parser.error(
-                    'The value for -d/--DatabaseFolder is not a folder'
-                )
-
-            elif e.args[0] == 'Logging folder is not a folder':
-                parser.error(
-                    'The value for -l/--LogFolder is not a folder'
-                )
-
-            elif e.args[0] == 'Invalid host value':
+        except InvalidKeyValue as e:
+            if e.key == 'host':
                 parser.error(
                     'The value for -h/--Host is not valid'
                 )
 
-            elif e.args[0] == 'Invalid port value':
+            elif e.key == 'port':
                 parser.error(
                     'The value for -p/--Port is not valid'
                 )
 
-            elif e.args[0] == 'Invalid url prefix value':
+            elif e.key == 'url_prefix':
                 parser.error(
                     'The value for -u/--UrlPrefix is not valid'
                 )
@@ -289,6 +274,23 @@ if __name__ == "__main__":
             else:
                 raise e
 
+        except ValueError as e:
+            if not e.args:
+                raise e
+
+            elif 'database' in e.args[0].lower():
+                parser.error(
+                    'The value for -d/--DatabaseFolder is not a folder'
+                )
+
+            elif 'logging' in e.args[0].lower():
+                parser.error(
+                    'The value for -l/--LogFolder is not a folder'
+                )
+
+            else:
+                raise e
+
     else:
-        rc = MIND()
-        exit(rc)
+        return_code = main()
+        exit(return_code)
