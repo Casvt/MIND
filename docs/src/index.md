@@ -27,6 +27,6 @@ MIND can be used for sending notifications at the desired time. This can be a se
 
 ## Contact
 
-- For support, a [Discord server](https://discord.gg/nMNdgG7vsE) is available.
+- For support, a [Discord server](https://discord.gg/Xy9VUASHhr) is available.
 - For issues or feature suggestions, see the [Reporting page](./other_docs/reporting.md).
 - For donations, go to [Ko-Fi](https://ko-fi.com/casvt).
