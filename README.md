@@ -14,6 +14,8 @@ MIND is a simple self hosted reminder application that can send push notificatio
 
 MIND allows you to set reminders for a given time. They can run just once, or be repeated at a given interval. Or use static reminders to send notifications by pressing a button. Whether you want to remind yourself of a meeting, set yearly repeating reminders for birthdays or be able to notify your family that you're late with the press of a button, it's all possible with MIND! The notifications can be sent using over 100+ platforms with the integration of [Apprise](https://github.com/caronc/apprise). If you want to send a notification, Apprise probably supports it.
 
+Featured on [Noted](https://noted.lol/mind-reminders/), [Scotti-BYTE](https://discussion.scottibyte.com/t/mind-an-open-source-self-hosted-scheduled-notifier/470) and [Jan's Tech Blog](https://bachelor-tech.com/detailed-guides/never-again-forget-about-important-dates-with-mind/).
+
 ## Features
 
 - Notifications are sent with second-precision
