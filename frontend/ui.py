@@ -34,9 +34,14 @@ def ui_manifest():
         "theme_color": "#6b6b6b",
         "icons": [
             {
-                "src": f"{Server.url_prefix}/static/img/favicon.svg",
-                "type": "image/svg+xml",
-                "sizes": "any"
+                "src": f"{Server.url_prefix}/static/img/favicon_512.png",
+                "type": "image/png",
+                "sizes": "512x512"
+            },
+            {
+                "src": f"{Server.url_prefix}/static/img/favicon_192.png",
+                "type": "image/png",
+                "sizes": "192x192"
             }
         ]
     }

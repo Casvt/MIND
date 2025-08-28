@@ -1,30 +1,34 @@
-<svg viewBox="239.752 39.2 500 500" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="170mm" height="170mm" viewBox="0 0 170 170" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="color-0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1.000006, 0, 0, 0.999994, -30.815779, -277.541534)" bx:pinned="true">
-      <title>White</title>
-      <stop style="stop-color: rgb(255, 255, 255);"></stop>
-    </linearGradient>
-    <linearGradient id="color-1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1.000006, 0, 0, 0.999994, 19.424101, -198.084808)" bx:pinned="true">
-      <title>Off-white</title>
-      <stop style="stop-color: rgb(210, 210, 210)"></stop>
-    </linearGradient>
-    <linearGradient id="color-2" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1.000006, 0, 0, 0.999994, 5.575318, -62.311562)" bx:pinned="true">
-      <title>Gray</title>
-      <stop style="stop-color: rgb(155, 155, 155)"></stop>
-    </linearGradient>
-    <linearGradient id="color-3" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1.000006, 0, 0, 0.999994, -74.018517, 113.766891)" bx:pinned="true">
-      <title>Dark gray</title>
-      <stop style="stop-color: rgb(91, 91, 91)"></stop>
-    </linearGradient>
-    <bx:grid x="39.752" y="39.2" width="100" height="100"></bx:grid>
+      <rect x="181.17862" y="326.90924" width="118.15997" height="116.84708" />
   </defs>
-  <g transform="matrix(2.413543, 0, 0, 2.192117, -660.809998, -485.15448)" style="">
-    <ellipse style="fill: rgb(91, 91, 91); stroke: url(#color-3);" cx="519.4" cy="257.1" rx="64" ry="64" transform="matrix(0, 1, -1, 0, 773.392883, -159.637634)"></ellipse>
-    <ellipse style="fill: url(#color-2); stroke: url(#color-2);" cx="455.445" cy="193.1" rx="64.045" ry="64" transform="matrix(0, 1, -1, 0, 668.85199, -52.200024)"></ellipse>
-    <ellipse style="stroke: url(#color-1); fill: url(#color-1);" cx="391.445" cy="129.1" rx="64" ry="64" transform="matrix(0, 1, -1, 0, 604.85199, -88.244972)"></ellipse>
-    <g transform="matrix(1, 0, 0, 1, -43.907719, -71.28595)">
-      <ellipse style="stroke: url(#color-0); fill: url(#color-0);" cx="327.402" cy="65.104" rx="64.045" ry="64" transform="matrix(0, 1, -1, 0, 546.14032, 103.69133)"></ellipse>
-      <text style="fill: rgb(51, 51, 51); font-family: 'Russo One'; font-size: 148.922px; font-weight: 700; line-height: 238.276px; white-space: pre;" transform="matrix(0.4969, 0, 0, 0.496903, 445.627899, 461.735657)"><tspan>M</tspan><tspan x="0" dy="1em">​</tspan></text>
-    </g>
+  <g transform="translate(-15,-15)">
+    <circle
+      style="fill:#5b5b5b;fill-opacity:1;stroke-width:0.264583"
+      cx="135"
+      cy="100"
+      r="50" />
+    <circle
+      style="fill:#9b9b9b;fill-opacity:1;stroke-width:0.264583"
+      cx="100"
+      cy="135"
+      r="50" />
+    <circle
+      style="fill:#d2d2d2;fill-opacity:1;stroke-width:0.264583"
+      cx="100"
+      cy="65"
+      r="50" />
+    <circle
+      style="fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+      cx="65"
+      cy="100"
+      r="50" />
+    <text
+      xml:space="preserve"
+      transform="matrix(0.60400151,0,0,0.61170848,-71.696631,-132.097)"
+      style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:96px;font-family:'Bookman Old Style';-inkscape-font-specification:'Bookman Old Style, Semi-Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect1);fill:#333333;fill-opacity:1">
+      <tspan x="181.17773" y="412.11951">M</tspan>
+   </text>
   </g>
 </svg>
