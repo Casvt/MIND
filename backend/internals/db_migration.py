@@ -343,8 +343,8 @@ class MigrateAddCronScheduleColumn(DBMigrator):
         # V12 -> V13
 
         get_db().executescript("""
+            PRAGMA foreign_keys = OFF;
             BEGIN TRANSACTION;
-            PRAGMA defer_foreign_keys = ON;
 
             CREATE TEMPORARY TABLE temp_reminders_13 AS
                 SELECT * FROM reminders;
@@ -380,4 +380,5 @@ class MigrateAddCronScheduleColumn(DBMigrator):
                 FROM temp_reminders_13;
 
             COMMIT;
+            PRAGMA foreign_keys = ON;
         """)
