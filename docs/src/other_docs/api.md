@@ -60,12 +60,14 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	| ---- | -------- | --------- | ----------- | -------------- |
 	| username | Yes | string | The username of the user account | N/A |
 	| password | Yes | string | The password of the user account | N/A |
+	| mfa_code | No | string | The MFA code sent to the user using the set Apprise URL | N/A |
 
 	**Returns**
 
 	| Code | Error | Description |
 	| ---- | ----- | ----------- |
 	| 201 | N/A | Success |
+	| 200 | MFACodeRequired | An MFA code is sent and now expected to be supplied |
 	| 400 | KeyNotFound | A key was not found in the input that is required to be given |
 	| 400 | UsernameInvalid | The username contains invalid characters or is not allowed |
 	| 401 | AccessUnauthorized | The password given is not correct |
@@ -129,9 +131,19 @@ The following is automatically generated. Please report any issues on [GitHub](h
 | ------------------------ | ----------- |
 | Yes | Manage a user account |
 
+??? GET
+
+	Get info of the user account
+
+	**Returns**
+
+	| Code | Error | Description |
+	| ---- | ----- | ----------- |
+	| 200 | N/A | Success |
+
 ??? PUT
 
-	Change the password of the user account
+	Change the settings of the user account
 
 	**Parameters (body)**
 
@@ -139,6 +151,7 @@ The following is automatically generated. Please report any issues on [GitHub](h
 	| ---- | -------- | --------- | ----------- | -------------- |
 	| new_username | No | string | The new username of the user account | N/A |
 	| new_password | No | string | The new password of the user account | N/A |
+	| new_mfa_apprise_url | No | string | The Apprise URL to use for sending the MFA codes | N/A |
 
 	**Returns**
 
@@ -873,7 +886,7 @@ Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
 
 ??? PUT
 
-	Change the password of the user account
+	Change the settings of the user account
 
 	**Parameters (body)**
 
@@ -881,6 +894,7 @@ Replace `<int:u_id>` with the ID of the entry. For example: `/admin/users/2`.
 	| ---- | -------- | --------- | ----------- | -------------- |
 	| new_username | No | string | The new username of the user account | N/A |
 	| new_password | No | string | The new password of the user account | N/A |
+	| new_mfa_apprise_url | No | string | The Apprise URL to use for sending the MFA codes | N/A |
 
 	**Returns**
 
