@@ -275,7 +275,7 @@ class UsersDB:
 
         result = get_db().execute(f"""
             SELECT
-                id, username, admin, salt, hash
+                id, username, admin, salt, hash, mfa_apprise_url
             FROM users
             {id_filter}
             ORDER BY admin DESC, LOWER(username);
@@ -310,16 +310,20 @@ class UsersDB:
         self,
         user_id: int,
         username: str,
-        hash: bytes
+        hash: bytes,
+        mfa_apprise_url: Union[str, None]
     ) -> None:
         get_db().execute("""
             UPDATE users
-            SET username = :username, hash = :hash
+            SET username = :username,
+                hash = :hash,
+                mfa_apprise_url = :mfa_apprise_url
             WHERE id = :user_id;
             """,
             {
                 "username": username,
                 "hash": hash,
+                "mfa_apprise_url": mfa_apprise_url or None,
                 "user_id": user_id
             }
         )

@@ -82,10 +82,13 @@ class User:
         if self.user_db.taken(new_username):
             raise UsernameTaken(new_username)
 
+        user_data = self.get()
+
         self.user_db.update(
             self.user_id,
             new_username,
-            self.get().hash
+            user_data.hash,
+            user_data.mfa_apprise_url
         )
 
         LOGGER.info(
@@ -106,12 +109,33 @@ class User:
         self.user_db.update(
             self.user_id,
             user_data.username,
-            hash_password
+            hash_password,
+            user_data.mfa_apprise_url
         )
 
         LOGGER.info(
             f'The user with ID {self.user_id} changed their password'
         )
+        return
+
+    def update_mfa_apprise_url(
+        self,
+        new_mfa_apprise_url: Union[str, None]
+    ) -> None:
+        """Change the MFA Apprise URL of the account.
+
+        Args:
+            new_mfa_apprise_url (Union[str, None]): The new MFA Apprise URL.
+        """
+        user_data = self.get()
+
+        self.user_db.update(
+            self.user_id,
+            user_data.username,
+            user_data.hash,
+            new_mfa_apprise_url
+        )
+
         return
 
     def delete(self) -> None:

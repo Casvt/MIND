@@ -262,6 +262,15 @@ def generate_api_key() -> str:
     return token_hex(Constants.API_KEY_LENGTH // 2)
 
 
+def generate_mfa_code() -> str:
+    """Generate a 6-digit MFA code.
+
+    Returns:
+        str: The code.
+    """
+    return str(int.from_bytes(token_bytes(3), 'big') % 1_000_000).zfill(6)
+
+
 # region Apprise
 def send_apprise_notification(
     urls: List[str],

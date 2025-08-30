@@ -387,7 +387,8 @@ DB_SCHEMA = """
         username VARCHAR(255) UNIQUE NOT NULL,
         salt VARCHAR(40) NOT NULL,
         hash VARCHAR(100) NOT NULL,
-        admin BOOL NOT NULL DEFAULT 0
+        admin BOOL NOT NULL DEFAULT 0,
+        mfa_apprise_url TEXT
     );
     CREATE TABLE IF NOT EXISTS notification_services(
         id INTEGER PRIMARY KEY,

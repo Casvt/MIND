@@ -9,18 +9,15 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import (TYPE_CHECKING, Any, Callable, Dict, List, Literal,
-                    Sequence, Tuple, TypedDict, TypeVar, Union, cast)
+from typing import (Any, Callable, Dict, List, Literal, Sequence,
+                    Tuple, TypedDict, TypeVar, Union, cast)
 
 from flask import Response
-
-if TYPE_CHECKING:
-    from backend.implementations.users import User
-
 
 # region Types
 T = TypeVar('T')
 U = TypeVar('U')
+MISSING = object()
 WEEKDAY_NUMBER = Literal[0, 1, 2, 3, 4, 5, 6]
 
 BaseJSONSerialisable = Union[
@@ -56,6 +53,7 @@ class Constants:
     ADMIN_PREFIX = API_PREFIX + ADMIN_API_EXTENSION
     API_KEY_LENGTH = 32 # hexadecimal characters
     API_KEY_CLEANUP_INTERVAL = 86400 # seconds
+    MFA_CODE_TIMEOUT = 300 # seconds
 
     DB_FOLDER = ("db",)
     DB_NAME = "MIND.db"
@@ -238,12 +236,6 @@ class StartTypeHandler(ABC):
 
 
 # region Dataclasses
-@dataclass
-class ApiKeyEntry:
-    exp: int
-    user_data: UserData
-
-
 @dataclass(frozen=True, order=True)
 class NotificationServiceData:
     id: int
@@ -261,12 +253,13 @@ class UserData:
     admin: bool
     salt: bytes
     hash: bytes
+    mfa_apprise_url: Union[str, None]
 
     def todict(self) -> Dict[str, Any]:
         return {
             k: v
             for k, v in self.__dict__.items()
-            if k in ('id', 'username', 'admin')
+            if k in ('id', 'username', 'admin', 'mfa_apprise_url')
         }
 
 

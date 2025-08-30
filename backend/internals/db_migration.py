@@ -382,3 +382,16 @@ class MigrateAddCronScheduleColumn(DBMigrator):
             COMMIT;
             PRAGMA foreign_keys = ON;
         """)
+
+
+class MigrateAddMFAColumn(DBMigrator):
+    start_version = 13
+
+    def run(self) -> None:
+        # V13 -> V14
+
+        get_db().executescript("""
+            ALTER TABLE users
+                ADD mfa_apprise_url TEXT;
+        """)
+        return

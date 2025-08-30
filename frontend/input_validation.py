@@ -18,10 +18,11 @@ from flask import Blueprint, Request, request
 from backend.base.custom_exceptions import (AccessUnauthorized,
                                             InvalidDatabaseFile,
                                             InvalidKeyValue, InvalidTime,
-                                            KeyNotFound, NewAccountsNotAllowed,
+                                            KeyNotFound, MFACodeRequired,
+                                            NewAccountsNotAllowed,
                                             NotificationServiceNotFound,
                                             UsernameInvalid, UsernameTaken)
-from backend.base.definitions import (Constants, DataSource, DataType,
+from backend.base.definitions import (MISSING, Constants, DataSource, DataType,
                                       EndpointHandler, MindException,
                                       RepeatQuantity, SortingMethod,
                                       TimelessSortingMethod)
@@ -125,6 +126,19 @@ class PasswordVariable(InputVariable):
     related_exceptions = [KeyNotFound, AccessUnauthorized]
 
 
+class MfaCodeVariable(NonRequiredInputVariable):
+    name = "mfa_code"
+    description = "The MFA code sent to the user using the set Apprise URL"
+    related_exceptions = [MFACodeRequired, AccessUnauthorized]
+
+    def validate(self) -> bool:
+        return self.value is None or (
+            isinstance(self.value, str)
+            and len(self.value) == 6
+            and self.value.isdigit()
+        )
+
+
 class CreatePasswordVariable(PasswordVariable):
     related_exceptions = [KeyNotFound]
 
@@ -148,6 +162,18 @@ class NewPasswordVariable(NonRequiredInputVariable):
     name = "new_password"
     description = "The new password of the user account"
     related_exceptions = [InvalidKeyValue]
+
+
+class NewMfaAppriseURLVariable(NonRequiredInputVariable):
+    name = "new_mfa_apprise_url"
+    description = "The Apprise URL to use for sending the MFA codes"
+    default = MISSING
+
+    def validate(self) -> bool:
+        return super().validate() and (
+            not isinstance(self.value, str)
+            or Apprise().add(self.value)
+        )
 
 
 class TitleVariable(InputVariable):
@@ -540,7 +566,7 @@ class AuthLoginData(EndpointData):
     description = "Login to a user account"
     requires_auth = False
     methods = Methods(
-        post=("", [UsernameVariable, PasswordVariable])
+        post=("", [UsernameVariable, PasswordVariable, MfaCodeVariable])
     )
 
 
@@ -565,9 +591,10 @@ class UsersAddData(EndpointData):
 class UsersData(EndpointData):
     description = "Manage a user account"
     methods = Methods(
+        get=("Get info of the user account", []),
         put=(
-            "Change the password of the user account",
-            [NewUsernameVariable, NewPasswordVariable]
+            "Change the settings of the user account",
+            [NewUsernameVariable, NewPasswordVariable, NewMfaAppriseURLVariable]
         ),
         delete=(
             "Delete the user account",
@@ -839,8 +866,8 @@ class UserManagementData(EndpointData):
     description = "Manage a specific user"
     methods = Methods(
         put=(
-            "Change the password of the user account",
-            [NewUsernameVariable, NewPasswordVariable]
+            "Change the settings of the user account",
+            [NewUsernameVariable, NewPasswordVariable, NewMfaAppriseURLVariable]
         ),
         delete=(
             "Delete the user account",

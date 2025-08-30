@@ -5,15 +5,17 @@ from io import BytesIO
 from os import remove
 from os.path import basename
 from time import time as epoch_time
-from typing import TYPE_CHECKING, Any, Dict, cast
+from typing import TYPE_CHECKING, Any, Dict, Tuple, cast
 
 from flask import after_this_request, g as flask_g, request, send_file
 
-from backend.base.custom_exceptions import APIKeyExpired, APIKeyInvalid
-from backend.base.definitions import (ApiKeyEntry, Constants,
+from backend.base.custom_exceptions import (AccessUnauthorized, APIKeyExpired,
+                                            APIKeyInvalid, MFACodeRequired)
+from backend.base.definitions import (MISSING, Constants, Interval,
                                       SendResult, StartType, UserData)
 from backend.base.helpers import (folder_path, generate_api_key,
-                                  hash_api_key, return_api)
+                                  generate_mfa_code, hash_api_key, return_api,
+                                  send_apprise_notification)
 from backend.base.logging import LOGGER, get_log_file_contents
 from backend.implementations.apprise_parser import get_apprise_services
 from backend.implementations.notification_services import NotificationServices
@@ -46,40 +48,8 @@ from frontend.input_validation import (AboutData, AuthLoginData,
                                        UsersManagementData, admin_api, api,
                                        get_api_docs, input_validation)
 
-# region Auth and input
+# region Auth Management and Input
 users = Users()
-api_key_map: Dict[str, ApiKeyEntry] = {}
-
-
-class ApiKeyMapping:
-    _next_run: int = 0
-
-    @classmethod
-    def cleanup(cls) -> None:
-        """Cleans up expired API keys from the mapping."""
-        now = int(epoch_time())
-        if now < cls._next_run:
-            return
-        cls._next_run = now + Constants.API_KEY_CLEANUP_INTERVAL
-
-        to_delete = [
-            k
-            for k, v in api_key_map.items()
-            if v.exp + 86400 <= now
-        ]
-        for k in to_delete:
-            del api_key_map[k]
-
-        return
-
-    @staticmethod
-    def remove_user(user_id: int) -> None:
-        for key, value in api_key_map.items():
-            if value.user_data.id == user_id:
-                del api_key_map[key]
-                break
-        return
-
 
 if TYPE_CHECKING:
     class TypedAppCtxGlobals:
@@ -93,6 +63,50 @@ else:
     g = flask_g
 
 
+class AuthManager:
+    _next_run: int = 0
+    api_key_map: Dict[str, Tuple[UserData, int]] = {}
+    mfa_code_map: Dict[int, Tuple[str, int]] = {}
+
+    @classmethod
+    def cleanup(cls) -> None:
+        """Cleans up expired API keys and MFA codes"""
+
+        now = int(epoch_time())
+        if now < cls._next_run:
+            return
+
+        cls._next_run = now + Constants.API_KEY_CLEANUP_INTERVAL
+
+        expired_api_keys = [
+            k
+            for k, (_, exp) in cls.api_key_map.items()
+            # Allow one day to respond with expired key
+            # instead of invalid key
+            if exp + Interval.ONE_DAY.value <= now
+        ]
+        for k in expired_api_keys:
+            del cls.api_key_map[k]
+
+        expired_mfa_codes = [
+            k
+            for k, (_, exp) in cls.mfa_code_map.items()
+            if exp <= now
+        ]
+        for k in expired_mfa_codes:
+            del cls.mfa_code_map[k]
+
+        return
+
+    @classmethod
+    def remove_user(cls, user_id: int) -> None:
+        for key, value in cls.api_key_map.items():
+            if value[0].id == user_id:
+                del cls.api_key_map[key]
+                break
+        return
+
+
 def auth() -> None:
     """Checks if the client is logged in.
 
@@ -103,11 +117,10 @@ def auth() -> None:
     api_key = request.values.get('api_key', '')
     hashed_api_key = hash_api_key(api_key)
 
-    if hashed_api_key not in api_key_map:
+    if hashed_api_key not in AuthManager.api_key_map:
         raise APIKeyInvalid(api_key)
 
-    map_entry = api_key_map[hashed_api_key]
-    user_data = map_entry.user_data
+    user_data, exp = AuthManager.api_key_map[hashed_api_key]
 
     if (
         user_data.admin
@@ -124,20 +137,20 @@ def auth() -> None:
     ):
         raise APIKeyInvalid(api_key)
 
-    if map_entry.exp <= epoch_time():
-        del api_key_map[hashed_api_key]
+    if exp <= epoch_time():
+        del AuthManager.api_key_map[hashed_api_key]
         raise APIKeyExpired(api_key)
 
     # Api key valid
     sv = Settings().get_settings()
     if sv.login_time_reset:
-        map_entry.exp = (
+        exp = (
             int(epoch_time()) + sv.login_time
         )
 
     g.hashed_api_key = hashed_api_key
     g.user_data = user_data
-    g.exp = map_entry.exp
+    g.exp = exp
 
     return
 
@@ -159,22 +172,50 @@ def api_auth_and_input_validation() -> None:
 def api_login():
     user_data = users.login(g.inputs['username'], g.inputs['password']).get()
 
+    # Credentials valid
+    if user_data.mfa_apprise_url:
+        if g.inputs['mfa_code'] is not None:
+            # Validate code
+            mfa_code, exp = AuthManager.mfa_code_map.get(
+                user_data.id, ('', 0)
+            )
+            if not (
+                g.inputs['mfa_code'] == mfa_code
+                and exp > epoch_time()
+            ):
+                raise AccessUnauthorized()
+
+        else:
+            mfa_code = generate_mfa_code()
+
+            AuthManager.mfa_code_map[user_data.id] = (
+                mfa_code, int(epoch_time()) + Constants.MFA_CODE_TIMEOUT
+            )
+
+            send_apprise_notification(
+                [user_data.mfa_apprise_url],
+                "MIND MFA Login Code",
+                f"Your login code is: {mfa_code}"
+            )
+
+            raise MFACodeRequired()
+
     # Login successful
 
     StartTypeHandlers.diffuse_timer(StartType.RESTART_DB_CHANGES)
     StartTypeHandlers.diffuse_timer(StartType.RESTART_HOSTING_CHANGES)
-    ApiKeyMapping.cleanup()
+    AuthManager.cleanup()
 
     # Generate an API key until one is generated that isn't used already
     while True:
         api_key = generate_api_key()
         hashed_api_key = hash_api_key(api_key)
-        if hashed_api_key not in api_key_map:
+        if hashed_api_key not in AuthManager.api_key_map:
             break
 
     login_time = Settings().sv.login_time
     exp = int(epoch_time()) + login_time
-    api_key_map[hashed_api_key] = ApiKeyEntry(exp, user_data)
+    AuthManager.api_key_map[hashed_api_key] = (user_data, exp)
 
     result = {
         'api_key': api_key,
@@ -186,7 +227,7 @@ def api_login():
 
 @api.route('/auth/logout', AuthLogoutData)
 def api_logout():
-    del api_key_map[g.hashed_api_key]
+    del AuthManager.api_key_map[g.hashed_api_key]
     return return_api({}, code=201)
 
 
@@ -212,20 +253,27 @@ def api_add_user():
 def api_manage_user():
     user = users.get_one(g.user_data.id)
 
-    if request.method == 'PUT':
+    if request.method == 'GET':
+        result = user.get()
+        return return_api(result.todict())
+
+    elif request.method == 'PUT':
         new_username = g.inputs['new_username']
         new_password = g.inputs['new_password']
+        new_mfa_apprise_url = g.inputs['new_mfa_apprise_url']
 
         if new_username:
             user.update_username(new_username)
         if new_password:
             user.update_password(new_password)
+        if new_mfa_apprise_url != MISSING:
+            user.update_mfa_apprise_url(new_mfa_apprise_url)
 
-        return return_api({})
+        return return_api(user.get().todict())
 
     elif request.method == 'DELETE':
         user.delete()
-        del api_key_map[g.hashed_api_key]
+        del AuthManager.api_key_map[g.hashed_api_key]
         return return_api({})
 
 
@@ -590,17 +638,20 @@ def api_admin_user(u_id: int):
     if request.method == 'PUT':
         new_username = g.inputs['new_username']
         new_password = g.inputs['new_password']
+        new_mfa_apprise_url = g.inputs['mfa_apprise_url']
 
         if new_username:
             user.update_username(new_username)
         if new_password:
             user.update_password(new_password)
+        if new_mfa_apprise_url != MISSING:
+            user.update_mfa_apprise_url(new_mfa_apprise_url)
 
         return return_api({})
 
     elif request.method == 'DELETE':
         user.delete()
-        ApiKeyMapping.remove_user(u_id)
+        AuthManager.remove_user(u_id)
         return return_api({})
 
 

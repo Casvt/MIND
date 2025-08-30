@@ -158,6 +158,18 @@ class APIKeyExpired(LogUnauthMindException):
         }
 
 
+class MFACodeRequired(MindException):
+    "An MFA code is sent and now expected to be supplied"
+
+    @property
+    def api_response(self) -> ApiResponse:
+        return {
+            'code': 200,
+            'error': self.__class__.__name__,
+            'result': {}
+        }
+
+
 # region Admin Operations
 class OperationNotAllowed(MindException):
     "What was requested to be done is not allowed"
