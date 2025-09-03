@@ -249,6 +249,7 @@ body:has(#wide-toggle:checked) .tab-container > div {
 }
 
 .entry.add-entry {
+	flex-grow: 1;
 	justify-content: center;
 	align-items: center;
 	gap: .5rem;
@@ -271,13 +272,13 @@ body:has(#wide-toggle:checked) .tab-container > div {
 .entry {
 	--color: var(--color-gray);
 	width: var(--entry-width);
-	height: 6rem;
+	min-height: 5.8rem;
+	max-height: 8.9rem;
 	position: relative;
 
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
-	gap: .1rem;
 
 	border-radius: 4px;
 	padding: .75rem;
@@ -296,6 +297,7 @@ button.entry.fit {
 .entry h2 {
 	overflow-y: hidden;
 	height: 100%;
+	padding-bottom: .1rem;
 
 	text-align: left;
 	font-size: 1.25em;
