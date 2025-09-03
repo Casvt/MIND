@@ -139,7 +139,7 @@ div.input-style:has(input.changed) {
 
 #add-user-form,
 #edit-user-form {
-	width: 16rem;
+	width: min(90%, 16rem);
 	height: 8rem;
 
 	display: flex;
@@ -160,7 +160,8 @@ dialog:where(#upload-db-dialog, #import-db-dialog) {
 	--max-height: 25rem;
 }
 
-:where(#upload-db-dialog, #import-db-dialog) .dialog-content > p {
+:where(#upload-db-dialog, #import-db-dialog, #add-user-dialog, #edit-user-dialog)
+ .dialog-content > p {
 	padding-inline: 1rem;
 	text-align: center;
 }

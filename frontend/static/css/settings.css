@@ -15,14 +15,19 @@
 	}
 }
 
-#change-password-form {
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
+:where(#edit-account-dialog, #delete-user-dialog) .dialog-content > p {
+	padding-inline: 1rem;
+	text-align: center;
 }
 
-#change-password-form input {
-	width: 16rem;
+#edit-account-form {
+	width: min(90%, 16rem);
+	height: 8rem;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 1rem;
 }
 
 #delete-account-button {
@@ -31,10 +36,6 @@
 
 #delete-account-button:hover {
 	background-color: var(--color-error);
-}
-
-#delete-user-dialog .dialog-content p {
-	text-align: center;
 }
 
 .contact-list {

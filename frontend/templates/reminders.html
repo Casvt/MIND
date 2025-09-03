@@ -114,6 +114,30 @@
 		</div>
 	</dialog>
 
+	<dialog id="edit-account-dialog">
+		<div class="dialog-container">
+			<div class="dialog-header">
+				<h2>Edit Account</h2>
+			</div>
+			<div class="dialog-content">
+				<p>Leave fields empty to not change their value</p>
+				<form id="edit-account-form">
+					<div class="checked-input-container">
+						<input type="text" id="edit-account-username-input" autocomplete="username" placeholder="New username" class="input-style">
+						<p id="edit-invalid-username-error">Username invalid</p>
+						<p id="edit-taken-username-error">Username already taken</p>
+					</div>
+
+					<input type="password" id="edit-account-password-input" autocomplete="new-password" placeholder="New password" class="input-style">
+				</form>
+			</div>
+			<div class="dialog-footer">
+				<button id="close-edit-account" class="input-style">Cancel</button>
+				<button type="submit" form="edit-account-form" class="input-style">Save</button>
+			</div>
+		</div>
+	</dialog>
+
 	<header>
 		<div>
 			<label for="nav-toggle" id="toggle-nav">
@@ -481,13 +505,9 @@
 									<td><select id="default-service-input" class="input-style"></select></td>
 								</tr>
 								<tr>
-									<th><label for="change-password-input">Change Password</label></th>
+									<th><label for="start-edit-account">Edit Account</label></th>
 									<td>
-										<form id="change-password-form">
-											<input type="text" name="hidden-username" class="hidden" autocomplete="username">
-											<input type="password" id="change-password-input" class="input-style" autocomplete="new-password" placeholder="New Password" required>
-											<button type="submit" class="input-style">Change</button>
-										</form>
+										<button id="start-edit-account" class="input-style">Edit Account</button>
 									</td>
 								</tr>
 								<tr>

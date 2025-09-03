@@ -4,10 +4,22 @@ const settingsEls = {
 		locale: document.querySelector('#locale-input'),
 		defaultService: document.querySelector('#default-service-input'),
 	},
-	changePassword: {
-		form: document.querySelector('#change-password-form'),
-		input: document.querySelector('#change-password-input'),
-		submit: document.querySelector('#change-password-form button')
+	editAccount: {
+		start: document.querySelector("#start-edit-account"),
+		dialog: document.querySelector("#edit-account-dialog"),
+		form: document.querySelector("#edit-account-form"),
+		close: document.querySelector("#close-edit-account"),
+		inputContainers: {
+			username: document.querySelector("#edit-account-form .checked-input-container:has(input[type='text'])")
+		},
+		inputs: {
+			username: document.querySelector("#edit-account-username-input"),
+			password: document.querySelector("#edit-account-password-input")
+		},
+		errors: {
+			usernameInvalid: document.querySelector('#edit-invalid-username-error'),
+			usernameTaken: document.querySelector('#edit-taken-username-error')
+		}
 	},
 	deleteAccount: {
 		dialog: document.querySelector('#delete-user-dialog'),
@@ -40,23 +52,57 @@ function updateClockSetting() {
 	setupClock()
 }
 
-function changePassword() {
-	const data = {
-		'new_password': settingsEls.changePassword.input.value
+function openEditAccount() {
+	settingsEls.editAccount.inputContainers.username.classList.remove('error-input-container')
+	hide([settingsEls.editAccount.errors.usernameInvalid, settingsEls.editAccount.errors.usernameTaken])
+	settingsEls.editAccount.inputs.username.value = ''
+	settingsEls.editAccount.inputs.password.value = ''
+
+	settingsEls.editAccount.dialog.showModal()
+}
+
+function closeEditAccount() {
+	settingsEls.editAccount.dialog.close()
+}
+
+function editAccount() {
+	settingsEls.editAccount.inputContainers.username.classList.remove('error-input-container')
+	hide([settingsEls.editAccount.errors.usernameInvalid, settingsEls.editAccount.errors.usernameTaken])
+
+	const data = {}
+
+	if (settingsEls.editAccount.inputs.username.value !== '')
+		data.new_username = settingsEls.editAccount.inputs.username.value
+
+	if (settingsEls.editAccount.inputs.password.value !== '')
+		data.new_password = settingsEls.editAccount.inputs.password.value
+
+	if (Object.keys(data).length === 0) {
+		// Nothing changed
+		closeEditAccount()
+		return
 	}
+
 	sendAPI("PUT", "/user", {}, data)
-	.then(response => {
-		settingsEls.changePassword.input.value = ""
-		settingsEls.changePassword.submit.style.backgroundColor = "var(--color-success)"
-		settingsEls.changePassword.submit.innerText = "Changed"
-		setTimeout(() => {
-				settingsEls.changePassword.submit.style.backgroundColor = ""
-				settingsEls.changePassword.submit.innerText = "Change"
-			},
-			2000
-		)
+	.then(json => {
+		closeEditAccount()
 	})
-	.catch(e => console.log(e))
+	.catch(e => {
+		e.json().then(e => {
+			if (e.error === 'UsernameInvalid') {
+				settingsEls.editAccount.errors.usernameInvalid.innerText = e.result.reason
+				hide([], [settingsEls.editAccount.errors.usernameInvalid])
+				settingsEls.editAccount.inputContainers.username.classList.add('error-input-container')
+
+			} else if (e.error === 'UsernameTaken') {
+				hide([], [settingsEls.editAccount.errors.usernameTaken])
+				settingsEls.editAccount.inputContainers.username.classList.add('error-input-container')
+
+			} else {
+				console.log(e)
+			}
+		})
+	})
 }
 
 function deleteAccount() {
@@ -71,9 +117,18 @@ loadSettings()
 settingsEls.settings.showClock.onchange = e => updateClockSetting()
 settingsEls.settings.locale.onchange = e => updateLocale()
 settingsEls.settings.defaultService.onchange = e => updateDefaultService()
-settingsEls.changePassword.form.action = 'javascript:changePassword();'
 settingsEls.deleteAccount.button.onclick = e => 
 	settingsEls.deleteAccount.dialog.showModal()
+
+settingsEls.editAccount.start.onclick = e => openEditAccount()
+settingsEls.editAccount.dialog.onclick = e => {
+	if (e.target === e.currentTarget) {
+		e.stopPropagation()
+		closeEditAccount()
+	}
+}
+settingsEls.editAccount.form.action = 'javascript:editAccount()'
+settingsEls.editAccount.close.onclick = e => closeEditAccount()
 
 settingsEls.deleteAccount.dialog.onclick = e => {
 	if (e.target === e.currentTarget) {
