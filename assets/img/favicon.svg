@@ -1,0 +1,30 @@
+<svg viewBox="239.752 39.2 500 500" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+  <defs>
+    <linearGradient id="color-0" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1.000006, 0, 0, 0.999994, -30.815779, -277.541534)" bx:pinned="true">
+      <title>White</title>
+      <stop style="stop-color: rgb(255, 255, 255);"></stop>
+    </linearGradient>
+    <linearGradient id="color-1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1.000006, 0, 0, 0.999994, 19.424101, -198.084808)" bx:pinned="true">
+      <title>Off-white</title>
+      <stop style="stop-color: rgb(210, 210, 210)"></stop>
+    </linearGradient>
+    <linearGradient id="color-2" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1.000006, 0, 0, 0.999994, 5.575318, -62.311562)" bx:pinned="true">
+      <title>Gray</title>
+      <stop style="stop-color: rgb(155, 155, 155)"></stop>
+    </linearGradient>
+    <linearGradient id="color-3" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1.000006, 0, 0, 0.999994, -74.018517, 113.766891)" bx:pinned="true">
+      <title>Dark gray</title>
+      <stop style="stop-color: rgb(91, 91, 91)"></stop>
+    </linearGradient>
+    <bx:grid x="39.752" y="39.2" width="100" height="100"></bx:grid>
+  </defs>
+  <g transform="matrix(2.413543, 0, 0, 2.192117, -660.809998, -485.15448)" style="">
+    <ellipse style="fill: rgb(91, 91, 91); stroke: url(#color-3);" cx="519.4" cy="257.1" rx="64" ry="64" transform="matrix(0, 1, -1, 0, 773.392883, -159.637634)"></ellipse>
+    <ellipse style="fill: url(#color-2); stroke: url(#color-2);" cx="455.445" cy="193.1" rx="64.045" ry="64" transform="matrix(0, 1, -1, 0, 668.85199, -52.200024)"></ellipse>
+    <ellipse style="stroke: url(#color-1); fill: url(#color-1);" cx="391.445" cy="129.1" rx="64" ry="64" transform="matrix(0, 1, -1, 0, 604.85199, -88.244972)"></ellipse>
+    <g transform="matrix(1, 0, 0, 1, -43.907719, -71.28595)">
+      <ellipse style="stroke: url(#color-0); fill: url(#color-0);" cx="327.402" cy="65.104" rx="64.045" ry="64" transform="matrix(0, 1, -1, 0, 546.14032, 103.69133)"></ellipse>
+      <text style="fill: rgb(51, 51, 51); font-family: 'Russo One'; font-size: 148.922px; font-weight: 700; line-height: 238.276px; white-space: pre;" transform="matrix(0.4969, 0, 0, 0.496903, 445.627899, 461.735657)"><tspan>M</tspan><tspan x="0" dy="1em">​</tspan></text>
+    </g>
+  </g>
+</svg>
