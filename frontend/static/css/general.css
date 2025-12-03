@@ -7,19 +7,60 @@
 }
 
 :root {
-	--color-light: #ffffff;
-	--color-light-gray: #6b6b6b;
-	--color-gray: #3c3c3c;
-	--color-dark: #1b1b1b;
+  --color-light: #ffffffd9;
+  --color-light-gray: #9ba0a8d9;
+  --color-gray: #2e2f33aa;
+  --color-dark: #18191caa;
 
-	--color-error: #db5461;
-	--color-success: #54db68;
-	
-	--header-height: 4.5rem;
-	--nav-width: 4rem;
-	--rem-clamp: clamp(.5rem, 2vw, 1rem);
-	--default-shadow: 0 1px 2px 0 rgb(0 0 0 / 60%), 0 2px 6px 2px rgb(0 0 0 / 30%);
+  --frost-bg: rgba(255, 255, 255, 0.12);
+  --frost-border: rgba(255, 255, 255, 0.22);
+  --glass-blur: blur(18px);
+
+  --color-error: #db5461;
+  --color-success: #54db68;
+  
+  --header-height: 4.5rem;
+  --nav-width: 4rem;
+  --rem-clamp: clamp(.5rem, 2vw, 1rem);
+  --default-shadow: 0 4px 20px rgba(0,0,0,0.35);
+  --round: 22px;
 }
+
+
+
+/* Frosted Glass Base */
+.frosted {
+  backdrop-filter: var(--glass-blur);
+  background: var(--frost-bg);
+  border: 1px solid var(--frost-border);
+  border-radius: var(--round);
+  box-shadow: var(--default-shadow);
+}
+
+
+
+/* General */
+body {
+  height: 100vh;
+  overflow-x: hidden;
+  background: linear-gradient(135deg, #1a1c1f, #131416);
+  color: var(--color-light);
+}
+
+/* Header */
+header {
+  width: 100%;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border-radius: var(--round);
+  background: var(--frost-bg);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--default-shadow);
+}
+
+
 
 /*  */
 /* Default properties */
@@ -261,6 +302,7 @@ nav > div > button svg {
 	width: 2rem;
 }
 
+
 /*  */
 /* Window management */
 /*  */
@@ -303,6 +345,24 @@ nav > div > button svg {
 
 .window-container.show-window > .extra-window-container {
 	transform: translateY(var(--y-offset));
+}
+
+/* Components using main rounding */
+header,
+button,
+label,
+input:not([type="checkbox"]),
+select,
+textarea,
+.as-button,
+nav,
+nav > div > button {
+  border-radius: var(--round);
+}
+
+/* Reminder / Middle Window – strong rounding */
+.extra-window-container > div {
+  border-radius: 40px;
 }
 
 /*  */
