@@ -38,6 +38,7 @@ def get_about_data() -> Dict[str, Any]:
 
 @dataclass(frozen=True)
 class PublicSettingsValues:
+    """All settings that are exposed to the user"""
     log_level: int = INFO
 
     host: str = '0.0.0.0'
@@ -59,6 +60,7 @@ class PublicSettingsValues:
 
 @dataclass(frozen=True)
 class SettingsValues(PublicSettingsValues):
+    """All settings including privates"""
     database_version: int = DatabaseMigrationHandler.latest_db_version()
 
     backup_host: str = '0.0.0.0'
@@ -76,7 +78,7 @@ class Settings(metaclass=Singleton):
     def _insert_missing_settings(self) -> None:
         """Insert any missing keys from the settings into the database"""
         config_db = ConfigDB()
-        for key, value in asdict(SettingsValues()).items():
+        for key, value in SettingsValues().todict().items():
             config_db.insert(key, value)
         commit()
         return
@@ -94,14 +96,12 @@ class Settings(metaclass=Singleton):
             if k in SettingsValues.__dataclass_fields__
         }
 
-        bool_fields = (
-            field.name
-            for field in SettingsValues.__dataclass_fields__.values()
-            if field.type is bool
-        )
-
-        for b_key in bool_fields:
-            db_values[b_key] = bool(db_values[b_key])
+        # Database type for value is BLOB,
+        # so manually convert types
+        for key, value in db_values.items():
+            key_type = SettingsValues.__dataclass_fields__[key].type
+            if key_type is bool:
+                db_values[key] = bool(value)
 
         return SettingsValues(**db_values)
 
@@ -157,7 +157,7 @@ class Settings(metaclass=Singleton):
         """
         formatted_data = {}
         for key, value in data.items():
-            formatted_data[key] = self.__format_setting(key, value, from_public)
+            formatted_data[key] = self.__format_value(key, value, from_public)
 
         config_db = ConfigDB()
         for key, value in formatted_data.items():
@@ -242,7 +242,7 @@ class Settings(metaclass=Singleton):
         self.update(restore_settings)
         return
 
-    def __format_setting(self, key: str, value: Any, from_public: bool) -> Any:
+    def __format_value(self, key: str, value: Any, from_public: bool) -> Any:
         """Check if the value of a setting is allowed and convert if needed.
 
         Args:
@@ -258,8 +258,6 @@ class Settings(metaclass=Singleton):
         Returns:
             Any: (Converted) Setting value.
         """
-        converted_value = value
-
         KeyCollection = PublicSettingsValues if from_public else SettingsValues
 
         if key not in KeyCollection.__dataclass_fields__:
@@ -270,6 +268,9 @@ class Settings(metaclass=Singleton):
         if not isinstance(value, key_data.type):
             raise InvalidKeyValue(key, value)
 
+        # Do key-specific checks and formatting
+        converted_value = value
+
         if key == 'login_time':
             if not (
                 Interval.ONE_MINUTE.value
@@ -279,7 +280,7 @@ class Settings(metaclass=Singleton):
                 raise InvalidKeyValue(key, value)
 
         elif key in ('port', 'backup_port'):
-            if not 1 <= value <= 65535:
+            if not 1 <= value <= 65_535:
                 raise InvalidKeyValue(key, value)
 
         elif key in ('url_prefix', 'backup_url_prefix'):
