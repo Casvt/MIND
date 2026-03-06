@@ -6,7 +6,6 @@ from datetime import datetime
 from os import remove
 from os.path import basename, dirname, exists, join
 from re import compile
-from shutil import move
 from sqlite3 import OperationalError
 from time import time
 from typing import TYPE_CHECKING, List, Union
@@ -14,7 +13,7 @@ from typing import TYPE_CHECKING, List, Union
 from backend.base.custom_exceptions import (DatabaseFileNotFound,
                                             InvalidDatabaseFile)
 from backend.base.definitions import Constants, DatabaseBackupEntry, StartType
-from backend.base.helpers import copy, folder_path, list_files
+from backend.base.helpers import copy, folder_path, list_files, rename_file
 from backend.base.logging import LOGGER
 from backend.internals.db import DBConnection
 from backend.internals.db_migration import get_latest_db_version
@@ -188,7 +187,7 @@ def revert_db_import(
 
     if swap:
         remove(original_db_file)
-        move(
+        rename_file(
             other_db_file,
             original_db_file
         )
@@ -260,11 +259,11 @@ def import_db(
     cursor_new.connection.close()
 
     DBConnection().merge_wal_files()
-    move(
+    rename_file(
         DBConnection.default_file,
         join(dirname(DBConnection.default_file), Constants.DB_ORIGINAL_NAME)
     )
-    move(
+    rename_file(
         new_db_file,
         DBConnection.default_file
     )

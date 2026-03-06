@@ -1,21 +1,22 @@
 # -*- coding: utf-8 -*-
 
 """
-General "helper" functions and classes
+Generic functions and classes
 """
 
 from base64 import urlsafe_b64encode
-from datetime import datetime
+from collections import deque
+from datetime import datetime, timezone
 from hashlib import pbkdf2_hmac, sha256
 from logging import WARNING
-from os import makedirs, scandir, symlink
+from os import makedirs, scandir
 from os.path import abspath, dirname, exists, isfile, join, splitext
 from secrets import token_bytes, token_hex
 from shutil import copy2, move
 from sys import base_exec_prefix, executable, platform, version_info
 from threading import current_thread
-from typing import (Any, Callable, Dict, Iterable, List,
-                    Sequence, Set, Tuple, Union, cast)
+from typing import (Any, Callable, Dict, Iterable,
+                    List, Sequence, Tuple, Union, cast)
 
 from apprise import Apprise, LogCapture
 from cron_converter import Cron
@@ -27,7 +28,16 @@ from backend.base.definitions import (WEEKDAY_NUMBER, Constants,
 from backend.base.logging import LOGGER
 
 
-# region Python
+# region System
+def current_thread_id() -> int:
+    """Get the ID of the current thread.
+
+    Returns:
+        int: The ID.
+    """
+    return current_thread().native_id or -1
+
+
 def get_python_version() -> str:
     """Get the Python version as a string. E.g. `"3.8.10.final.0"`.
 
@@ -91,8 +101,9 @@ def get_python_exe() -> Union[str, None]:
     Returns:
         Union[str, None]: The python executable path, or `None` if not found.
     """
-    if platform.startswith('darwin'):
-        filepath = None
+    filepath = executable or None
+
+    if platform.startswith('darwin') and not isfile(filepath or ''):
         bundle_path = join(
             base_exec_prefix,
             "Resources",
@@ -102,11 +113,10 @@ def get_python_exe() -> Union[str, None]:
             "Python"
         )
         if exists(bundle_path):
+            from os import symlink
             from tempfile import mkdtemp
             filepath = join(mkdtemp(), "python")
             symlink(bundle_path, filepath)
-    else:
-        filepath = executable or None
 
     if filepath and not isfile(filepath):
         filepath = None
@@ -190,15 +200,6 @@ def search_filter(query: str, result: GeneralReminderData) -> bool:
         in
         (result.title + (result.text or '')).lower().replace(' ', '')
     )
-
-
-def current_thread_id() -> int:
-    """Get the ID of the current thread.
-
-    Returns:
-        int: The ID.
-    """
-    return current_thread().native_id or -1
 
 
 def return_api(
@@ -369,7 +370,7 @@ def find_next_time(
     if weekdays is not None:
         weekdays.sort()
 
-    current_time = datetime.fromtimestamp(datetime.utcnow().timestamp())
+    current_time = datetime.now(timezone.utc)
     original_datetime = datetime.fromtimestamp(original_time)
     new_time = datetime.fromtimestamp(original_time)
 
@@ -444,10 +445,7 @@ def folder_path(*folders: str) -> str:
     Returns:
         str: The absolute filepath.
     """
-    return join(
-        dirname(dirname(dirname(abspath(__file__)))),
-        *folders
-    )
+    return join(dirname(dirname(dirname(abspath(__file__)))), *folders)
 
 
 def list_files(folder: str, ext: Iterable[str] = []) -> List[str]:
@@ -458,25 +456,21 @@ def list_files(folder: str, ext: Iterable[str] = []) -> List[str]:
         folder (str): The base folder to search through.
 
         ext (Iterable[str], optional): File extensions to only include.
-            Dot-prefix not necessary. Let empty to allow all extensions.
+            Dot-prefix optional. Keep empty to allow all extensions.
             Defaults to [].
 
     Returns:
-        List[str]: The paths of the files in the folder.
+        List[str]: The absolute paths of the files in the folder.
     """
     files: List[str] = []
+    to_dos = deque((folder,))
+    ext = {'.' + e.lower().lstrip('.') for e in ext}
 
-    def _list_files(folder: str, ext: Set[str] = set()):
-        """Internal function to add all files in a folder to the files list.
-
-        Args:
-            folder (str): The base folder to search through.
-            ext (Set[str], optional): A set of lowercase, dot-prefixed,
-            extensions to filter for or empty for no filter. Defaults to set().
-        """
-        for f in scandir(folder):
+    while to_dos:
+        to_do = to_dos.popleft()
+        for f in scandir(to_do):
             if f.is_dir():
-                _list_files(f.path, ext)
+                to_dos.append(f.path)
 
             elif (
                 f.is_file()
@@ -488,14 +482,11 @@ def list_files(folder: str, ext: Iterable[str] = []) -> List[str]:
             ):
                 files.append(f.path)
 
-    ext = {'.' + e.lower().lstrip('.') for e in ext}
-    _list_files(folder, ext)
     return files
 
 
 def create_folder(folder: str) -> None:
-    """Create a folder. Also creates any parent folders if they don't exist
-    already. Allows folder to already exist.
+    """Create a folder recursively, if any of the folders don't exist already.
 
     Args:
         folder (str): The path to the folder to create.
@@ -547,13 +538,16 @@ def rename_file(
     before: str,
     after: str
 ) -> None:
-    """Rename a file, taking care of new folder locations and
-    the possible complications with files on OS'es.
+    """Rename a file, but also taking care of creating the new location,
+    handling the possible complications with files on OSes and filesystems
+    and logging the rename.
 
     Args:
         before (str): The current filepath of the file.
         after (str): The new desired filepath of the file.
     """
+    LOGGER.debug(f'Renaming file {before} to {after}')
+
     create_folder(dirname(after))
 
     move(before, after, copy_function=copy)
