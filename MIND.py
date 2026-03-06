@@ -25,6 +25,7 @@ def subprocess_main(
     start_type: StartType,
     db_folder: Union[str, None] = None,
     log_folder: Union[str, None] = None,
+    log_file: Union[str, None] = None,
     host: Union[str, None] = None,
     port: Union[int, None] = None,
     url_prefix: Union[str, None] = None
@@ -40,6 +41,10 @@ def subprocess_main(
 
         log_folder (Union[str, None], optional): The folder in which the logs
             from MIND will be stored.
+            Defaults to None.
+
+        log_file (Union[str, None], optional): The filename of the file in which
+            the logs from MIND will be stored.
             Defaults to None.
 
         host (Union[str, None], optional): The host to bind the server to.
@@ -60,7 +65,7 @@ def subprocess_main(
         NoReturn: Exit code 0 means to shutdown. Exit code 131 or higher means
             to restart with possibly special reasons.
     """
-    setup_logging(log_folder)
+    setup_logging(log_folder, log_file)
     LOGGER.info('Starting up MIND')
 
     if not check_min_python_version(*Constants.MIN_PYTHON_VERSION):
@@ -210,6 +215,11 @@ if __name__ == "__main__":
             type=str,
             help="The folder in which the logs from MIND will be stored"
         )
+        fs.add_argument(
+            '-f', '--LogFile',
+            type=str,
+            help="The filename of the file in which the logs from MIND will be stored"
+        )
 
         hs = parser.add_argument_group(title="Hosting Settings")
         hs.add_argument(
@@ -237,6 +247,7 @@ if __name__ == "__main__":
 
         db_folder: Union[str, None] = args.DatabaseFolder
         log_folder: Union[str, None] = args.LogFolder
+        log_file: Union[str, None] = args.LogFile
         host: Union[str, None] = None
         port: Union[int, None] = None
         url_prefix: Union[str, None] = None
@@ -250,6 +261,7 @@ if __name__ == "__main__":
                 start_type=start_type,
                 db_folder=db_folder,
                 log_folder=log_folder,
+                log_file=log_file,
                 host=host,
                 port=port,
                 url_prefix=url_prefix
@@ -283,9 +295,14 @@ if __name__ == "__main__":
                     'The value for -d/--DatabaseFolder is not a folder'
                 )
 
-            elif 'logging' in e.args[0].lower():
+            elif e.args[0] == 'Logging folder is not a folder':
                 parser.error(
                     'The value for -l/--LogFolder is not a folder'
+                )
+
+            elif e.args[0] == 'Logging file is not a file':
+                parser.error(
+                    'The value for -f/--LogFile is not a file'
                 )
 
             else:

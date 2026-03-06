@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 
+"""
+Setting up, using and altering the logger
+"""
+
 import logging
 import logging.config
 from io import StringIO
-from os.path import exists, isdir, join
+from os.path import exists, isdir, isfile, join
 from typing import Any, Union
 
 from backend.base.definitions import Constants
@@ -81,16 +85,24 @@ LOGGING_CONFIG = {
 }
 
 
-def setup_logging(log_folder: Union[str, None]) -> None:
+def setup_logging(
+    log_folder: Union[str, None],
+    log_file: Union[str, None]
+) -> None:
     """Setup the basic config of the logging module.
 
     Args:
         log_folder (Union[str, None]): The folder to put the log file in.
             If `None`, the log file will be in the same folder as the
-            application folder.
+            application folder. It will be created if it doesn't exist yet.
+
+        log_file (Union[str, None]): The filename of the log file.
+            If `None`, the default filename will be used.  It will be created if
+            it doesn't exist yet.
 
     Raises:
-        ValueError: The given log folder is not a folder.
+        ValueError: The given log folder is not a folder, or the given log file
+            is not a file.
     """
     from backend.base.helpers import create_folder, folder_path
 
@@ -100,21 +112,26 @@ def setup_logging(log_folder: Union[str, None]) -> None:
 
         create_folder(log_folder)
 
+    if log_file:
+        if exists(log_file) and not isfile(log_file):
+            raise ValueError("Logging file is not a file")
+
+    else:
+        log_file = Constants.LOGGER_FILENAME
+
     if log_folder is None:
-        LOGGING_CONFIG["handlers"]["file"]["filename"] = folder_path(
-            Constants.LOGGER_FILENAME
-        )
+        LOGGING_CONFIG["handlers"]["file"]["filename"] = folder_path(log_file)
     else:
         LOGGING_CONFIG["handlers"]["file"]["filename"] = join(
             log_folder,
-            Constants.LOGGER_FILENAME
+            log_file
         )
 
     logging.config.dictConfig(LOGGING_CONFIG)
 
-    # Log uncaught exceptions using the logger instead of printing the stderr
+    # Log uncaught exceptions using the logger instead of printing to stderr.
     # Logger goes to stderr anyway, so still visible in console but also logs
-    # to file, so that downloaded log file also contains any errors.
+    # to file, so that downloaded log file also contains any exceptions.
     import sys
     import threading
     from traceback import format_exception
@@ -139,7 +156,7 @@ def setup_logging(log_folder: Union[str, None]) -> None:
 
 
 def get_log_filepath() -> str:
-    """Get the filepath to the logging file.
+    """Get the filepath to the log file.
 
     Returns:
         str: The filepath.
@@ -151,16 +168,16 @@ def get_log_file_contents() -> StringIO:
     """Get all the logs from the log file(s).
 
     Raises:
-        LogFileNotFound: The log file does not exist.
+        FileNotFound: The log file does not exist.
 
     Returns:
         StringIO: The contents of the log file(s).
     """
-    from backend.base.custom_exceptions import LogFileNotFound
+    from backend.base.custom_exceptions import FileNotFound
 
     file = get_log_filepath()
     if not exists(file):
-        raise LogFileNotFound(file)
+        raise FileNotFound(file)
 
     sio = StringIO()
     for ext in ('.1', ''):

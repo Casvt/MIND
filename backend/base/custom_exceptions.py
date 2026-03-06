@@ -253,15 +253,12 @@ class DatabaseFileNotFound(MindException):
         }
 
 
-class LogFileNotFound(MindException):
-    "The log file was not found"
+class FileNotFound(MindException):
+    "The folder or file was not found"
 
-    def __init__(self, log_file: str) -> None:
-        self.log_file = log_file
-        LOGGER.warning(
-            "The log file was not found: %s",
-            log_file
-        )
+    def __init__(self, filepath: str) -> None:
+        self.filepath = filepath
+        LOGGER.warning("The file was not found: %s", filepath)
         return
 
     @property
@@ -270,7 +267,7 @@ class LogFileNotFound(MindException):
             'code': 404,
             'error': self.__class__.__name__,
             'result': {
-                'log_file': self.log_file
+                'filepath': self.filepath
             }
         }
 
