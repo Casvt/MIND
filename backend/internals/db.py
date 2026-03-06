@@ -21,7 +21,6 @@ from backend.base.logging import LOGGER, set_log_level
 
 
 class MindCursor(Cursor):
-
     row_factory: Union[Type[Row], None] # type: ignore
 
     @property
@@ -289,7 +288,7 @@ def iter_commit(iterable: Iterable[T]) -> Iterator[T]:
     ```
     # commits
     for i in iter_commit(iterable):
-        cursor.execute(...)
+        ...
         # commits
     ```
 
@@ -324,7 +323,7 @@ def close_db(e: Union[None, BaseException] = None) -> None:
                 c.close()
             db.commit()
             if not current_thread().name.startswith('waitress-'):
-                db.close()
+                DBConnectionManager.close_connection_of_thread()
         delattr(g, 'cursors')
 
     except ProgrammingError:
@@ -376,76 +375,76 @@ def setup_db() -> None:
 
 
 DB_SCHEMA = """
-    CREATE TABLE IF NOT EXISTS users(
-        id INTEGER PRIMARY KEY,
-        username VARCHAR(255) UNIQUE NOT NULL,
-        salt VARCHAR(40) NOT NULL,
-        hash VARCHAR(100) NOT NULL,
-        admin BOOL NOT NULL DEFAULT 0,
-        mfa_apprise_url TEXT
-    );
-    CREATE TABLE IF NOT EXISTS notification_services(
-        id INTEGER PRIMARY KEY,
-        user_id INTEGER NOT NULL,
-        title VARCHAR(255),
-        url TEXT,
+CREATE TABLE IF NOT EXISTS users(
+    id INTEGER PRIMARY KEY,
+    username VARCHAR(255) UNIQUE NOT NULL,
+    salt VARCHAR(40) NOT NULL,
+    hash VARCHAR(100) NOT NULL,
+    admin BOOL NOT NULL DEFAULT 0,
+    mfa_apprise_url TEXT
+);
+CREATE TABLE IF NOT EXISTS notification_services(
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    title VARCHAR(255),
+    url TEXT,
 
-        FOREIGN KEY (user_id) REFERENCES users(id)
-    );
-    CREATE TABLE IF NOT EXISTS reminders(
-        id INTEGER PRIMARY KEY,
-        user_id INTEGER NOT NULL,
-        title VARCHAR(255) NOT NULL,
-        text TEXT,
-        time INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE TABLE IF NOT EXISTS reminders(
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    text TEXT,
+    time INTEGER NOT NULL,
 
-        repeat_quantity VARCHAR(15),
-        repeat_interval INTEGER,
-        original_time INTEGER,
-        weekdays VARCHAR(13),
-        cron_schedule VARCHAR(255),
+    repeat_quantity VARCHAR(15),
+    repeat_interval INTEGER,
+    original_time INTEGER,
+    weekdays VARCHAR(13),
+    cron_schedule VARCHAR(255),
 
-        color VARCHAR(7),
-        enabled BOOL NOT NULL DEFAULT 1,
+    color VARCHAR(7),
+    enabled BOOL NOT NULL DEFAULT 1,
 
-        FOREIGN KEY (user_id) REFERENCES users(id)
-    );
-    CREATE TABLE IF NOT EXISTS templates(
-        id INTEGER PRIMARY KEY,
-        user_id INTEGER NOT NULL,
-        title VARCHAR(255) NOT NULL,
-        text TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE TABLE IF NOT EXISTS templates(
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    text TEXT,
 
-        color VARCHAR(7),
+    color VARCHAR(7),
 
-        FOREIGN KEY (user_id) REFERENCES users(id)
-    );
-    CREATE TABLE IF NOT EXISTS static_reminders(
-        id INTEGER PRIMARY KEY,
-        user_id INTEGER NOT NULL,
-        title VARCHAR(255) NOT NULL,
-        text TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE TABLE IF NOT EXISTS static_reminders(
+    id INTEGER PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    text TEXT,
 
-        color VARCHAR(7),
+    color VARCHAR(7),
 
-        FOREIGN KEY (user_id) REFERENCES users(id)
-    );
-    CREATE TABLE IF NOT EXISTS reminder_services(
-        reminder_id INTEGER,
-        static_reminder_id INTEGER,
-        template_id INTEGER,
-        notification_service_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+CREATE TABLE IF NOT EXISTS reminder_services(
+    reminder_id INTEGER,
+    static_reminder_id INTEGER,
+    template_id INTEGER,
+    notification_service_id INTEGER NOT NULL,
 
-        FOREIGN KEY (reminder_id) REFERENCES reminders(id)
-            ON DELETE CASCADE,
-        FOREIGN KEY (static_reminder_id) REFERENCES static_reminders(id)
-            ON DELETE CASCADE,
-        FOREIGN KEY (template_id) REFERENCES templates(id)
-            ON DELETE CASCADE,
-        FOREIGN KEY (notification_service_id) REFERENCES notification_services(id)
-    );
-    CREATE TABLE IF NOT EXISTS config(
-        key VARCHAR(255) PRIMARY KEY,
-        value BLOB NOT NULL
-    );
+    FOREIGN KEY (reminder_id) REFERENCES reminders(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (static_reminder_id) REFERENCES static_reminders(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (template_id) REFERENCES templates(id)
+        ON DELETE CASCADE,
+    FOREIGN KEY (notification_service_id) REFERENCES notification_services(id)
+);
+CREATE TABLE IF NOT EXISTS config(
+    key VARCHAR(255) PRIMARY KEY,
+    value BLOB NOT NULL
+);
 """
