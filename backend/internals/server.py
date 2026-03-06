@@ -185,9 +185,9 @@ class Server(metaclass=Singleton):
         shutdown after one second.
         """
         self.get_db_timer_thread(
-            1.0,
-            self.__trigger_server_shutdown,
-            "InternalStateHandler"
+            interval=1.0,
+            target=self.__trigger_server_shutdown,
+            name="InternalStateHandler"
         ).start()
         return
 
@@ -258,8 +258,7 @@ class StartTypeHandlers:
 
     @classmethod
     def register_handler(cls, start_type: StartType):
-        """Class decorator to register a StartTypeHandler for a certain start
-        type.
+        """Register a handler for a certain start type.
 
         ```
         @StartTypeHandlers.register_handler(example_type)
@@ -268,8 +267,7 @@ class StartTypeHandlers:
         ```
 
         Args:
-            start_type (StartType): The start type that the StartTypeHandler is
-                for.
+            start_type (StartType): The start type that the handler is for.
         """
         def wrapper(
             handler_class: type[StartTypeHandler]
@@ -306,7 +304,7 @@ class StartTypeHandlers:
         cls.timeout_thread = Server().get_db_timer_thread(
             interval=handler.timeout,
             target=cls._on_timeout_wrapper,
-            name="StartTypeHandler",
+            name=f"StartTypeHandler.{start_type.name}",
             args=(handler.on_timeout, handler.restart_on_timeout)
         )
         cls.timeout_thread.start()
@@ -326,16 +324,18 @@ class StartTypeHandlers:
         if cls.running_handler != start_type:
             return
 
-        if cls.timeout_thread and cls.timeout_thread.is_alive():
-            handler = cls.handlers[start_type]
-            LOGGER.info(
-                "Timer for %s diffused",
-                handler.description
-            )
-            cls.timeout_thread.cancel()
-            cls.timeout_thread = None
-            cls.running_handler = None
-            handler.on_diffuse()
+        if not (cls.timeout_thread and cls.timeout_thread.is_alive()):
+            return
+
+        handler = cls.handlers[start_type]
+        LOGGER.info(
+            "Timer for %s diffused",
+            handler.description
+        )
+        cls.timeout_thread.cancel()
+        cls.timeout_thread = None
+        cls.running_handler = None
+        handler.on_diffuse()
         return
 
 
