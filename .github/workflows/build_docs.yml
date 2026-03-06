@@ -1,4 +1,4 @@
-name: Update and build docs
+name: Build and deploy docs
 
 on:
   push:
@@ -6,20 +6,26 @@ on:
       - Development
 
 jobs:
-  update_build:
+  deploy:
     name: Update API docs and build docs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         name: Setup checkout
-      - uses: actions/setup-python@v4
-        name: Setup python 3.8
         with:
-          python-version: 3.8
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v4
+        name: Setup python 3.12
+        with:
+          python-version: 3.12
           cache: 'pip'
+
       - run: pip install -r requirements.txt -r docs/requirements-docs.txt
         name: Install dependencies
+
       - run: python3 docs/generate_api_docs.py
         name: Generate API docs
+
       - run: mkdocs gh-deploy --force -f docs/mkdocs.yml
         name: Build docs
