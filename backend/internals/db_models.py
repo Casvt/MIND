@@ -2,11 +2,12 @@
 
 from typing import Any, List, Tuple, Union
 
-from backend.base.definitions import (NotificationServiceData, ReminderData,
+from backend.base.definitions import (REMINDER_TO_KEY,
+                                      NotificationServiceData, ReminderData,
                                       ReminderType, StaticReminderData,
                                       TemplateData, UserData)
 from backend.base.helpers import first_of_subarrays
-from backend.internals.db import REMINDER_TO_KEY, MindCursor, get_db
+from backend.internals.db import MindCursor, get_db
 
 
 class ConfigDB:

@@ -14,16 +14,10 @@ from typing import Any, Dict, Iterable, Iterator, List, Type, Union
 
 from flask import g
 
-from backend.base.definitions import Constants, ReminderType, T
+from backend.base.definitions import Constants, T
 from backend.base.helpers import (create_folder, current_thread_id,
                                   folder_path, rename_file)
 from backend.base.logging import LOGGER, set_log_level
-
-REMINDER_TO_KEY = {
-    ReminderType.REMINDER: "reminder_id",
-    ReminderType.STATIC_REMINDER: "static_reminder_id",
-    ReminderType.TEMPLATE: "template_id"
-}
 
 
 class MindCursor(Cursor):
