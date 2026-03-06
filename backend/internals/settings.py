@@ -13,7 +13,7 @@ from backend.base.helpers import (Singleton, folder_path, get_python_version,
                                   get_version_from_pyproject)
 from backend.base.logging import LOGGER, set_log_level
 from backend.internals.db import DBConnection, commit
-from backend.internals.db_migration import get_latest_db_version
+from backend.internals.db_migration import DatabaseMigrationHandler
 from backend.internals.db_models import ConfigDB
 
 
@@ -30,7 +30,7 @@ def get_about_data() -> Dict[str, Any]:
     return {
         "version": get_version_from_pyproject(folder_path("pyproject.toml")),
         "python_version": get_python_version(),
-        "database_version": get_latest_db_version(),
+        "database_version": DatabaseMigrationHandler.latest_db_version(),
         "database_location": DBConnection.default_file,
         "data_folder": folder_path()
     }
@@ -59,7 +59,7 @@ class PublicSettingsValues:
 
 @dataclass(frozen=True)
 class SettingsValues(PublicSettingsValues):
-    database_version: int = get_latest_db_version()
+    database_version: int = DatabaseMigrationHandler.latest_db_version()
 
     backup_host: str = '0.0.0.0'
     backup_port: int = 8080

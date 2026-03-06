@@ -16,7 +16,7 @@ from backend.base.definitions import Constants, DatabaseBackupEntry, StartType
 from backend.base.helpers import copy, folder_path, list_files, rename_file
 from backend.base.logging import LOGGER
 from backend.internals.db import DBConnection
-from backend.internals.db_migration import get_latest_db_version
+from backend.internals.db_migration import DatabaseMigrationHandler
 from backend.internals.db_models import ConfigDB
 from backend.internals.settings import Settings
 
@@ -231,7 +231,7 @@ def import_db(
                 "Uploaded database is not a MIND database file"
             )
 
-        if database_version > get_latest_db_version():
+        if database_version > DatabaseMigrationHandler.latest_db_version():
             raise InvalidDatabaseFile(
                 new_db_file,
                 "Uploaded database is higher version than this MIND installation can support")

@@ -342,7 +342,7 @@ def setup_db_adapters_and_converters() -> None:
 def setup_db() -> None:
     """Setup the default config and database connection and tables"""
     from backend.implementations.users import Users
-    from backend.internals.db_migration import migrate_db
+    from backend.internals.db_migration import DatabaseMigrationHandler
     from backend.internals.settings import Settings
 
     cursor = get_db()
@@ -356,11 +356,7 @@ def setup_db() -> None:
 
     set_log_level(settings_values.log_level)
 
-    migrate_db()
-
-    # DB Migration might change settings directly in database,
-    # so clear cache just to be sure.
-    settings.clear_cache()
+    DatabaseMigrationHandler.migrate()
 
     # Add admin user if it doesn't exist
     users = Users()

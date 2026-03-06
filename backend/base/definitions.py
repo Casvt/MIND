@@ -253,14 +253,6 @@ class DatabaseBackupEntry(TypedDict):
 
 
 # region Abstract Classes
-class DBMigrator(ABC):
-    start_version: int
-
-    @abstractmethod
-    def run(self) -> None:
-        ...
-
-
 class MindException(Exception, ABC):
     "An exception specific to MIND"
 
