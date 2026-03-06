@@ -1,19 +1,60 @@
 {
 	"configurations": [
 		{
+			"name": "Main File",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "${workspaceFolder}/MIND.py",
+			"justMyCode": true
+		},
+		{
+			"name": "Profile Memory",
+			"type": "debugpy",
+			"request": "launch",
+			"module": "memray",
+			"args": [
+				"run",
+				"--follow-fork",
+				"--no-compress",
+				"-f",
+				"-o", "${workspaceFolder}/mem_prof.bin",
+				"${workspaceFolder}/MIND.py"
+			],
+			"postDebugTask": "Create Memory Profile Data"
+		},
+		{
+			"name": "Profile CPU",
+			"type": "debugpy",
+			"request": "launch",
+			"program": "${workspaceFolder}/MIND.py",
+			"justMyCode": true,
+			"postDebugTask": "Show Profile Data"
+		},
+		{
+			"name": "Render Docs",
+			"type": "debugpy",
+			"request": "launch",
+			"module": "mkdocs",
+			"args": [
+				"serve",
+				"-f", "${workspaceFolder}/docs/mkdocs.yml",
+				"-a", "${input:docsHostPort}"
+			]
+		},
+		{
 			"name": "Current File",
 			"type": "debugpy",
 			"request": "launch",
 			"program": "${file}",
 			"justMyCode": true
-		},
+		}
+	],
+	"inputs": [
 		{
-			"name": "Main File",
-			"type": "debugpy",
-			"request": "launch",
-			"python": "/bin/python3",
-			"program": "${workspaceFolder}/MIND.py",
-			"justMyCode": true
+			"id": "docsHostPort",
+			"type": "promptString",
+			"description": "The host:port to serve the docs at",
+			"default": "192.168.2.15:8000"
 		}
 	]
 }
