@@ -2,5 +2,7 @@ blank_issues_enabled: false
 contact_links:
   - name: Documentation Hub
     url: https://casvt.github.io/MIND/
-  - name: Discord
+    about: You can find the documentation for MIND here.
+  - name: Discord Server
     url: https://discord.gg/Xy9VUASHhr
+    about: Get in contact on the discord server.

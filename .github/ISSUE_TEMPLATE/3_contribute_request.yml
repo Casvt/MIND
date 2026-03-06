@@ -5,8 +5,7 @@ body:
 - type: textarea
   attributes:
     label: What do you want to contribute?
-    description: For example adding a feature, fix a bug or improve documentation.
-    render: markdown
+    description: For example adding a feature, fixing a bug or improving documentation.
   validations:
     required: true
 
