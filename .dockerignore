@@ -1,5 +1,5 @@
 # Byte-compiled / optimized / DLL files
-**/__pycache__/
+__pycache__/
 *.py[cod]
 *$py.class
 
@@ -14,7 +14,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
 lib64/
 parts/
 sdist/
@@ -57,6 +56,7 @@ coverage.xml
 
 # Django stuff:
 *.log
+*.log.*
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -144,9 +144,10 @@ docker-compose.yml
 .gitignore
 .git/
 .github/
+.pre-commit-config.yaml
 
 # Various files
-**/*.md
+*.md
 LICENSE
 
 # Tests
@@ -155,3 +156,4 @@ tests/
 # Project management files
 docs/
 requirements-dev.txt
+release.sh
