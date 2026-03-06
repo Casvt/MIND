@@ -199,7 +199,7 @@ class ReminderServicesDB:
         )
 
         cursor.execute("COMMIT;")
-        cursor.connection.isolation_level = ""
+        cursor.connection.isolation_level = "DEFERRED"
         return
 
     def uses_ns(

@@ -10,7 +10,7 @@ from os.path import dirname, exists, isdir, isfile, join
 from sqlite3 import (PARSE_DECLTYPES, Connection, Cursor, ProgrammingError,
                      Row, register_adapter, register_converter)
 from threading import current_thread
-from typing import Any, Dict, Generator, Iterable, List, Type, Union
+from typing import Any, Dict, Iterable, Iterator, List, Type, Union
 
 from flask import g
 
@@ -99,7 +99,7 @@ class MindCursor(Cursor):
             else:
                 self.execute("COMMIT;")
 
-        self.connection.isolation_level = ""
+        self.connection.isolation_level = "DEFERRED"
         return
 
 
@@ -288,7 +288,7 @@ def commit() -> None:
     return
 
 
-def iter_commit(iterable: Iterable[T]) -> Generator[T]:
+def iter_commit(iterable: Iterable[T]) -> Iterator[T]:
     """Commit the database after yielding each value in the iterable. Also
     commits just before the first iteration starts.
 
@@ -303,7 +303,7 @@ def iter_commit(iterable: Iterable[T]) -> Generator[T]:
         iterable (Iterable[T]): Iterable that will be iterated over like normal.
 
     Yields:
-        Generator[T]: Items of iterable.
+        Iterator[T]: Items of iterable.
     """
     commit = get_db().connection.commit
     commit()
