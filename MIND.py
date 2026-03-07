@@ -21,7 +21,7 @@ from backend.internals.server import Server, StartTypeHandlers
 from backend.internals.settings import Settings
 
 
-def subprocess_main(
+def _main(
     start_type: StartType,
     db_folder: Union[str, None] = None,
     log_folder: Union[str, None] = None,
@@ -58,8 +58,7 @@ def subprocess_main(
             Defaults to None.
 
     Raises:
-        InvalidKeyValue: One of the hosting arguments has an invalid value.
-        ValueError: One of the folder arguments has an invalid value.
+        ValueError: One of the arguments has an invalid value.
 
     Returns:
         NoReturn: Exit code 0 means to shutdown. Exit code 131 or higher means
@@ -81,11 +80,22 @@ def subprocess_main(
         s = Settings()
 
         if host:
-            s.update({"host": host})
+            try:
+                s.update({"host": host})
+            except InvalidKeyValue:
+                raise ValueError("Invalid host value")
+
         if port:
-            s.update({"port": port})
-        if url_prefix:
-            s.update({"url_prefix": url_prefix})
+            try:
+                s.update({"port": port})
+            except InvalidKeyValue:
+                raise ValueError("Invalid port value")
+
+        if url_prefix is not None:
+            try:
+                s.update({"url_prefix": url_prefix})
+            except InvalidKeyValue:
+                raise ValueError("Invalid url prefix value")
 
         settings = s.get_settings()
 
@@ -180,7 +190,7 @@ def _run_sub_process(
         return 0
 
 
-def main() -> int:
+def mind() -> int:
     """The main function of MIND.
 
     Returns:
@@ -203,7 +213,7 @@ if __name__ == "__main__":
             notifications to your device. Set the reminder and forget about it!
         """)
 
-        fs = parser.add_argument_group(title="Folders")
+        fs = parser.add_argument_group(title="Folders and files")
         fs.add_argument(
             '-d', '--DatabaseFolder',
             type=str,
@@ -257,7 +267,7 @@ if __name__ == "__main__":
             url_prefix = args.UrlPrefix
 
         try:
-            subprocess_main(
+            _main(
                 start_type=start_type,
                 db_folder=db_folder,
                 log_folder=log_folder,
@@ -267,30 +277,11 @@ if __name__ == "__main__":
                 url_prefix=url_prefix
             )
 
-        except InvalidKeyValue as e:
-            if e.key == 'host':
-                parser.error(
-                    'The value for -h/--Host is not valid'
-                )
-
-            elif e.key == 'port':
-                parser.error(
-                    'The value for -p/--Port is not valid'
-                )
-
-            elif e.key == 'url_prefix':
-                parser.error(
-                    'The value for -u/--UrlPrefix is not valid'
-                )
-
-            else:
-                raise e
-
         except ValueError as e:
             if not e.args:
                 raise e
 
-            elif 'database' in e.args[0].lower():
+            elif e.args[0] == 'Database location is not a folder':
                 parser.error(
                     'The value for -d/--DatabaseFolder is not a folder'
                 )
@@ -305,9 +296,24 @@ if __name__ == "__main__":
                     'The value for -f/--LogFile is not a file'
                 )
 
+            elif e.args[0] == 'Invalid host value':
+                parser.error(
+                    'The value for -h/--Host is not valid'
+                )
+
+            elif e.args[0] == 'Invalid port value':
+                parser.error(
+                    'The value for -p/--Port is not valid'
+                )
+
+            elif e.args[0] == 'Invalid url prefix value':
+                parser.error(
+                    'The value for -u/--UrlPrefix is not valid'
+                )
+
             else:
                 raise e
 
     else:
-        return_code = main()
+        return_code = mind()
         exit(return_code)
