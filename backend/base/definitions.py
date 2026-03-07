@@ -346,10 +346,11 @@ class ReminderData(GeneralReminderData):
     _weekdays: Union[str, None]
     cron_schedule: Union[str, None]
     enabled: bool
+    weekdays: Union[List[WEEKDAY_NUMBER], None] = None
 
     def __post_init__(self) -> None:
         if self._weekdays is not None:
-            self.weekdays: Union[List[WEEKDAY_NUMBER], None] = [
+            self.weekdays = [
                 cast(WEEKDAY_NUMBER, int(n))
                 for n in self._weekdays.split(',')
                 if n
