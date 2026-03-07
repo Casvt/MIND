@@ -8,9 +8,7 @@ from itertools import chain
 from re import compile
 from typing import Any, Dict, List, Tuple, Union
 
-from apprise import Apprise
-
-from backend.base.helpers import when_not_none
+from backend.base.helpers import init_apprise, when_not_none
 
 remove_named_groups = compile(r'(?<=\()\?P<\w+>')
 IGNORED_ARGS = {'cto', 'format', 'overflow', 'rto', 'verify'}
@@ -162,7 +160,7 @@ def get_apprise_services() -> List[Dict[str, Any]]:
     """
     result: List[Dict[str, Any]] = []
 
-    schemas = Apprise().details()['schemas']
+    schemas = init_apprise().details()['schemas']
     for schema in chain((CUSTOM_URL_SCHEMA,), schemas):
         entry = {
             'name': str(schema['service_name']),

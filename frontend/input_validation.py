@@ -11,7 +11,6 @@ from os.path import splitext
 from re import compile
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Tuple, Type, Union
 
-from apprise import Apprise
 from cron_converter import Cron
 from flask import Blueprint, Request, request
 
@@ -26,7 +25,7 @@ from backend.base.definitions import (MISSING, Constants, DataSource, DataType,
                                       EndpointHandler, MindException,
                                       RepeatQuantity, SortingMethod,
                                       TimelessSortingMethod)
-from backend.base.helpers import folder_path
+from backend.base.helpers import folder_path, init_apprise
 from backend.internals.settings import SettingsValues
 
 if TYPE_CHECKING:
@@ -172,7 +171,7 @@ class NewMfaAppriseURLVariable(NonRequiredInputVariable):
     def validate(self) -> bool:
         return super().validate() and (
             not isinstance(self.value, str)
-            or Apprise().add(self.value)
+            or init_apprise().add(self.value)
         )
 
 
@@ -186,7 +185,7 @@ class URLVariable(InputVariable):
     description = "The Apprise URL of the notification service"
 
     def validate(self) -> bool:
-        return super().validate() and Apprise().add(self.value)
+        return super().validate() and init_apprise().add(self.value)
 
 
 class EditTitleVariable(NonRequiredInputVariable, TitleVariable):
@@ -465,6 +464,17 @@ class DBBackupFolderVariable(NonRequiredInputVariable):
     def validate(self) -> bool:
         return self.value is None or (
             isinstance(self.value, str)
+        )
+
+
+class ApprisePluginPathsVariable(NonRequiredInputVariable):
+    name = "apprise_plugin_paths"
+    description = "The list of paths that Apprise should also import plugins from"
+    data_type = [DataType.STR_ARRAY]
+
+    def validate(self) -> bool:
+        return self.value is None or (
+            isinstance(self.value, list)
         )
 
 
@@ -830,7 +840,8 @@ class SettingsData(EndpointData):
                 LogLevelVariable,
                 DBBackupIntervalVariable,
                 DBBackupAmountVariable,
-                DBBackupFolderVariable
+                DBBackupFolderVariable,
+                ApprisePluginPathsVariable
             ]
         ),
         delete=(

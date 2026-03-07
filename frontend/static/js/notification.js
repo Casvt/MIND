@@ -457,11 +457,13 @@ function showAddServiceWindow(index) {
 	title.innerText = data.name;
 	window.appendChild(title);
 
-	const docs = document.createElement('a');
-	docs.href = data.doc_url;
-	docs.target = '_blank';
-	docs.innerText = 'Documentation';
-	window.appendChild(docs);
+	if (data.doc_url) {
+		const docs = document.createElement('a');
+		docs.href = data.doc_url;
+		docs.target = '_blank';
+		docs.innerText = 'Documentation';
+		window.appendChild(docs);
+	}
 
 	window.appendChild(createTitle());
 

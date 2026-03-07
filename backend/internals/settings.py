@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from dataclasses import _MISSING_TYPE, asdict, dataclass
+from dataclasses import _MISSING_TYPE, asdict, dataclass, field
 from functools import lru_cache
 from logging import DEBUG, INFO
 from os import sep
-from os.path import abspath, isdir
+from os.path import abspath, exists, isdir
 from typing import Any, Dict, Mapping
+
+from apprise.manager_plugins import NotificationManager
 
 from backend.base.custom_exceptions import InvalidKeyValue, KeyNotFound
 from backend.base.definitions import Constants, Interval
-from backend.base.helpers import (Singleton, folder_path, get_python_version,
+from backend.base.helpers import (CommaList, Singleton, folder_path,
+                                  get_python_version,
                                   get_version_from_pyproject)
 from backend.base.logging import LOGGER, set_log_level
 from backend.internals.db import DBConnection, commit
@@ -53,6 +56,10 @@ class PublicSettingsValues:
     db_backup_amount: int = 3
     db_backup_folder: str = folder_path(*Constants.DB_FOLDER)
     db_backup_last_run: int = 0
+
+    apprise_plugin_paths: CommaList = field(
+        default_factory=lambda: CommaList('')
+    )
 
     def todict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -102,6 +109,9 @@ class Settings(metaclass=Singleton):
             key_type = SettingsValues.__dataclass_fields__[key].type
             if key_type is bool:
                 db_values[key] = bool(value)
+
+            if key_type is CommaList:
+                db_values[key] = CommaList(value)
 
         return SettingsValues(**db_values)
 
@@ -178,6 +188,12 @@ class Settings(metaclass=Singleton):
                 DatabaseBackupHandler
 
             DatabaseBackupHandler.set_backup_timer()
+
+        if (
+            'apprise_plugin_paths' in data
+            and formatted_data['apprise_plugin_paths'] != old_settings.apprise_plugin_paths
+        ):
+            NotificationManager().unload_modules()
 
         self.clear_cache()
 
@@ -265,6 +281,12 @@ class Settings(metaclass=Singleton):
 
         key_data = KeyCollection.__dataclass_fields__[key]
 
+        if key_data.type is CommaList and isinstance(value, list):
+            if not all(isinstance(e, str) for e in value):
+                raise InvalidKeyValue(key, value)
+
+            value = CommaList(value)
+
         if not isinstance(value, key_data.type):
             raise InvalidKeyValue(key, value)
 
@@ -307,5 +329,10 @@ class Settings(metaclass=Singleton):
         elif key == 'db_backup_last_run':
             if value < 0:
                 raise InvalidKeyValue(key, value)
+
+        elif key == 'apprise_plugin_paths':
+            for path in value:
+                if not exists(path):
+                    raise InvalidKeyValue(key, value)
 
         return converted_value

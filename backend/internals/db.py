@@ -15,7 +15,7 @@ from typing import Any, Dict, Iterable, Iterator, List, Type, Union
 from flask import g
 
 from backend.base.definitions import Constants, T
-from backend.base.helpers import (create_folder, current_thread_id,
+from backend.base.helpers import (CommaList, create_folder, current_thread_id,
                                   folder_path, rename_file)
 from backend.base.logging import LOGGER, set_log_level
 
@@ -336,6 +336,7 @@ def setup_db_adapters_and_converters() -> None:
     """Add DB adapters and converters for custom types and bool"""
     register_adapter(bool, lambda b: int(b))
     register_converter("BOOL", lambda b: b == b'1')
+    register_adapter(CommaList, lambda c: str(c))
     return
 
 

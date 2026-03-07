@@ -18,7 +18,7 @@ from threading import current_thread
 from typing import (Any, Callable, Dict, Iterable,
                     List, Sequence, Tuple, Union, cast)
 
-from apprise import Apprise, LogCapture
+from apprise import Apprise, AppriseAsset, LogCapture
 from cron_converter import Cron
 from dateutil.relativedelta import relativedelta
 
@@ -273,6 +273,22 @@ def generate_mfa_code() -> str:
 
 
 # region Apprise
+def init_apprise() -> Apprise:
+    """Create an instance of Apprise with any extra plugins loaded.
+
+    Returns:
+        Apprise: The instance.
+    """
+    from backend.internals.settings import Settings
+
+    asset = AppriseAsset(
+        plugin_paths=Settings().sv.apprise_plugin_paths # type: ignore
+    )
+    app = Apprise(asset=asset)
+
+    return app
+
+
 def send_apprise_notification(
     urls: List[str],
     title: str,
@@ -292,7 +308,7 @@ def send_apprise_notification(
     Returns:
         SendResult: Whether Apprise was successful.
     """
-    a = Apprise()
+    a = init_apprise()
 
     for url in urls:
         if not a.add(url):
@@ -556,6 +572,40 @@ def rename_file(
 
 
 # region Classes
+class CommaList(list):
+    """
+    Normal list but init can _also_ take a string with comma seperated values.
+    Using str() will convert it back to a string with comma seperated values.
+
+    ```
+    >>> c = CommaList('blue,green,red')
+    >>> c.append('purple')
+    >>> str(c)
+    'blue,green,red,purple'
+    ```
+    """
+
+    def __init__(self, value: Union[str, Iterable[str]]):
+        """Create an instance.
+
+        Args:
+            value (Union[str, Iterable[str]]): Either a string of comma-seperated
+            values, or any other standard input to the `list` class.
+        """
+        if not isinstance(value, str):
+            super().__init__(value)
+            return
+
+        if not value:
+            super().__init__([])
+        else:
+            super().__init__(value.split(','))
+        return
+
+    def __str__(self) -> str:
+        return ','.join(self)
+
+
 class Singleton(type):
     """
     Make each initialisation of a class return the same instance by setting
