@@ -29,7 +29,7 @@
 
 		<noscript>Javascript is disabled. The web-ui of MIND does not work with JavaScript disabled.</noscript>
 		<div class="login-container">
-			<form id="login-form">
+			<form id="login-form" aria-label="Login form">
 				<h2>Login</h2>
 
 				<div class="checked-input-container">
@@ -42,10 +42,10 @@
 					<p>Password incorrect</p>
 				</div>
 
-				<label for="form-switch" class="switch-button">Or create an account</label>
+				<label for="form-switch" class="switch-button" aria-hidden="true">Or create an account</label>
 				<button type="submit">Login</button>
 			</form>
-			<form id="register-form">
+			<form id="register-form" aria-label="Account registration form">
 				<h2>Register</h2>
 
 				<div class="checked-input-container">
@@ -56,7 +56,7 @@
 
 				<input type="password" id="register-password-input" autocomplete="new-password" placeholder="Password" class="input-style" required>
 
-				<label for="form-switch" class="switch-button">Or log into an account</label>
+				<label for="form-switch" class="switch-button" aria-hidden="true">Or log into an account</label>
 				<button type="submit">Register</button>
 			</form>
 			<div id="form-cover">

@@ -24,7 +24,7 @@ header > div:first-child {
 	padding: 0.45rem;
 }
 
-#toggle-nav:hover svg :where(path, rect) {
+#toggle-nav:active svg :where(path, rect) {
 	animation: flash-nav-colour .2s forwards;
 }
 

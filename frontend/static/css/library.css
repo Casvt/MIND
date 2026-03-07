@@ -95,7 +95,7 @@
 }
 
 .search-input-container::before {
-	content: "/";
+	content: "/" / "";
 	position: absolute;
 	z-index: -1;
 	inset: .5rem auto .5rem 100%;

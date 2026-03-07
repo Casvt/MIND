@@ -154,23 +154,18 @@ async function fetchAPI(endpoint, params={}, jsonReturn=true, checkAuth=true) {
 		formattedParams = '?' + Object.entries(params).map(p => p.join('=')).join('&')
 	}
 
-	return fetch(`${urlPrefix}/api${endpoint}${formattedParams}`)
-	.then(response => {
-		if (!response.ok)
-			return Promise.reject(response)
-		if (jsonReturn)
-			return response.json()
-		else
-			return response
-	})
-	.catch(response => {
+	const response = await fetch(`${urlPrefix}/api${endpoint}${formattedParams}`)
+	if (!response.ok) {
 		if (checkAuth && response.status === 401) {
 			setLocalStorage({api_key: null})
 			window.location.href = `${urlPrefix}/`
-		} else {
-			return Promise.reject(response)
 		}
-	})
+		throw response
+	}
+	if (jsonReturn)
+		return await response.json()
+	else
+		return response
 }
 
 /**
@@ -209,27 +204,22 @@ async function sendAPI(
 		formattedParams = '?' + Object.entries(params).map(p => p.join('=')).join('&')
 	}
 
-	return fetch(`${urlPrefix}/api${endpoint}${formattedParams}`, {
+	const response = await fetch(`${urlPrefix}/api${endpoint}${formattedParams}`, {
 		'method': method,
 		'headers': {'Content-Type': 'application/json'},
 		'body': Object.entries(body).length !== 0 ? JSON.stringify(body) : ''
 	})
-	.then(response => {
-		if (!response.ok)
-			return Promise.reject(response)
-		if (jsonReturn)
-			return response.json()
-		else
-			return response
-	})
-	.catch(response => {
+	if (!response.ok) {
 		if (checkAuth && response.status === 401) {
 			setLocalStorage({api_key: null})
 			window.location.href = `${urlPrefix}/`
-		} else {
-			return Promise.reject(response)
 		}
-	})
+		throw response
+	}
+	if (jsonReturn)
+		return await response.json()
+	else
+		return response
 }
 
 /**

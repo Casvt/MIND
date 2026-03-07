@@ -16,11 +16,16 @@ const infoClasses = [
 
 function showWindow(id) {
     const window_container = document.querySelector('.window-container')
+    const extra_window_container = document.querySelector('.extra-window-container')
+    const extra_windows = [...extra_window_container.children]
+
     if (id === "home") {
         window_container.classList.remove(
             'show-window',
             'inter-window-ani'
         )
+        extra_windows.forEach(w => w.ariaHidden = true)
+        document.getElementById("home").ariaHidden = false
 
         document.body.onkeydown = e => {
             if (
@@ -33,11 +38,7 @@ function showWindow(id) {
         }
 
     } else {
-        const extra_window_container = document.querySelector('.extra-window-container')
-
-        const offset = [
-            ...extra_window_container.children
-        ].indexOf(document.getElementById(id)) * -100
+        const offset = extra_windows.indexOf(document.getElementById(id)) * -100
 
         extra_window_container.style.setProperty(
             '--y-offset',
@@ -48,6 +49,9 @@ function showWindow(id) {
             () => window_container.classList.add('inter-window-ani'),
             constants.windowAnimationDuration
         )
+        
+        document.getElementById("home").ariaHidden = true
+        extra_windows.forEach(w => w.ariaHidden = w.id !== id)
 
         if (id === "notification") {
             document.body.onkeydown = e => {
