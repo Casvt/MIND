@@ -799,6 +799,7 @@ Replace `<int:s_id>` with the ID of the entry. For example: `/staticreminders/2`
 	| db_backup_interval | No | number | How often to make a backup of the database | N/A |
 	| db_backup_amount | No | number | How many backups to keep. The oldest one will be removed if needed. | N/A |
 	| db_backup_folder | No | string | The folder to store the backups in | N/A |
+	| apprise_plugin_paths | No | list of string | The list of paths that Apprise should also import plugins from | N/A |
 
 	**Returns**
 
