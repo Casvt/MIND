@@ -15,6 +15,22 @@
             }
         },
         {
+            "label": "Build Frontend",
+            "type": "shell",
+            "command": "tsc && esbuild ts/login/login.ts --bundle --format=esm --outfile=js/login.js",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/frontend/static"
+            },
+            "presentation": {
+                "reveal": "silent",
+                "clear": true
+            }
+        },
+        {
             "label": "Create Memory Profile Data",
             "hide": true,
             "type": "shell",

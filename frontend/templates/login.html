@@ -15,7 +15,6 @@
 
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/general.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
-	<script src="{{ url_for('static', filename='js/general.js') }}" defer></script>
 	<script src="{{ url_for('static', filename='js/login.js') }}" defer></script>
 
 	<title>Login - MIND</title>
@@ -26,37 +25,57 @@
 	</header>
 	<main>
 		<input type="checkbox" id="form-switch" class="hidden">
+		<input type="checkbox" id="mfa-switch" class="hidden">
 
 		<noscript>Javascript is disabled. The web-ui of MIND does not work with JavaScript disabled.</noscript>
-		<div class="login-container">
+
+		<div id="login-container">
 			<form id="login-form" aria-label="Login form">
 				<h2>Login</h2>
 
 				<div class="checked-input-container">
-					<input type="text" id="login-username-input" autocomplete="username" placeholder="Username" class="input-style" required autofocus>
+					<input type="text" id="login-username" class="input-style" autocomplete="username" placeholder="Username" required autofocus>
 					<p>Username not found</p>
 				</div>
 
 				<div class="checked-input-container">
-					<input type="password" id="login-password-input" autocomplete="current-password" placeholder="Password" class="input-style" required>
+					<input type="password" id="login-password" class="input-style" autocomplete="current-password" placeholder="Password" required>
 					<p>Password incorrect</p>
 				</div>
 
-				<label for="form-switch" class="switch-button" aria-hidden="true">Or create an account</label>
+				<button type="button" class="switch-button" aria-hidden="true">Or create an account</button>
+
+				<button type="submit">Login</button>
+			</form>
+			<form id="mfa-form" aria-label="2FA form">
+				<h2>Enter Code</h2>
+				<p>A 2FA code has been sent</p>
+
+				<p id="invalid-mfa-code" class="error hidden">*Incorrect code</p>
+				<div id="mfa-container">
+					<input type="number" id="mfa-1" min="0" max="9" required>
+					<input type="number" id="mfa-2" min="0" max="9" required>
+					<input type="number" id="mfa-3" min="0" max="9" required>
+					<input type="number" id="mfa-4" min="0" max="9" required>
+					<input type="number" id="mfa-5" min="0" max="9" required>
+					<input type="number" id="mfa-6" min="0" max="9" required>
+				</div>
+
 				<button type="submit">Login</button>
 			</form>
 			<form id="register-form" aria-label="Account registration form">
 				<h2>Register</h2>
 
 				<div class="checked-input-container">
-					<input type="text" id="register-username-input" autocomplete="username" placeholder="Username" class="input-style" required>
-					<p id="invalid-username-error">Username invalid</p>
-					<p id="taken-username-error">Username already taken</p>
+					<input type="text" id="register-username" class="input-style" autocomplete="username" placeholder="Username" required>
+					<p id="invalid-username">Username invalid</p>
+					<p id="taken-username">Username already taken</p>
 				</div>
 
-				<input type="password" id="register-password-input" autocomplete="new-password" placeholder="Password" class="input-style" required>
+				<input type="password" id="register-password" class="input-style" autocomplete="new-password" placeholder="Password" required>
 
-				<label for="form-switch" class="switch-button" aria-hidden="true">Or log into an account</label>
+				<button type="button" class="switch-button" aria-hidden="true">Or log into an account</button>
+
 				<button type="submit">Register</button>
 			</form>
 			<div id="form-cover">

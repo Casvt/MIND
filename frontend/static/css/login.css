@@ -6,11 +6,12 @@ main {
 	align-items: center;
 }
 
-.login-container {
+#login-container {
 	position: relative;
-	width: min(40rem, 90%);
+	width: 90%;
+	max-width: 40rem;
 	height: 22rem;
-	
+
 	display: flex;
 	flex-direction: row-reverse;
 	flex-wrap: wrap;
@@ -23,8 +24,8 @@ main {
 }
 
 form {
-	height: inherit;
-	flex: 1 0 auto;
+	height: 100%;
+	width: 50%;
 
 	display: flex;
 	flex-direction: column;
@@ -33,33 +34,45 @@ form {
 	gap: 1rem;
 
 	padding: 2rem;
-	
+
 	transition: translate 100ms ease-in-out;
 }
 
-form h2 {
-	font-size: clamp(1.2rem, 7vw, 2rem);
+#mfa-form {
+	display: none;
+}
+
+main:has(#mfa-switch:checked) {
+	& #login-form {
+		display: none;
+	}
+
+	& #mfa-form {
+		display: flex;
+	}
+}
+
+h2 {
+	font-size: 2rem;
 }
 
 .switch-button {
-	border: 0;
 	background-color: transparent;
 	color: var(--color-light);
 
 	text-decoration: underline;
-	text-align: center;
 }
 
 button[type="submit"] {
 	width: 7rem;
-	
+
 	padding: .5rem 1rem;
 	border-radius: 4px;
 	background-color: var(--color-mid-gray);
 	color: var(--color-light);
 
 	font-size: 1.1rem;
-	
+
 	transition:
 		background-color 150ms ease-in-out,
 		box-shadow 150ms ease-in-out;
@@ -70,19 +83,53 @@ button[type="submit"]:hover {
 	box-shadow: var(--default-shadow);
 }
 
+#mfa-container {
+	display: flex;
+	gap: .3rem;
+}
+
+#mfa-container > input {
+    height: 3rem;
+    width: 2rem;
+
+	border: 0;
+	outline: 0;
+    border-bottom: 2px solid var(--color-light);
+    background-color: transparent;
+    color: var(--color-light);
+
+	text-align: center;
+    font-size: 1.3rem;
+
+	appearance: textfield;
+	-moz-appearance: textfield;
+	&::-webkit-inner-spin-button,
+	&::-webkit-outer-spin-button {
+		-webkit-appearance: none;
+	}
+
+	&:focus {
+		border-color: var(--color-light-gray);
+	}
+
+	&:user-invalid {
+		border-color: var(--color-error);
+	}
+}
+
 #form-cover {
 	position: absolute;
 	left: 0;
+	z-index: 2;
 	height: 100%;
 	width: 50%;
-	z-index: 2;
 
 	display: flex;
-	
+
 	padding: 3rem;
 	border-radius: 4px;
 	background-color: var(--color-gray);
-	
+
 	box-shadow: 0px 0px 20px 3px rgba(0 0 0 / 0.25);
 	transition: left 100ms ease-in-out;
 }
@@ -91,12 +138,20 @@ main:has(#form-switch:checked) #form-cover {
 	left: 50%;
 }
 
-@media (max-width: 594px) {
-	#form-cover {
-		display: none;
+@media (max-width: 37rem) {
+	#login-container {
+		max-width: 25rem;
 	}
-	
+
+	form {
+		width: 100%;
+	}
+
 	main:has(#form-switch:checked) form {
 		translate: 0 -100%;
+	}
+
+	#form-cover {
+		display: none;
 	}
 }

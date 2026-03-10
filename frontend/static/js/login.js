@@ -1,112 +1,267 @@
-const els = {
-    switchButton: document.querySelector(".switch-button"),
-	login: {
-		form: document.querySelector('#login-form'),
-        inputContainers: {
-			username: document.querySelector('#login-form .checked-input-container:has(input[type="text"])'),
-			password: document.querySelector('#login-form .checked-input-container:has(input[type="password"])')
-        },
-		inputs: {
-			username: document.querySelector('#login-username-input'),
-			password: document.querySelector('#login-password-input')
-		}
-	},
-	create: {
-		form: document.querySelector('#register-form'),
-        inputContainers: {
-			username: document.querySelector('#register-form .checked-input-container:has(input[type="text"])'),
-        },
-		inputs: {
-			username: document.querySelector('#register-username-input'),
-			password: document.querySelector('#register-password-input')
-		},
-		errors: {
-			usernameInvalid: document.querySelector('#invalid-username-error'),
-			usernameTaken: document.querySelector('#taken-username-error')
-		}
-	}
+// ts/general.ts
+function hide({ to_hide = [], to_show = [] } = {}) {
+  to_hide.forEach((el) => el.classList.add("hidden"));
+  if (to_show !== null && to_show !== void 0)
+    to_show.forEach((el) => el.classList.remove("hidden"));
+}
+var localStorageDefaultValues = {
+  api_key: null,
+  locale: "en-GB",
+  default_service: null,
+  sorting_reminders: "time",
+  sorting_static: "title",
+  sorting_templates: "title",
+  wide_library_view: false,
+  allow_new_accounts_cache: true,
+  show_clock: "no"
+};
+function getLocalStorage() {
+  return JSON.parse(localStorage.getItem("MIND") || "{}");
+}
+function setLocalStorage(new_values) {
+  localStorage.setItem("MIND", JSON.stringify(new_values));
+}
+function setupLocalStorage() {
+  if (!localStorage.getItem("MIND"))
+    setLocalStorage(localStorageDefaultValues);
+  const currentValues = getLocalStorage();
+  const cleanedVersion = {};
+  Object.keys(localStorageDefaultValues).forEach((k) => {
+    if (currentValues[k] === void 0)
+      cleanedVersion[k] = localStorageDefaultValues[k];
+    else
+      cleanedVersion[k] = currentValues[k];
+  });
+  setLocalStorage(cleanedVersion);
+}
+var defaultAPIRequestOptions = {
+  method: "GET",
+  params: {},
+  body: {},
+  redirectUnauth: true
+};
+async function fetchAPI(endpoint, options = {}) {
+  const finalOptions = {
+    ...defaultAPIRequestOptions,
+    ...options
+  };
+  if (apiKey)
+    finalOptions.params.api_key = apiKey;
+  let formattedParams = new URLSearchParams(finalOptions.params).toString();
+  if (formattedParams)
+    formattedParams = "?" + formattedParams;
+  let fetchOptions = {
+    method: finalOptions.method
+  };
+  if (finalOptions.method === "POST") {
+    fetchOptions.headers = { "Content-Type": "application/json" }, fetchOptions.body = JSON.stringify(finalOptions.body);
+  }
+  const response = await fetch(
+    `${urlPrefix}/api${endpoint}${formattedParams}`,
+    fetchOptions
+  );
+  if (!response.ok) {
+    if (finalOptions.redirectUnauth && response.status === 401) {
+      const storage = getLocalStorage();
+      storage.api_key = null;
+      setLocalStorage(storage);
+      if (window.location.pathname !== `${urlPrefix}/`)
+        window.location.href = `${urlPrefix}/`;
+    }
+    throw await response.json();
+  }
+  return await response.json();
+}
+async function checkLogin() {
+  if (!apiKey) {
+    if (window.location.pathname !== `${urlPrefix}/`)
+      window.location.href = `${urlPrefix}/`;
+    return;
+  }
+  await fetchAPI("/auth/status").then((json) => {
+    if (json.result.admin && window.location.pathname !== `${urlPrefix}/admin`)
+      window.location.href = `${urlPrefix}/admin`;
+    else if (!json.result.admin && window.location.pathname !== `${urlPrefix}/reminders`)
+      window.location.href = `${urlPrefix}/reminders`;
+  });
+}
+var urlPrefix = document.getElementById("url_prefix")?.dataset.value || "";
+var apiKey = getLocalStorage().api_key;
+var OnLoadRunner = class {
+  static onLoadFunctions = [];
+  /**
+   * Register one or more functions to run on load. They are run after the
+   * functions that are already registered. If multiple are added, they are
+   * run in the order that they are supplied.
+   * @param {CallableFunction[]} functions The functions to register.
+   */
+  static add(...functions) {
+    this.onLoadFunctions.push(...functions);
+  }
+  /**
+   * Run all registered functions sequentially.
+   */
+  static async runOnLoad() {
+    for (const f of this.onLoadFunctions) {
+      await f();
+    }
+  }
+};
+OnLoadRunner.add(setupLocalStorage, checkLogin);
+
+// ts/login/elements.ts
+var loginEls = {
+  switchButtons: [...document.querySelectorAll(".switch-button")],
+  formSwitch: document.getElementById("form-switch"),
+  mfaSwitch: document.getElementById("mfa-switch"),
+  login: {
+    form: document.getElementById("login-form"),
+    inputContainers: {
+      username: document.querySelector("#login-form .checked-input-container:has(#login-username)"),
+      password: document.querySelector("#login-form .checked-input-container:has(#login-password)")
+    },
+    inputs: {
+      username: document.getElementById("login-username"),
+      password: document.getElementById("login-password")
+    }
+  },
+  mfa: {
+    form: document.getElementById("mfa-form"),
+    error: document.getElementById("invalid-mfa-code"),
+    inputContainer: document.getElementById("mfa-container")
+  },
+  register: {
+    form: document.getElementById("register-form"),
+    inputContainers: {
+      username: document.querySelector("#register-form .checked-input-container:has(#register-username)")
+    },
+    inputs: {
+      username: document.getElementById("register-username"),
+      password: document.getElementById("register-password")
+    },
+    errors: {
+      usernameInvalid: document.getElementById("invalid-username"),
+      usernameTaken: document.getElementById("taken-username")
+    }
+  }
+};
+
+// ts/login/actions.ts
+function getMFACode() {
+  return [
+    ...loginEls.mfa.inputContainer.querySelectorAll('input[type="number"]')
+  ].map((el) => el.value).join("");
+}
+function login(username, password) {
+  loginEls.login.inputContainers.username.classList.remove("error-input-container");
+  loginEls.login.inputContainers.password.classList.remove("error-input-container");
+  if (!username)
+    username = loginEls.login.inputs.username.value;
+  if (!password)
+    password = loginEls.login.inputs.password.value;
+  let body = {
+    username,
+    password
+  };
+  if (loginEls.mfaSwitch.checked)
+    body.mfa_code = getMFACode();
+  fetchAPI("/auth/login", {
+    redirectUnauth: false,
+    method: "POST",
+    body
+  }).then((json) => {
+    if (json.error === "MFACodeRequired") {
+      loginEls.mfa.error.classList.add("hidden");
+      loginEls.mfaSwitch.checked = true;
+      loginEls.mfa.inputContainer.querySelector("input")?.focus();
+      return;
+    }
+    const storage = getLocalStorage();
+    storage.api_key = json.result.api_key;
+    setLocalStorage(storage);
+    if (json.result.admin)
+      window.location.href = "./admin";
+    else
+      window.location.href = "./reminders";
+  }).catch((json) => {
+    if (json.error === "UserNotFound")
+      loginEls.login.inputContainers.username.classList.add("error-input-container");
+    else if (json.error === "AccessUnauthorized") {
+      loginEls.login.inputContainers.password.classList.add("error-input-container");
+      loginEls.mfa.error.classList.remove("hidden");
+    } else
+      console.log(json);
+  });
+}
+var invalidUsernameReasonMap = {
+  only_numbers: "A username can't exist of just digits",
+  not_allowed: "The username is not allowed",
+  invalid_character: "The username contains an invalid character"
+};
+function register() {
+  loginEls.register.inputContainers.username.classList.remove("error-input-container");
+  hide({ to_hide: [
+    loginEls.register.errors.usernameInvalid,
+    loginEls.register.errors.usernameTaken
+  ] });
+  const body = {
+    username: loginEls.register.inputs.username.value,
+    password: loginEls.register.inputs.password.value
+  };
+  fetchAPI("/user/add", {
+    method: "POST",
+    body
+  }).then((_) => login(body.username, body.password)).catch((json) => {
+    if (json.error === "UsernameInvalid") {
+      loginEls.register.errors.usernameInvalid.innerText = invalidUsernameReasonMap[json.result.reason];
+      hide({ to_show: [loginEls.register.errors.usernameInvalid] });
+      loginEls.register.inputContainers.username.classList.add("error-input-container");
+    } else if (json.error === "UsernameTaken") {
+      hide({ to_show: [loginEls.register.errors.usernameTaken] });
+      loginEls.register.inputContainers.username.classList.add("error-input-container");
+    } else
+      console.log(json);
+  });
+}
+function checkNewAccountsAllowed() {
+  const storage = getLocalStorage();
+  if (!storage.allow_new_accounts_cache)
+    hide({ to_hide: [loginEls.switchButtons[0]] });
+  fetchAPI("/settings").then((json) => {
+    if (!json.result.allow_new_accounts)
+      hide({ to_hide: [loginEls.switchButtons[0]] });
+    else
+      hide({ to_show: [loginEls.switchButtons[0]] });
+    if (storage.allow_new_accounts_cache !== json.result.allow_new_accounts) {
+      storage.allow_new_accounts_cache = json.result.allow_new_accounts;
+      setLocalStorage(storage);
+    }
+  });
 }
 
-function login(data = null) {
-	els.login.inputContainers.username.classList.remove('error-input-container')
-	els.login.inputContainers.password.classList.remove('error-input-container')
-
-	if (data === null)
-		data = {
-			username: els.login.inputs.username.value,
-			password: els.login.inputs.password.value
-		}
-
-	sendAPI("POST", "/auth/login", {}, data, true, false)
-	.then(json => {
-		setLocalStorage({api_key: json.result.api_key})
-		if (json.result.admin)
-			window.location.href = `${urlPrefix}/admin`
-		else
-			window.location.href = `${urlPrefix}/reminders`
-	})
-	.catch(e => {
-		if (e.status === 404)
-			els.login.inputContainers.username.classList.add('error-input-container')
-		else if (e.status === 401)
-			els.login.inputContainers.password.classList.add('error-input-container')
-		else
-			console.log(e)
-	})
-}
-
-function create() {
-	els.create.inputContainers.username.classList.remove('error-input-container')
-	hide([els.create.errors.usernameInvalid, els.create.errors.usernameTaken])
-
-	const data = {
-		username: els.create.inputs.username.value,
-		password: els.create.inputs.password.value
-	}
-
-	sendAPI("POST", "/user/add", {}, data)
-	.then(json => login(data))
-	.catch(e => {
-		e.json().then(e => {
-			if (e.error === 'UsernameInvalid') {
-				els.create.errors.usernameInvalid.innerText = e.result.reason
-				hide([], [els.create.errors.usernameInvalid])
-				els.create.inputContainers.username.classList.add('error-input-container')
-
-			} else if (e.error === 'UsernameTaken') {
-				hide([], [els.create.errors.usernameTaken])
-				els.create.inputContainers.username.classList.add('error-input-container')
-
-			} else {
-				console.log(e)
-			}
-		})
-	})
-}
-
-function checkAllowNewAccounts() {
-	const cachedValue = getLocalStorage("allow_new_accounts_cache").allow_new_accounts_cache
-	if (!cachedValue)
-		hide([els.switchButton])
-
-	fetchAPI("/settings")
-	.then(json => {
-		if (!json.result.allow_new_accounts)
-			hide([els.switchButton])
-		else
-			hide([], [els.switchButton])
-
-		if (cachedValue !== json.result.allow_new_accounts)
-			setLocalStorage({
-				allow_new_accounts_cache: json.result.allow_new_accounts
-			})
-	})
-}
-
-if (apiKey !== null)
-	checkLogin()
-
-checkAllowNewAccounts()
-
-els.login.form.action = 'javascript:login();'
-els.create.form.action = 'javascript:create();'
+// ts/login/login.ts
+loginEls.switchButtons.forEach(
+  (el) => el.onclick = (e) => loginEls.formSwitch.checked = !loginEls.formSwitch.checked
+);
+loginEls.mfa.inputContainer.querySelectorAll("input:not(:last-of-type)").forEach(
+  (el) => el.oninput = (e) => {
+    if (["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].includes(el.value)) {
+      const nextInput = el.nextElementSibling;
+      nextInput.focus();
+    }
+  }
+);
+loginEls.login.form.onsubmit = (e) => {
+  e.preventDefault();
+  login();
+};
+loginEls.mfa.form.onsubmit = (e) => {
+  e.preventDefault();
+  login();
+};
+loginEls.register.form.onsubmit = (e) => {
+  e.preventDefault();
+  register();
+};
+OnLoadRunner.add(checkNewAccountsAllowed);
+OnLoadRunner.runOnLoad();
