@@ -387,8 +387,8 @@ def find_next_time(
         weekdays.sort()
 
     current_time = datetime.now(timezone.utc)
-    original_datetime = datetime.fromtimestamp(original_time)
-    new_time = datetime.fromtimestamp(original_time)
+    original_datetime = datetime.fromtimestamp(original_time, tz=timezone.utc)
+    new_time = datetime.fromtimestamp(original_time, tz=timezone.utc)
 
     if cron_schedule is not None:
         cron_instance = Cron(cron_schedule)
