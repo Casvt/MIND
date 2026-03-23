@@ -638,7 +638,7 @@ def api_admin_user(u_id: int):
     if request.method == 'PUT':
         new_username = g.inputs['new_username']
         new_password = g.inputs['new_password']
-        new_mfa_apprise_url = g.inputs['mfa_apprise_url']
+        new_mfa_apprise_url = g.inputs['new_mfa_apprise_url']
 
         if new_username:
             user.update_username(new_username)
