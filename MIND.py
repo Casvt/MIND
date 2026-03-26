@@ -9,16 +9,8 @@ from subprocess import Popen
 from sys import argv, exit
 from typing import NoReturn, Union
 
-from backend.base.custom_exceptions import InvalidKeyValue
 from backend.base.definitions import Constants, StartType
 from backend.base.helpers import check_min_python_version, get_python_exe
-from backend.base.logging import LOGGER, setup_logging
-from backend.features.reminder_handler import ReminderHandler
-from backend.features.tz_shifter import TimezoneChangeHandler
-from backend.internals.db import set_db_location, setup_db
-from backend.internals.db_backup_import import DatabaseBackupHandler
-from backend.internals.server import Server, StartTypeHandlers
-from backend.internals.settings import Settings
 
 
 def _main(
@@ -64,6 +56,15 @@ def _main(
         NoReturn: Exit code 0 means to shutdown. Exit code 131 or higher means
             to restart with possibly special reasons.
     """
+    from backend.base.custom_exceptions import InvalidKeyValue
+    from backend.base.logging import LOGGER, setup_logging
+    from backend.features.reminder_handler import ReminderHandler
+    from backend.features.tz_shifter import TimezoneChangeHandler
+    from backend.internals.db import set_db_location, setup_db
+    from backend.internals.db_backup_import import DatabaseBackupHandler
+    from backend.internals.server import Server, StartTypeHandlers
+    from backend.internals.settings import Settings
+
     setup_logging(log_folder, log_file)
     LOGGER.info('Starting up MIND')
 
