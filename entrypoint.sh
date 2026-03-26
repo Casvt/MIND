@@ -2,39 +2,31 @@
 
 set -e
 
-PUID=${PUID}
-PGID=${PGID}
-ID_CACHE_FILE="/app/.id_cache"
+PUID=${PUID:-0}
+PGID=${PGID:-0}
 
-# Stay as root user
-if [ "$PUID" = "0" ]; then
-    echo "Running as root user..."
+DB_DIR="/app/db"
+LOG_DIR="/app/logs"
+
+if [ "$PUID" = "0" ]
+then
+    # Stay as root user
+    echo "Running as root"
     exec "$@"
 
-# Switch to non-root user
 else
-    echo "Updating mind to ($PUID:$PGID)..."
+    # Switch to non-root user
+    echo "Preparing MIND to run as $PUID:$PGID..."
 
-    # Group
-    if [ "$(id -g mind)" != "$PGID" ]; then 
-        groupmod -o -g "$PGID" mind
-    fi
-    # User
-    if [ "$(id -u mind)" != "$PUID" ]; then
-        usermod -o -u "$PUID" -g "$PGID" mind
-    fi
+    groupmod -o -g "$PGID" mind
+    usermod -o -u "$PUID" -g "$PGID" mind
 
-    # Mount permissions
-    CURRENT_ID="${PUID}:${PGID}"
-    if [ -f "$ID_CACHE_FILE" ] && [ "$(cat "$ID_CACHE_FILE")" = "$CURRENT_ID" ]; then
-        echo "Permissions match. Skipping chown."
-    else
-        echo "Permission mismatch or first run. Updating permissions..."
-        chown -R mind:mind /app
-        echo "$CURRENT_ID" > "$ID_CACHE_FILE"
-    fi
+    echo "Ensuring ownership..."
+    chown -R mind:mind "$DB_DIR" "$LOG_DIR" || {
+        echo "Failed to update ownership to $PUID:$PGID"
+        exit 1
+    }
 
-    # Drop Privileges
-    echo "Dropping privileges to mind ($PUID:$PGID)..."
+    echo "Running as $PUID:$PGID"
     exec gosu mind "$@"
 fi

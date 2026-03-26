@@ -42,9 +42,10 @@ RUN --mount=from=builder,source=/wheels,target=/wheels \
     pip3 install --no-index --find-links=/wheels -r /wheels/requirements.txt
 
 RUN groupadd -g 1000 mind && \
-    useradd -u 1000 -g mind -d /app -M -s /bin/bash mind
+    useradd -u 1000 -g mind -d /nonexistent -M -s /bin/bash mind && \
+    mkdir -p /app/db /app/logs
     
-COPY . .
+COPY --chmod=755 . .
 
 ENV PUID=0 \
     PGID=0 \
@@ -53,4 +54,4 @@ ENV PUID=0 \
 EXPOSE 8080
 
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD [ "python3", "/app/MIND.py" ]
+CMD ["python3", "/app/MIND.py", "--LogFolder", "/app/logs"]
