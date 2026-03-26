@@ -184,8 +184,8 @@ dialog:where(#upload-db-dialog, #import-db-dialog) {
 	height: 6.1rem;
 }
 
-#reset-settings-dialog .dialog-content {
-	height: calc(100% - 2 * 3.2rem);
+:where(#reset-settings-dialog, #plugins-dialog) .dialog-content {
+	height: calc(100% - 2 * var(--dialog-header-height));
 	justify-content: flex-start;
 	overflow-y: auto;
 }
@@ -204,6 +204,50 @@ dialog:where(#upload-db-dialog, #import-db-dialog) {
 
 #reset-settings-dialog:not(:has(input[type="checkbox"]:checked)) #submit-reset-settings {
 	color: var(--color-light-gray);
+}
+
+#plugins-dialog .dialog-content {
+	gap: 0rem;
+}
+
+#add-plugin {
+	margin-top: 1rem;
+	width: 90%;
+	
+	& svg {
+		transition: transform 200ms ease-in-out;
+	}
+}
+
+#plugins-dialog:has(#add-plugin-row:not(.hidden)) #add-plugin svg {
+	transform: rotate(45deg);
+}
+
+#plugin-not-found {
+	transform: translateY(1rem);
+}
+
+#plugins-table :where(th, td):last-child {
+	width: 5.5rem;
+}
+
+#no-plugins-row td {
+	text-align: center;
+}
+
+#plugins-table:has(tbody > tr:not(#no-plugins-row):not(.hidden)) #no-plugins-row {
+	display: none;
+}
+
+#plugin-path {
+	width: 100%;
+	height: 100%;
+
+	border: 0;
+	border-radius: 6px;
+	padding: .25rem;
+	color: var(--color-light);
+	background-color: var(--color-dark);
 }
 
 @media (max-width: 24rem) {

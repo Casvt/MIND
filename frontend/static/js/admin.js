@@ -187,6 +187,17 @@ var adminEls = {
     list: document.getElementById("reset-list"),
     form: document.getElementById("reset-settings-form")
   },
+  plugins: {
+    dialog: document.getElementById("plugins-dialog"),
+    open: document.getElementById("open-plugins"),
+    cancel: document.getElementById("close-plugins"),
+    add: document.getElementById("add-plugin"),
+    addRow: document.getElementById("add-plugin-row"),
+    addInput: document.getElementById("plugin-path"),
+    form: document.getElementById("add-plugin-form"),
+    list: document.getElementById("plugins-list"),
+    error: document.getElementById("plugin-not-found")
+  },
   userList: document.getElementById("user-list"),
   addUser: {
     dialog: document.getElementById("add-user-dialog"),
@@ -337,6 +348,7 @@ function loadSettings() {
     el.value = json.result[el.name];
     el = adminEls.settings.dbBackupFolder;
     el.value = json.result[el.name];
+    loadPlugins(json.result["apprise_plugin_paths"]);
     SettingsChanges.initInputChangeDetection();
   });
 }
@@ -492,6 +504,58 @@ var ResetWindow = class {
           1e3
         );
       }
+    });
+  }
+};
+var plugins = [];
+function loadPlugins(plugins2) {
+  adminEls.plugins.list.innerHTML = "";
+  plugins2.forEach((plugin) => {
+    const tr = document.createElement("tr");
+    const path = document.createElement("td");
+    path.innerText = plugin;
+    tr.appendChild(path);
+    const action = document.createElement("td");
+    const deletePlugin = document.createElement("button");
+    deletePlugin.appendChild(createIcon("icon-delete"));
+    deletePlugin.title = "Remove the plugin path";
+    deletePlugin.onclick = (e) => {
+      plugins2.shift();
+      loadPlugins(plugins2);
+      fetchAPI("/admin/settings", { method: "PUT", body: {
+        apprise_plugin_paths: plugins2
+      } });
+    };
+    action.appendChild(deletePlugin);
+    tr.appendChild(action);
+    adminEls.plugins.list.appendChild(tr);
+  });
+}
+var PluginsWindow = class {
+  dialog = adminEls.plugins.dialog;
+  prepare() {
+  }
+  show(args = {}) {
+    hide({ to_hide: [adminEls.plugins.addRow, adminEls.plugins.error] });
+    this.dialog.showModal();
+  }
+  hide() {
+    this.dialog.close();
+  }
+  submit() {
+    hide({ to_hide: [adminEls.plugins.error] });
+    plugins.unshift(adminEls.plugins.addInput.value);
+    fetchAPI("/admin/settings", { method: "PUT", body: {
+      apprise_plugin_paths: plugins
+    } }).then((_) => {
+      loadPlugins(plugins);
+      hide({ to_hide: [adminEls.plugins.addRow] });
+    }).catch((json) => {
+      if (json.error === "InvalidKeyValue") {
+        plugins.shift();
+        hide({ to_show: [adminEls.plugins.error] });
+      } else
+        console.log(json);
     });
   }
 };
@@ -781,6 +845,7 @@ var ImportDatabaseWindow = class {
 };
 var windowInstances = {
   reset: new ResetWindow(),
+  plugins: new PluginsWindow(),
   addUser: new AddUserWindow(),
   editUser: new EditUserWindow(),
   deleteUser: new DeleteUserWindow(),
@@ -820,6 +885,32 @@ adminEls.resetSettings.dialog.onclick = (e) => {
 adminEls.resetSettings.form.onsubmit = (e) => {
   e.preventDefault();
   windowInstances.reset.submit();
+};
+adminEls.plugins.open.onclick = (e) => windowInstances.plugins.show();
+adminEls.plugins.cancel.onclick = (e) => windowInstances.plugins.hide();
+adminEls.plugins.dialog.onclick = (e) => {
+  if (e.target === e.currentTarget) {
+    e.stopPropagation();
+    windowInstances.plugins.hide();
+  }
+};
+adminEls.plugins.add.onclick = (e) => {
+  if (adminEls.plugins.addRow.classList.contains("hidden")) {
+    adminEls.plugins.addInput.value = "";
+    hide({
+      to_show: [adminEls.plugins.addRow],
+      to_hide: [adminEls.plugins.error]
+    });
+    adminEls.plugins.addInput.focus();
+  } else {
+    hide({
+      to_hide: [adminEls.plugins.addRow, adminEls.plugins.error]
+    });
+  }
+};
+adminEls.plugins.form.onsubmit = (e) => {
+  e.preventDefault();
+  windowInstances.plugins.submit();
 };
 adminEls.addUser.open.onclick = (e) => windowInstances.addUser.show();
 adminEls.addUser.cancel.onclick = (e) => windowInstances.addUser.hide();

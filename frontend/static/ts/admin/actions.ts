@@ -43,7 +43,7 @@ export function shutdown(): void {
 // region Setting Changes
 export class SettingsChanges {
     public static changesCount: number = 0
-    
+
     public static setChangeCount(count: number): void {
         this.changesCount = count
         if (count === 1)
@@ -51,10 +51,10 @@ export class SettingsChanges {
         else
             adminEls.changesCount.innerText = `${count} changes`
     }
-    
+
     public static initInputChangeDetection(): void {
         this.setChangeCount(0)
-        
+
         Object.values(adminEls.settings).forEach(s => {
             const settingValue = s.type === "checkbox" ? s.checked : s.value
             s.dataset.currentValue = encodeURI(settingValue.toString())
@@ -119,6 +119,8 @@ export function loadSettings(): void {
 
         el = adminEls.settings.dbBackupFolder
         el.value = json.result[el.name]
+
+        loadPlugins(json.result["apprise_plugin_paths"])
 
 		SettingsChanges.initInputChangeDetection()
     })
@@ -324,6 +326,73 @@ class ResetWindow implements Window {
                     1000
                 )
             }
+        })
+    }
+}
+
+// region Plugin Management
+const plugins: string[] = []
+
+function loadPlugins(plugins: string[]): void {
+    adminEls.plugins.list.innerHTML = ''
+    plugins.forEach(plugin => {
+        const tr = document.createElement("tr")
+
+        const path = document.createElement("td")
+        path.innerText = plugin
+        tr.appendChild(path)
+
+        const action = document.createElement("td")
+        const deletePlugin = document.createElement("button")
+        deletePlugin.appendChild(createIcon("icon-delete"))
+        deletePlugin.title = "Remove the plugin path"
+        deletePlugin.onclick = e => {
+            plugins.shift()
+            loadPlugins(plugins)
+            fetchAPI("/admin/settings", {method: "PUT", body: {
+                apprise_plugin_paths: plugins
+            }})
+        }
+        action.appendChild(deletePlugin)
+        tr.appendChild(action)
+
+        adminEls.plugins.list.appendChild(tr)
+    })
+}
+
+class PluginsWindow implements Window {
+    public dialog = adminEls.plugins.dialog
+
+    public prepare(): void {}
+
+    public show(args: object = {}): void {
+        hide({to_hide: [adminEls.plugins.addRow, adminEls.plugins.error]})
+        this.dialog.showModal()
+    }
+
+    public hide(): void {
+        this.dialog.close()
+    }
+
+    public submit(): void {
+        hide({to_hide: [adminEls.plugins.error]})
+
+        plugins.unshift(adminEls.plugins.addInput.value)
+
+        fetchAPI("/admin/settings", {method: "PUT", body: {
+            apprise_plugin_paths: plugins
+        }})
+        .then(_ => {
+            loadPlugins(plugins)
+            hide({to_hide: [adminEls.plugins.addRow]})
+        })
+        .catch(json => {
+            if (json.error === "InvalidKeyValue") {
+                plugins.shift()
+                hide({to_show: [adminEls.plugins.error]})
+            }
+            else
+                console.log(json)
         })
     }
 }
@@ -701,6 +770,7 @@ class ImportDatabaseWindow implements Window {
 // region Window Instances
 export const windowInstances = {
     reset: new ResetWindow(),
+    plugins: new PluginsWindow(),
     addUser: new AddUserWindow(),
     editUser: new EditUserWindow(),
     deleteUser: new DeleteUserWindow(),

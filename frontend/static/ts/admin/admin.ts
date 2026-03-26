@@ -1,4 +1,4 @@
-import { Constants, downloadCurrentDatabase, downloadLogs, logout, OnLoadRunner } from "../general";
+import { Constants, downloadCurrentDatabase, downloadLogs, hide, logout, OnLoadRunner } from "../general";
 import { loadAbout, loadBackups, loadSettings, loadUsers, restart, SettingsChanges, shutdown, submitSettings, windowInstances } from "./actions";
 import { adminEls } from "./elements";
 
@@ -41,6 +41,34 @@ adminEls.resetSettings.dialog.onclick = e => {
 adminEls.resetSettings.form.onsubmit = e => {
     e.preventDefault()
     windowInstances.reset.submit()
+}
+
+adminEls.plugins.open.onclick = e => windowInstances.plugins.show()
+adminEls.plugins.cancel.onclick = e => windowInstances.plugins.hide()
+adminEls.plugins.dialog.onclick = e => {
+    if (e.target === e.currentTarget) {
+        e.stopPropagation()
+        windowInstances.plugins.hide()
+    }
+}
+adminEls.plugins.add.onclick = e => {
+    if (adminEls.plugins.addRow.classList.contains("hidden")) {
+        adminEls.plugins.addInput.value = ''
+        hide({
+            to_show: [adminEls.plugins.addRow],
+            to_hide: [adminEls.plugins.error]
+        })
+        adminEls.plugins.addInput.focus()
+    }
+    else {
+        hide({
+            to_hide: [adminEls.plugins.addRow, adminEls.plugins.error],
+        })
+    }
+}
+adminEls.plugins.form.onsubmit = e => {
+    e.preventDefault()
+    windowInstances.plugins.submit()
 }
 
 adminEls.addUser.open.onclick = e => windowInstances.addUser.show()

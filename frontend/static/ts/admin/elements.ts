@@ -42,6 +42,18 @@ export const adminEls = {
         list: document.getElementById("reset-list") as HTMLDivElement,
         form: document.getElementById("reset-settings-form") as HTMLFormElement
     },
+    
+    plugins: {
+        dialog: document.getElementById("plugins-dialog") as HTMLDialogElement,
+        open: document.getElementById("open-plugins") as HTMLButtonElement,
+        cancel: document.getElementById("close-plugins") as HTMLButtonElement,
+        add: document.getElementById("add-plugin") as HTMLButtonElement,
+        addRow: document.getElementById("add-plugin-row") as HTMLTableRowElement,
+        addInput: document.getElementById("plugin-path") as HTMLInputElement,
+        form: document.getElementById("add-plugin-form") as HTMLFormElement,
+        list: document.getElementById("plugins-list") as HTMLTableElement,
+        error: document.getElementById("plugin-not-found") as HTMLParagraphElement
+    },
 
     userList: document.getElementById("user-list") as HTMLTableElement,
     addUser: {

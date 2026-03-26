@@ -26,6 +26,7 @@
 	--nav-show-speed: 300ms;
 	--nav-button-spacing: .5rem;
 	--scrollbar-width: 10px;
+	--dialog-header-height: 3.2rem;
 
 	--window-slide-duration: 500ms;
 	--dyn-spacing: clamp(.5rem, 2vw, 1rem);
@@ -40,6 +41,7 @@
 /*  */
 dialog {
 	margin: auto;
+	overscroll-behavior: contain;
 }
 
 img {
@@ -487,7 +489,7 @@ dialog[open]::backdrop {
 }
 
 .dialog-header, .dialog-footer {
-	height: 3.2rem;
+	height: var(--dialog-header-height);
 	
 	display: flex;
 	align-items: center;

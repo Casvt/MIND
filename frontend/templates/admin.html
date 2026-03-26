@@ -45,6 +45,49 @@
 				</div>
 			</div>
 		</dialog>
+		<dialog id="plugins-dialog">
+			<div class="dialog-container">
+				<div class="dialog-header">
+					<h2>Apprise Plugin Paths</h2>
+				</div>
+				<div class="dialog-content">
+					<form id="add-plugin-form"></form>
+					<button id="add-plugin" class="input-style">
+						<svg><use href="#icon-plus"></use></svg>
+					</button>
+					<p id="plugin-not-found" class="error hidden">*Path not found</p>
+					<div class="table-container">
+						<table id="plugins-table" class="entries-table">
+							<thead>
+								<tr>
+									<th>Path</th>
+									<th>Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr id="no-plugins-row">
+									<td colspan="2">No Plugins</td>
+								</tr>
+								<tr id="add-plugin-row" class="hidden">
+									<td>
+										<input type="text" id="plugin-path" form="add-plugin-form" required placeholder="Plugin Path">
+									</td>
+									<td>
+										<button type="submit" form="add-plugin-form">
+											<svg><use href="#icon-save"></use></svg>
+										</button>
+									</td>
+								</tr>
+							</tbody>
+							<tbody id="plugins-list"></tbody>
+						</table>
+					</div>
+				</div>
+				<div class="dialog-footer">
+					<button id="close-plugins" class="input-style">Close</button>
+				</div>
+			</div>
+		</dialog>
 		<dialog id="add-user-dialog">
 			<div class="dialog-container">
 				<div class="dialog-header">
@@ -288,7 +331,7 @@
 				</div>
 			</section>
 			<section id="logging-section">
-				<h2>Logging and Resetting</h2>
+				<h2>Logging, Resetting and Plugins</h2>
 				<div class="table-container">
 					<table class="collaps-table">
 						<tbody>
@@ -312,6 +355,13 @@
 								<td>
 									<button id="open-reset-settings" class="input-style">Reset Setting</button>
 									<p>Opens a window to select settings for which to reset their value.</p>
+								</td>
+							</tr>
+							<tr>
+								<th><label for="open-plugins">Apprise Plugins</label></th>
+								<td>
+									<button id="open-plugins" class="input-style">Manage Paths</button>
+									<p>Opens a window to manage the paths to plugins that Apprise should load.</p>
 								</td>
 							</tr>
 						</tbody>
@@ -367,8 +417,10 @@
 				<div class="table-container">
 					<table id="user-table" class="entries-table">
 						<thead>
-							<th>User</th>
-							<th>Actions</th>
+							<tr>
+								<th>User</th>
+								<th>Actions</th>
+							</tr>
 						</thead>
 						<tbody id="user-list">
 						</tbody>
