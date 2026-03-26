@@ -1,11 +1,39 @@
+// region Constants
+export class Constants {
+    public static readonly svgNamespace = "http://www.w3.org/2000/svg"
+
+    public static readonly unsavedChangesMessage = "You have unsaved changes. Are you sure you want to leave?"
+
+    public static readonly restartMessage =
+        "MIND has detected changes to the hosting settings. "
+        + "It is required to login into MIND within 1 minute in order to keep the new hosting settings. "
+        + "Otherwise, MIND will go back to the old hosting settings."
+}
+
+export const invalidUsernameReasonMap: Record<string, string> = {
+    only_numbers: "A username can't exist of just digits",
+    not_allowed: "The username is not allowed",
+    invalid_character: "The username contains an invalid character"
+}
+
+// region Definitions
+export abstract class Window {
+    public abstract readonly dialog: HTMLDialogElement
+
+    public abstract prepare(): void
+    public abstract show(args: object): void
+    public abstract hide(): void
+    public abstract submit(): void
+}
+
 // region Helpers
 
 /**
  * Hide and show elements.
- * 
+ *
  * @param {Array<HTMLElement>} to_hide The elements to hide,
  * by adding the `hidden` class.
- * 
+ *
  * @param {Array<HTMLElement>?} to_show The elements to show,
  * by removing the `hidden` class.
  */
@@ -15,6 +43,19 @@ export function hide(
 	to_hide.forEach(el => el.classList.add('hidden'))
 	if (to_show !== null && to_show !== undefined)
 		to_show.forEach(el => el.classList.remove('hidden'))
+}
+
+/**
+ * Create an icon element based on an icon stored in an svg store.
+ * @param iconId The HTML ID of the svg element that contains the icon.
+ * @returns The icon element, to be used anywhere on the page.
+ */
+export function createIcon(iconId: string): SVGSVGElement {
+    const svg = document.createElementNS(Constants.svgNamespace, "svg")
+    const use = document.createElementNS(Constants.svgNamespace, "use") as SVGUseElement
+    use.setAttribute("href", `#${iconId}`)
+    svg.appendChild(use)
+    return svg
 }
 
 // region LocalStorage
@@ -72,7 +113,7 @@ export function setupLocalStorage(): void {
     Object.keys(localStorageDefaultValues).forEach(k => {
 		if (currentValues[k] === undefined)
             //@ts-expect-error
-			cleanedVersion[k] = localStorageDefaultValues[k] 
+			cleanedVersion[k] = localStorageDefaultValues[k]
 		else
 			cleanedVersion[k] = currentValues[k]
 	})
@@ -87,19 +128,19 @@ interface APIRequestOptions {
      * The REST method to use when making the request.
      */
     method: string,
-    
+
     /**
      * Any URL parameters to include in the request. The API key is already
      * supplied.
      */
     params: Record<string, any>,
-    
+
     /**
      * The body of the request when it's a POST request. Will automatically
      * be stringified.
      */
-    body: Record<string, any>,
-    
+    body: Record<string, any> | FormData,
+
     /**
      * If the server responds that the user is not authenticated, automatically
      * redirect to the login page.
@@ -146,10 +187,15 @@ export async function fetchAPI(
     let fetchOptions: RequestInit = {
         method: finalOptions.method
     }
-    
-    if (finalOptions.method === "POST") {
-        fetchOptions.headers = {"Content-Type": "application/json"},
-        fetchOptions.body = JSON.stringify(finalOptions.body)
+
+    if (["POST", "PUT", "DELETE"].includes(finalOptions.method)) {
+        if (finalOptions.body instanceof FormData) {
+            fetchOptions.body = finalOptions.body
+
+        } else {
+            fetchOptions.headers = {"Content-Type": "application/json"},
+            fetchOptions.body = JSON.stringify(finalOptions.body)
+        }
     }
 
     const response = await fetch(
@@ -169,10 +215,35 @@ export async function fetchAPI(
     return await response.json()
 }
 
+/**
+ * Make a browser download the logs by calling this function. Only works when
+ * the API key is valid and for an admin account.
+ */
+export function downloadLogs(): void {
+    window.location.href = `${urlPrefix}/api/admin/logs?api_key=${apiKey}`
+}
+
+/**
+ * Make a browser download the database in its current state by calling this
+ * function. Only works when the API key is valid and for an admin account.
+ */
+export function downloadCurrentDatabase(): void {
+    window.location.href = `${urlPrefix}/api/admin/database?api_key=${apiKey}`
+}
+
+/**
+ * Make a browser download a database backup by calling this function. Only
+ * works when the API key is valid and for an admin account.
+ * @param {number} index The index of the backup.
+ */
+export function downloadBackupDatabase(index: number): void {
+    window.location.href = `${urlPrefix}/api/admin/database/backups/${index}?api_key=${apiKey}`
+}
+
 // region Auth
 /**
  * Check whether the API key stored in local storage is valid (might be expired)
- * and whether they're on the correct page (might be user loading admin page). 
+ * and whether they're on the correct page (might be user loading admin page).
  * If not, redirect the user to the proper page. Await the call if this check
  * needs to be completed before anything else happens.
  */
@@ -194,12 +265,26 @@ async function checkLogin(): Promise<void> {
             && window.location.pathname !== `${urlPrefix}/admin`
         )
             window.location.href = `${urlPrefix}/admin`
-        
+
         else if (
             !json.result.admin
             && window.location.pathname !== `${urlPrefix}/reminders`
         )
             window.location.href = `${urlPrefix}/reminders`
+    })
+}
+
+/**
+ * Log out the user and redirect to the login page.
+ */
+export function logout(): void {
+    fetchAPI("/auth/logout", {method: "POST"})
+    .then(_ => {
+        const storage = getLocalStorage()
+        storage.api_key = null
+        setLocalStorage(storage)
+
+        window.location.href = `${urlPrefix}/`
     })
 }
 

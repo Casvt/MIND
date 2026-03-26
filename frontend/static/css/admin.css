@@ -1,4 +1,5 @@
-.action-buttons {
+/* Grid and sections */
+#action-buttons {
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -43,7 +44,7 @@
 #grid-container {
 	--grid-spacing: 1.25rem;
 
-	width: min(100%, 80rem + 3 * var(--grid-spacing));
+	width: fit-content;
 	margin-inline: auto;
 
 	display: grid;
@@ -56,6 +57,8 @@
 
 #grid-container > section {
 	max-height: 40rem;
+	max-width: 40rem;
+	width: 100%;
 	min-width: 0;
 
 	border-radius: 4px;
@@ -70,6 +73,24 @@ h2 {
 	border-bottom: 1px solid var(--color-gray);
 }
 
+/* Section styling */
+#power-section {
+	display: flex;
+	flex-direction: column;
+
+	& > div {
+		flex-grow: 1;
+
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		gap: 1rem;
+		
+		padding: 1rem;
+	}
+}
+
 .collaps-table {
 	--min-width: 18rem;
 	--max-width: 40rem;
@@ -77,25 +98,7 @@ h2 {
 	--min-data-width: 15rem;
 }
 
-#power-section > .table-container {
-	padding: 1rem;
-
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	gap: 1rem;
-}
-
-tr:has(:where(input, select).changed) label {
-	color: var(--color-changed);
-}
-
-:where(input, select).changed,
-div.input-style:has(input.changed) {
-	border-color: var(--color-changed);
-}
-
+/* Section styling */
 #backup-settings-section td:has(div.checked-input-container) {
 	height: 6.6rem;
 }
@@ -137,6 +140,17 @@ div.input-style:has(input.changed) {
 	text-wrap-mode: nowrap;
 }
 
+/* Changed settings */
+tr:has(:where(input, select).changed) label {
+	color: var(--color-changed);
+}
+
+:where(input, select).changed,
+div.input-style:has(input.changed) {
+	border-color: var(--color-changed);
+}
+
+/* Dialog content styling */
 #add-user-form,
 #edit-user-form {
 	width: min(90%, 16rem);
@@ -184,8 +198,16 @@ dialog:where(#upload-db-dialog, #import-db-dialog) {
 	max-width: 30rem;
 }
 
+#submit-reset-settings {
+	transition: color 100ms linear;
+}
+
+#reset-settings-dialog:not(:has(input[type="checkbox"]:checked)) #submit-reset-settings {
+	color: var(--color-light-gray);
+}
+
 @media (max-width: 24rem) {
-	.action-buttons button {
+	#action-buttons > button {
 		width: 100%;
 
 		&:last-of-type {

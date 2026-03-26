@@ -17,7 +17,7 @@
         {
             "label": "Build Frontend",
             "type": "shell",
-            "command": "tsc && esbuild ts/login/login.ts --bundle --format=esm --outfile=js/login.js",
+            "command": "tsc && esbuild ./ts/login/login.ts ./ts/admin/admin.ts --bundle --format=esm --tree-shaking=true --outdir=./js --entry-names='[name]'",
             "group": {
                 "kind": "build",
                 "isDefault": true

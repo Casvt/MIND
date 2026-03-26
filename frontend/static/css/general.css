@@ -65,7 +65,7 @@ input[type="datetime-local"] {
 	color-scheme: dark;
 }
 
-svg :where(path, rect) {
+svg {
 	fill: var(--color-light);
 }
 
@@ -169,7 +169,7 @@ button:has(> svg).input-style {
 
 button.input-style > svg {
 	height: 1.3rem;
-	width: auto;
+	aspect-ratio: 1/1;
 }
 
 div.input-style {

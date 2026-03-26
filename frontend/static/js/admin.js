@@ -1,774 +1,886 @@
-//
-// region Elements
-//
-const windows = {
-	resetSettings: {
-		dialog: document.querySelector("#reset-settings-dialog"),
-		form: document.querySelector("#reset-settings-form"),
-		close: document.querySelector("#close-reset-settings"),
-		submit: document.querySelector("#submit-reset-button")
-	},
-	addUser: {
-		dialog: document.querySelector("#add-user-dialog"),
-		form: document.querySelector("#add-user-form"),
-		close: document.querySelector("#close-add-user"),
-		inputContainers: {
-			username: document.querySelector("#add-user-form .checked-input-container:has(input[type='text'])")
-		},
-		inputs: {
-			username: document.querySelector("#add-user-username-input"),
-			password: document.querySelector("#add-user-password-input")
-		},
-		errors: {
-			usernameInvalid: document.querySelector('#add-invalid-username-error'),
-			usernameTaken: document.querySelector('#add-taken-username-error')
-		}
-	},
-	editUser: {
-		dialog: document.querySelector("#edit-user-dialog"),
-		username: document.querySelector("#username-edit-user"),
-		form: document.querySelector("#edit-user-form"),
-		close: document.querySelector("#close-edit-user"),
-		inputContainers: {
-			username: document.querySelector("#edit-user-form .checked-input-container:has(input[type='text'])")
-		},
-		inputs: {
-			username: document.querySelector("#edit-user-username-input"),
-			password: document.querySelector("#edit-user-password-input")
-		},
-		errors: {
-			usernameInvalid: document.querySelector('#edit-invalid-username-error'),
-			usernameTaken: document.querySelector('#edit-taken-username-error')
-		}
-	},
-	deleteUser: {
-		dialog: document.querySelector("#delete-user-dialog"),
-		username: document.querySelector("#username-delete-user"),
-		close: document.querySelector("#close-delete-user"),
-		confirm: document.querySelector("#confirm-delete-user")
-	},
-	uploadDb: {
-		dialog: document.querySelector("#upload-db-dialog"),
-		form: document.querySelector("#upload-db-form"),
-		close: document.querySelector("#close-upload-db"),
-		submit: document.querySelector("#upload-db-dialog button[type='submit']"),
-		inputContainers: {
-			file: document.querySelector("#upload-db-form .checked-input-container:has(input[type='file'])")
-		},
-		inputs: {
-			file: document.querySelector("#upload-db-form input[type='file']"),
-			keepHostingSettings: document.querySelector("#upload-db-form input[type='checkbox']")
-		},
-		errors: {
-			invalidFile: document.querySelector('#upload-invalid-db-error'),
-		}
-	},
-	importDb: {
-		dialog: document.querySelector("#import-db-dialog"),
-		form: document.querySelector("#import-db-form"),
-		close: document.querySelector("#close-import-db"),
-		submit: document.querySelector("#import-db-dialog button[type='submit']"),
-		backupName: document.querySelector("#db-backup-name"),
-		backupCreation: document.querySelector("#db-creation-date"),
-		inputs: {
-			keepHostingSettings: document.querySelector("#import-db-form input[type='checkbox']")
-		}
-	}
+// ts/general.ts
+var Constants = class {
+  static svgNamespace = "http://www.w3.org/2000/svg";
+  static unsavedChangesMessage = "You have unsaved changes. Are you sure you want to leave?";
+  static restartMessage = "MIND has detected changes to the hosting settings. It is required to login into MIND within 1 minute in order to keep the new hosting settings. Otherwise, MIND will go back to the old hosting settings.";
+};
+var invalidUsernameReasonMap = {
+  only_numbers: "A username can't exist of just digits",
+  not_allowed: "The username is not allowed",
+  invalid_character: "The username contains an invalid character"
+};
+function hide({ to_hide = [], to_show = [] } = {}) {
+  to_hide.forEach((el) => el.classList.add("hidden"));
+  if (to_show !== null && to_show !== void 0)
+    to_show.forEach((el) => el.classList.remove("hidden"));
 }
-
-const els = {
-	logout: document.querySelector("#logout-button"),
-	settingsSubmit: document.querySelector('#save-button'),
-	changesCount: document.querySelector('#changes-count'),
-	settingsForm: document.querySelector('#settings-form'),
-	downloadLogs: document.querySelector("#download-logs-button"),
-	startResetSettings: document.querySelector("#open-reset-button"),
-	userList: document.querySelector("#user-list"),
-	dbBackupFolderContainer: document.querySelector('div.checked-input-container:has(#db-backup-folder-input)'),
-	backupList: document.querySelector("#backup-list"),
-	startAddUser: document.querySelector("#add-user-button"),
-	uploadDb: document.querySelector("#upload-db-button"),
-	downloadDb: document.querySelector("#download-db-button"),
-	about: {
-		mindVersion: document.querySelector("#mind-version"),
-		pythonVersion: document.querySelector("#python-version"),
-		dbVersion: document.querySelector("#db-version"),
-		dbLocation: document.querySelector("#db-location"),
-		dataFolder: document.querySelector("#data-folder")
-	},
-	power: {
-		restart: document.querySelector('#restart-button'),
-		shutdown: document.querySelector('#shutdown-button')
-	}
+function createIcon(iconId) {
+  const svg = document.createElementNS(Constants.svgNamespace, "svg");
+  const use = document.createElementNS(Constants.svgNamespace, "use");
+  use.setAttribute("href", `#${iconId}`);
+  svg.appendChild(use);
+  return svg;
 }
-
-const settings = {
-	allowNewAccounts: document.querySelector('#allow-new-accounts-input'),
-	loginTime: document.querySelector('#login-time-input'),
-	loginTimeReset: document.querySelector('#login-time-reset-input'),
-	host: document.querySelector('#host-input'),
-	port: document.querySelector('#port-input'),
-	urlPrefix: document.querySelector('#url-prefix-input'),
-	logLevel: document.querySelector('#log-level-input'),
-	dbBackupInterval: document.querySelector('#db-backup-interval-input'),
-	dbBackupAmount: document.querySelector('#db-backup-amount-input'),
-	dbBackupFolder: document.querySelector('#db-backup-folder-input')
+var localStorageDefaultValues = {
+  api_key: null,
+  locale: "en-GB",
+  default_service: null,
+  sorting_reminders: "time",
+  sorting_static: "title",
+  sorting_templates: "title",
+  wide_library_view: false,
+  allow_new_accounts_cache: true,
+  show_clock: "no"
+};
+function getLocalStorage() {
+  return JSON.parse(localStorage.getItem("MIND") || "{}");
 }
+function setLocalStorage(new_values) {
+  localStorage.setItem("MIND", JSON.stringify(new_values));
+}
+function setupLocalStorage() {
+  if (!localStorage.getItem("MIND"))
+    setLocalStorage(localStorageDefaultValues);
+  const currentValues = getLocalStorage();
+  const cleanedVersion = {};
+  Object.keys(localStorageDefaultValues).forEach((k) => {
+    if (currentValues[k] === void 0)
+      cleanedVersion[k] = localStorageDefaultValues[k];
+    else
+      cleanedVersion[k] = currentValues[k];
+  });
+  setLocalStorage(cleanedVersion);
+}
+var defaultAPIRequestOptions = {
+  method: "GET",
+  params: {},
+  body: {},
+  redirectUnauth: true
+};
+async function fetchAPI(endpoint, options = {}) {
+  const finalOptions = {
+    ...defaultAPIRequestOptions,
+    ...options
+  };
+  if (apiKey)
+    finalOptions.params.api_key = apiKey;
+  let formattedParams = new URLSearchParams(finalOptions.params).toString();
+  if (formattedParams)
+    formattedParams = "?" + formattedParams;
+  let fetchOptions = {
+    method: finalOptions.method
+  };
+  if (["POST", "PUT", "DELETE"].includes(finalOptions.method)) {
+    if (finalOptions.body instanceof FormData) {
+      fetchOptions.body = finalOptions.body;
+    } else {
+      fetchOptions.headers = { "Content-Type": "application/json" }, fetchOptions.body = JSON.stringify(finalOptions.body);
+    }
+  }
+  const response = await fetch(
+    `${urlPrefix}/api${endpoint}${formattedParams}`,
+    fetchOptions
+  );
+  if (!response.ok) {
+    if (finalOptions.redirectUnauth && response.status === 401) {
+      const storage = getLocalStorage();
+      storage.api_key = null;
+      setLocalStorage(storage);
+      if (window.location.pathname !== `${urlPrefix}/`)
+        window.location.href = `${urlPrefix}/`;
+    }
+    throw await response.json();
+  }
+  return await response.json();
+}
+function downloadLogs() {
+  window.location.href = `${urlPrefix}/api/admin/logs?api_key=${apiKey}`;
+}
+function downloadCurrentDatabase() {
+  window.location.href = `${urlPrefix}/api/admin/database?api_key=${apiKey}`;
+}
+function downloadBackupDatabase(index) {
+  window.location.href = `${urlPrefix}/api/admin/database/backups/${index}?api_key=${apiKey}`;
+}
+async function checkLogin() {
+  if (!apiKey) {
+    if (window.location.pathname !== `${urlPrefix}/`)
+      window.location.href = `${urlPrefix}/`;
+    return;
+  }
+  await fetchAPI("/auth/status").then((json) => {
+    if (json.result.admin && window.location.pathname !== `${urlPrefix}/admin`)
+      window.location.href = `${urlPrefix}/admin`;
+    else if (!json.result.admin && window.location.pathname !== `${urlPrefix}/reminders`)
+      window.location.href = `${urlPrefix}/reminders`;
+  });
+}
+function logout() {
+  fetchAPI("/auth/logout", { method: "POST" }).then((_) => {
+    const storage = getLocalStorage();
+    storage.api_key = null;
+    setLocalStorage(storage);
+    window.location.href = `${urlPrefix}/`;
+  });
+}
+var urlPrefix = document.getElementById("url_prefix")?.dataset.value || "";
+var apiKey = getLocalStorage().api_key;
+var OnLoadRunner = class {
+  static onLoadFunctions = [];
+  /**
+   * Register one or more functions to run on load. They are run after the
+   * functions that are already registered. If multiple are added, they are
+   * run in the order that they are supplied.
+   * @param {CallableFunction[]} functions The functions to register.
+   */
+  static add(...functions) {
+    this.onLoadFunctions.push(...functions);
+  }
+  /**
+   * Run all registered functions sequentially.
+   */
+  static async runOnLoad() {
+    for (const f of this.onLoadFunctions) {
+      await f();
+    }
+  }
+};
+OnLoadRunner.add(setupLocalStorage, checkLogin);
 
-//
-// region About
-//
+// ts/admin/elements.ts
+var adminEls = {
+  logout: document.getElementById("logout"),
+  about: {
+    mindVersion: document.getElementById("mind-version"),
+    pythonVersion: document.getElementById("python-version"),
+    dbVersion: document.getElementById("db-version"),
+    dbLocation: document.getElementById("db-location"),
+    dataFolder: document.getElementById("data-folder")
+  },
+  settingsSubmit: document.getElementById("save-settings"),
+  changesCount: document.getElementById("changes-count"),
+  settingsForm: document.getElementById("settings-form"),
+  dbBackupFolderInputContainer: document.querySelector("div.checked-input-container:has(#db-backup-folder)"),
+  settings: {
+    allowNewAccounts: document.getElementById("allow-new-accounts"),
+    loginTime: document.getElementById("login-time"),
+    loginTimeReset: document.getElementById("login-time-reset"),
+    host: document.getElementById("host"),
+    port: document.getElementById("port"),
+    urlPrefix: document.getElementById("url-prefix"),
+    logLevel: document.getElementById("log-level"),
+    dbBackupInterval: document.getElementById("db-backup-interval"),
+    dbBackupAmount: document.getElementById("db-backup-amount"),
+    dbBackupFolder: document.getElementById("db-backup-folder")
+  },
+  power: {
+    restart: document.getElementById("restart-button"),
+    shutdown: document.getElementById("shutdown-button")
+  },
+  downloadLogs: document.getElementById("download-logs"),
+  downloadCurrentDatabase: document.getElementById("download-db"),
+  resetSettings: {
+    dialog: document.getElementById("reset-settings-dialog"),
+    open: document.getElementById("open-reset-settings"),
+    cancel: document.getElementById("close-reset-settings"),
+    submit: document.getElementById("submit-reset-settings"),
+    list: document.getElementById("reset-list"),
+    form: document.getElementById("reset-settings-form")
+  },
+  userList: document.getElementById("user-list"),
+  addUser: {
+    dialog: document.getElementById("add-user-dialog"),
+    open: document.getElementById("open-add-user"),
+    cancel: document.getElementById("close-add-user"),
+    form: document.getElementById("add-user-form"),
+    inputContainers: {
+      username: document.querySelector("#add-user-form .checked-input-container:has(input[type='text'])")
+    },
+    inputs: {
+      username: document.getElementById("add-user-username"),
+      password: document.getElementById("add-user-password")
+    },
+    errors: {
+      usernameInvalid: document.getElementById("add-invalid-username"),
+      usernameTaken: document.getElementById("add-taken-username")
+    }
+  },
+  editUser: {
+    dialog: document.getElementById("edit-user-dialog"),
+    username: document.getElementById("edit-target-username"),
+    cancel: document.getElementById("close-edit-user"),
+    form: document.getElementById("edit-user-form"),
+    inputContainers: {
+      username: document.querySelector("#edit-user-form .checked-input-container:has(input[type='text'])")
+    },
+    inputs: {
+      username: document.getElementById("edit-user-username"),
+      password: document.getElementById("edit-user-password")
+    },
+    errors: {
+      usernameInvalid: document.getElementById("edit-invalid-username"),
+      usernameTaken: document.getElementById("edit-taken-username")
+    }
+  },
+  deleteUser: {
+    dialog: document.getElementById("delete-user-dialog"),
+    username: document.getElementById("delete-target-username"),
+    cancel: document.getElementById("close-delete-user"),
+    confirm: document.getElementById("confirm-delete-user")
+  },
+  backupList: document.getElementById("backup-list"),
+  downloadDb: document.getElementById("download-db-button"),
+  uploadDb: {
+    dialog: document.getElementById("upload-db-dialog"),
+    open: document.getElementById("open-upload-db"),
+    cancel: document.getElementById("close-upload-db"),
+    submit: document.getElementById("submit-upload-db"),
+    form: document.getElementById("upload-db-form"),
+    inputContainers: {
+      file: document.querySelector("#upload-db-form .checked-input-container:has(input[type='file'])")
+    },
+    inputs: {
+      file: document.getElementById("database-file"),
+      keepHostingSettings: document.getElementById("copy-hosting-upload")
+    }
+  },
+  importDb: {
+    dialog: document.getElementById("import-db-dialog"),
+    backupName: document.getElementById("db-backup-name"),
+    backupCreation: document.getElementById("db-creation-date"),
+    cancel: document.getElementById("close-import-db"),
+    submit: document.getElementById("submit-import-db"),
+    form: document.getElementById("import-db-form"),
+    inputs: {
+      keepHostingSettings: document.getElementById("copy-hosting-import")
+    }
+  }
+};
+
+// ts/admin/actions.ts
 function loadAbout() {
-	fetchAPI('/about')
-	.then(json => {
-		els.about.mindVersion.innerText = json.result.version
-		els.about.pythonVersion.innerText = json.result.python_version
-		els.about.dbVersion.innerText = json.result.database_version
-		els.about.dbLocation.innerText = json.result.database_location
-		els.about.dataFolder.innerText = json.result.data_folder
-	})
+  fetchAPI("/about").then((json) => {
+    adminEls.about.mindVersion.innerText = json.result.version;
+    adminEls.about.pythonVersion.innerText = json.result.python_version;
+    adminEls.about.dbVersion.innerText = json.result.database_version;
+    adminEls.about.dbLocation.innerText = json.result.database_location;
+    adminEls.about.dataFolder.innerText = json.result.data_folder;
+  });
 }
-
-//
-// region Power
-//
-function restartApp() {
-	els.power.restart.innerHTML = icons.loading
-	els.power.restart.classList.add('spinning')
-	sendAPI("POST", "/admin/restart")
-	.then(response => 
-		setTimeout(
-			() => window.location.reload(),
-			1000
-		)
-	)
+function restart() {
+  adminEls.power.restart.replaceChildren(createIcon("icon-loading"));
+  adminEls.power.restart.classList.add("spinning");
+  fetchAPI("/admin/restart", { method: "POST" }).then((json) => {
+    setTimeout(
+      () => window.location.reload(),
+      1e3
+    );
+  });
 }
-
-function shutdownApp() {
-	els.power.shutdown.innerHTML = icons.loading
-	els.power.shutdown.classList.add('spinning')
-	sendAPI("POST", "/admin/shutdown")
-	.then(response => 
-		setTimeout(
-			() => window.location.reload(),
-			1000
-		)
-	)
+function shutdown() {
+  adminEls.power.shutdown.replaceChildren(createIcon("icon-loading"));
+  adminEls.power.shutdown.classList.add("spinning");
+  fetchAPI("/admin/shutdown", { method: "POST" }).then((json) => {
+    setTimeout(
+      () => window.location.reload(),
+      1e3
+    );
+  });
 }
-
-//
-// region Settings
-//
-function increaseChangeCount() {
-	const newCount = parseInt(els.changesCount.dataset.count) + 1
-	els.changesCount.dataset.count = newCount
-	if (newCount === 1)
-		els.changesCount.innerText = `${newCount} change`
-	else
-		els.changesCount.innerText = `${newCount} changes`
-}
-
-function decreaseChangeCount() {
-	const newCount = parseInt(els.changesCount.dataset.count) - 1
-	els.changesCount.dataset.count = newCount
-	if (newCount === 1)
-		els.changesCount.innerText = `${newCount} change`
-	else
-		els.changesCount.innerText = `${newCount} changes`
-}
-
-function clearChangeCount() {
-	els.changesCount.dataset.count = 0
-	els.changesCount.innerText = '0 changes'
-}
-
-function changesPresent() {
-	return parseInt(els.changesCount.dataset.count) !== 0
-}
-
-function initInputChangeDetection() {
-	clearChangeCount()
-	Object.values(settings).forEach(s => {
-		const settingValue = s.type === 'checkbox' ? s.checked : s.value
-		s.dataset.currentvalue = encodeURI(settingValue)
-
-		s.classList.remove('changed')
-
-		s.oninput = e => {
-			const newValue = encodeURI(s.type === 'checkbox' ? s.checked : s.value)
-			if (
-				newValue !== s.dataset.currentvalue
-				&& !s.classList.contains('changed')
-			) {
-				// Setting has changed from current value to new value
-				increaseChangeCount()
-				s.classList.add('changed')
-			}
-			else if (
-				newValue === s.dataset.currentvalue
-				&& s.classList.contains('changed')
-			) {
-				// Setting has changed from new value back to current value
-				decreaseChangeCount()
-				s.classList.remove('changed')
-			}
-		}
-	})
-}
-
+var SettingsChanges = class {
+  static changesCount = 0;
+  static setChangeCount(count) {
+    this.changesCount = count;
+    if (count === 1)
+      adminEls.changesCount.innerText = `${count} change`;
+    else
+      adminEls.changesCount.innerText = `${count} changes`;
+  }
+  static initInputChangeDetection() {
+    this.setChangeCount(0);
+    Object.values(adminEls.settings).forEach((s) => {
+      const settingValue = s.type === "checkbox" ? s.checked : s.value;
+      s.dataset.currentValue = encodeURI(settingValue.toString());
+      s.classList.remove("changed");
+      s.oninput = (e) => {
+        const newValue = encodeURI((s.type === "checkbox" ? s.checked : s.value).toString());
+        if (newValue !== s.dataset.currentValue && !s.classList.contains("changed")) {
+          this.setChangeCount(this.changesCount + 1);
+          s.classList.add("changed");
+        } else if (newValue === s.dataset.currentValue && s.classList.contains("changed")) {
+          this.setChangeCount(this.changesCount - 1);
+          s.classList.remove("changed");
+        }
+      };
+    });
+  }
+};
 function loadSettings() {
-	fetchAPI('/settings')
-	.then(json => {
-		settings.allowNewAccounts.checked = json.result.allow_new_accounts
-		settings.loginTime.value = Math.round(json.result.login_time / 60)
-		settings.loginTimeReset.value = json.result.login_time_reset.toString()
-		settings.host.value = json.result.host
-		settings.port.value = json.result.port
-		settings.urlPrefix.value = json.result.url_prefix
-		settings.logLevel.value = json.result.log_level
-		settings.dbBackupInterval.value = json.result.db_backup_interval / 3600
-		settings.dbBackupAmount.value = json.result.db_backup_amount
-		settings.dbBackupFolder.value = json.result.db_backup_folder
-
-		initInputChangeDetection()
-	})
+  fetchAPI("/settings").then((json) => {
+    let el = adminEls.settings.allowNewAccounts;
+    el.checked = json.result[el.name];
+    el = adminEls.settings.loginTime;
+    el.value = Math.round(json.result[el.name] / 60).toString();
+    el = adminEls.settings.loginTimeReset;
+    el.value = json.result[el.name].toString();
+    el = adminEls.settings.host;
+    el.value = json.result[el.name];
+    el = adminEls.settings.port;
+    el.value = json.result[el.name];
+    el = adminEls.settings.urlPrefix;
+    el.value = json.result[el.name];
+    el = adminEls.settings.logLevel;
+    el.value = json.result[el.name];
+    el = adminEls.settings.dbBackupInterval;
+    el.value = (json.result[el.name] / 3600).toString();
+    el = adminEls.settings.dbBackupAmount;
+    el.value = json.result[el.name];
+    el = adminEls.settings.dbBackupFolder;
+    el.value = json.result[el.name];
+    SettingsChanges.initInputChangeDetection();
+  });
 }
-
 function submitSettings() {
-	els.dbBackupFolderContainer.classList.remove('error-input-container')
-	els.settingsSubmit.classList.remove('submit-error')
-
-	if (!changesPresent())
-		return
-
-	let hostChanged = false,
-		portChanged = false,
-		urlPrefixChanged = false
-	const data = {}
-
-	if (settings.allowNewAccounts.classList.contains('changed'))
-		data.allow_new_accounts = settings.allowNewAccounts.checked
-
-	if (settings.loginTime.classList.contains('changed'))
-		data.login_time = settings.loginTime.value * 60
-
-	if (settings.loginTimeReset.classList.contains('changed'))
-		data.login_time_reset = settings.loginTimeReset.value === 'true'
-
-	if (settings.host.classList.contains('changed')) {
-		data.host = settings.host.value
-		hostChanged = true
-	}
-
-	if (settings.port.classList.contains('changed')) {
-		data.port = parseInt(settings.port.value)
-		portChanged = true
-	}
-
-	if (settings.urlPrefix.classList.contains('changed')) {
-		data.url_prefix = settings.urlPrefix.value
-		urlPrefixChanged = true
-	}
-
-	if (settings.logLevel.classList.contains('changed'))
-		data.log_level = parseInt(settings.logLevel.value)
-
-	if (settings.dbBackupInterval.classList.contains('changed'))
-		data.db_backup_interval = parseInt(settings.dbBackupInterval.value) * 3600
-
-	if (settings.dbBackupAmount.classList.contains('changed'))
-		data.db_backup_amount = parseInt(settings.dbBackupAmount.value)
-
-	if (settings.dbBackupFolder.classList.contains('changed'))
-		data.db_backup_folder = settings.dbBackupFolder.value
-
-	if (hostChanged || portChanged || urlPrefixChanged) {
-		// Notify about restart and revert timer
-		const restartMessage = "MIND has detected changes to the hosting settings. "
-			+ "It is required to login into MIND within 1 minute in order to keep the new hosting settings. "
-			+ "Otherwise, MIND will go back to the old hosting settings."
-		if (!confirm(restartMessage))
-			return
-	}
-
-	sendAPI("PUT", "/admin/settings", {}, data)
-	.then(response => {
-		if (hostChanged) {
-			setTimeout(
-				() => window.location.reload(),
-				1000
-			)
-		}
-		else if (portChanged || urlPrefixChanged) {
-			const newUrl = new URL(window.location.href)
-			if (portChanged)
-				newUrl.port = parseInt(settings.port.value)
-			if (urlPrefixChanged)
-				newUrl.pathname = settings.urlPrefix.value + newUrl.pathname.slice(settings.urlPrefix.dataset.currentvalue.length)
-
-			setTimeout(
-				() => window.location.href = newUrl.toString(),
-				1000
-			)
-		}
-		
-		initInputChangeDetection()
-	})
-	.catch(response => {
-		response.json().then(json => {
-			if (['ApiKeyInvalid', 'ApiKeyExpired'].includes(json.error))
-				window.location.href = `${urlPrefix}/`
-
-			if (
-				json.error === 'InvalidKeyValue'
-				&& json.result.key === 'db_backup_folder'
-			) {
-				els.dbBackupFolderContainer.classList.add('error-input-container')
-				els.settingsSubmit.classList.add('submit-error')
-			}
-		})
-	})
+  adminEls.dbBackupFolderInputContainer.classList.remove("error-input-container");
+  adminEls.settingsSubmit.classList.remove("submit-error");
+  if (SettingsChanges.changesCount === 0)
+    return;
+  const data = {};
+  let hostChanged = false, portChanged = false, urlPrefixChanged = false;
+  if (adminEls.settings.allowNewAccounts.classList.contains("changed")) {
+    const el = adminEls.settings.allowNewAccounts;
+    data[el.name] = el.checked;
+  }
+  if (adminEls.settings.loginTime.classList.contains("changed")) {
+    const el = adminEls.settings.loginTime;
+    data[el.name] = parseInt(el.value) * 60;
+  }
+  if (adminEls.settings.loginTimeReset.classList.contains("changed")) {
+    const el = adminEls.settings.loginTimeReset;
+    data[el.name] = el.value === "true";
+  }
+  if (adminEls.settings.host.classList.contains("changed")) {
+    const el = adminEls.settings.host;
+    data[el.name] = el.value;
+    hostChanged = true;
+  }
+  if (adminEls.settings.port.classList.contains("changed")) {
+    const el = adminEls.settings.port;
+    data[el.name] = parseInt(el.value);
+    portChanged = true;
+  }
+  if (adminEls.settings.urlPrefix.classList.contains("changed")) {
+    const el = adminEls.settings.urlPrefix;
+    data[el.name] = el.value;
+    urlPrefixChanged = true;
+  }
+  if (adminEls.settings.logLevel.classList.contains("changed")) {
+    const el = adminEls.settings.logLevel;
+    data[el.name] = parseInt(el.value);
+  }
+  if (adminEls.settings.dbBackupInterval.classList.contains("changed")) {
+    const el = adminEls.settings.dbBackupInterval;
+    data[el.name] = parseInt(el.value) * 3600;
+  }
+  if (adminEls.settings.dbBackupAmount.classList.contains("changed")) {
+    const el = adminEls.settings.dbBackupAmount;
+    data[el.name] = parseInt(el.value);
+  }
+  if (adminEls.settings.dbBackupFolder.classList.contains("changed")) {
+    const el = adminEls.settings.dbBackupFolder;
+    data[el.name] = el.value;
+  }
+  if (hostChanged || portChanged || urlPrefixChanged) {
+    if (!confirm(Constants.restartMessage))
+      return;
+  }
+  fetchAPI("/admin/settings", { method: "PUT", body: data }).then((_) => {
+    if (hostChanged) {
+      setTimeout(
+        () => window.location.reload(),
+        1e3
+      );
+    } else if (portChanged || urlPrefixChanged) {
+      const newUrl = new URL(window.location.href);
+      if (portChanged)
+        newUrl.port = adminEls.settings.port.value;
+      if (urlPrefixChanged)
+        newUrl.pathname = adminEls.settings.urlPrefix.value + newUrl.pathname.slice(
+          adminEls.settings.urlPrefix.dataset.currentValue?.length || 0
+        );
+      setTimeout(
+        () => window.location.href = newUrl.toString(),
+        1e3
+      );
+    }
+    SettingsChanges.initInputChangeDetection();
+  }).catch((json) => {
+    if (json.error === "InvalidKeyValue" && json.result.key === adminEls.settings.dbBackupFolder.name) {
+      adminEls.dbBackupFolderInputContainer.classList.add("error-input-container");
+      adminEls.settingsSubmit.classList.add("submit-error");
+    }
+  });
 }
-
-function openResetSettings() {
-	windows.resetSettings.dialog.showModal()
-}
-
-function closeResetSettings() {
-	windows.resetSettings.dialog.close()
-}
-
-function resetSettings() {
-	const resetSettings = [...windows.resetSettings.form.querySelectorAll('input')]
-		.filter(i => i.checked)
-		.map(i => i.dataset.setting)
-
-	windows.resetSettings.submit.innerHTML = icons.loading
-	windows.resetSettings.submit.classList.add('spinning')
-
-	const hostChanged = resetSettings.includes("host"),
-		portChanged = resetSettings.includes("port"),
-		urlPrefixChanged = resetSettings.includes("url_prefix")
-
-	if (hostChanged || portChanged || urlPrefixChanged) {
-		// Notify about restart and revert timer
-		const restartMessage = "MIND has detected changes to the hosting settings. "
-			+ "It is required to login into MIND within 1 minute in order to keep the new hosting settings. "
-			+ "Otherwise, MIND will go back to the old hosting settings."
-		if (!confirm(restartMessage)) {
-			windows.resetSettings.submit.innerText = "Reset"
-			windows.resetSettings.submit.classList.remove('spinning')
-			return
-		}
-	}
-
-	sendAPI("DELETE", "/admin/settings", {}, {
-		setting_keys: resetSettings
-	})
-	.then(response => {
-		if (portChanged || urlPrefixChanged) {
-			const newUrl = new URL(window.location.href)
-			if (portChanged)
-				newUrl.port = 8080
-			if (urlPrefixChanged)
-				newUrl.pathname = "/"
-	
-			setTimeout(
-				() => window.location.href = newUrl.toString(),
-				1000
-			)
-	
-		} else {
-			setTimeout(
-				() => window.location.reload(),
-				1000
-			)
-		}
-	})
-}
-
-//
-// region Add user
-//
-function openAddUser() {
-	windows.addUser.inputContainers.username.classList.remove('error-input-container')
-	hide([windows.addUser.errors.usernameInvalid, windows.addUser.errors.usernameTaken])
-	windows.addUser.inputs.username.value = ''
-	windows.addUser.inputs.password.value = ''
-
-	windows.addUser.dialog.showModal()
-}
-
-function closeAddUser() {
-	windows.addUser.dialog.close()
-}
-
-function addUser() {
-	windows.addUser.inputContainers.username.classList.remove('error-input-container')
-	hide([windows.addUser.errors.usernameInvalid, windows.addUser.errors.usernameTaken])
-
-	const data = {
-		username: windows.addUser.inputs.username.value,
-		password: windows.addUser.inputs.password.value
-	}
-
-	sendAPI("POST", "/admin/users", {}, data)
-	.then(json => {
-		loadUsers()
-		closeAddUser()
-	})
-	.catch(e => {
-		e.json().then(e => {
-			if (e.error === 'UsernameInvalid') {
-				windows.addUser.errors.usernameInvalid.innerText = e.result.reason
-				hide([], [windows.addUser.errors.usernameInvalid])
-				windows.addUser.inputContainers.username.classList.add('error-input-container')
-
-			} else if (e.error === 'UsernameTaken') {
-				hide([], [windows.addUser.errors.usernameTaken])
-				windows.addUser.inputContainers.username.classList.add('error-input-container')
-
-			} else {
-				console.log(e)
-			}
-		})
-	})
-}
-
-//
-// region Edit user
-//
-function openEditUser(id, username, isAdmin) {
-	windows.editUser.dialog.dataset.id = id
-	windows.editUser.username.innerText = username
-
-	windows.editUser.inputContainers.username.classList.remove('error-input-container')
-	hide([windows.editUser.errors.usernameInvalid, windows.editUser.errors.usernameTaken])
-	windows.editUser.inputs.username.value = ''
-	windows.editUser.inputs.password.value = ''
-
-	if (isAdmin)
-		hide([windows.editUser.inputContainers.username])
-	else
-		hide([], [windows.editUser.inputContainers.username])
-
-	windows.editUser.dialog.showModal()
-}
-
-function closeEditUser() {
-	windows.editUser.dialog.close()
-}
-
-function editUser() {
-	windows.editUser.inputContainers.username.classList.remove('error-input-container')
-	hide([windows.editUser.errors.usernameInvalid, windows.editUser.errors.usernameTaken])
-
-	const data = {}
-
-	if (windows.editUser.inputs.username.value !== '')
-		data.new_username = windows.editUser.inputs.username.value
-
-	if (windows.editUser.inputs.password.value !== '')
-		data.new_password = windows.editUser.inputs.password.value
-
-	if (Object.keys(data).length === 0) {
-		// Nothing changed
-		closeEditUser()
-		return
-	}
-
-	const id = parseInt(windows.editUser.dialog.dataset.id)
-	sendAPI("PUT", `/admin/users/${id}`, {}, data)
-	.then(json => {
-		loadUsers()
-		closeEditUser()
-	})
-	.catch(e => {
-		e.json().then(e => {
-			if (e.error === 'UsernameInvalid') {
-				windows.editUser.errors.usernameInvalid.innerText = e.result.reason
-				hide([], [windows.editUser.errors.usernameInvalid])
-				windows.editUser.inputContainers.username.classList.add('error-input-container')
-
-			} else if (e.error === 'UsernameTaken') {
-				hide([], [windows.editUser.errors.usernameTaken])
-				windows.editUser.inputContainers.username.classList.add('error-input-container')
-
-			} else {
-				console.log(e)
-			}
-		})
-	})
-}
-
-//
-// region Delete user
-//
-function openDeleteUser(id, username) {
-	windows.deleteUser.dialog.dataset.id = id
-	windows.deleteUser.username.innerText = username
-	windows.deleteUser.dialog.showModal()
-}
-
-function closeDeleteUser() {
-	windows.deleteUser.dialog.close()
-}
-
-function deleteUser() {
-	const id = parseInt(windows.deleteUser.dialog.dataset.id)
-	sendAPI("DELETE", `/admin/users/${id}`)
-	.then(response => {
-		els.userList.querySelector(`tr[data-id="${id}"]`).remove()
-		closeDeleteUser()
-	})
-}
-
-//
-// region Load users
-//
+var ResetWindow = class {
+  dialog = adminEls.resetSettings.dialog;
+  prepare() {
+    Object.values(adminEls.settings).forEach((el) => {
+      let parent = el.parentElement;
+      if (parent.nodeName === "DIV")
+        parent = parent.parentElement;
+      parent = parent.parentElement;
+      const title = parent.firstElementChild.firstElementChild.innerText;
+      const tr = document.createElement("tr");
+      const checkboxContainer = document.createElement("td");
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.dataset.setting = el.name;
+      checkboxContainer.appendChild(checkbox);
+      const titleContainer = document.createElement("td");
+      titleContainer.innerText = title;
+      tr.appendChild(checkboxContainer);
+      tr.appendChild(titleContainer);
+      adminEls.resetSettings.list.appendChild(tr);
+    });
+  }
+  show(args = {}) {
+    adminEls.resetSettings.list.querySelectorAll("input").forEach(
+      (el) => el.checked = false
+    );
+    this.dialog.showModal();
+  }
+  hide() {
+    this.dialog.close();
+  }
+  submit() {
+    const resetSettings = [...adminEls.resetSettings.list.querySelectorAll("input")].filter((i) => i.checked).map((i) => i.dataset.setting);
+    if (!resetSettings.length)
+      return;
+    adminEls.resetSettings.submit.replaceChildren(createIcon("icon-loading"));
+    adminEls.resetSettings.submit.classList.add("spinning");
+    const hostChanged = resetSettings.includes(
+      adminEls.settings.host.name
+    ), portChanged = resetSettings.includes(
+      adminEls.settings.port.name
+    ), urlPrefixChanged = resetSettings.includes(
+      adminEls.settings.urlPrefix.name
+    );
+    if (hostChanged || portChanged || urlPrefixChanged) {
+      if (!confirm(Constants.restartMessage)) {
+        adminEls.resetSettings.submit.innerText = "Reset";
+        adminEls.resetSettings.submit.classList.remove("spinning");
+        return;
+      }
+    }
+    fetchAPI("/admin/settings", {
+      method: "DELETE",
+      body: { setting_keys: resetSettings }
+    }).then((_) => {
+      if (portChanged || urlPrefixChanged) {
+        const newUrl = new URL(window.location.href);
+        if (portChanged)
+          newUrl.port = 8080 .toString();
+        if (urlPrefixChanged)
+          newUrl.pathname = "/";
+        setTimeout(
+          () => window.location.href = newUrl.toString(),
+          1e3
+        );
+      } else {
+        setTimeout(
+          () => window.location.reload(),
+          1e3
+        );
+      }
+    });
+  }
+};
+var users = {};
 function loadUsers() {
-	els.userList.innerHTML = ''
-	fetchAPI("/admin/users")
-	.then(json => {
-		json.result.forEach(user => {
-			const entry = document.createElement('tr')
-			entry.dataset.id = user.id
-
-			const username = document.createElement('td')
-			username.innerText = user.username
-			entry.appendChild(username)
-
-			const actions = document.createElement('td')
-			entry.appendChild(actions)
-
-			const edit_user = document.createElement('button')
-			edit_user.onclick = e => openEditUser(user.id, user.username, user.admin)
-			edit_user.innerHTML = icons.edit
-			actions.appendChild(edit_user)
-
-			if (user.username !== 'admin') {
-				const delete_user = document.createElement('button')
-				delete_user.onclick = e => openDeleteUser(user.id, user.username)
-				delete_user.innerHTML = icons.delete
-				actions.appendChild(delete_user)
-			}
-
-			els.userList.appendChild(entry)
-		})
-	})
+  adminEls.userList.innerHTML = "";
+  fetchAPI("/admin/users").then((json) => {
+    json.result.forEach((user) => {
+      users[user.id] = { username: user.username, admin: user.admin };
+      const entry = document.createElement("tr");
+      entry.dataset.id = user.id.toString();
+      const username = document.createElement("td");
+      username.innerText = user.username;
+      entry.appendChild(username);
+      const actions = document.createElement("td");
+      entry.appendChild(actions);
+      const editUser = document.createElement("button");
+      editUser.appendChild(createIcon("icon-edit"));
+      editUser.title = "Edit the user";
+      editUser.onclick = (e) => windowInstances.editUser.show({
+        userId: user.id
+      });
+      actions.appendChild(editUser);
+      const deleteUser = document.createElement("button");
+      deleteUser.appendChild(createIcon("icon-delete"));
+      deleteUser.title = "Delete the user";
+      deleteUser.onclick = (e) => windowInstances.deleteUser.show({
+        userId: user.id
+      });
+      actions.appendChild(deleteUser);
+      if (user.username === "admin") {
+        deleteUser.classList.add("hidden");
+      }
+      adminEls.userList.appendChild(entry);
+    });
+  });
 }
-
-//
-// region Database management
-//
-function openUploadDb() {
-	windows.uploadDb.inputs.file.value = ''
-	windows.uploadDb.inputContainers.file.classList.remove('error-input-container')
-	windows.uploadDb.inputs.keepHostingSettings.checked = false
-	windows.uploadDb.dialog.showModal()
-}
-
-function closeUploadDb() {
-	windows.uploadDb.dialog.close()
-}
-
-function uploadDb() {
-	const copyHosting = windows.uploadDb.inputs.keepHostingSettings ? 'true' : 'false'
-	const formData = new FormData()
-	formData.append('file', windows.uploadDb.inputs.file.files[0])
-
-	windows.uploadDb.submit.innerHTML = icons.loading
-	windows.uploadDb.submit.classList.add('spinning')
-	windows.uploadDb.inputContainers.file.classList.remove('error-input-container')
-	fetch(`${urlPrefix}/api/admin/database?api_key=${apiKey}&copy_hosting_settings=${copyHosting}`, {
-		method: 'POST',
-		body: formData
-	})
-	.then(response => {
-		if (!response.ok) return Promise.reject(response.status)
-		setTimeout(
-			() => window.location.reload(),
-			1000
-		)
-	})
-	.catch(e => {
-		if (e === 400) {
-			windows.uploadDb.inputs.file.value = ''
-			windows.uploadDb.submit.innerText = 'Import'
-			windows.uploadDb.submit.classList.remove('spinning')
-			windows.uploadDb.inputContainers.file.classList.add('error-input-container')
-
-		} else
-			console.log(e)
-	})
-}
-
-function openImportDb(index, filename, creation) {
-	windows.importDb.dialog.dataset.index = index
-	windows.importDb.backupName.innerText = filename
-	windows.importDb.backupCreation.innerText = new
-		Date(creation * 1000)
-			.toLocaleString(getLocalStorage('locale')['locale'])
-	windows.importDb.inputs.keepHostingSettings.checked = false
-	windows.importDb.dialog.showModal()
-}
-
-function closeImportDb() {
-	windows.importDb.dialog.close()
-}
-
-function importDb() {
-	const index = parseInt(windows.importDb.dialog.dataset.index)
-	const copyHosting = windows.importDb.inputs.keepHostingSettings.checked ? 'true' : 'false'
-	windows.importDb.submit.innerHTML = icons.loading
-	windows.importDb.submit.classList.add('spinning')
-	sendAPI("POST", `/admin/database/backups/${index}`, {
-		copy_hosting_settings: copyHosting
-	})
-	.then(response => {
-		setTimeout(
-			() => window.location.reload(),
-			1000
-		)
-	})
-}
-
+var AddUserWindow = class {
+  dialog = adminEls.addUser.dialog;
+  prepare() {
+  }
+  show(args = {}) {
+    adminEls.addUser.inputContainers.username.classList.remove("error-input-container");
+    hide({ to_hide: [
+      adminEls.addUser.errors.usernameInvalid,
+      adminEls.addUser.errors.usernameTaken
+    ] });
+    adminEls.addUser.inputs.username.value = "";
+    adminEls.addUser.inputs.password.value = "";
+    this.dialog.showModal();
+  }
+  hide() {
+    this.dialog.close();
+  }
+  submit() {
+    adminEls.addUser.inputContainers.username.classList.remove("error-input-container");
+    hide({ to_hide: [
+      adminEls.addUser.errors.usernameInvalid,
+      adminEls.addUser.errors.usernameTaken
+    ] });
+    const data = {
+      username: adminEls.addUser.inputs.username.value,
+      password: adminEls.addUser.inputs.password.value
+    };
+    fetchAPI("/admin/users", {
+      method: "POST",
+      body: data
+    }).then((_) => {
+      loadUsers();
+      this.hide();
+    }).catch((json) => {
+      if (json.error === "UsernameInvalid") {
+        adminEls.addUser.errors.usernameInvalid.innerText = invalidUsernameReasonMap[json.result.reason];
+        hide({ to_show: [adminEls.addUser.errors.usernameInvalid] });
+        adminEls.addUser.inputContainers.username.classList.add("error-input-container");
+      } else if (json.error === "UsernameTaken") {
+        hide({ to_show: [adminEls.addUser.errors.usernameTaken] });
+        adminEls.addUser.inputContainers.username.classList.add("error-input-container");
+      } else {
+        console.log(json);
+      }
+    });
+  }
+};
+var EditUserWindow = class {
+  state = {
+    userId: null
+  };
+  dialog = adminEls.editUser.dialog;
+  prepare() {
+  }
+  show(args) {
+    this.state.userId = args.userId;
+    const { username, admin } = users[args.userId];
+    adminEls.editUser.username.innerText = username;
+    adminEls.editUser.inputContainers.username.classList.remove("error-input-container");
+    hide({ to_hide: [
+      adminEls.editUser.errors.usernameInvalid,
+      adminEls.editUser.errors.usernameTaken
+    ] });
+    adminEls.editUser.inputs.username.value = "";
+    adminEls.editUser.inputs.password.value = "";
+    if (admin)
+      hide({ to_hide: [adminEls.editUser.inputContainers.username] });
+    else
+      hide({ to_show: [adminEls.editUser.inputContainers.username] });
+    this.dialog.showModal();
+  }
+  hide() {
+    this.dialog.close();
+  }
+  submit() {
+    adminEls.editUser.inputContainers.username.classList.remove("error-input-container");
+    hide({ to_hide: [
+      adminEls.editUser.errors.usernameInvalid,
+      adminEls.editUser.errors.usernameTaken
+    ] });
+    const data = {}, usernameValue = adminEls.editUser.inputs.username.value, passwordValue = adminEls.editUser.inputs.password.value;
+    if (usernameValue)
+      data.new_username = usernameValue;
+    if (passwordValue)
+      data.new_password = passwordValue;
+    if (!Object.keys(data).length) {
+      this.hide();
+      return;
+    }
+    const userId = this.state.userId;
+    if (!userId)
+      throw new Error("Trying to submit editing a user without having the dialog open");
+    fetchAPI(`/admin/users/${userId}`, {
+      method: "PUT",
+      body: data
+    }).then((_) => {
+      loadUsers();
+      this.hide();
+    }).catch((json) => {
+      if (json.error === "UsernameInvalid") {
+        adminEls.editUser.errors.usernameInvalid.innerText = invalidUsernameReasonMap[json.result.reason];
+        hide({ to_show: [adminEls.editUser.errors.usernameInvalid] });
+        adminEls.editUser.inputContainers.username.classList.add("error-input-container");
+      } else if (json.error === "UsernameTaken") {
+        hide({ to_show: [adminEls.editUser.errors.usernameTaken] });
+        adminEls.editUser.inputContainers.username.classList.add("error-input-container");
+      } else {
+        console.log(json);
+      }
+    });
+  }
+};
+var DeleteUserWindow = class {
+  state = {
+    userId: null
+  };
+  dialog = adminEls.deleteUser.dialog;
+  prepare() {
+  }
+  show(args) {
+    this.state.userId = args.userId;
+    const username = users[args.userId].username;
+    adminEls.deleteUser.username.innerText = username;
+    adminEls.deleteUser.dialog.showModal();
+  }
+  hide() {
+    adminEls.deleteUser.dialog.close();
+  }
+  submit() {
+    const userId = this.state.userId;
+    if (!userId)
+      throw new Error("Trying to submit deleting a user without having the dialog open");
+    fetchAPI(`/admin/users/${userId}`, { method: "DELETE" }).then((_) => {
+      adminEls.userList.querySelector(`tr[data-id="${userId}"]`)?.remove();
+      this.hide();
+    });
+  }
+};
+var backups = {};
 function loadBackups() {
-	els.backupList.innerHTML = ''
-	fetchAPI("/admin/database/backups")
-	.then(json => {
-		json.result.forEach(backup => {
-			const entry = document.createElement('tr')
-			entry.dataset.index = backup.index
-
-			const filename = document.createElement('td')
-			filename.innerText = backup.filename
-			entry.appendChild(filename)
-
-			const creation = document.createElement('td')
-			let formatted_datetime = new
-				Date(backup.creation_date * 1000)
-				.toLocaleString(getLocalStorage('locale')['locale'])
-			creation.innerText = formatted_datetime
-			entry.appendChild(creation)
-
-			const actions = document.createElement('td')
-			entry.appendChild(actions)
-
-			const download = document.createElement('button')
-			download.onclick =
-				e => window.location.href =
-					`${urlPrefix}/api/admin/database/backups/${backup.index}?api_key=${apiKey}`
-			download.innerHTML = icons.download
-			download.title = "Download database backup"
-			actions.appendChild(download)
-
-			const importDb = document.createElement('button')
-			importDb.onclick = e => openImportDb(backup.index, backup.filename, backup.creation_date)
-			importDb.innerHTML = icons.upload
-			importDb.title = "Import database backup"
-			actions.appendChild(importDb)
-
-			els.backupList.appendChild(entry)
-		})
-	})
+  adminEls.backupList.innerHTML = "";
+  fetchAPI("/admin/database/backups").then((json) => {
+    json.result.forEach((backup) => {
+      backups[backup.index] = {
+        filename: backup.filename,
+        creationDate: backup.creation_date
+      };
+      const entry = document.createElement("tr");
+      entry.dataset.index = backup.index.toString();
+      const filename = document.createElement("td");
+      filename.innerText = backup.filename;
+      entry.appendChild(filename);
+      const creation = document.createElement("td");
+      let formattedDate = new Date(backup.creation_date * 1e3).toLocaleString(getLocalStorage().locale);
+      creation.innerText = formattedDate;
+      entry.appendChild(creation);
+      const actions = document.createElement("td");
+      entry.appendChild(actions);
+      const downloadBackup = document.createElement("button");
+      downloadBackup.appendChild(createIcon("icon-download"));
+      downloadBackup.title = "Download database backup";
+      downloadBackup.onclick = (e) => downloadBackupDatabase(backup.index);
+      actions.appendChild(downloadBackup);
+      const importBackup = document.createElement("button");
+      importBackup.appendChild(createIcon("icon-upload"));
+      importBackup.title = "Import database backup";
+      importBackup.onclick = (e) => windowInstances.importDatabase.show({
+        backupIndex: backup.index
+      });
+      actions.appendChild(importBackup);
+      adminEls.backupList.appendChild(entry);
+    });
+  });
 }
+var UploadDatabaseWindow = class {
+  dialog = adminEls.uploadDb.dialog;
+  prepare() {
+  }
+  show(args = {}) {
+    adminEls.uploadDb.inputs.file.value = "";
+    adminEls.uploadDb.inputContainers.file.classList.remove("error-input-container");
+    adminEls.uploadDb.inputs.keepHostingSettings.checked = false;
+    this.dialog.showModal();
+  }
+  hide() {
+    this.dialog.close();
+  }
+  submit() {
+    const formData = new FormData();
+    if (!adminEls.uploadDb.inputs.file.files)
+      return;
+    formData.append("file", adminEls.uploadDb.inputs.file.files[0]);
+    adminEls.uploadDb.submit.replaceChildren(createIcon("icon-loading"));
+    adminEls.uploadDb.submit.classList.add("spinning");
+    adminEls.uploadDb.inputContainers.file.classList.remove("error-input-container");
+    fetchAPI("/admin/database", {
+      method: "POST",
+      params: {
+        copy_hosting_settings: adminEls.uploadDb.inputs.keepHostingSettings
+      },
+      body: formData
+    }).then((_) => setTimeout(
+      () => window.location.reload(),
+      1e3
+    )).catch((json) => {
+      if (json.error === "InvalidDatabaseFile") {
+        adminEls.uploadDb.inputs.file.value = "";
+        adminEls.uploadDb.submit.innerText = "Import";
+        adminEls.uploadDb.submit.classList.remove("spinning");
+        adminEls.uploadDb.inputContainers.file.classList.add("error-input-container");
+      } else
+        console.log(json);
+    });
+  }
+};
+var ImportDatabaseWindow = class {
+  state = {
+    backupIndex: null
+  };
+  dialog = adminEls.importDb.dialog;
+  prepare() {
+  }
+  show(args) {
+    this.state.backupIndex = args.backupIndex;
+    const { filename, creationDate } = backups[args.backupIndex];
+    adminEls.importDb.backupName.innerText = filename;
+    adminEls.importDb.backupCreation.innerText = new Date(creationDate * 1e3).toLocaleString(getLocalStorage().locale);
+    adminEls.importDb.inputs.keepHostingSettings.checked = false;
+    adminEls.importDb.dialog.showModal();
+  }
+  hide() {
+    this.dialog.close();
+  }
+  submit() {
+    const backupIndex = this.state.backupIndex;
+    if (!backupIndex)
+      throw new Error("Trying to submit importing a db without having the dialog open");
+    adminEls.importDb.submit.replaceChildren(createIcon("icon-loading"));
+    adminEls.importDb.submit.classList.add("spinning");
+    fetchAPI(`/admin/database/backups/${backupIndex}`, {
+      method: "POST",
+      params: {
+        copy_hosting_settings: adminEls.importDb.inputs.keepHostingSettings.checked
+      }
+    }).then((_) => setTimeout(
+      () => window.location.reload(),
+      1e3
+    ));
+  }
+};
+var windowInstances = {
+  reset: new ResetWindow(),
+  addUser: new AddUserWindow(),
+  editUser: new EditUserWindow(),
+  deleteUser: new DeleteUserWindow(),
+  uploadDatabase: new UploadDatabaseWindow(),
+  importDatabase: new ImportDatabaseWindow()
+};
 
-//
-// region On load
-//
-checkLogin()
-
-loadAbout()
-loadSettings()
-loadUsers()
-loadBackups()
-
-els.logout.onclick = e => {
-	if (changesPresent())
-		if (!confirm("You have unsaved changes. Are you sure you want to leave?"))
-			return
-		window.onbeforeunload = null
-
-	logout()
-}
-els.settingsForm.action = 'javascript:submitSettings();'
-
-window.onbeforeunload = e => {
-	if (!changesPresent())
-		// No changes
-		return undefined
-
-	// Changes detected. Returning string instead of undefined
-	// will make browser show confirmation message before leaving.
-	// Showing custom message is not allowed, so an empty string is
-	// good enough
-	e.returnValue = ''
-	return ''
-}
-
-els.power.restart.onclick = e => restartApp()
-els.power.shutdown.onclick = e => shutdownApp()
-
-els.downloadLogs.onclick = e =>
-	window.location.href = `${urlPrefix}/api/admin/logs?api_key=${apiKey}`
-
-els.startResetSettings.onclick = e => openResetSettings()
-windows.resetSettings.dialog.onclick = e => {
-	if (e.target === e.currentTarget) {
-		e.stopPropagation()
-		closeResetSettings()
-	}
-}
-windows.resetSettings.form.action = 'javascript:resetSettings()'
-windows.resetSettings.close.onclick = e => closeResetSettings()
-
-els.startAddUser.onclick = e => openAddUser()
-windows.addUser.dialog.onclick = e => {
-	if (e.target === e.currentTarget) {
-		e.stopPropagation()
-		closeAddUser()
-	}
-}
-windows.addUser.form.action = 'javascript:addUser()'
-windows.addUser.close.onclick = e => closeAddUser()
-
-windows.editUser.dialog.onclick = e => {
-	if (e.target === e.currentTarget) {
-		e.stopPropagation()
-		closeEditUser()
-	}
-}
-windows.editUser.form.action = 'javascript:editUser()'
-windows.editUser.close.onclick = e => closeEditUser()
-
-windows.deleteUser.dialog.onclick = e => {
-	if (e.target === e.currentTarget) {
-		e.stopPropagation()
-		closeDeleteUser()
-	}
-}
-windows.deleteUser.close.onclick = e => closeDeleteUser()
-windows.deleteUser.confirm.onclick = e => deleteUser()
-
-els.uploadDb.onclick = e => openUploadDb()
-windows.uploadDb.dialog.onclick = e => {
-	if (e.target === e.currentTarget) {
-		e.stopPropagation()
-		closeUploadDb()
-	}
-}
-windows.uploadDb.form.action = 'javascript:uploadDb()'
-windows.uploadDb.close.onclick = e => closeUploadDb()
-
-els.downloadDb.onclick = e =>
-	window.location.href = `${urlPrefix}/api/admin/database?api_key=${apiKey}`
-
-windows.importDb.dialog.onclick = e => {
-	if (e.target === e.currentTarget) {
-		e.stopPropagation()
-		closeImportDb()
-	}
-}
-windows.importDb.form.action = 'javascript:importDb()'
-windows.importDb.close.onclick = e => closeImportDb()
+// ts/admin/admin.ts
+adminEls.settingsForm.onsubmit = (e) => {
+  e.preventDefault();
+  submitSettings();
+};
+adminEls.logout.onclick = (e) => {
+  if (SettingsChanges.changesCount > 0) {
+    if (!confirm(Constants.unsavedChangesMessage))
+      return;
+    window.onbeforeunload = null;
+  }
+  logout();
+};
+window.onbeforeunload = (e) => {
+  if (SettingsChanges.changesCount === 0)
+    return void 0;
+  e.preventDefault();
+};
+adminEls.power.restart.onclick = (e) => restart();
+adminEls.power.shutdown.onclick = (e) => shutdown();
+adminEls.downloadLogs.onclick = (e) => downloadLogs();
+adminEls.resetSettings.open.onclick = (e) => windowInstances.reset.show();
+adminEls.resetSettings.cancel.onclick = (e) => windowInstances.reset.hide();
+adminEls.resetSettings.dialog.onclick = (e) => {
+  if (e.target === e.currentTarget) {
+    e.stopPropagation();
+    windowInstances.reset.hide();
+  }
+};
+adminEls.resetSettings.form.onsubmit = (e) => {
+  e.preventDefault();
+  windowInstances.reset.submit();
+};
+adminEls.addUser.open.onclick = (e) => windowInstances.addUser.show();
+adminEls.addUser.cancel.onclick = (e) => windowInstances.addUser.hide();
+adminEls.addUser.dialog.onclick = (e) => {
+  if (e.target === e.currentTarget) {
+    e.stopPropagation();
+    windowInstances.addUser.hide();
+  }
+};
+adminEls.addUser.form.onsubmit = (e) => {
+  e.preventDefault();
+  windowInstances.addUser.submit();
+};
+adminEls.editUser.cancel.onclick = (e) => windowInstances.editUser.hide();
+adminEls.editUser.dialog.onclick = (e) => {
+  if (e.target === e.currentTarget) {
+    e.stopPropagation();
+    windowInstances.editUser.hide();
+  }
+};
+adminEls.editUser.form.onsubmit = (e) => {
+  e.preventDefault();
+  windowInstances.editUser.submit();
+};
+adminEls.deleteUser.cancel.onclick = (e) => windowInstances.deleteUser.hide();
+adminEls.deleteUser.dialog.onclick = (e) => {
+  if (e.target === e.currentTarget) {
+    e.stopPropagation();
+    windowInstances.deleteUser.hide();
+  }
+};
+adminEls.deleteUser.confirm.onclick = (e) => windowInstances.deleteUser.submit();
+adminEls.uploadDb.open.onclick = (e) => windowInstances.uploadDatabase.show();
+adminEls.uploadDb.cancel.onclick = (e) => windowInstances.uploadDatabase.hide();
+adminEls.uploadDb.dialog.onclick = (e) => {
+  if (e.target === e.currentTarget) {
+    e.stopPropagation();
+    windowInstances.uploadDatabase.hide();
+  }
+};
+adminEls.uploadDb.form.onsubmit = (e) => {
+  e.preventDefault();
+  windowInstances.uploadDatabase.submit();
+};
+adminEls.downloadCurrentDatabase.onclick = (e) => downloadCurrentDatabase();
+adminEls.importDb.cancel.onclick = (e) => windowInstances.importDatabase.hide();
+adminEls.importDb.dialog.onclick = (e) => {
+  if (e.target === e.currentTarget) {
+    e.stopPropagation();
+    windowInstances.importDatabase.hide();
+  }
+};
+adminEls.importDb.form.onclick = (e) => {
+  e.preventDefault();
+  windowInstances.importDatabase.submit();
+};
+OnLoadRunner.add(
+  loadAbout,
+  loadSettings,
+  loadUsers,
+  loadBackups,
+  windowInstances.reset.prepare
+);
+OnLoadRunner.runOnLoad();

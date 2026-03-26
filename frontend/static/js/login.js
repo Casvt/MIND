@@ -1,4 +1,9 @@
 // ts/general.ts
+var invalidUsernameReasonMap = {
+  only_numbers: "A username can't exist of just digits",
+  not_allowed: "The username is not allowed",
+  invalid_character: "The username contains an invalid character"
+};
 function hide({ to_hide = [], to_show = [] } = {}) {
   to_hide.forEach((el) => el.classList.add("hidden"));
   if (to_show !== null && to_show !== void 0)
@@ -53,8 +58,12 @@ async function fetchAPI(endpoint, options = {}) {
   let fetchOptions = {
     method: finalOptions.method
   };
-  if (finalOptions.method === "POST") {
-    fetchOptions.headers = { "Content-Type": "application/json" }, fetchOptions.body = JSON.stringify(finalOptions.body);
+  if (["POST", "PUT", "DELETE"].includes(finalOptions.method)) {
+    if (finalOptions.body instanceof FormData) {
+      fetchOptions.body = finalOptions.body;
+    } else {
+      fetchOptions.headers = { "Content-Type": "application/json" }, fetchOptions.body = JSON.stringify(finalOptions.body);
+    }
   }
   const response = await fetch(
     `${urlPrefix}/api${endpoint}${formattedParams}`,
@@ -193,11 +202,6 @@ function login(username, password) {
       console.log(json);
   });
 }
-var invalidUsernameReasonMap = {
-  only_numbers: "A username can't exist of just digits",
-  not_allowed: "The username is not allowed",
-  invalid_character: "The username contains an invalid character"
-};
 function register() {
   loginEls.register.inputContainers.username.classList.remove("error-input-container");
   hide({ to_hide: [

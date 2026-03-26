@@ -1,4 +1,4 @@
-import { fetchAPI, getLocalStorage, hide, setLocalStorage } from "../general";
+import { fetchAPI, getLocalStorage, hide, invalidUsernameReasonMap, setLocalStorage } from "../general";
 import { loginEls } from "./elements";
 
 /**
@@ -68,12 +68,6 @@ export function login(username?: string, password?: string): void {
         else
             console.log(json)
     })
-}
-
-const invalidUsernameReasonMap: Record<string, string> = {
-    only_numbers: "A username can't exist of just digits",
-    not_allowed: "The username is not allowed",
-    invalid_character: "The username contains an invalid character"
 }
 
 /**
