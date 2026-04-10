@@ -6,11 +6,8 @@
     "allowJs": false,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
     "noEmit": true,
     "jsx": "preserve",
-    "baseUrl": "./",
     "noFallthroughCasesInSwitch": true,
   },
   "include": ["./frontend/static/ts"]
