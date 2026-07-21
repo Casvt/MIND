@@ -268,7 +268,11 @@ async function checkLogin(): Promise<void> {
 
         else if (
             !json.result.admin
-            && window.location.pathname !== `${urlPrefix}/reminders`
+            && (
+                window.location.pathname !== `${urlPrefix}/reminders`
+                && window.location.pathname !== `${urlPrefix}/notificationservices`
+                && window.location.pathname !== `${urlPrefix}/settings`
+            )
         )
             window.location.href = `${urlPrefix}/reminders`
     })

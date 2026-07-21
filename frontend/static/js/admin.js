@@ -111,7 +111,7 @@ async function checkLogin() {
   await fetchAPI("/auth/status").then((json) => {
     if (json.result.admin && window.location.pathname !== `${urlPrefix}/admin`)
       window.location.href = `${urlPrefix}/admin`;
-    else if (!json.result.admin && window.location.pathname !== `${urlPrefix}/reminders`)
+    else if (!json.result.admin && (window.location.pathname !== `${urlPrefix}/reminders` && window.location.pathname !== `${urlPrefix}/notificationservices` && window.location.pathname !== `${urlPrefix}/settings`))
       window.location.href = `${urlPrefix}/reminders`;
   });
 }

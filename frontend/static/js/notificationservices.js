@@ -181,5 +181,5 @@ baseEls.favIcon.onclick = () => window.location.href = "/reminders";
 baseEls.navToggle.onclick = () => baseEls.navDivider.classList.toggle("show-nav");
 OnLoadRunner.add(setupClock);
 
-// ts/reminders/reminders.ts
+// ts/notificationservices/notificationservices.ts
 OnLoadRunner.runOnLoad();

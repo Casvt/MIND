@@ -1,140 +1,185 @@
-const settingsEls = {
-	settings: {
-		showClock: document.querySelector('#clock-input'),
-		locale: document.querySelector('#locale-input'),
-		defaultService: document.querySelector('#default-service-input'),
-	},
-	editAccount: {
-		start: document.querySelector("#start-edit-account"),
-		dialog: document.querySelector("#edit-account-dialog"),
-		form: document.querySelector("#edit-account-form"),
-		close: document.querySelector("#close-edit-account"),
-		inputContainers: {
-			username: document.querySelector("#edit-account-form .checked-input-container:has(input[type='text'])")
-		},
-		inputs: {
-			username: document.querySelector("#edit-account-username-input"),
-			password: document.querySelector("#edit-account-password-input")
-		},
-		errors: {
-			usernameInvalid: document.querySelector('#edit-invalid-username-error'),
-			usernameTaken: document.querySelector('#edit-taken-username-error')
-		}
-	},
-	deleteAccount: {
-		dialog: document.querySelector('#delete-user-dialog'),
-		close: document.querySelector('#close-delete-user'),
-		confirm: document.querySelector('#confirm-delete-user'),
-		button: document.querySelector('#delete-account-button')
-	}
+// ts/general.ts
+var localStorageDefaultValues = {
+  api_key: null,
+  locale: "en-GB",
+  default_service: null,
+  sorting_reminders: "time",
+  sorting_static: "title",
+  sorting_templates: "title",
+  wide_library_view: false,
+  allow_new_accounts_cache: true,
+  show_clock: "no"
+};
+function getLocalStorage() {
+  return JSON.parse(localStorage.getItem("MIND") || "{}");
+}
+function setLocalStorage(new_values) {
+  localStorage.setItem("MIND", JSON.stringify(new_values));
+}
+function setupLocalStorage() {
+  if (!localStorage.getItem("MIND"))
+    setLocalStorage(localStorageDefaultValues);
+  const currentValues = getLocalStorage();
+  const cleanedVersion = {};
+  Object.keys(localStorageDefaultValues).forEach((k) => {
+    if (currentValues[k] === void 0)
+      cleanedVersion[k] = localStorageDefaultValues[k];
+    else
+      cleanedVersion[k] = currentValues[k];
+  });
+  setLocalStorage(cleanedVersion);
+}
+var defaultAPIRequestOptions = {
+  method: "GET",
+  params: {},
+  body: {},
+  redirectUnauth: true
+};
+async function fetchAPI(endpoint, options = {}) {
+  const finalOptions = {
+    ...defaultAPIRequestOptions,
+    ...options
+  };
+  if (apiKey)
+    finalOptions.params.api_key = apiKey;
+  let formattedParams = new URLSearchParams(finalOptions.params).toString();
+  if (formattedParams)
+    formattedParams = "?" + formattedParams;
+  let fetchOptions = {
+    method: finalOptions.method
+  };
+  if (["POST", "PUT", "DELETE"].includes(finalOptions.method)) {
+    if (finalOptions.body instanceof FormData) {
+      fetchOptions.body = finalOptions.body;
+    } else {
+      fetchOptions.headers = { "Content-Type": "application/json" }, fetchOptions.body = JSON.stringify(finalOptions.body);
+    }
+  }
+  const response = await fetch(
+    `${urlPrefix}/api${endpoint}${formattedParams}`,
+    fetchOptions
+  );
+  if (!response.ok) {
+    if (finalOptions.redirectUnauth && response.status === 401) {
+      const storage = getLocalStorage();
+      storage.api_key = null;
+      setLocalStorage(storage);
+      if (window.location.pathname !== `${urlPrefix}/`)
+        window.location.href = `${urlPrefix}/`;
+    }
+    throw await response.json();
+  }
+  return await response.json();
+}
+async function checkLogin() {
+  if (!apiKey) {
+    if (window.location.pathname !== `${urlPrefix}/`)
+      window.location.href = `${urlPrefix}/`;
+    return;
+  }
+  await fetchAPI("/auth/status").then((json) => {
+    if (json.result.admin && window.location.pathname !== `${urlPrefix}/admin`)
+      window.location.href = `${urlPrefix}/admin`;
+    else if (!json.result.admin && (window.location.pathname !== `${urlPrefix}/reminders` && window.location.pathname !== `${urlPrefix}/notificationservices` && window.location.pathname !== `${urlPrefix}/settings`))
+      window.location.href = `${urlPrefix}/reminders`;
+  });
+}
+function logout() {
+  fetchAPI("/auth/logout", { method: "POST" }).then((_) => {
+    const storage = getLocalStorage();
+    storage.api_key = null;
+    setLocalStorage(storage);
+    window.location.href = `${urlPrefix}/`;
+  });
+}
+var urlPrefix = document.getElementById("url_prefix")?.dataset.value || "";
+var apiKey = getLocalStorage().api_key;
+var OnLoadRunner = class {
+  static onLoadFunctions = [];
+  /**
+   * Register one or more functions to run on load. They are run after the
+   * functions that are already registered. If multiple are added, they are
+   * run in the order that they are supplied.
+   * @param {CallableFunction[]} functions The functions to register.
+   */
+  static add(...functions) {
+    this.onLoadFunctions.push(...functions);
+  }
+  /**
+   * Run all registered functions sequentially.
+   */
+  static async runOnLoad() {
+    for (const f of this.onLoadFunctions) {
+      await f();
+    }
+  }
+};
+OnLoadRunner.add(setupLocalStorage, checkLogin);
+
+// ts/base/elements.ts
+var baseEls = {
+  logOut: document.getElementById("logout"),
+  favIcon: document.querySelector("header img"),
+  navToggle: document.getElementById("toggle-nav"),
+  navDivider: document.getElementById("nav-divider"),
+  clock: {
+    time: document.getElementById("clock-time"),
+    date: document.getElementById("clock-date")
+  }
+};
+
+// ts/base/actions.ts
+var clockTimer = null;
+function setMinutesClock(locale) {
+  const currentTime = /* @__PURE__ */ new Date();
+  baseEls.clock.date.innerText = currentTime.toLocaleDateString(locale);
+  baseEls.clock.time.innerText = currentTime.toLocaleTimeString(locale, {
+    "timeStyle": "short"
+  });
+  clockTimer = setTimeout(
+    () => setMinutesClock(locale),
+    // Time until next minute
+    (60 - currentTime.getSeconds()) * 1e3
+  );
+}
+function setSecondsClock(locale) {
+  const currentTime = /* @__PURE__ */ new Date();
+  baseEls.clock.date.innerText = currentTime.toLocaleDateString(locale);
+  baseEls.clock.time.innerText = currentTime.toLocaleTimeString(locale, {
+    "timeStyle": "medium"
+  });
+  clockTimer = setTimeout(
+    () => setSecondsClock(locale),
+    1e3
+  );
+}
+function setupClock() {
+  const settings = getLocalStorage();
+  if (clockTimer !== null) {
+    clearTimeout(clockTimer);
+    clockTimer = null;
+  }
+  switch (settings["show_clock"]) {
+    case "no":
+      baseEls.clock.time.innerText = "";
+      baseEls.clock.date.innerText = "";
+      break;
+    case "without_seconds":
+      setMinutesClock(settings["locale"]);
+      break;
+    case "with_seconds":
+      setSecondsClock(settings["locale"]);
+      break;
+    default:
+      break;
+  }
 }
 
-function loadSettings() {
-	const values = getLocalStorage()
-	settingsEls.settings.locale.value = values['locale']
-	settingsEls.settings.showClock.value = values['show_clock']
-	// Default Service is handled by notification.fillNotificationSelection()
-}
+// ts/base/base.ts
+baseEls.logOut.onclick = () => logout();
+baseEls.favIcon.onclick = () => window.location.href = "/reminders";
+baseEls.navToggle.onclick = () => baseEls.navDivider.classList.toggle("show-nav");
+OnLoadRunner.add(setupClock);
 
-function updateLocale() {
-	setLocalStorage({'locale': settingsEls.settings.locale.value})
-	fillLibrary(reminderTypes.reminder)
-	setupClock()
-}
-
-function updateDefaultService() {
-	setLocalStorage({'default_service': parseInt(settingsEls.settings.defaultService.value)})
-	// Add window is handled by show.showAdd()
-}
-
-function updateClockSetting() {
-	setLocalStorage({'show_clock': settingsEls.settings.showClock.value})
-	setupClock()
-}
-
-function openEditAccount() {
-	settingsEls.editAccount.inputContainers.username.classList.remove('error-input-container')
-	hide([settingsEls.editAccount.errors.usernameInvalid, settingsEls.editAccount.errors.usernameTaken])
-	settingsEls.editAccount.inputs.username.value = ''
-	settingsEls.editAccount.inputs.password.value = ''
-
-	settingsEls.editAccount.dialog.showModal()
-}
-
-function closeEditAccount() {
-	settingsEls.editAccount.dialog.close()
-}
-
-function editAccount() {
-	settingsEls.editAccount.inputContainers.username.classList.remove('error-input-container')
-	hide([settingsEls.editAccount.errors.usernameInvalid, settingsEls.editAccount.errors.usernameTaken])
-
-	const data = {}
-
-	if (settingsEls.editAccount.inputs.username.value !== '')
-		data.new_username = settingsEls.editAccount.inputs.username.value
-
-	if (settingsEls.editAccount.inputs.password.value !== '')
-		data.new_password = settingsEls.editAccount.inputs.password.value
-
-	if (Object.keys(data).length === 0) {
-		// Nothing changed
-		closeEditAccount()
-		return
-	}
-
-	sendAPI("PUT", "/user", {}, data)
-	.then(json => {
-		closeEditAccount()
-	})
-	.catch(e => {
-		e.json().then(e => {
-			if (e.error === 'UsernameInvalid') {
-				settingsEls.editAccount.errors.usernameInvalid.innerText = e.result.reason
-				hide([], [settingsEls.editAccount.errors.usernameInvalid])
-				settingsEls.editAccount.inputContainers.username.classList.add('error-input-container')
-
-			} else if (e.error === 'UsernameTaken') {
-				hide([], [settingsEls.editAccount.errors.usernameTaken])
-				settingsEls.editAccount.inputContainers.username.classList.add('error-input-container')
-
-			} else {
-				console.log(e)
-			}
-		})
-	})
-}
-
-function deleteAccount() {
-	sendAPI("DELETE", "/user")
-	.then(response => {
-		window.location.href = `${urlPrefix}/`
-	})
-}
-
-loadSettings()
-
-settingsEls.settings.showClock.onchange = e => updateClockSetting()
-settingsEls.settings.locale.onchange = e => updateLocale()
-settingsEls.settings.defaultService.onchange = e => updateDefaultService()
-settingsEls.deleteAccount.button.onclick = e => 
-	settingsEls.deleteAccount.dialog.showModal()
-
-settingsEls.editAccount.start.onclick = e => openEditAccount()
-settingsEls.editAccount.dialog.onclick = e => {
-	if (e.target === e.currentTarget) {
-		e.stopPropagation()
-		closeEditAccount()
-	}
-}
-settingsEls.editAccount.form.action = 'javascript:editAccount()'
-settingsEls.editAccount.close.onclick = e => closeEditAccount()
-
-settingsEls.deleteAccount.dialog.onclick = e => {
-	if (e.target === e.currentTarget) {
-		e.stopPropagation()
-		settingsEls.deleteAccount.dialog.close()
-	}
-}
-settingsEls.deleteAccount.close.onclick = e => settingsEls.deleteAccount.dialog.close()
-settingsEls.deleteAccount.confirm.onclick = e => deleteAccount()
+// ts/settings/settings.ts
+OnLoadRunner.runOnLoad();

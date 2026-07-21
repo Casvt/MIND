@@ -21,8 +21,8 @@
 	--color-dim-error: #bc4551;
 	--color-success: #54db68;
 
-	--header-height: 4.5rem;
-	--nav-width: 4rem;
+	--header-height: 3.5rem;
+	--nav-width: 15rem;
 	--nav-show-speed: 300ms;
 	--nav-button-spacing: .5rem;
 	--scrollbar-width: 10px;
@@ -37,7 +37,7 @@
 }
 
 /*  */
-/* Default properties */
+/* Default styling */
 /*  */
 dialog {
 	margin: auto;
@@ -94,6 +94,68 @@ table {
 
 ::-webkit-scrollbar-thumb:hover {
 	background-color: var(--color-light-gray);
+}
+
+dialog {
+	--ani-duration: 100ms;
+	--max-height: 23rem;
+
+	width: min(100%, 40rem);
+	height: min(100%, var(--max-height));
+
+	border-radius: 6px;
+	border: 4px solid var(--color-gray);
+	background-color: var(--color-dark);
+	color: var(--color-light);
+
+	box-shadow: 0px 0px 20px 5px rgba(0 0 0 / 0.8);
+	
+	animation: vanish-dialog var(--ani-duration);
+}
+
+dialog[open] {
+	animation: appear-dialog var(--ani-duration);
+}
+
+dialog::backdrop {
+	backdrop-filter: blur(3px);
+}
+
+dialog[open]::backdrop {
+	animation: appear-dialog-bg var(--ani-duration);
+}
+
+@keyframes appear-dialog {
+	from {
+		opacity: 0;
+		translate: 0 -5%;
+	}
+	to {
+		opacity: 1;
+		translate: 0 0;
+	}
+}
+
+@keyframes vanish-dialog {
+	from {
+		display: block;
+		opacity: 1;
+		translate: 0 0;
+	}
+	to {
+		display: none;
+		opacity: 0;
+		translate: 0 -5%;
+	}
+}
+
+@keyframes appear-dialog-bg {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 /*  */
@@ -372,115 +434,6 @@ div.long-input-style > input {
 	}
 }
 
-/*  */
-/* General styling */
-/*  */
-body {
-	height: 100dvh;
-	overflow-x: hidden;
-
-	background-color: var(--color-dark);
-	color: var(--color-light);
-}
-
-noscript {
-	display: block;
-	max-width: 95%;
-	margin-inline: 1rem;
-	margin-bottom: 1rem;
-
-	border-radius: 4px;
-	padding: 1rem;
-	background-color: var(--color-error);
-	color: var(--color-light);
-
-	text-align: center;
-}
-
-header {
-	width: 100%;
-	height: var(--header-height);
-
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	gap: 1rem;
-
-	padding: .25rem calc(var(--dyn-spacing) + .75rem);
-	border-bottom-left-radius: 6px;
-	border-bottom-right-radius: 6px;
-	background-color: var(--color-gray);
-
-	box-shadow: var(--default-shadow);
-}
-
-header img {
-	height: 3rem;
-	width: fit-content;
-}
-
-dialog {
-	--ani-duration: 100ms;
-	--max-height: 23rem;
-
-	width: min(100%, 40rem);
-	height: min(100%, var(--max-height));
-
-	border-radius: 6px;
-	border: 4px solid var(--color-gray);
-	background-color: var(--color-dark);
-	color: var(--color-light);
-
-	box-shadow: 0px 0px 20px 5px rgba(0 0 0 / 0.8);
-	
-	animation: vanish-dialog var(--ani-duration);
-}
-
-dialog[open] {
-	animation: appear-dialog var(--ani-duration);
-}
-
-dialog::backdrop {
-	backdrop-filter: blur(3px);
-}
-
-dialog[open]::backdrop {
-	animation: appear-dialog-bg var(--ani-duration);
-}
-
-@keyframes appear-dialog {
-	from {
-		opacity: 0;
-		translate: 0 -5%;
-	}
-	to {
-		opacity: 1;
-		translate: 0 0;
-	}
-}
-
-@keyframes vanish-dialog {
-	from {
-		display: block;
-		opacity: 1;
-		translate: 0 0;
-	}
-	to {
-		display: none;
-		opacity: 0;
-		translate: 0 -5%;
-	}
-}
-
-@keyframes appear-dialog-bg {
-	from {
-		opacity: 0;
-	}
-	to {
-		opacity: 1;
-	}
-}
-
 .dialog-container {
 	height: 100%;
 	display: flex;
@@ -554,6 +507,63 @@ dialog[open]::backdrop {
 	&:last-of-type:where(:hover, :focus-within) {
 		background-color: var(--color-dim-error);
 	}
+}
+
+/*  */
+/* General styling */
+/*  */
+body {
+	height: 100dvh;
+	overflow-x: hidden;
+
+	display: flex;
+	flex-direction: column;
+
+	background-color: var(--color-dark);
+	color: var(--color-light);
+}
+
+noscript {
+	display: block;
+	max-width: 95%;
+	margin-inline: 1rem;
+	margin-bottom: 1rem;
+
+	border-radius: 4px;
+	padding: 1rem;
+	background-color: var(--color-error);
+	color: var(--color-light);
+
+	text-align: center;
+}
+
+header {
+	width: 100%;
+	height: var(--header-height);
+	flex: 0 0 auto;
+
+	display: grid;
+	grid-template-columns: 1fr 7rem 1fr;
+	align-items: center;
+	gap: 1rem;
+
+	padding: .25rem var(--dyn-spacing);
+	border-bottom-left-radius: 6px;
+	border-bottom-right-radius: 6px;
+	background-color: var(--color-gray);
+
+	box-shadow: var(--default-shadow);
+}
+
+header > div > img {
+	height: calc(var(--header-height) * 0.6);
+	width: fit-content;
+	cursor: pointer;
+}
+
+header h1 {
+	font-size: 1.5rem;
+	text-align: center;
 }
 
 @media (prefers-reduced-motion) {

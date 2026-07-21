@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta id="url_prefix" data-value="{{url_prefix}}">
+
+	<link rel="manifest" href="{{url_prefix}}/manifest.json">
+	<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/favicon.svg') }}">
+	<meta name="apple-mobile-web-app-status-bar" content="#6b6b6b">
+	<meta name="theme-color" content="#6b6b6b">
+
+	<link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/x-icon">
+
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/general.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+    {% block css %}
+    {% endblock css %}
+    {% block js %}
+    {% endblock js %}
+
+	<title>{% block title %}{% endblock title %} - MIND</title>
+</head>
+<body>
+	{% include "icons.html" %}
+    {% block windows %}
+    {% endblock windows %}
+	<header>
+		<div>
+			<button id="toggle-nav">
+                <svg><use href="#icon-menu"></use></svg>
+			</button>
+			<img src="{{ url_for('static', filename='img/favicon.svg') }}" alt="">
+		</div>
+        <div>
+            <h1>MIND</h1>
+        </div>
+		<div id="clock-container" aria-label="Clock">
+			<div id="clock-time">12:12</div>
+			<div id="clock-date">01-01-2026</div>
+		</div>
+	</header>
+    <div id="nav-divider">
+        <nav>
+            <div>
+                <a href="/reminders" title="Home">
+                    <svg><use href="#icon-home"></use></svg>
+                    <span>Home</span>
+                </a>
+                <a href="/notificationservices" title="Notification Services">
+                    <svg><use href="#icon-notificationservices"></use></svg>
+                    <span>Notification Services</span>
+                </a>
+                <a href="/settings" title="Settings">
+                    <svg><use href="#icon-settings"></use></svg>
+                    <span>Settings</span>
+                </a>
+            </div>
+            <div>
+                <button id="logout" title="Log Out">
+                    <svg><use href="#icon-logout"></use></svg>
+                    <span>Log Out</span>
+                </button>
+            </div>
+        </nav>
+        <main>
+            {% block main %}
+            {% endblock main %}
+        </main>
+    </div>
+</body>
+</html>

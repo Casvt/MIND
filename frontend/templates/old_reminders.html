@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta id="url_prefix" data-value="{{url_prefix}}">
+
+	<link rel="manifest" href="{{url_prefix}}/manifest.json">
+	<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/favicon.svg') }}">
+	<meta name="apple-mobile-web-app-status-bar" content="#6b6b6b">
+	<meta name="theme-color" content="#6b6b6b">
+
+	<link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/x-icon">
+
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/general.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/reminders.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/info.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/library.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/notification.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+	<script src="{{ url_for('static', filename='js/general.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='js/reminders.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='js/library.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='js/window.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='js/templates.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='js/show.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='js/notification.js') }}" defer></script>
+	<script src="{{ url_for('static', filename='js/settings.js') }}" defer></script>
+
+	<title>Reminders - MIND</title>
+</head>
+<body>
+	<input type="checkbox" id="nav-toggle" class="hidden" checked>
+	<input type="checkbox" id="wide-toggle" class="hidden">
+
+	<div class="hidden element-storage">
+		<table>
+			<tbody>
+				<tr class="notification-service-row" data-id="">
+					<td class="title-column"></td>
+					<td class="url-column"></td>
+					<td class="action-column">
+						<button data-type="edit" title="Edit">
+							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" xml:space="preserve">
+								<g>
+									<g>
+										<path d="M22.94,1.06a3.626,3.626,0,0,0-5.124,0L0,18.876V24H5.124L22.94,6.184A3.627,3.627,0,0,0,22.94,1.06ZM4.3,22H2V19.7L15.31,6.4l2.3,2.3ZM21.526,4.77,19.019,7.277l-2.295-2.3L19.23,2.474a1.624,1.624,0,0,1,2.3,2.3Z"></path>
+									</g>
+								</g>
+							</svg>
+						</button>
+						<button data-type="delete" title="Delete">
+							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" xml:space="preserve">
+								<g>
+									<g>
+										<path d="M22,4H17V2a2,2,0,0,0-2-2H9A2,2,0,0,0,7,2V4H2V6H4V21a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V6h2ZM9,2h6V4H9Zm9,19a1,1,0,0,1-1,1H7a1,1,0,0,1-1-1V6H18Z"></path>
+										<rect x="9" y="10" width="2" height="8"></rect>
+										<rect x="13" y="10" width="2" height="8"></rect>
+									</g>
+								</g>
+							</svg>
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<dialog id="delete-user-dialog">
+		<div class="dialog-container">
+			<div class="dialog-content">
+				<p>Are you sure you want to permanently delete your account?</p>
+				<div class="confirm-container">
+					<button id="confirm-delete-user" class="input-style">Confirm</button>
+					<button id="close-delete-user" class="input-style">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</dialog>
+
+	<dialog id="edit-ns-dialog">
+		<div class="dialog-container">
+			<div class="dialog-header">
+				<h2>Edit Notification Service</h2>
+			</div>
+			<div class="dialog-content">
+				<form id="edit-ns-form">
+					<input type="text" id="edit-ns-title-input" placeholder="Title" class="input-style" required>
+
+					<div class="checked-input-container">
+						<input type="text" id="edit-ns-url-input" placeholder="Apprise URL" class="input-style" required>
+						<p id="edit-ns-url-error">Invalid URL</p>
+					</div>
+				</form>
+			</div>
+			<div class="dialog-footer">
+				<button id="close-edit-ns" class="input-style">Cancel</button>
+				<button type="submit" form="edit-ns-form" class="input-style">Save</button>
+			</div>
+		</div>
+	</dialog>
+
+	<dialog id="delete-ns-dialog">
+		<div class="dialog-container">
+			<div class="dialog-content">
+				<p>Are you sure you want to permanently delete this notification service?</p>
+				<p class="error hidden" id="delete-ns-error">Failed to delete notification service</p>
+				<div class="confirm-container">
+					<button id="confirm-delete-ns" class="input-style">Delete</button>
+					<button id="close-delete-ns" class="input-style">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</dialog>
+
+	<dialog id="edit-account-dialog">
+		<div class="dialog-container">
+			<div class="dialog-header">
+				<h2>Edit Account</h2>
+			</div>
+			<div class="dialog-content">
+				<p>Leave fields empty to not change their value</p>
+				<form id="edit-account-form">
+					<div class="checked-input-container">
+						<input type="text" id="edit-account-username-input" autocomplete="username" placeholder="New username" class="input-style">
+						<p id="edit-invalid-username-error">Username invalid</p>
+						<p id="edit-taken-username-error">Username already taken</p>
+					</div>
+
+					<input type="password" id="edit-account-password-input" autocomplete="new-password" placeholder="New password" class="input-style">
+				</form>
+			</div>
+			<div class="dialog-footer">
+				<button id="close-edit-account" class="input-style">Cancel</button>
+				<button type="submit" form="edit-account-form" class="input-style">Save</button>
+			</div>
+		</div>
+	</dialog>
+
+	<header>
+		<div>
+			<label for="nav-toggle" id="toggle-nav">
+				<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" xml:space="preserve">
+					<g>
+						<rect y="11" width="24" height="2" rx="1"></rect>
+						<rect y="4" width="24" height="2" rx="1"></rect>
+						<rect y="18" width="24" height="2" rx="1"></rect>
+					</g>
+				</svg>
+			</label>
+			<img src="{{ url_for('static', filename='img/favicon.svg') }}" alt="">
+			<h1>MIND</h1>
+		</div>
+		<div id="clock-container" aria-label="Clock">
+			<div id="clock-time"></div>
+			<div id="clock-date"></div>
+		</div>
+	</header>
+	<div class="nav-divider">
+		<div class="nav-container">
+			<nav>
+				<div>
+					<button id="home-button" aria-label="Home" title="Home">
+						<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" xml:space="preserve">
+							<g>
+								<path d="M23.121,9.069,15.536,1.483a5.008,5.008,0,0,0-7.072,0L.879,9.069A2.978,2.978,0,0,0,0,11.19v9.817a3,3,0,0,0,3,3H21a3,3,0,0,0,3-3V11.19A2.978,2.978,0,0,0,23.121,9.069ZM15,22.007H9V18.073a3,3,0,0,1,6,0Zm7-1a1,1,0,0,1-1,1H17V18.073a5,5,0,0,0-10,0v3.934H3a1,1,0,0,1-1-1V11.19a1.008,1.008,0,0,1,.293-.707L9.878,2.9a3.008,3.008,0,0,1,4.244,0l7.585,7.586A1.008,1.008,0,0,1,22,11.19Z"></path>
+							</g>
+						</svg>
+					</button>
+					<button id="notification-services-button" aria-label="Notification Services" title="Notification Services">
+						<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve">
+							<g>
+								<path d="M23.83,14.12l-1.56-5.84c-.88-3.15-3.47-5.48-6.58-6.11-.01-.01-.02-.03-.03-.04-1.57-1.38-3.58-2.14-5.66-2.14C5.94,0,2.5,2.76,1.63,6.68L.11,12.35c-.31,1.38,.03,2.81,.91,3.91,.89,1.1,2.21,1.74,3.62,1.74h.19c.06,.09,.12,.18,.19,.26,.89,1.1,2.21,1.74,3.62,1.74h.96c.23,2.24,2.1,4,4.4,4s4.17-1.76,4.4-4h.95c1.46,0,2.81-.67,3.7-1.84,.88-1.17,1.17-2.64,.78-4.04Zm-21.25,.89c-.5-.63-.69-1.44-.53-2.19l1.52-5.67c.67-3.04,3.32-5.16,6.43-5.16,.62,0,1.22,.11,1.8,.28-3.05,.8-5.46,3.22-6.17,6.4l-1.52,5.67c-.12,.53-.14,1.06-.08,1.58-.57-.13-1.08-.45-1.45-.92Zm11.42,6.99c-1.2,0-2.19-.86-2.4-2h4.8c-.21,1.14-1.2,2-2.4,2Zm7.46-5.04c-.5,.66-1.27,1.04-2.11,1.04H8.64c-.81,0-1.56-.36-2.06-.99-.5-.63-.69-1.44-.53-2.19l1.52-5.67c.67-3.04,3.32-5.16,6.43-5.16,2.95,0,5.55,1.98,6.34,4.81l1.56,5.84c.22,.8,.06,1.64-.44,2.31Z"></path>
+							</g>
+						</svg>
+					</button>
+					<button id="settings-button" aria-label="Settings" title="Settings">
+						<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve">
+							<g>
+								<path d="M1,4.75H3.736a3.728,3.728,0,0,0,7.195,0H23a1,1,0,0,0,0-2H10.931a3.728,3.728,0,0,0-7.195,0H1a1,1,0,0,0,0,2ZM7.333,2a1.75,1.75,0,1,1-1.75,1.75A1.752,1.752,0,0,1,7.333,2Z"></path>
+								<path d="M23,11H20.264a3.727,3.727,0,0,0-7.194,0H1a1,1,0,0,0,0,2H13.07a3.727,3.727,0,0,0,7.194,0H23a1,1,0,0,0,0-2Zm-6.333,2.75A1.75,1.75,0,1,1,18.417,12,1.752,1.752,0,0,1,16.667,13.75Z"></path>
+								<path d="M23,19.25H10.931a3.728,3.728,0,0,0-7.195,0H1a1,1,0,0,0,0,2H3.736a3.728,3.728,0,0,0,7.195,0H23a1,1,0,0,0,0-2ZM7.333,22a1.75,1.75,0,1,1,1.75-1.75A1.753,1.753,0,0,1,7.333,22Z"></path>
+							</g>
+						</svg>
+					</button>
+				</div>
+				<div>
+					<button id="logout-button" aria-label="Log out of MIND" title="Logout">
+						<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve">
+							<g>
+								<path d="M11.476,15a1,1,0,0,0-1,1v3a3,3,0,0,1-3,3H5a3,3,0,0,1-3-3V5A3,3,0,0,1,5,2H7.476a3,3,0,0,1,3,3V8a1,1,0,0,0,2,0V5a5.006,5.006,0,0,0-5-5H5A5.006,5.006,0,0,0,0,5V19a5.006,5.006,0,0,0,5,5H7.476a5.006,5.006,0,0,0,5-5V16A1,1,0,0,0,11.476,15Z"></path>
+								<path d="M22.867,9.879,18.281,5.293a1,1,0,1,0-1.414,1.414l4.262,4.263L6,11a1,1,0,0,0,0,2H6l15.188-.031-4.323,4.324a1,1,0,1,0,1.414,1.414l4.586-4.586A3,3,0,0,0,22.867,9.879Z"></path>
+							</g>
+						</svg>
+					</button>
+				</div>
+			</nav>
+		</div>
+		<main class="window-container">
+			<div id="home" aria-label="Home screen" aria-hidden="false">
+				<div class="tab-selector">
+					<input type="radio" name="tab-selector" id="reminder-tab-selector" checked>
+					<label for="reminder-tab-selector">Reminders</label>
+					<input type="radio" name="tab-selector" id="static-tab-selector">
+					<label for="static-tab-selector">Static Reminders</label>
+					<input type="radio" name="tab-selector" id="template-tab-selector">
+					<label for="template-tab-selector">Templates</label>
+				</div>
+				<div class="search-container">
+					<noscript>Javascript is disabled. The web-ui of MIND does not work with JavaScript disabled.</noscript>
+					<form id="search-form">
+						<div class="search-bar" aria-label="Search bar and sorting options">
+							<button type="submit" title="Start search">
+								<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 513.749 513.749" xml:space="preserve">
+									<g>
+										<g>
+											<path d="M504.352,459.061l-99.435-99.477c74.402-99.427,54.115-240.344-45.312-314.746S119.261-9.277,44.859,90.15   S-9.256,330.494,90.171,404.896c79.868,59.766,189.565,59.766,269.434,0l99.477,99.477c12.501,12.501,32.769,12.501,45.269,0   c12.501-12.501,12.501-32.769,0-45.269L504.352,459.061z M225.717,385.696c-88.366,0-160-71.634-160-160s71.634-160,160-160   s160,71.634,160,160C385.623,314.022,314.044,385.602,225.717,385.696z"></path>
+										</g>
+									</g>
+								</svg>
+							</button>
+							<div class="search-input-container">
+								<input type="text" id="search-input" class="input-style" placeholder="Search..." aria-label="Search term input">
+							</div>
+							<button type="button" id="clear-button" title="Clear search">
+								<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512.021 512.021" xml:space="preserve">
+									<g>
+										<g>
+											<path d="M301.258,256.01L502.645,54.645c12.501-12.501,12.501-32.769,0-45.269c-12.501-12.501-32.769-12.501-45.269,0l0,0   L256.01,210.762L54.645,9.376c-12.501-12.501-32.769-12.501-45.269,0s-12.501,32.769,0,45.269L210.762,256.01L9.376,457.376   c-12.501,12.501-12.501,32.769,0,45.269s32.769,12.501,45.269,0L256.01,301.258l201.365,201.387   c12.501,12.501,32.769,12.501,45.269,0c12.501-12.501,12.501-32.769,0-45.269L301.258,256.01z"></path>
+										</g>
+									</g>
+								</svg>
+							</button>
+							<select id="sort-input" form="" title="Sorting">
+								<button>
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512">
+										<path d="M24,1c0,.553-.448,1-1,1H10c-.552,0-1-.447-1-1s.448-1,1-1h13c.552,0,1,.447,1,1Zm-4,4H10c-.552,0-1,.447-1,1s.448,1,1,1h10c.552,0,1-.447,1-1s-.448-1-1-1Zm-3,5h-7c-.552,0-1,.447-1,1s.448,1,1,1h7c.552,0,1-.447,1-1s-.448-1-1-1Zm-3,5h-4c-.552,0-1,.447-1,1s.448,1,1,1h4c.552,0,1-.447,1-1s-.448-1-1-1Zm-4.879,4.293c-.391-.391-1.023-.391-1.414,0l-1.707,1.707V1c0-.553-.448-1-1-1s-1,.447-1,1V21l-1.708-1.708c-.391-.391-1.023-.391-1.414,0s-.391,1.023,0,1.414l2.707,2.707c.39,.39,.902,.585,1.415,.585s1.024-.195,1.414-.585l2.707-2.707c.391-.391,.391-1.023,0-1.414Z"/>
+									</svg>
+								</button>
+								<option value="time">Time</option>
+								<option value="time_reversed">Time Reversed</option>
+								<option value="title">Title</option>
+								<option value="title_reversed">Title Reversed</option>
+								<option value="date_added">Date Added</option>
+								<option value="date_added_reversed">Date Added Reversed</option>
+							</select>
+							<label id="wide-button" for="wide-toggle" aria-hidden="true" title="Toggle wide list">
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512">
+									<path d="M23.312,10.012c-.29-.327-.574-.637-.771-.834L19.713,6.3a1,1,0,0,0-1.426,1.4l2.834,2.885c.108.108.244.255.389.414H2.555c.146-.16.284-.308.4-.42L5.779,7.7A1,1,0,0,0,4.353,6.3L1.53,9.172c-.2.2-.487.513-.777.84A2.99,2.99,0,0,0,0,11.994v.012a3,3,0,0,0,.754,1.983c.289.326.573.636.769.833L4.353,17.7a1,1,0,0,0,1.426-1.4L2.944,13.414c-.108-.108-.244-.255-.389-.414H21.51c-.145.16-.283.308-.4.42L18.287,16.3a1,1,0,1,0,1.426,1.4l2.822-2.873c.2-.2.486-.513.777-.84A3,3,0,0,0,23.312,10.012Z"/>
+								</svg>
+							</label>
+						</div>
+					</form>
+				</div>
+				<div class="tab-container">
+					<div id="reminder-tab" aria-label="Add reminders and list of reminders">
+						<button class="entry add-entry" id="add-reminder" title="Add reminder">
+							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" xml:space="preserve">
+								<g>
+									<g>
+										<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
+									</g>
+								</g>
+							</svg>
+							<p>Add a notification service first!</p>
+						</button>
+					</div>
+					<div id="static-reminder-tab" aria-label="Add static reminders and list of static reminders">
+						<button class="entry add-entry" id="add-static-reminder" title="Add static reminder">
+							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" xml:space="preserve">
+								<g>
+									<g>
+										<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
+									</g>
+								</g>
+							</svg>
+							<p>Add a notification service first!</p>
+						</button>
+					</div>
+					<div id="template-tab" aria-label="Add templates and list of templates">
+						<button class="entry add-entry" id="add-template" title="Add template">
+							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve">
+								<g>
+									<g>
+										<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
+									</g>
+								</g>
+							</svg>
+							<p>Add a notification service first!</p>
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="extra-window-container">
+				<div id="info" aria-label="Add or edit a reminder, static reminder or template" aria-hidden="true">
+					<h2></h2>
+					<div class="form-container">
+						<form id="info-form">
+							<input type="checkbox" id="color-toggle" class="hidden">
+							<input type="checkbox" id="notification-service-selection-toggle" class="hidden">
+							<div class="sub-inputs">
+								<select id="template-selection">
+									<option value="0" selected>No template</option>
+								</select>
+								<div id="enabled-container" class="as-button">
+									<input type="checkbox" id="enabled-input" checked>
+									<label for="enabled-input">Enabled</label>
+								</div>
+								<label for="color-toggle" id="color-button" class="as-button">Color</label>
+							</div>
+							<div class="color-list"></div>
+							<input type="text" id="title-input" placeholder="Title" required>
+							<div class="sub-inputs">
+								<input type="datetime-local" id="time-input" required>
+								<label for="notification-service-selection-toggle" id="notification-service-selection-button">Notification Services</label>
+							</div>
+							<div class="notification-service-selection"></div>
+							<div class="repeat-options sub-inputs">
+								<button type="button" id="normal-button" data-selected="true">
+									<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 507.506 507.506" style="enable-background:new 0 0 512 512" xml:space="preserve">
+										<g>
+											<path d="M163.865 436.934a54.228 54.228 0 0 1-38.4-15.915L9.369 304.966c-12.492-12.496-12.492-32.752 0-45.248 12.496-12.492 32.752-12.492 45.248 0l109.248 109.248L452.889 79.942c12.496-12.492 32.752-12.492 45.248 0 12.492 12.496 12.492 32.752 0 45.248L202.265 421.019a54.228 54.228 0 0 1-38.4 15.915z"></path>
+										</g>
+									</svg>
+									Normal
+								</button>
+								<button type="button" id="repeat-button" data-selected="false">
+									<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 507.506 507.506" style="enable-background:new 0 0 512 512" xml:space="preserve">
+										<g>
+											<path d="M163.865 436.934a54.228 54.228 0 0 1-38.4-15.915L9.369 304.966c-12.492-12.496-12.492-32.752 0-45.248 12.496-12.492 32.752-12.492 45.248 0l109.248 109.248L452.889 79.942c12.496-12.492 32.752-12.492 45.248 0 12.492 12.496 12.492 32.752 0 45.248L202.265 421.019a54.228 54.228 0 0 1-38.4 15.915z"></path>
+										</g>
+									</svg>
+									Repeated
+								</button>
+								<button type="button" id="weekday-button" data-selected="false">
+									<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 507.506 507.506" style="enable-background:new 0 0 512 512" xml:space="preserve">
+										<g>
+											<path d="M163.865 436.934a54.228 54.228 0 0 1-38.4-15.915L9.369 304.966c-12.492-12.496-12.492-32.752 0-45.248 12.496-12.492 32.752-12.492 45.248 0l109.248 109.248L452.889 79.942c12.496-12.492 32.752-12.492 45.248 0 12.492 12.496 12.492 32.752 0 45.248L202.265 421.019a54.228 54.228 0 0 1-38.4 15.915z"></path>
+										</g>
+									</svg>
+									Week Days
+								</button>
+							</div>
+							<div class="repeat-bar hidden">
+								<p>Repeat every </p>
+								<input type="number" id="repeat-interval" placeholder="interval" min="1" step="1" oninput="validity.valid || (value='');">
+								<select id="repeat-quantity">
+									<option value="minutes">Minute(s)</option>
+									<option value="hours">Hour(s)</option>
+									<option value="days" selected>Day(s)</option>
+									<option value="weeks">Week(s)</option>
+									<option value="months">Month(s)</option>
+									<option value="years">Year(s)</option>
+								</select>
+							</div>
+							<div class="weekday-bar hidden">
+								<p>Mo</p>
+								<input type="checkbox">
+								<p>Tu</p>
+								<input type="checkbox">
+								<p>We</p>
+								<input type="checkbox">
+								<p>Thu</p>
+								<input type="checkbox">
+								<p>Fr</p>
+								<input type="checkbox">
+								<p>Sa</p>
+								<input type="checkbox">
+								<p>Su</p>
+								<input type="checkbox">
+							</div>
+							<textarea id="text-input" cols="30" rows="10" placeholder="Text (optional)"></textarea>
+							<div class="options">
+								<button type="button" id="close-info">Cancel</button>
+								<button type="button" id="test-reminder">
+									<div>Test</div>
+									<div>Sent</div>
+								</button>
+								<button type="button" id="delete-info">Delete</button>
+								<button type="submit">Add</button>
+							</div>
+						</form>
+					</div>
+				</div>
+
+
+				<div id="notification" aria-label="Notification Service Window" aria-hidden="true">
+					<h2>Notification Services</h2>
+					<label id="add-service-button" for="service-list-toggle" title="Toggle adding notification service">
+						<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs" width="256" height="256" x="0" y="0" viewBox="0 0 512 512" xml:space="preserve">
+							<g>
+								<g>
+									<path d="M480,224H288V32c0-17.673-14.327-32-32-32s-32,14.327-32,32v192H32c-17.673,0-32,14.327-32,32s14.327,32,32,32h192v192   c0,17.673,14.327,32,32,32s32-14.327,32-32V288h192c17.673,0,32-14.327,32-32S497.673,224,480,224z"></path>
+								</g>
+							</g>
+						</svg>
+					</label>
+					<input type="checkbox" id="service-list-toggle" class="hidden">
+					<input type="checkbox" id="add-service-toggle" class="hidden">
+					<div class="table-container">
+						<table class="entries-table">
+							<thead>
+								<tr>
+									<th class="title-column">Title</th>
+									<th class="url-column">Apprise URL</th>
+									<th title="Actions">Actions</th>
+								</tr>
+							</thead>
+							<tbody id="services-list">
+								<tr class="empty-row">
+									<td colspan="3">No Services</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div id="add-service-container">
+						<input type="text" id="ns-search-input" class="input-style" placeholder="Type '/' to search services...">
+						<div id="service-list">
+							<p>No Results</p>
+						</div>
+						<form id="add-service-window"></form>
+					</div>
+				</div>
+
+
+				<div id="settings" aria-label="Settings Window" aria-hidden="true">
+					<h2>Settings</h2>
+					<div class="table-container">
+						<table id="settings-table" class="collaps-table">
+							<tbody>
+								<tr id="clock-setting-row">
+									<th><label for="clock-input">Show Clock</label></th>
+									<td>
+										<select id="clock-input" class="input-style">
+											<option value="no">No</option>
+											<option value="without_seconds">Show, but not seconds</option>
+											<option value="with_seconds">Show, with seconds</option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<th><label for="locale-input">Locale</label></th>
+									<td>
+										<select id="locale-input" class="input-style">
+											<option value="ar-SA">ar-SA</option>
+											<option value="bn-BD">bn-BD</option>
+											<option value="bn-IN">bn-IN</option>
+											<option value="cs-CZ">cs-CZ</option>
+											<option value="da-DK">da-DK</option>
+											<option value="de-AT">de-AT</option>
+											<option value="de-CH">de-CH</option>
+											<option value="de-DE">de-DE</option>
+											<option value="el-GR">el-GR</option>
+											<option value="en-AU">en-AU</option>
+											<option value="en-CA">en-CA</option>
+											<option value="en-GB" selected>en-GB</option>
+											<option value="en-IE">en-IE</option>
+											<option value="en-IN">en-IN</option>
+											<option value="en-NZ">en-NZ</option>
+											<option value="en-US">en-US</option>
+											<option value="en-ZA">en-ZA</option>
+											<option value="es-AR">es-AR</option>
+											<option value="es-CL">es-CL</option>
+											<option value="es-CO">es-CO</option>
+											<option value="es-ES">es-ES</option>
+											<option value="es-MX">es-MX</option>
+											<option value="es-US">es-US</option>
+											<option value="fi-FI">fi-FI</option>
+											<option value="fr-BE">fr-BE</option>
+											<option value="fr-CA">fr-CA</option>
+											<option value="fr-CH">fr-CH</option>
+											<option value="fr-FR">fr-FR</option>
+											<option value="he-IL">he-IL</option>
+											<option value="hi-IN">hi-IN</option>
+											<option value="hu-HU">hu-HU</option>
+											<option value="id-ID">id-ID</option>
+											<option value="it-CH">it-CH</option>
+											<option value="it-IT">it-IT</option>
+											<option value="ja-JP">ja-JP</option>
+											<option value="ko-KR">ko-KR</option>
+											<option value="nl-BE">nl-BE</option>
+											<option value="nl-NL">nl-NL</option>
+											<option value="no-NO">no-NO</option>
+											<option value="pl-PL">pl-PL</option>
+											<option value="pt-BR">pt-BR</option>
+											<option value="pt-PT">pt-PT</option>
+											<option value="ro-RO">ro-RO</option>
+											<option value="ru-RU">ru-RU</option>
+											<option value="sk-SK">sk-SK</option>
+											<option value="sv-SE">sv-SE</option>
+											<option value="ta-IN">ta-IN</option>
+											<option value="ta-LK">ta-LK</option>
+											<option value="th-TH">th-TH</option>
+											<option value="tr-TR">tr-TR</option>
+											<option value="zh-CN">zh-CN</option>
+											<option value="zh-HK">zh-HK</option>
+											<option value="zh-TW">zh-TW</option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<th><label for="default-service-input">Default Notification Service</label></th>
+									<td><select id="default-service-input" class="input-style"></select></td>
+								</tr>
+								<tr>
+									<th><label for="start-edit-account">Edit Account</label></th>
+									<td>
+										<button id="start-edit-account" class="input-style">Edit Account</button>
+									</td>
+								</tr>
+								<tr>
+									<th><label for="delete-account-button">Delete Account</label></th>
+									<td><button id="delete-account-button" class="input-style">Delete Account</button></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<h2>Contact and Donation</h2>
+					<div class="contact-list">
+						<a href="https://ko-fi.com/casvt">Donate to MIND</a>
+						<a href="https://casvt.github.io/MIND/">Documentation</a>
+						<a href="https://github.com/Casvt/MIND/issues">Report an issue</a>
+						<a href="https://discord.gg/Xy9VUASHhr">Discord server</a>
+					</div>
+				</div>
+			</div>
+		</main>
+	</div>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+{% endblock %}
+{% block js %}
+    <script defer src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %}
+{% block windows %}
+{% endblock %}
+{% block main %}
+<p>SETTINGS</p>
+{% endblock main %}

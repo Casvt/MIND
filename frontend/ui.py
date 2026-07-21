@@ -66,6 +66,16 @@ def ui_reminders():
     return render('reminders.html')
 
 
+@ui.route('/notificationservices')
+def ui_ns():
+    return render('notificationservices.html')
+
+
+@ui.route('/settings')
+def ui_settings():
+    return render('settings.html')
+
+
 @ui.route('/admin')
 def ui_admin():
     return render('admin.html')

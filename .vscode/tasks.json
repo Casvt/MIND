@@ -17,7 +17,7 @@
         {
             "label": "Build Frontend",
             "type": "shell",
-            "command": "tsc && esbuild ./ts/login/login.ts ./ts/admin/admin.ts --bundle --format=esm --tree-shaking=true --outdir=./js --entry-names='[name]'",
+            "command": "tsc && esbuild ./ts/login/login.ts ./ts/admin/admin.ts ./ts/reminders/reminders.ts ./ts/notificationservices/notificationservices.ts ./ts/settings/settings.ts --bundle --format=esm --tree-shaking=true --outdir=./js --entry-names='[name]'",
             "group": {
                 "kind": "build",
                 "isDefault": true
