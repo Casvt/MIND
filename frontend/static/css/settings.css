@@ -10,6 +10,7 @@
 	& th {
 		padding-top: .5rem;
 	}
+
 	&:first-child td {
 		padding-top: 0;
 	}
@@ -30,11 +31,11 @@
 	gap: 1rem;
 }
 
-#delete-account-button {
+#open-delete-account {
 	background-color: var(--color-dim-error);
 }
 
-#delete-account-button:hover {
+#open-delete-account:hover {
 	background-color: var(--color-error);
 }
 
@@ -86,7 +87,7 @@
 	}
 }
 
-@media (max-width: 22rem) {
+@media (max-width: 24rem) {
 	#clock-container {
 		display: none;
 	}

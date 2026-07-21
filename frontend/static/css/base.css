@@ -138,6 +138,11 @@ nav > div > :where(button, a) {
 	}
 }
 
+main h2 {
+	font-size: 1.75rem;
+	margin-bottom: 1rem;
+}
+
 @media (max-width: 55rem) {
     header > div:first-child {
         transform: none;

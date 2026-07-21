@@ -240,6 +240,19 @@ export function downloadBackupDatabase(index: number): void {
     window.location.href = `${urlPrefix}/api/admin/database/backups/${index}?api_key=${apiKey}`
 }
 
+/**
+ * Delete the currently logged in user and redirect to the login page.
+ */
+export async function deleteAccount() {
+    await fetchAPI("/user", { method: "DELETE" })
+
+    const storage = getLocalStorage()
+    storage.api_key = null
+    setLocalStorage(storage)
+
+    window.location.href = `${urlPrefix}`
+}
+
 // region Auth
 /**
  * Check whether the API key stored in local storage is valid (might be expired)

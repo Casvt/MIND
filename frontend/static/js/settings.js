@@ -1,4 +1,9 @@
 // ts/general.ts
+function hide({ to_hide = [], to_show = [] } = {}) {
+  to_hide.forEach((el) => el.classList.add("hidden"));
+  if (to_show !== null && to_show !== void 0)
+    to_show.forEach((el) => el.classList.remove("hidden"));
+}
 var localStorageDefaultValues = {
   api_key: null,
   locale: "en-GB",
@@ -71,6 +76,13 @@ async function fetchAPI(endpoint, options = {}) {
   }
   return await response.json();
 }
+async function deleteAccount() {
+  await fetchAPI("/user", { method: "DELETE" });
+  const storage = getLocalStorage();
+  storage.api_key = null;
+  setLocalStorage(storage);
+  window.location.href = `${urlPrefix}`;
+}
 async function checkLogin() {
   if (!apiKey) {
     if (window.location.pathname !== `${urlPrefix}/`)
@@ -132,9 +144,11 @@ var baseEls = {
 var clockTimer = null;
 function setMinutesClock(locale) {
   const currentTime = /* @__PURE__ */ new Date();
-  baseEls.clock.date.innerText = currentTime.toLocaleDateString(locale);
+  baseEls.clock.date.innerText = currentTime.toLocaleDateString(locale, {
+    dateStyle: "short"
+  });
   baseEls.clock.time.innerText = currentTime.toLocaleTimeString(locale, {
-    "timeStyle": "short"
+    timeStyle: "short"
   });
   clockTimer = setTimeout(
     () => setMinutesClock(locale),
@@ -144,9 +158,11 @@ function setMinutesClock(locale) {
 }
 function setSecondsClock(locale) {
   const currentTime = /* @__PURE__ */ new Date();
-  baseEls.clock.date.innerText = currentTime.toLocaleDateString(locale);
+  baseEls.clock.date.innerText = currentTime.toLocaleDateString(locale, {
+    dateStyle: "short"
+  });
   baseEls.clock.time.innerText = currentTime.toLocaleTimeString(locale, {
-    "timeStyle": "medium"
+    timeStyle: "medium"
   });
   clockTimer = setTimeout(
     () => setSecondsClock(locale),
@@ -159,16 +175,16 @@ function setupClock() {
     clearTimeout(clockTimer);
     clockTimer = null;
   }
-  switch (settings["show_clock"]) {
+  switch (settings.show_clock) {
     case "no":
       baseEls.clock.time.innerText = "";
       baseEls.clock.date.innerText = "";
       break;
     case "without_seconds":
-      setMinutesClock(settings["locale"]);
+      setMinutesClock(settings.locale);
       break;
     case "with_seconds":
-      setSecondsClock(settings["locale"]);
+      setSecondsClock(settings.locale);
       break;
     default:
       break;
@@ -181,5 +197,147 @@ baseEls.favIcon.onclick = () => window.location.href = "/reminders";
 baseEls.navToggle.onclick = () => baseEls.navDivider.classList.toggle("show-nav");
 OnLoadRunner.add(setupClock);
 
+// ts/settings/elements.ts
+var settingsEls = {
+  settings: {
+    showClock: document.getElementById("clock-input"),
+    locale: document.getElementById("locale-input"),
+    defaultService: document.getElementById("default-service-input")
+  },
+  editAcc: {
+    open: document.getElementById("open-edit-account"),
+    dialog: document.getElementById("edit-account-dialog"),
+    form: document.getElementById("edit-account-form"),
+    close: document.getElementById("close-edit-account"),
+    usernameContainer: document.querySelector("#edit-account-form .checked-input-container:has(input[type='text'])"),
+    inputs: {
+      username: document.getElementById("edit-username"),
+      password: document.getElementById("edit-password")
+    },
+    errors: {
+      usernameInvalid: document.getElementById("invalid-username-error"),
+      usernameTaken: document.getElementById("username-taken-error")
+    }
+  },
+  delAcc: {
+    open: document.getElementById("open-delete-account"),
+    dialog: document.getElementById("delete-account-dialog"),
+    close: document.getElementById("close-delete-account"),
+    confirm: document.getElementById("confirm-delete-account")
+  }
+};
+
+// ts/settings/actions.ts
+async function loadSettings() {
+  const values = getLocalStorage();
+  settingsEls.settings.showClock.value = values.show_clock;
+  settingsEls.settings.locale.value = values.locale;
+  settingsEls.settings.defaultService.innerHTML = "";
+  const json = await fetchAPI("/notificationservices");
+  json.result.forEach((service) => {
+    const entry = document.createElement("option");
+    entry.value = service.id.toString();
+    entry.innerText = service.title;
+    if (values.default_service === service.id)
+      entry.selected = true;
+    settingsEls.settings.defaultService.appendChild(entry);
+  });
+  if (!json.result.map((s) => s.id).includes(values.default_service)) {
+    values.default_service = json.result[0]?.id || null;
+    setLocalStorage(values);
+  }
+}
+function updateClockSetting() {
+  const storage = getLocalStorage();
+  storage.show_clock = settingsEls.settings.showClock.value;
+  setLocalStorage(storage);
+  setupClock();
+}
+function updateLocale() {
+  const storage = getLocalStorage();
+  storage.locale = settingsEls.settings.locale.value;
+  setLocalStorage(storage);
+  setupClock();
+}
+function updateDefaultService() {
+  const storage = getLocalStorage();
+  storage.default_service = parseInt(settingsEls.settings.defaultService.value);
+  setLocalStorage(storage);
+}
+var EditAccountWindow = class {
+  dialog = settingsEls.editAcc.dialog;
+  prepare() {
+  }
+  show(args = {}) {
+    settingsEls.editAcc.usernameContainer.classList.remove("error-input-container");
+    hide({ to_hide: [
+      settingsEls.editAcc.errors.usernameInvalid,
+      settingsEls.editAcc.errors.usernameTaken
+    ] });
+    settingsEls.editAcc.inputs.username.value = "";
+    settingsEls.editAcc.inputs.password.value = "";
+    settingsEls.editAcc.dialog.showModal();
+  }
+  hide() {
+    settingsEls.editAcc.dialog.close();
+  }
+  submit() {
+    settingsEls.editAcc.usernameContainer.classList.remove("error-input-container");
+    hide({ to_hide: [
+      settingsEls.editAcc.errors.usernameInvalid,
+      settingsEls.editAcc.errors.usernameTaken
+    ] });
+    const data = {};
+    if (settingsEls.editAcc.inputs.username.value !== "")
+      data.new_username = settingsEls.editAcc.inputs.username.value;
+    if (settingsEls.editAcc.inputs.password.value !== "")
+      data.new_password = settingsEls.editAcc.inputs.password.value;
+    if (!Object.keys(data).length) {
+      this.hide();
+      return;
+    }
+    fetchAPI("/user", {
+      method: "PUT",
+      body: data
+    }).then(() => this.hide()).catch((json) => {
+      if (json.error === "UsernameInvalid") {
+        settingsEls.editAcc.errors.usernameInvalid.innerText = json.result.reason;
+        hide({ to_show: [settingsEls.editAcc.errors.usernameInvalid] });
+        settingsEls.editAcc.usernameContainer.classList.add("error-input-container");
+      } else if (json.error === "UsernameTaken") {
+        hide({ to_show: [settingsEls.editAcc.errors.usernameTaken] });
+        settingsEls.editAcc.usernameContainer.classList.add("error-input-container");
+      } else
+        console.log(json);
+    });
+  }
+};
+
 // ts/settings/settings.ts
+settingsEls.settings.showClock.onchange = () => updateClockSetting();
+settingsEls.settings.locale.onchange = () => updateLocale();
+settingsEls.settings.defaultService.onchange = () => updateDefaultService();
+var editWindow = new EditAccountWindow();
+settingsEls.editAcc.open.onclick = () => editWindow.show();
+settingsEls.editAcc.dialog.onclick = (e) => {
+  if (e.target === e.currentTarget) {
+    e.stopPropagation();
+    editWindow.hide();
+  }
+};
+settingsEls.editAcc.close.onclick = () => editWindow.hide();
+settingsEls.editAcc.form.onsubmit = (e) => {
+  e.preventDefault();
+  editWindow.submit();
+};
+settingsEls.delAcc.open.onclick = () => settingsEls.delAcc.dialog.showModal();
+settingsEls.delAcc.dialog.onclick = (e) => {
+  if (e.target === e.currentTarget) {
+    e.stopPropagation();
+    settingsEls.delAcc.dialog.close();
+  }
+};
+settingsEls.delAcc.close.onclick = () => settingsEls.delAcc.dialog.close();
+settingsEls.delAcc.confirm.onclick = () => deleteAccount();
+OnLoadRunner.add(loadSettings);
 OnLoadRunner.runOnLoad();
