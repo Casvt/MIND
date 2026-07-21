@@ -15,11 +15,7 @@
 }
 
 header > div:first-child {
-	display: flex;
-	align-items: center;
-	gap: 1rem;
-
-    transform: translateX(-3.8rem);
+    transform: translateX(-4rem);
 	transition: transform var(--nav-show-speed) var(--playful-curve);
 }
 

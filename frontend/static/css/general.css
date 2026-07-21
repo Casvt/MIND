@@ -542,8 +542,8 @@ header {
 	height: var(--header-height);
 	flex: 0 0 auto;
 
-	display: grid;
-	grid-template-columns: 1fr 7rem 1fr;
+	display: flex;
+	justify-content: space-between;
 	align-items: center;
 	gap: 1rem;
 
@@ -553,6 +553,12 @@ header {
 	background-color: var(--color-gray);
 
 	box-shadow: var(--default-shadow);
+}
+
+header > div:first-child {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
 }
 
 header > div > img {
