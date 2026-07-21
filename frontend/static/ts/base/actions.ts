@@ -5,9 +5,11 @@ var clockTimer: number | null = null
 
 function setMinutesClock(locale: string): void {
     const currentTime = new Date()
-    baseEls.clock.date.innerText = currentTime.toLocaleDateString(locale)
+    baseEls.clock.date.innerText = currentTime.toLocaleDateString(locale, {
+        dateStyle: "short"
+    })
     baseEls.clock.time.innerText = currentTime.toLocaleTimeString(locale, {
-        "timeStyle": "short"
+        timeStyle: "short"
     })
     clockTimer = setTimeout(
         () => setMinutesClock(locale),
@@ -18,9 +20,11 @@ function setMinutesClock(locale: string): void {
 
 function setSecondsClock(locale: string): void {
     const currentTime = new Date()
-    baseEls.clock.date.innerText = currentTime.toLocaleDateString(locale)
+    baseEls.clock.date.innerText = currentTime.toLocaleDateString(locale, {
+        dateStyle: "short"
+    })
     baseEls.clock.time.innerText = currentTime.toLocaleTimeString(locale, {
-        "timeStyle": "medium"
+        timeStyle: "medium"
     })
     clockTimer = setTimeout(
         () => setSecondsClock(locale),
@@ -36,18 +40,18 @@ export function setupClock(): void {
         clockTimer = null
     }
 
-    switch (settings['show_clock']) {
+    switch (settings.show_clock) {
         case 'no':
             baseEls.clock.time.innerText = ''
             baseEls.clock.date.innerText = ''
             break
 
         case 'without_seconds':
-            setMinutesClock(settings['locale'])
+            setMinutesClock(settings.locale)
             break
 
         case 'with_seconds':
-            setSecondsClock(settings['locale'])
+            setSecondsClock(settings.locale)
             break
 
         default:
