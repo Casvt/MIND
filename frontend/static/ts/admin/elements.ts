@@ -51,11 +51,11 @@ export const adminEls = {
         addRow: document.getElementById("add-plugin-row") as HTMLTableRowElement,
         addInput: document.getElementById("plugin-path") as HTMLInputElement,
         form: document.getElementById("add-plugin-form") as HTMLFormElement,
-        list: document.getElementById("plugins-list") as HTMLTableElement,
+        list: document.getElementById("plugins-list") as HTMLTableSectionElement,
         error: document.getElementById("plugin-not-found") as HTMLParagraphElement
     },
 
-    userList: document.getElementById("user-list") as HTMLTableElement,
+    userList: document.getElementById("user-list") as HTMLTableSectionElement,
     addUser: {
         dialog: document.getElementById("add-user-dialog") as HTMLDialogElement,
         open: document.getElementById("open-add-user") as HTMLButtonElement,
@@ -99,7 +99,7 @@ export const adminEls = {
 		confirm: document.getElementById("confirm-delete-user") as HTMLButtonElement
 	},
 
-    backupList: document.getElementById("backup-list") as HTMLTableElement,
+    backupList: document.getElementById("backup-list") as HTMLTableSectionElement,
     downloadDb: document.getElementById("download-db-button") as HTMLButtonElement,
 	uploadDb: {
 		dialog: document.getElementById("upload-db-dialog") as HTMLDialogElement,
