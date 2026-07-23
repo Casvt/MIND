@@ -7,7 +7,96 @@
     <script defer src="{{ url_for('static', filename='js/notificationservices.js') }}"></script>
 {% endblock %}
 {% block windows %}
-{% endblock %}
+    <dialog id="ns-options-dialog">
+        <div class="dialog-container">
+            <div class="dialog-header">
+                <h2>Add Notification Service</h2>
+            </div>
+            <div id="options-container" class="dialog-content">
+                <input type="text" id="ns-search-input" class="input-style" placeholder="Type '/' to search services...">
+                <div id="options-list">
+                    <p>No Results</p>
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button id="close-ns-options" class="input-style">Close</button>
+            </div>
+        </div>
+    </dialog>
+
+    <dialog id="add-ns-dialog">
+        <div class="dialog-container">
+            <div class="dialog-header">
+                <h2>Add <span id="add-type"></span> Notification Service</h2>
+            </div>
+            <div class="dialog-content">
+                <form id="builder-form"></form>
+            </div>
+            <div class="dialog-footer">
+                <button id="close-add-ns" class="input-style">Back</button>
+                <button id="test-service" class="input-style test-button" type="button">
+                    <div>Test</div>
+                    <div>Sent</div>
+                </button>
+                <button form="builder-form" id="submit-add-ns" class="input-style" type="submit">Add</button>
+            </div>
+        </div>
+    </dialog>
+
+	<dialog id="edit-ns-dialog">
+		<div class="dialog-container">
+			<div class="dialog-header">
+				<h2>Edit Notification Service</h2>
+			</div>
+			<div class="dialog-content">
+				<form id="edit-ns-form">
+					<input type="text" id="edit-title" placeholder="Title" class="input-style" required>
+
+					<div class="checked-input-container">
+						<input type="text" id="edit-url" placeholder="Apprise URL" class="input-style" required>
+						<p id="edit-invalid-url">Invalid URL</p>
+					</div>
+				</form>
+			</div>
+			<div class="dialog-footer">
+				<button id="close-edit-ns" class="input-style">Cancel</button>
+				<button type="submit" form="edit-ns-form" id="confirm-edit-ns" class="input-style">Save</button>
+			</div>
+		</div>
+	</dialog>
+
+	<dialog id="delete-ns-dialog">
+		<div class="dialog-container">
+			<div class="dialog-content">
+				<p>Are you sure you want to permanently delete this notification service?</p>
+				<p class="error hidden" id="delete-ns-error">Failed to delete notification service</p>
+				<div class="confirm-container">
+					<button id="confirm-delete-ns" class="input-style">Delete</button>
+					<button id="close-delete-ns" class="input-style">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</dialog>
+{% endblock windows %}
 {% block main %}
-<p>NOTIFICATIONS</p>
+    <h2>Notification Services</h2>
+    <button id="open-service-options" title="Open the window to start adding a notification service">
+        <svg><use href="#icon-plus"></use></svg>
+    </button>
+    <div class="table-container">
+        <table id="services-table" class="entries-table">
+            <thead>
+                <tr>
+                    <th class="title-column">Title</th>
+                    <th class="url-column">Apprise URL</th>
+                    <th title="Actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="services-list">
+                <tr class="empty-row">
+                    <td colspan="3">No Services</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 {% endblock main %}

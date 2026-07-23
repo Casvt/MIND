@@ -96,35 +96,6 @@ table {
 	background-color: var(--color-light-gray);
 }
 
-dialog {
-	--ani-duration: 100ms;
-	--max-height: 23rem;
-
-	width: min(100%, 40rem);
-	height: min(100%, var(--max-height));
-
-	border-radius: 6px;
-	border: 4px solid var(--color-gray);
-	background-color: var(--color-dark);
-	color: var(--color-light);
-
-	box-shadow: 0px 0px 20px 5px rgba(0 0 0 / 0.8);
-	
-	animation: vanish-dialog var(--ani-duration);
-}
-
-dialog[open] {
-	animation: appear-dialog var(--ani-duration);
-}
-
-dialog::backdrop {
-	backdrop-filter: blur(3px);
-}
-
-dialog[open]::backdrop {
-	animation: appear-dialog-bg var(--ani-duration);
-}
-
 @keyframes appear-dialog {
 	from {
 		opacity: 0;
@@ -156,6 +127,35 @@ dialog[open]::backdrop {
 	to {
 		opacity: 1;
 	}
+}
+
+dialog {
+	--ani-duration: 100ms;
+	--max-height: 23rem;
+
+	width: min(100%, 40rem);
+	height: min(100%, var(--max-height));
+
+	border-radius: 6px;
+	border: 4px solid var(--color-gray);
+	background-color: var(--color-dark);
+	color: var(--color-light);
+
+	box-shadow: 0px 0px 20px 5px rgba(0 0 0 / 0.8);
+
+	animation: vanish-dialog var(--ani-duration);
+}
+
+dialog[open] {
+	animation: appear-dialog var(--ani-duration);
+}
+
+dialog::backdrop {
+	backdrop-filter: blur(3px);
+}
+
+dialog[open]::backdrop {
+	animation: appear-dialog-bg var(--ani-duration);
 }
 
 /*  */
@@ -214,7 +214,7 @@ svg.spinning {
 	transition: background-color 150ms ease-in-out;
 
 	font-size: 1rem;
-	
+
 	&:focus-within {
 		border-color: var(--color-light-gray);
 	}
@@ -320,6 +320,28 @@ div.long-input-style > input {
 	font-size: .7rem;
 }
 
+.test-button {
+	display: flex;
+	gap: 1rem;
+
+	overflow-x: hidden;
+
+	& > div {
+		margin-block: auto;
+
+		width: 100%;
+		flex: 0 0 auto;
+
+		font-size: inherit;
+
+		transition: transform 100ms linear;
+	}
+
+	&.show-sent > div {
+		transform: translateX(calc(-100% - 1rem));
+	}
+}
+
 .table-container {
 	width: 100%;
 	overflow: auto;
@@ -329,7 +351,7 @@ div.long-input-style > input {
 	--inline-padding: 1.5rem;
 
 	position: relative;
-	
+
 	padding-inline: var(--inline-padding);
 }
 
@@ -418,7 +440,7 @@ div.long-input-style > input {
 		width: var(--header-width);
 		padding-right: var(--middle-spacing);
 		text-align: right;
-		
+
 		& > label {
 			display: flex;
 			justify-content: flex-end;
@@ -453,10 +475,11 @@ div.long-input-style > input {
 
 .dialog-header, .dialog-footer {
 	height: var(--dialog-header-height);
-	
+
 	display: flex;
 	align-items: center;
 	gap: 1rem;
+	flex: 0 0 auto;
 
 	padding: .4rem .75rem;
 
@@ -485,7 +508,7 @@ div.long-input-style > input {
 	&:first-of-type:where(:hover, :focus-within) {
 		background-color: var(--color-dim-error);
 	}
-	
+
 	&:last-of-type:where(:hover, :focus-within) {
 		background-color: var(--color-success);
 	}
@@ -501,6 +524,11 @@ div.long-input-style > input {
 	gap: 1rem;
 }
 
+.dialog-container:has(.dialog-header, .dialog-footer) .dialog-content {
+	height: calc(100% - var(--dialog-header-height) * 2);
+	overflow-y: auto;
+}
+
 .confirm-container {
 	display: flex;
 	flex-direction: row-reverse;
@@ -509,7 +537,7 @@ div.long-input-style > input {
 
 .confirm-container > button {
 	width: 6rem;
-	
+
 	&:first-of-type:where(:hover, :focus-within) {
 		background-color: var(--color-success);
 	}
@@ -618,7 +646,7 @@ header h1 {
 		&:first-child {
 			width: 100%;
 			text-align: left;
-			
+
 			& > label {
 				justify-content: flex-start;
 			}
@@ -628,7 +656,7 @@ header h1 {
 			min-width: unset;
 		}
 	}
-	
+
 	dialog {
 		margin: 0;
 		width: 100%;
@@ -639,7 +667,7 @@ header h1 {
 		border-radius: 0;
 		border: 0;
 	}
-	
+
 	@keyframes appear-dialog {
 		from {
 			opacity: 0;

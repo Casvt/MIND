@@ -1,7 +1,8 @@
-#add-service-button {
+#open-service-options {
 	width: min(100%, 17rem);
 	height: 2rem;
 	margin-inline: auto;
+	margin-bottom: .5rem;
 
 	display: flex;
 	justify-content: center;
@@ -9,22 +10,17 @@
 
 	border-radius: 4px;
 	background-color: var(--color-gray);
+	
+	& > svg {
+		height: 1rem;
+		width: 1rem;
+	}
 }
 
-#add-service-button > svg {
-	height: 1rem;
-	width: 1rem;
-	transition: transform .125s linear;
-}
-
-#notification:has(#service-list-toggle:checked) #add-service-button > svg {
-	transform: rotate(45deg);
-}
-
-#notification .entries-table {
-	margin-inline: auto;
-
+#services-table {
 	--inline-padding: .5rem;
+
+	margin-inline: auto;
 }
 
 #services-list .empty-row td {
@@ -41,8 +37,14 @@
 }
 
 .url-column {
-	width: 26rem;
+	max-width: 26rem;
+	overflow: auto;
+
 	text-wrap-mode: nowrap;
+
+	&::-webkit-scrollbar {
+		height: 0;
+	}
 }
 
 .action-column {
@@ -50,69 +52,17 @@
 }
 
 /*  */
-/* Edit and delete windows */
+/* Options Window */
 /*  */
-#edit-ns-form {
-	width: 100%;
-	height: 10rem;
+#ns-options-dialog {
+	--max-height: 90dvh;
+	width: min(100%, 55rem);
+}
 
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 1rem;
-
+#options-container {
 	padding: 1rem;
-
-	& > * {
-		max-width: 24rem;
-
-		&.checked-input-container > input {
-			max-width: inherit;
-		}
-	}
-}
-
-#delete-ns-dialog p {
-	padding-inline: 1rem;
-	text-align: center;
-}
-
-#confirm-delete-ns {
-	min-width: 6rem;
-	width: unset;
-
-	padding-inline: 1rem;
-}
-
-/*  */
-/* Add service */
-/*  */
-#add-service-container {
-	margin-top: 1rem;
-	display: none;
-	flex-direction: column;
-	align-items: center;
-}
-
-#notification:has(#service-list-toggle:checked) {
-	& table {
-		display: none;
-	}
-
-	& #add-service-container {
-		display: flex;
-	}
-}
-
-#notification:has(#add-service-toggle:checked) {
-	& #service-list,
-	& #ns-search-input {
-		display: none;
-	}
-
-	& #add-service-window {
-		display: flex;
-	}
+	
+	justify-content: flex-start;
 }
 
 #ns-search-input {
@@ -124,7 +74,7 @@
 	padding: .25rem .5rem;
 }
 
-#service-list {
+#options-list {
 	width: min(100%, 48rem);
 	margin-inline: auto;
 
@@ -134,17 +84,17 @@
 	justify-content: center;
 }
 
-#service-list p {
+#options-list p {
 	width: 100%;
 	text-align: center;
 }
 
-#service-list:not(:has(button)) > p,
-#service-list:has(button:not(.hidden)) > p {
+#options-list:not(:has(button)) > p,
+#options-list:has(button:not(.hidden)) > p {
 	display: none;
 }
 
-#service-list button {
+#options-list button {
 	width: 12rem;
 	max-width: 15rem;
 	height: 6rem;
@@ -171,23 +121,36 @@
 	}
 }
 
+#ns-options-dialog .dialog-footer {
+	z-index: 1;
+}
+
 /*  */
 /* Add service form */
 /*  */
-#add-service-window {
+#add-ns-dialog {
+	--max-height: 50rem;
+	width: min(100%, 55rem);
+}
+
+#add-ns-dialog .dialog-content {
+	padding: 1rem;
+	
+	justify-content: flex-start;
+}
+
+#builder-form {
 	width: 100%;
 	max-width: 30rem;
-	margin: auto;
 
-	display: none;
+	display: flex;
 	flex-direction: column;
-	justify-content: center;
 	gap: 1rem;
 
 	text-align: center;
 }
 
-#add-service-window .input-style {
+#builder-form .input-style {
 	max-width: 100%;
 
 	&::placeholder {
@@ -195,11 +158,11 @@
 	}
 }
 
-#add-service-window > h3 {
+#builder-form > h3 {
 	font-size: 1.75rem;
 }
 
-#add-service-window > p {
+#builder-form > p {
 	height: 2.7rem;
 	margin-bottom: calc((1rem + 2px) * -1);
 
@@ -210,16 +173,16 @@
 	border-top-left-radius: 4px;
 	border-top-right-radius: 4px;
 	padding-inline: .5rem;
-	color: var(--color-mid-gray);
+	color: var(--color-light-gray);
 
 	box-shadow: var(--default-shadow);
 }
 
-#add-service-window > a {
+#builder-form > a {
 	color: var(--color-light);
 }
 
-#add-service-window > div[data-map] {
+#builder-form > div[data-index] {
 	display: flex;
 	flex-direction: column;
 	gap: .6rem;
@@ -230,7 +193,7 @@
 	box-shadow: var(--default-shadow);
 
 	& > p {
-		color: var(--color-mid-gray);
+		color: var(--color-light-gray);
 		font-size: 1.1rem;
 	}
 }
@@ -300,4 +263,39 @@
 
 .entries-list:has(.add-row:not(.hidden)) > button > svg {
 	transform: rotate(45deg);
+}
+
+/*  */
+/* Edit and delete windows */
+/*  */
+#edit-ns-form {
+	width: 100%;
+	height: 10rem;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
+
+	padding: 1rem;
+
+	& > * {
+		max-width: 24rem;
+
+		&.checked-input-container > input {
+			max-width: inherit;
+		}
+	}
+}
+
+#delete-ns-dialog p {
+	padding-inline: 1rem;
+	text-align: center;
+}
+
+#confirm-delete-ns {
+	min-width: 6rem;
+	width: unset;
+
+	padding-inline: 1rem;
 }

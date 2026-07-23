@@ -2,6 +2,9 @@
 export class Constants {
     public static readonly svgNamespace = "http://www.w3.org/2000/svg"
 
+    public static readonly autoSearchTimeoutNs = 500
+
+
     public static readonly unsavedChangesMessage = "You have unsaved changes. Are you sure you want to leave?"
 
     public static readonly restartMessage =
