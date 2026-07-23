@@ -17,12 +17,16 @@ main > h2:first-of-type {
 
 #edit-account-form {
 	width: min(90%, 16rem);
-	height: 8rem;
+	height: 12rem;
 
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
-	gap: 1rem;
+	gap: .4rem;
+	
+	& > .checked-input-container {
+		margin-bottom: 1rem;
+	}
 }
 
 #open-delete-account {
