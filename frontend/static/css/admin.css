@@ -154,12 +154,16 @@ div.input-style:has(input.changed) {
 #add-user-form,
 #edit-user-form {
 	width: min(90%, 16rem);
-	height: 8rem;
+	height: 12rem;
 
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
-	gap: 1rem;
+	gap: .4rem;
+	
+	& > .checked-input-container {
+		margin-bottom: 1rem;
+	}
 }
 
 #edit-user-form:has(div.hidden) {
