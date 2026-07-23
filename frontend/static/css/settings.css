@@ -1,19 +1,13 @@
+main > h2:first-of-type {
+	margin-bottom: 0rem;
+}
+
 #settings-table {
 	--min-width: 0;
 	--max-width: 40rem;
 	--min-data-width: 16rem;
 
 	margin-inline: auto;
-}
-
-#settings-table tr {
-	& th {
-		padding-top: .5rem;
-	}
-
-	&:first-child td {
-		padding-top: 0;
-	}
 }
 
 :where(#edit-account-dialog, #delete-user-dialog) .dialog-content > p {

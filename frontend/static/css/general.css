@@ -418,6 +418,12 @@ div.long-input-style > input {
 		width: var(--header-width);
 		padding-right: var(--middle-spacing);
 		text-align: right;
+		
+		& > label {
+			display: flex;
+			justify-content: flex-end;
+			height: 2.7rem;
+		}
 	}
 
 	&:last-child {
@@ -432,6 +438,10 @@ div.long-input-style > input {
 
 		font-size: .9rem;
 	}
+}
+
+.collaps-table tr:not(:has(input[type=checkbox])) > th > label {
+	align-items: center;
 }
 
 .dialog-container {
@@ -608,6 +618,10 @@ header h1 {
 		&:first-child {
 			width: 100%;
 			text-align: left;
+			
+			& > label {
+				justify-content: flex-start;
+			}
 		}
 
 		&:last-child {
