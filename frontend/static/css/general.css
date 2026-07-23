@@ -60,7 +60,7 @@ label:hover {
 
 input::placeholder,
 textarea::placeholder {
-	color: var(--color-gray);
+	color: var(--color-light-gray);
 }
 
 input[type="datetime-local"] {
