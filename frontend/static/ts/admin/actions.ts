@@ -19,7 +19,7 @@ export function restart(): void {
     adminEls.power.restart.classList.add("spinning")
 
     fetchAPI("/admin/restart", {method: "POST"})
-    .then(json => {
+    .then(() => {
         setTimeout(
             () => window.location.reload(),
             1000
@@ -32,7 +32,7 @@ export function shutdown(): void {
     adminEls.power.shutdown.classList.add("spinning")
 
     fetchAPI("/admin/shutdown", {method: "POST"})
-    .then(json => {
+    .then(() => {
         setTimeout(
             () => window.location.reload(),
             1000
@@ -198,7 +198,7 @@ export function submitSettings(): void {
 	}
 
     fetchAPI("/admin/settings", {method: "PUT", body: data})
-	.then(_ => {
+	.then(() => {
 		if (hostChanged) {
 			setTimeout(
 				() => window.location.reload(),
@@ -241,7 +241,7 @@ class ResetWindow implements Window {
     public dialog = adminEls.resetSettings.dialog
 
     public prepare(): void {
-        Object.values(adminEls.settings).forEach(el => {
+        Object.values(adminEls.settings).forEach((el, idx) => {
             let parent = el.parentElement as HTMLElement
             if (parent.nodeName === "DIV")
                 parent = parent.parentElement as HTMLElement
@@ -251,11 +251,15 @@ class ResetWindow implements Window {
             const tr = document.createElement("tr")
             const checkboxContainer = document.createElement("td")
             const checkbox = document.createElement("input")
+            checkbox.id = `reset-${idx}`
             checkbox.type = "checkbox"
             checkbox.dataset.setting = el.name
             checkboxContainer.appendChild(checkbox)
             const titleContainer = document.createElement("td")
-            titleContainer.innerText = title
+            const titleLabel = document.createElement("label")
+            titleLabel.setAttribute("for", `reset-${idx}`)
+            titleLabel.innerText = title
+            titleContainer.appendChild(titleLabel)
             tr.appendChild(checkboxContainer)
             tr.appendChild(titleContainer)
             adminEls.resetSettings.list.appendChild(tr)

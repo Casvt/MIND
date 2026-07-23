@@ -1,6 +1,7 @@
 // ts/general.ts
 var Constants = class {
   static svgNamespace = "http://www.w3.org/2000/svg";
+  static autoSearchTimeoutNs = 500;
   static unsavedChangesMessage = "You have unsaved changes. Are you sure you want to leave?";
   static restartMessage = "MIND has detected changes to the hosting settings. It is required to login into MIND within 1 minute in order to keep the new hosting settings. Otherwise, MIND will go back to the old hosting settings.";
 };
@@ -281,7 +282,7 @@ function loadAbout() {
 function restart() {
   adminEls.power.restart.replaceChildren(createIcon("icon-loading"));
   adminEls.power.restart.classList.add("spinning");
-  fetchAPI("/admin/restart", { method: "POST" }).then((json) => {
+  fetchAPI("/admin/restart", { method: "POST" }).then(() => {
     setTimeout(
       () => window.location.reload(),
       1e3
@@ -291,7 +292,7 @@ function restart() {
 function shutdown() {
   adminEls.power.shutdown.replaceChildren(createIcon("icon-loading"));
   adminEls.power.shutdown.classList.add("spinning");
-  fetchAPI("/admin/shutdown", { method: "POST" }).then((json) => {
+  fetchAPI("/admin/shutdown", { method: "POST" }).then(() => {
     setTimeout(
       () => window.location.reload(),
       1e3
@@ -406,7 +407,7 @@ function submitSettings() {
     if (!confirm(Constants.restartMessage))
       return;
   }
-  fetchAPI("/admin/settings", { method: "PUT", body: data }).then((_) => {
+  fetchAPI("/admin/settings", { method: "PUT", body: data }).then(() => {
     if (hostChanged) {
       setTimeout(
         () => window.location.reload(),
@@ -436,7 +437,7 @@ function submitSettings() {
 var ResetWindow = class {
   dialog = adminEls.resetSettings.dialog;
   prepare() {
-    Object.values(adminEls.settings).forEach((el) => {
+    Object.values(adminEls.settings).forEach((el, idx) => {
       let parent = el.parentElement;
       if (parent.nodeName === "DIV")
         parent = parent.parentElement;
@@ -445,11 +446,15 @@ var ResetWindow = class {
       const tr = document.createElement("tr");
       const checkboxContainer = document.createElement("td");
       const checkbox = document.createElement("input");
+      checkbox.id = `reset-${idx}`;
       checkbox.type = "checkbox";
       checkbox.dataset.setting = el.name;
       checkboxContainer.appendChild(checkbox);
       const titleContainer = document.createElement("td");
-      titleContainer.innerText = title;
+      const titleLabel = document.createElement("label");
+      titleLabel.setAttribute("for", `reset-${idx}`);
+      titleLabel.innerText = title;
+      titleContainer.appendChild(titleLabel);
       tr.appendChild(checkboxContainer);
       tr.appendChild(titleContainer);
       adminEls.resetSettings.list.appendChild(tr);

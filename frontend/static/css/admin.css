@@ -29,7 +29,7 @@
 			background-color: var(--color-light-gray);
 			box-shadow: var(--default-shadow);
 		}
-		
+
 		&.submit-error {
 			background-color: var(--color-error);
 		}
@@ -86,7 +86,7 @@ h2 {
 		justify-content: center;
 		align-items: center;
 		gap: 1rem;
-		
+
 		padding: 1rem;
 	}
 }
@@ -198,12 +198,26 @@ dialog:where(#upload-db-dialog, #import-db-dialog) {
 	max-width: 30rem;
 }
 
+#reset-list label {
+	width: 100%;
+	height: 100%;
+
+	display: flex;
+	align-items: center;
+}
+
 #submit-reset-settings {
 	transition: color 100ms linear;
 }
 
 #reset-settings-dialog:not(:has(input[type="checkbox"]:checked)) #submit-reset-settings {
 	color: var(--color-light-gray);
+	cursor: default;
+	
+	&:hover,
+	&:focus-within {
+		background-color: var(--color-dark);
+	}
 }
 
 #plugins-dialog .dialog-content {
@@ -213,7 +227,7 @@ dialog:where(#upload-db-dialog, #import-db-dialog) {
 #add-plugin {
 	margin-top: 1rem;
 	width: 90%;
-	
+
 	& svg {
 		transition: transform 200ms ease-in-out;
 	}
