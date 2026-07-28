@@ -285,6 +285,10 @@ body:has(#wide-toggle[data-selected]) #tab-container > div {
 	#tab-selector > button {
 		flex: 1 0 25%;
 	}
+	
+	#search-form:not(:focus-within) .search-input-container::before {
+		opacity: 0;
+	}
 
 	#search-form #wide-toggle {
 		display: none;
