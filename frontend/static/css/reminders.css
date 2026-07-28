@@ -1,7 +1,7 @@
 /*  */
 /* Tab selector */
 /*  */
-.tab-selector {
+#tab-selector {
 	width: 100%;
 	display: flex;
 	justify-content: center;
@@ -9,15 +9,10 @@
 	flex-wrap: wrap;
 	gap: 1rem;
 
-	padding-inline: 1rem;
-	padding-top: 1rem;
+	padding: 1rem;
 }
 
-.tab-selector > input {
-	display: none;
-}
-
-.tab-selector > label {
+#tab-selector > button {
 	min-width: 9.55rem;
 
 	padding: .5rem 1rem;
@@ -31,48 +26,35 @@
 	transition:
 		background-color 150ms ease-in-out,
 		box-shadow 150ms ease-in-out;
-}
-
-.tab-selector > label:hover {
-	background-color: var(--color-light-gray);
-	box-shadow: var(--default-shadow);
-}
-
-.tab-selector > input:checked + label {
-	background-color: var(--color-gray);
-}
-
-.window-container:has(#reminder-tab-selector:checked) #reminder-tab,
-.window-container:has(#static-tab-selector:checked) #static-reminder-tab,
-.window-container:has(#template-tab-selector:checked) #template-tab {
-	display: flex;
+    
+    &:hover {
+        background-color: var(--color-light-gray);
+        box-shadow: var(--default-shadow);
+    }
+    
+    &[data-selected] {
+        background-color: var(--color-gray);
+    }
 }
 
 /*  */
 /* Search bar */
 /*  */
-.search-container {
-	max-width: 40rem;
-	margin: auto;
-
-	padding-block: clamp(1rem, 4vw, 2rem);
-}
-
 #search-form {
-	margin-inline: 1rem;
-}
+    --button-width: clamp(2.4rem, 7.5vw, 3rem);
+	max-width: 40rem;
+	margin-inline: auto;
+    
+    display: flex;
+	
+    border: 2px solid var(--color-gray);
+    border-radius: 4px;
+    margin-bottom: clamp(1rem, 4vw, 2rem);
 
-.search-bar {
-	--button-width: clamp(2.4rem, 7.5vw, 3rem);
-	display: flex;
+    box-shadow: var(--default-shadow);
+}    
 
-	border: 2px solid var(--color-gray);
-	border-radius: 4px;
-
-	box-shadow: var(--default-shadow);
-}
-
-.search-bar :where(button, label) {
+#search-form button {
 	width: var(--button-width);
 	flex-shrink: 0;
 
@@ -119,7 +101,7 @@
 	transition: opacity .1s linear;
 }
 
-.search-bar:not(:focus-within) .search-input-container::before {
+#search-form:not(:focus-within) .search-input-container::before {
 	opacity: 1;
 }
 
@@ -148,7 +130,7 @@
 	transition: opacity .1s linear;
 }
 
-.search-bar:focus-within #clear-button {
+#search-form:focus-within #clear-button {
 	opacity: 1;
 }
 
@@ -205,8 +187,8 @@
 	}
 }
 
-.window-container:has(
-	:where(#static-tab-selector, #template-tab-selector):checked
+main:has(
+	:where(#static-tab-selector, #template-tab-selector)[data-selected]
 ) #sort-input > option:where(
 	[value="time"], [value="time_reversed"]
 ) {
@@ -214,9 +196,9 @@
 }
 
 /*  */
-/* Reminder list */
+/* Tabs */
 /*  */
-.tab-container > div {
+#tab-container > div {
 	--gap: 1rem;
 	--entry-width: 13rem;
 	max-width: 43rem;
@@ -230,26 +212,20 @@
 	padding: 1rem;
 }
 
-body:has(#wide-toggle:checked) .tab-container > div {
+main:has(#reminder-tab-selector[data-selected]) #reminder-tab,
+main:has(#static-tab-selector[data-selected]) #static-reminder-tab,
+main:has(#template-tab-selector[data-selected]) #template-tab {
+    display: flex;
+}
+
+body:has(#wide-toggle[data-selected]) #tab-container > div {
 	max-width: 85rem;
 }
 
-#home {
-	overflow-y: auto;
-}
-
-#home::after {
-	content: "";
-	position: sticky;
-	display: block;
-	inset: auto 0 0 0;
-	height: 1.5rem;
-
-	background: linear-gradient(0deg, var(--color-dark), 30%, transparent);
-}
-
+/*  */
+/* Library Entries */
+/*  */
 .entry.add-entry {
-	flex-grow: 1;
 	justify-content: center;
 	align-items: center;
 	gap: .5rem;
@@ -286,7 +262,7 @@ body:has(#wide-toggle:checked) .tab-container > div {
 	color: var(--color-light);
 }
 
-button.entry.fit {
+.entry.fit {
 	flex-grow: 1;
 }
 
@@ -305,12 +281,12 @@ button.entry.fit {
 	font-weight: 500;
 }
 
-@media (max-width: 543px) {
-	.tab-selector > label {
+@media (max-width: 34rem) {
+	#tab-selector > button {
 		flex: 1 0 25%;
 	}
 
-	#wide-button {
+	#wide-toggle {
 		display: none;
 	}
 

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Reminders{% endblock %}
 {% block css %}
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/reminders.css') }}"> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reminders.css') }}">
 {% endblock %}
 {% block js %}
     <script defer src="{{ url_for('static', filename='js/reminders.js') }}"></script>
@@ -9,5 +9,57 @@
 {% block windows %}
 {% endblock %}
 {% block main %}
-<p>MAIN</p>
+    <div id="tab-selector">
+        <button id="reminder-tab-selector" data-selected="true">Reminders</button>
+        <button id="static-tab-selector">Static Reminders</button>
+        <button id="template-tab-selector">Templates</button>
+    </div>
+
+    <noscript>Javascript is disabled. The web-ui of MIND does not work with JavaScript disabled.</noscript>
+
+    <form id="search-form" aria-label="Search bar and sorting options">
+        <button type="submit" title="Start search">
+            <svg><use href="#icon-search"></use></svg>
+        </button>
+        <div class="search-input-container">
+            <input type="text" id="search-input" class="input-style" placeholder="Search..." aria-label="Search term input">
+        </div>
+        <button type="button" id="clear-button" title="Clear search">
+            <svg><use href="#icon-cancel"></use></svg>
+        </button>
+        <select id="sort-input" form="" title="Sorting">
+            <button>
+                <svg><use href="#icon-sort"></use></svg>
+            </button>
+            <option value="time">Time</option>
+            <option value="time_reversed">Time Reversed</option>
+            <option value="title">Title</option>
+            <option value="title_reversed">Title Reversed</option>
+            <option value="date_added">Date Added</option>
+            <option value="date_added_reversed">Date Added Reversed</option>
+        </select>
+        <button id="wide-toggle" type="button" aria-hidden="true" title="Toggle wide list">
+            <svg><use href="#icon-spread"></use></svg>
+        </button>
+    </form>
+    <div id="tab-container">
+        <div id="reminder-tab" aria-label="Add reminders and the list of reminders">
+            <button class="entry add-entry" id="add-reminder" title="Add reminder">
+                <svg><use href="#icon-plus"></use></svg>
+                <p>Add a notification service first!</p>
+            </button>
+        </div>
+        <div id="static-reminder-tab" aria-label="Add static reminders and the list of static reminders">
+            <button class="entry add-entry" id="add-static-reminder" title="Add static reminder">
+                <svg><use href="#icon-plus"></use></svg>
+                <p>Add a notification service first!</p>
+            </button>
+        </div>
+        <div id="template-tab" aria-label="Add templates and the list of templates">
+            <button class="entry add-entry" id="add-template" title="Add template">
+                <svg><use href="#icon-plus"></use></svg>
+                <p>Add a notification service first!</p>
+            </button>
+        </div>
+    </div>
 {% endblock main %}

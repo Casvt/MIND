@@ -196,9 +196,7 @@ def search_filter(query: str, result: GeneralReminderData) -> bool:
     """
     query = query.lower().replace(' ', '')
     return (
-        query.lower().replace(' ', '')
-        in
-        (result.title + (result.text or '')).lower().replace(' ', '')
+        query in (result.title + (result.text or '')).lower().replace(' ', '')
     )
 
 

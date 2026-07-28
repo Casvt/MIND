@@ -17,7 +17,7 @@ nsEls.options.search.oninput = () => {
 
     windowInstances.options.autoSearchTimer = setTimeout(
         windowInstances.options.searchOptions,
-        Constants.autoSearchTimeoutNs
+        Constants.autoSearchTimeout
     )
 }
 document.body.addEventListener("keydown", (e: KeyboardEvent) => {

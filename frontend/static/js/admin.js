@@ -1,7 +1,10 @@
 // ts/general.ts
 var Constants = class {
   static svgNamespace = "http://www.w3.org/2000/svg";
-  static autoSearchTimeoutNs = 500;
+  static autoSearchTimeout = 500;
+  // ms
+  static libraryRefreshInterval = 6e4;
+  // ms
   static unsavedChangesMessage = "You have unsaved changes. Are you sure you want to leave?";
   static restartMessage = "MIND has detected changes to the hosting settings. It is required to login into MIND within 1 minute in order to keep the new hosting settings. Otherwise, MIND will go back to the old hosting settings.";
 };
