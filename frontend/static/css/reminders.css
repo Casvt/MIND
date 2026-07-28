@@ -286,7 +286,7 @@ body:has(#wide-toggle[data-selected]) #tab-container > div {
 		flex: 1 0 25%;
 	}
 
-	#wide-toggle {
+	#search-form #wide-toggle {
 		display: none;
 	}
 
