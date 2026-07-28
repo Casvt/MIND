@@ -283,7 +283,11 @@ body:has(#wide-toggle[data-selected]) #tab-container > div {
 
 @media (max-width: 34rem) {
 	#tab-selector > button {
-		flex: 1 0 25%;
+		flex: 1 0 48%;
+
+		&:first-of-type {
+			flex: 1 0 100%;
+		}
 	}
 	
 	#search-form:not(:focus-within) .search-input-container::before {
