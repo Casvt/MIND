@@ -416,7 +416,7 @@ div.long-input-style > input {
 	width: auto;
 }
 
-.collaps-table {
+.collapse-table {
 	--min-width: 20rem;
 	--max-width: 55rem;
 	--header-width: 50%;
@@ -427,11 +427,11 @@ div.long-input-style > input {
 	padding-inline: 1rem;
 }
 
-.collaps-table tr:first-of-type :where(th, td) {
+.collapse-table tr:first-of-type :where(th, td) {
 	padding-top: 1rem;
 }
 
-.collaps-table :where(th, td) {
+.collapse-table :where(th, td) {
 	--middle-spacing: .75rem;
 	padding-bottom: 1rem;
 	vertical-align: top;
@@ -462,7 +462,7 @@ div.long-input-style > input {
 	}
 }
 
-.collaps-table tr:not(:has(input[type=checkbox])) > th > label {
+.collapse-table tr:not(:has(input[type=checkbox])) > th > label {
 	align-items: center;
 }
 
@@ -625,22 +625,22 @@ header h1 {
 }
 
 @media (max-width: 29rem) {
-	.collaps-table tbody {
+	.collapse-table tbody {
 		display: flex;
 		flex-direction: column;
 	}
 
-	.collaps-table tr {
+	.collapse-table tr {
 		display: inline-flex;
 		flex-direction: column;
 		padding-left: .5rem;
 	}
 
-	.collaps-table tr:first-of-type > td {
+	.collapse-table tr:first-of-type > td {
 		padding-top: 0rem;
 	}
 
-	.collaps-table :where(th, td) {
+	.collapse-table :where(th, td) {
 		width: 100%;
 
 		&:first-child {
