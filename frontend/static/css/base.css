@@ -81,13 +81,12 @@ main {
     padding: var(--dyn-spacing);
 	margin-left: calc(var(--nav-width) + var(--dyn-spacing));
 
-	transition: margin-left var(--nav-show-speed) var(--playful-curve),
-                filter var(--nav-show-speed) var(--playful-curve);
+	transition: margin-left var(--nav-show-speed) var(--playful-curve);
 }
 
 nav {
 	position: absolute;
-    z-index: 1;
+    z-index: 2;
     inset: var(--dyn-spacing) auto var(--dyn-spacing) var(--dyn-spacing);
 
 	width: var(--nav-width);
@@ -142,6 +141,20 @@ nav > div > :where(button, a) {
 	}
 }
 
+#nav-background {
+	position: absolute;
+	inset: 0 0 0 0;
+	z-index: 1;
+
+	display: none;
+	opacity: 0;
+
+	backdrop-filter: brightness(0.5);
+
+	transition: opacity var(--nav-show-speed) var(--playful-curve),
+		display var(--nav-show-speed) var(--playful-curve) allow-discrete;
+}
+
 main h2 {
 	font-size: 1.75rem;
 	margin-bottom: 1rem;
@@ -161,10 +174,17 @@ main h2 {
     }
 
     #nav-divider.show-nav {
+		& > #nav-background {
+			display: block;
+			opacity: 1;
+			
+			@starting-style {
+				opacity: 0;
+			}
+		}
+		
         & > main {
             margin-left: 0rem;
-            filter: brightness(.5);
-            user-select: none;
         }
     }
 }

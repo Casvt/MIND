@@ -134,6 +134,7 @@ var baseEls = {
   favIcon: document.querySelector("header img"),
   navToggle: document.getElementById("toggle-nav"),
   navDivider: document.getElementById("nav-divider"),
+  navBackground: document.getElementById("nav-background"),
   clock: {
     time: document.getElementById("clock-time"),
     date: document.getElementById("clock-date")
@@ -195,6 +196,7 @@ function setupClock() {
 baseEls.logOut.onclick = () => logout();
 baseEls.favIcon.onclick = () => window.location.href = "/reminders";
 baseEls.navToggle.onclick = () => baseEls.navDivider.classList.toggle("show-nav");
+baseEls.navBackground.onclick = () => baseEls.navDivider.classList.toggle("show-nav");
 OnLoadRunner.add(setupClock);
 
 // ts/settings/elements.ts

@@ -4,6 +4,7 @@ export const baseEls = {
 
     navToggle: document.getElementById("toggle-nav") as HTMLButtonElement,
     navDivider: document.getElementById("nav-divider") as HTMLDivElement,
+    navBackground: document.getElementById("nav-background") as HTMLDivElement,
 
     clock: {
         time: document.getElementById("clock-time") as HTMLDivElement,
