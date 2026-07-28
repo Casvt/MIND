@@ -59,7 +59,7 @@ header > div:first-child {
 /*  */
 #nav-divider {
     position: relative;
-	flex-grow: 1;
+	height: calc(100% - var(--header-height));
 }
 
 #nav-divider.show-nav {
@@ -68,14 +68,18 @@ header > div:first-child {
     }
 
     & > main {
-        margin-left: calc(var(--nav-width) + var(--dyn-spacing) * 2);
+        margin-left: calc(var(--nav-width) + var(--dyn-spacing));
     }
 }
 
 main {
+	height: 100%;
+
+	overflow-y: auto;
+
     text-align: center;
-    margin: var(--dyn-spacing);
-	margin-left: calc(var(--nav-width) + var(--dyn-spacing) * 2);
+    padding: var(--dyn-spacing);
+	margin-left: calc(var(--nav-width) + var(--dyn-spacing));
 
 	transition: margin-left var(--nav-show-speed) var(--playful-curve),
                 filter var(--nav-show-speed) var(--playful-curve);
@@ -153,12 +157,12 @@ main h2 {
     }
 
     main {
-        margin-left: var(--dyn-spacing);
+        margin-left: 0rem;
     }
 
     #nav-divider.show-nav {
         & > main {
-            margin-left: var(--dyn-spacing);
+            margin-left: 0rem;
             filter: brightness(.5);
             user-select: none;
         }
