@@ -4,9 +4,20 @@ function hide({ to_hide = [], to_show = [] } = {}) {
   if (to_show !== null && to_show !== void 0)
     to_show.forEach((el) => el.classList.remove("hidden"));
 }
+function getPreferredLocale() {
+  for (const lang of navigator.languages) {
+    if (lang.includes("-"))
+      return lang;
+    const locale = new Intl.Locale(lang).maximize();
+    if (!locale.region)
+      continue;
+    return `${locale.language}-${locale.region}`;
+  }
+  return "en-US";
+}
 var localStorageDefaultValues = {
   api_key: null,
-  locale: "en-GB",
+  locale: getPreferredLocale(),
   default_service: null,
   sorting_reminders: "time",
   sorting_static: "title",

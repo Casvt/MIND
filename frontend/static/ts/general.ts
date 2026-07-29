@@ -68,6 +68,26 @@ export function createIcon(iconId: string): SVGSVGElement {
     return svg
 }
 
+/**
+ * Get the preferred/browser locale.
+ * @returns The locale
+ */
+function getPreferredLocale(): string {
+    for (const lang of navigator.languages) {
+        if (lang.includes("-"))
+            return lang
+        
+        // No region, so add one
+        const locale = new Intl.Locale(lang).maximize()
+        if (!locale.region)
+            continue
+        
+        return `${locale.language}-${locale.region}`
+    }
+
+    return 'en-US'
+}
+
 // region LocalStorage
 interface localStorageFields {
     api_key: string | null
@@ -83,7 +103,7 @@ interface localStorageFields {
 
 const localStorageDefaultValues: localStorageFields = {
 	api_key: null,
-	locale: 'en-GB',
+	locale: getPreferredLocale(),
 	default_service: null,
 	sorting_reminders: 'time',
 	sorting_static: 'title',

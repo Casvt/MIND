@@ -8,9 +8,20 @@ var Constants = class {
   static unsavedChangesMessage = "You have unsaved changes. Are you sure you want to leave?";
   static restartMessage = "MIND has detected changes to the hosting settings. It is required to login into MIND within 1 minute in order to keep the new hosting settings. Otherwise, MIND will go back to the old hosting settings.";
 };
+function getPreferredLocale() {
+  for (const lang of navigator.languages) {
+    if (lang.includes("-"))
+      return lang;
+    const locale = new Intl.Locale(lang).maximize();
+    if (!locale.region)
+      continue;
+    return `${locale.language}-${locale.region}`;
+  }
+  return "en-US";
+}
 var localStorageDefaultValues = {
   api_key: null,
-  locale: "en-GB",
+  locale: getPreferredLocale(),
   default_service: null,
   sorting_reminders: "time",
   sorting_static: "title",
