@@ -46,7 +46,7 @@ header > div:first-child {
 #clock-time {
 	text-align: right;
 	font-weight: bold;
-	font-size: 1.3rem;
+	font-size: 1.2rem;
 }
 
 #clock-date {
@@ -100,7 +100,10 @@ nav {
 
 	padding: var(--nav-button-spacing);
 	border-radius: 4px;
+	border: 1px solid var(--color-dark-border);
 	background-color: var(--color-gray);
+
+	box-shadow: 0 0 10px 2px rgb(0 0 0 / 60%);
 
 	transition: left var(--nav-show-speed) var(--playful-curve);
 
@@ -125,14 +128,21 @@ nav > div > :where(button, a) {
 
 	padding: var(--nav-button-spacing);
 	border-radius: 4px;
+	border: 1px solid var(--color-dark);
+	border-left-width: 2px;
 	background-color: var(--color-dark);
 	color: var(--color-light);
 
     text-decoration: none;
-	transition: background-color 150ms ease-in-out;
+	transition: background-color 100ms ease-in-out;
 
 	&:hover {
 		background-color: var(--color-light-gray);
+		border-color: var(--color-light-border);
+	}
+	
+	&.current-nav {
+		border-left-color: var(--color-light);
 	}
 
 	& svg {
@@ -177,12 +187,12 @@ main h2 {
 		& > #nav-background {
 			display: block;
 			opacity: 1;
-			
+
 			@starting-style {
 				opacity: 0;
 			}
 		}
-		
+
         & > main {
             margin-left: 0rem;
         }
@@ -193,7 +203,7 @@ main h2 {
     :root {
         --nav-width: calc(100vw - var(--dyn-spacing) * 2);
     }
-    
+
     #clock-container {
         display: none;
     }

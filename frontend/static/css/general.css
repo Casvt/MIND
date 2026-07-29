@@ -20,6 +20,8 @@
 	--color-error: #db5461;
 	--color-dim-error: #bc4551;
 	--color-success: #54db68;
+	--color-dark-border: rgba(152, 152, 152, 0.08);
+	--color-light-border: rgba(255, 255, 255, 0.08);
 
 	--header-height: 3.5rem;
 	--nav-width: 15rem;
@@ -588,6 +590,7 @@ header {
 	padding: .25rem var(--dyn-spacing);
 	border-bottom-left-radius: 6px;
 	border-bottom-right-radius: 6px;
+	border-bottom: 1px solid var(--color-light-border);
 	background-color: var(--color-gray);
 
 	box-shadow: var(--default-shadow);

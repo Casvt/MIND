@@ -17,7 +17,7 @@
 
 	padding: .5rem 1rem;
 	border-radius: 4px;
-	border: 2px solid var(--color-gray);
+	border: 2px solid var(--color-light-border);
 	background-color: var(--color-dark);
 	color: var(--color-light);
 
@@ -26,14 +26,14 @@
 	transition:
 		background-color 150ms ease-in-out,
 		box-shadow 150ms ease-in-out;
-    
+
+	&[data-selected] {
+		background-color: var(--color-gray);
+	}
+
     &:hover {
         background-color: var(--color-light-gray);
         box-shadow: var(--default-shadow);
-    }
-    
-    &[data-selected] {
-        background-color: var(--color-gray);
     }
 }
 
@@ -47,7 +47,7 @@
     
     display: flex;
 	
-    border: 2px solid var(--color-gray);
+    border: 2px solid var(--color-light-border);
     border-radius: 4px;
     margin-bottom: clamp(1rem, 4vw, 2rem);
 
@@ -62,12 +62,31 @@
 	justify-content: center;
 	align-items: center;
 
+	border-radius: 4px;
 	background-color: transparent;
 
 	& svg {
 		height: 1rem;
 		width: auto;
 	}
+}
+
+#search-form :where(button, select) {
+	transition: background-color 100ms ease-in-out;
+
+	&:hover {
+		background-color: var(--color-gray);
+	}
+}
+
+#search-form > :first-child {
+	border-top-left-radius: 0px;
+	border-bottom-left-radius: 0px;
+}
+
+#search-form > :last-child {
+	border-top-right-radius: 0px;
+	border-bottom-right-radius: 0px;
 }
 
 .search-input-container {
@@ -141,6 +160,7 @@
 
 #sort-input {
 	border: 0;
+	border-radius: 4px;
 	background-color: var(--color-dark);
 	color: var(--color-light);
 

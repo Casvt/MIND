@@ -42,15 +42,15 @@
     <div id="nav-divider">
         <nav>
             <div>
-                <a href="/reminders" title="Home">
+                <a href="/reminders" title="Home" class="{% if request.path == '/reminders' %}current-nav{% endif %}">
                     <svg><use href="#icon-home"></use></svg>
                     <span>Home</span>
                 </a>
-                <a href="/notificationservices" title="Notification Services">
+                <a href="/notificationservices" title="Notification Services" class="{% if request.path == '/notificationservices' %}current-nav{% endif %}">
                     <svg><use href="#icon-notificationservices"></use></svg>
                     <span>Notification Services</span>
                 </a>
-                <a href="/settings" title="Settings">
+                <a href="/settings" title="Settings" class="{% if request.path == '/settings' %}current-nav{% endif %}">
                     <svg><use href="#icon-settings"></use></svg>
                     <span>Settings</span>
                 </a>
