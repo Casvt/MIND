@@ -93,6 +93,11 @@ class AddNSWindow implements Window {
 
         createURLBuilder(options[args.index])
 
+        nsEls.add.test.classList.remove("error-input")
+        nsEls.add.test.title = ''
+        nsEls.add.submit.classList.remove("error-input")
+        nsEls.add.submit.title = ''
+
         windowInstances.options.hide()
         this.dialog.showModal()
     }
