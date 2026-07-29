@@ -77,10 +77,10 @@ def _process_normal_token(
     }
 
     if token_details['type'].startswith('choice'):
-        normal_entry.update({
-            'options': token_details.get('values'),
-            'default': token_details.get('default')
-        })
+        normal_entry.update(
+            {'options': list(token_details["values"])
+             if "values" in token_details else None,
+             'default': token_details.get('default')})
 
     else:
         normal_entry.update({
@@ -111,10 +111,10 @@ def _process_arg(
         })
 
     elif arg_details['type'].startswith('choice'):
-        args_entry.update({
-            'options': arg_details['values'],
-            'default': arg_details.get('default')
-        })
+        args_entry.update(
+            {'options': list(arg_details["values"])
+             if "values" in arg_details else None, 'default': arg_details.get(
+                 'default')})
 
     elif arg_details['type'] == 'bool':
         args_entry.update({
