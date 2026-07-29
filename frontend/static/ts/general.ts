@@ -20,6 +20,12 @@ export const invalidUsernameReasonMap: Record<string, string> = {
     invalid_character: "The username contains an invalid character"
 }
 
+export const nsTestFailReasonMap: Record<string, string> = {
+    connection_error: "There was a connection error",
+    syntax_invalid_url: "The syntax of the URL is invalid",
+    rejected_url: "Value(s) rejected by service"
+}
+
 // region Definitions
 export abstract class Window {
     public abstract readonly dialog: HTMLDialogElement

@@ -1,4 +1,4 @@
-import { createIcon, fetchAPI, hide, Window } from "../general";
+import { createIcon, fetchAPI, hide, nsTestFailReasonMap, Window } from "../general";
 import { nsEls } from "./elements";
 import { buildURL, createURLBuilder, ServiceTemplate, validateInputRegexes } from "./urlbuilder";
 
@@ -131,7 +131,7 @@ class AddNSWindow implements Window {
                 testButton.classList.add("show-sent")
             } else {
                 testButton.classList.add("error-input")
-                testButton.title = json.result.description
+                testButton.title = nsTestFailReasonMap[json.result.description]
             }
         })
     }
@@ -174,7 +174,7 @@ class AddNSWindow implements Window {
         .catch(json => {
             if (json.error === "URLInvalid") {
                 addButton.classList.add("error-input")
-                addButton.title = json.result.reason
+                addButton.title = nsTestFailReasonMap[json.result.reason]
             }
             else
                 console.log(json)
@@ -219,7 +219,7 @@ class EditNSWindow implements Window {
         })
         .catch(json => {
             if (json.error === "URLInvalid" || json.error === "InvalidKeyValue") {
-                nsEls.edit.error.innerText = json.result.reason || "Syntax of URL invalid"
+                nsEls.edit.error.innerText = nsTestFailReasonMap[json.result.reason] || "Syntax of URL invalid"
                 hide({to_show: [nsEls.edit.error]})
                 nsEls.edit.urlContainer.classList.add("error-input-container")
             }

@@ -8,6 +8,11 @@ var Constants = class {
   static unsavedChangesMessage = "You have unsaved changes. Are you sure you want to leave?";
   static restartMessage = "MIND has detected changes to the hosting settings. It is required to login into MIND within 1 minute in order to keep the new hosting settings. Otherwise, MIND will go back to the old hosting settings.";
 };
+var nsTestFailReasonMap = {
+  connection_error: "There was a connection error",
+  syntax_invalid_url: "The syntax of the URL is invalid",
+  rejected_url: "Value(s) rejected by service"
+};
 function hide({ to_hide = [], to_show = [] } = {}) {
   to_hide.forEach((el) => el.classList.add("hidden"));
   if (to_show !== null && to_show !== void 0)
@@ -633,7 +638,7 @@ var AddNSWindow = class {
         testButton.classList.add("show-sent");
       } else {
         testButton.classList.add("error-input");
-        testButton.title = json.result.description;
+        testButton.title = nsTestFailReasonMap[json.result.description];
       }
     });
   }
@@ -667,7 +672,7 @@ var AddNSWindow = class {
     }).catch((json) => {
       if (json.error === "URLInvalid") {
         addButton.classList.add("error-input");
-        addButton.title = json.result.reason;
+        addButton.title = nsTestFailReasonMap[json.result.reason];
       } else
         console.log(json);
     });
@@ -702,7 +707,7 @@ var EditNSWindow = class {
       this.hide();
     }).catch((json) => {
       if (json.error === "URLInvalid" || json.error === "InvalidKeyValue") {
-        nsEls.edit.error.innerText = json.result.reason || "Syntax of URL invalid";
+        nsEls.edit.error.innerText = nsTestFailReasonMap[json.result.reason] || "Syntax of URL invalid";
         hide({ to_show: [nsEls.edit.error] });
         nsEls.edit.urlContainer.classList.add("error-input-container");
       } else
