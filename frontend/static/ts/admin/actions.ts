@@ -704,7 +704,7 @@ class UploadDatabaseWindow implements Window {
         fetchAPI("/admin/database", {
             method: "POST",
             params: {
-                copy_hosting_settings: adminEls.uploadDb.inputs.keepHostingSettings
+                copy_hosting_settings: adminEls.uploadDb.inputs.keepHostingSettings.checked
             },
             body: formData
         })
