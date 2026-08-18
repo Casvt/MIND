@@ -752,7 +752,7 @@ class ImportDatabaseWindow implements Window {
 
     public submit(): void {
         const backupIndex = this.state.backupIndex
-        if (!backupIndex)
+        if (backupIndex === null)
             throw new Error("Trying to submit importing a db without having the dialog open")
 
         adminEls.importDb.submit.replaceChildren(createIcon("icon-loading"))
