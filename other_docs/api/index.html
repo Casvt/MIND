@@ -1857,7 +1857,7 @@ Supply it via the url parameter <code class="highlight">api_key</code>.
 This API key is valid for one hour (though the admin can change this duration) after which the key expires, any further requests return 401 'APIKeyExpired' and you are required to log in again.
 If no <code class="highlight">api_key</code> is supplied or it is invalid, 401 <code class="highlight">APIKeyInvalid</code> is returned.</p>
 <p>For example:
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl<span class="w"> </span>-sSL<span class="w"> </span><span class="s1">&#39;http://192.168.2.15:8080/api/reminders?api_key=ABCDEFG&#39;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>curl<span class="w"> </span>-sSL<span class="w"> </span><span class="s1">'http://192.168.2.15:8080/api/reminders?api_key=ABCDEFG'</span>
 </code></pre></div></p>
 <h2 id="supplying-data">Supplying data<a class="headerlink" href="#supplying-data" title="Permanent link">&para;</a></h2>
 <p>Often, data needs to be supplied with a request:</p>
@@ -1868,19 +1868,19 @@ If no <code class="highlight">api_key</code> is supplied or it is invalid, 401 <
 </ul>
 <p>For example:
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># URL parameter</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>curl<span class="w"> </span>-sSL<span class="w"> </span><span class="s1">&#39;http://192.168.2.15:8080/api/reminders/search?api_key=ABCDEFG&amp;query=Fountain&amp;sort_by=time_reversed&#39;</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>curl<span class="w"> </span>-sSL<span class="w"> </span><span class="s1">'http://192.168.2.15:8080/api/reminders/search?api_key=ABCDEFG&amp;query=Fountain&amp;sort_by=time_reversed'</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Body parameter</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>curl<span class="w"> </span>-sSLX<span class="w"> </span>POST<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span>-d<span class="w"> </span><span class="s1">&#39;{&quot;title&quot;: &quot;Test service&quot;, &quot;url&quot;: &quot;test://fake/url&quot;}&#39;</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="s1">&#39;http://192.168.2.15:8080/api/notificationservices?api_key=ABCDEFG&#39;</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span>-H<span class="w"> </span><span class="s1">'Content-Type: application/json'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span>-d<span class="w"> </span><span class="s1">'{"title": "Test service", "url": "test://fake/url"}'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="s1">'http://192.168.2.15:8080/api/notificationservices?api_key=ABCDEFG'</span>
 <a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
 <a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="c1"># File parameter</span>
 <a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>curl<span class="w"> </span>-sSLX<span class="w"> </span>POST<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span>-H<span class="w"> </span><span class="s1">&#39;Content-Type: multipart/form-data&#39;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span>-H<span class="w"> </span><span class="s1">'Content-Type: multipart/form-data'</span><span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span>-F<span class="w"> </span><span class="nv">file</span><span class="o">=</span>@/backups/MIND_backup.db<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="s1">&#39;http://192.168.2.15:8080/api/admin/database?api_key=ABCDEFG&#39;</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">    </span><span class="s1">'http://192.168.2.15:8080/api/admin/database?api_key=ABCDEFG'</span>
 </code></pre></div></p>
 <h2 id="endpoints">Endpoints<a class="headerlink" href="#endpoints" title="Permanent link">&para;</a></h2>
 <p>The following is automatically generated. Please report any issues on <a href="https://github.com/Casvt/MIND/issues">GitHub</a>.</p>

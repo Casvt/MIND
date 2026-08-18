@@ -1287,7 +1287,7 @@
 <div class="tabbed-block">
 <p>Linux standards would suggest putting the folder in <code class="highlight">/opt/application_name</code>, as the <code class="highlight">/opt</code> directory is where program options should be stored. This is not mandatory however; you are allowed to create a folder anywhere you like. If we apply the standard to MIND, the folder would be <code class="highlight">/opt/MIND/db</code>.</p>
 <p>Create the desired folder using the UI (if your distro offers this) or with the following shell command (replace <code class="highlight">/path/to/directory</code> with desired path):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>mkdir<span class="w"> </span><span class="s2">&quot;/path/to/directory&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>mkdir<span class="w"> </span><span class="s2">"/path/to/directory"</span>
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Permissions and ownership</p>
@@ -1297,7 +1297,7 @@
 <div class="tabbed-block">
 <p>MacOS standards would suggest putting the folder in <code class="highlight">/Applications/application_name</code>. This is not mandatory however; you are allowed to create a folder anywhere you like. If we apply the standard to MIND, the folder would be <code class="highlight">/Applications/MIND/db</code>.</p>
 <p>Create the desired folder using the UI or with the following shell command (replace <code class="highlight">/path/to/directory</code> with desired path):</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mkdir<span class="w"> </span><span class="s2">&quot;/path/to/directory&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mkdir<span class="w"> </span><span class="s2">"/path/to/directory"</span>
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Permissions and ownership</p>
@@ -1307,7 +1307,7 @@
 <div class="tabbed-block">
 <p>There is no defined standard for Windows on where to put such a folder. We suggest a path like <code class="highlight">C:\apps\application_name</code>, so that it can be managed easily. This is not mandatory however; you are allowed to create a folder anywhere you like. If we apply this suggestion to MIND, the folder would be <code class="highlight">C:\apps\MIND\db</code>.</p>
 <p>Create the desired folder either using the Windows Explorer, or using the following Powershell command:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">mkdir</span> <span class="s2">&quot;C:\apps\MIND\db&quot;</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">mkdir</span> <span class="s2">"C:\apps\MIND\db"</span>
 </code></pre></div>
 <div class="admonition info">
 <p class="admonition-title">Permissions and ownership</p>
@@ -1330,7 +1330,7 @@
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span>--name<span class="w"> </span>mind<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span>-v<span class="w"> </span><span class="s2">&quot;mind-db:/app/db&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span>-v<span class="w"> </span><span class="s2">"mind-db:/app/db"</span><span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span>-e<span class="w"> </span><span class="nv">TZ</span><span class="o">=</span>Europe/Amsterdam<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="w">    </span>mrcas/mind:latest
@@ -1339,14 +1339,14 @@
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>docker<span class="w"> </span>run<span class="w"> </span>-d<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">    </span>--name<span class="w"> </span>mind<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span>-v<span class="w"> </span><span class="s2">&quot;mind-db:/app/db&quot;</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span>-v<span class="w"> </span><span class="s2">"mind-db:/app/db"</span><span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span>-e<span class="w"> </span><span class="nv">TZ</span><span class="o">=</span>Europe/Amsterdam<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">    </span>-p<span class="w"> </span><span class="m">8080</span>:8080<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">    </span>mrcas/mind:latest
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">docker</span> <span class="n">run</span> <span class="n">-d</span> <span class="p">-</span><span class="n">-name</span> <span class="n">mind</span> <span class="n">-v</span> <span class="s2">&quot;mind-db:/app/db&quot;</span> <span class="n">-e</span> <span class="n">TZ</span><span class="p">=</span><span class="n">Europe</span><span class="p">/</span><span class="n">Amsterdam</span> <span class="n">-p</span> <span class="n">8080</span><span class="p">:</span><span class="n">8080</span> <span class="n">mrcas</span><span class="p">/</span><span class="n">mind</span><span class="p">:</span><span class="n">latest</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">docker</span> <span class="n">run</span> <span class="n">-d</span> <span class="p">-</span><span class="n">-name</span> <span class="n">mind</span> <span class="n">-v</span> <span class="s2">"mind-db:/app/db"</span> <span class="n">-e</span> <span class="n">TZ</span><span class="p">=</span><span class="n">Europe</span><span class="p">/</span><span class="n">Amsterdam</span> <span class="n">-p</span> <span class="n">8080</span><span class="p">:</span><span class="n">8080</span> <span class="n">mrcas</span><span class="p">/</span><span class="n">mind</span><span class="p">:</span><span class="n">latest</span>
 </code></pre></div>
 </div>
 </div>
@@ -1355,8 +1355,8 @@
 <ol>
 <li>
 <p>If you're using a folder on the host machine instead of a docker volume to store the database file (<a href="#create-docker-volume-or-folder">reference</a>), replace <code class="highlight">mind-db</code> with the path to the host folder.<br />
-E.g. <code class="highlight">&quot;/opt/MIND/db:/app/db&quot;</code>.<br />
-E.g. <code class="highlight">&quot;C:\apps\MIND\db:/app/db&quot;</code>.</p>
+E.g. <code class="highlight">"/opt/MIND/db:/app/db"</code>.<br />
+E.g. <code class="highlight">"C:\apps\MIND\db:/app/db"</code>.</p>
 </li>
 <li>
 <p>Replace the timezone value (<code class="highlight">TZ=</code>) with the <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List">TZ database name</a> of your timezone (value of <code class="highlight">TZ identifier</code> on webpage).</p>
@@ -1368,20 +1368,20 @@ E.g. <code class="highlight">&quot;C:\apps\MIND\db:/app/db&quot;</code>.</p>
 </div>
 <div class="tabbed-block">
 <p>The contents of the <code class="highlight">docker-compose.yml</code> file are below. The source file can also be found <a href="https://github.com/Casvt/MIND/blob/Development/docker-compose.yml">on GitHub</a>. But before you copy, paste and run it, read the notes below!</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>version: &quot;3.3&quot;
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>services:
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>  mind:
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    container_name: mind
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>      image: mrcas/mind:latest
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>      volumes:
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>        <span class="k">-</span> &quot;mind-db:/app/db&quot;
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>      environment:
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a>        <span class="k">-</span> TZ=Europe/Amsterdam
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>      ports:
-<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>        <span class="k">-</span> 8080:8080
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">"3.3"</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="nt">services</span><span class="p">:</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="nt">mind</span><span class="p">:</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="nt">container_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mind</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">image</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mrcas/mind:latest</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">volumes</span><span class="p p-Indicator">:</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"mind-db:/app/db"</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">    </span><span class="w w-Error">  </span><span class="nt">environment</span><span class="p">:</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">TZ=Europe/Amsterdam</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">      </span><span class="nt">ports</span><span class="p">:</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8080:8080</span>
 <a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a>
-<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a>volumes:
-<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a>  mind-db:  
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="nt">volumes</span><span class="p">:</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="w">  </span><span class="nt">mind-db</span><span class="p">:</span><span class="w">  </span>
 </code></pre></div>
 <p>Then run the following command to start the container. Run this command from within the directory where the <code class="highlight">docker-compose.yml</code> file is located.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>docker-compose<span class="w"> </span>up<span class="w"> </span>-d
@@ -1390,8 +1390,8 @@ E.g. <code class="highlight">&quot;C:\apps\MIND\db:/app/db&quot;</code>.</p>
 <ol>
 <li>
 <p>If you're using a folder on the host machine instead of a docker volume to store the database file (<a href="#create-docker-volume-or-folder">reference</a>), replace <code class="highlight">mind-db</code> with the path to the host folder.<br />
-E.g. <code class="highlight">&quot;/opt/MIND/db:/app/db&quot;</code>.<br />
-E.g. <code class="highlight">&quot;C:\apps\MIND\db:/app/db&quot;</code>.</p>
+E.g. <code class="highlight">"/opt/MIND/db:/app/db"</code>.<br />
+E.g. <code class="highlight">"C:\apps\MIND\db:/app/db"</code>.</p>
 </li>
 <li>
 <p>Replace the timezone value (<code class="highlight">TZ=</code>) with the <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List">TZ database name</a> of your timezone (value of <code class="highlight">TZ identifier</code> on webpage).</p>
