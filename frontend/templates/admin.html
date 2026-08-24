@@ -121,18 +121,19 @@
 					<h2>Edit User</h2>
 				</div>
 				<div class="dialog-content">
-					<p>Leave fields empty to not change for <span id="edit-target-username"></span></p>
-					<form id="edit-user-form">
-						<label for="edit-user-username">Username</label>
-						<div class="checked-input-container">
-							<input type="text" id="edit-user-username" autocomplete="username" placeholder="New username" class="input-style">
-							<p id="edit-invalid-username">Username invalid</p>
-							<p id="edit-taken-username">Username already taken</p>
-						</div>
-
-						<label for="edit-user-password">Password</label>
-						<input type="password" id="edit-user-password" autocomplete="new-password" placeholder="New password" class="input-style">
-					</form>
+					<div>
+						<p>Leave fields empty to not change for <span id="edit-target-username"></span></p>
+						<form id="edit-user-form">
+							<label for="edit-user-username">Username</label>
+							<div class="checked-input-container">
+								<input type="text" id="edit-user-username" autocomplete="username" placeholder="New username" class="input-style">
+								<p id="edit-invalid-username">Username invalid</p>
+								<p id="edit-taken-username">Username already taken</p>
+							</div>
+							<label for="edit-user-password">Password</label>
+							<input type="password" id="edit-user-password" autocomplete="new-password" placeholder="New password" class="input-style">
+						</form>
+					</div>
 				</div>
 				<div class="dialog-footer">
 					<button id="close-edit-user" class="input-style">Cancel</button>
@@ -143,10 +144,12 @@
 		<dialog id="delete-user-dialog">
 			<div class="dialog-container">
 				<div class="dialog-content">
-					<p>Are you sure you want to delete the user <span id="delete-target-username"></span>?</p>
-					<div class="confirm-container">
-						<button id="confirm-delete-user" class="input-style">Confirm</button>
-						<button id="close-delete-user" class="input-style">Cancel</button>
+					<div>
+						<p>Are you sure you want to delete the user <span id="delete-target-username"></span>?</p>
+						<div class="confirm-container">
+							<button id="confirm-delete-user" class="input-style">Confirm</button>
+							<button id="close-delete-user" class="input-style">Cancel</button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -157,31 +160,33 @@
 					<h2>Upload Database</h2>
 				</div>
 				<div class="dialog-content">
-					<p>You will be uploading a database file. Login into MIND within one minute to keep the new database, or the upload will automatically be reverted.</p>
-					<form id="upload-db-form">
-						<div class="table-container">
-							<table class="collapse-table">
-								<tbody>
-									<tr>
-										<td><label for="database-file">Database File</label></td>
-										<td>
-											<div class="checked-input-container">
-												<input type="file" id="database-file" class="input-style" required>
-												<p>Invalid database file</p>
-											</div>
-										</td>
-									</tr>
-									<tr>
-										<td><label for="copy-hosting-upload">Keep Hosting Settings</label></td>
-										<td>
-											<input type="checkbox" id="copy-hosting-upload">
-											<p>Keep the current hosting settings instead of using the settings in the uploaded database when importing.</p>
-										</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</form>
+					<div>
+						<p>You will be uploading a database file. Login into MIND within one minute to keep the new database, or the upload will automatically be reverted.</p>
+						<form id="upload-db-form">
+							<div class="table-container">
+								<table class="collapse-table">
+									<tbody>
+										<tr>
+											<td><label for="database-file">Database File</label></td>
+											<td>
+												<div class="checked-input-container">
+													<input type="file" id="database-file" class="input-style" required>
+													<p>Invalid database file</p>
+												</div>
+											</td>
+										</tr>
+										<tr>
+											<td><label for="copy-hosting-upload">Keep Hosting Settings</label></td>
+											<td>
+												<input type="checkbox" id="copy-hosting-upload">
+												<p>Keep the current hosting settings instead of using the settings in the uploaded database when importing.</p>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</form>
+					</div>
 				</div>
 				<div class="dialog-footer">
 					<button id="close-upload-db" class="input-style">Cancel</button>
@@ -195,23 +200,25 @@
 					<h2>Import Database</h2>
 				</div>
 				<div class="dialog-content">
-					<p>You will be importing database backup <span id="db-backup-name"></span>, created on <span id="db-creation-date"></span>.
-						Login into MIND within one minute to keep the new database, or the import will automatically be reverted.</p>
-					<form id="import-db-form">
-						<div class="table-container">
-							<table class="collapse-table">
-								<tbody>
-									<tr>
-										<td><label for="copy-hosting-import">Keep Hosting Settings</label></td>
-										<td>
-											<input type="checkbox" id="copy-hosting-import">
-											<p>Keep the current hosting settings instead of using the settings in the selected database backup when importing.</p>
-										</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</form>
+					<div>
+						<p>You will be importing database backup <span id="db-backup-name"></span>, created on <span id="db-creation-date"></span>.
+							Login into MIND within one minute to keep the new database, or the import will automatically be reverted.</p>
+						<form id="import-db-form">
+							<div class="table-container">
+								<table class="collapse-table">
+									<tbody>
+										<tr>
+											<td><label for="copy-hosting-import">Keep Hosting Settings</label></td>
+											<td>
+												<input type="checkbox" id="copy-hosting-import">
+												<p>Keep the current hosting settings instead of using the settings in the selected database backup when importing.</p>
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</form>
+					</div>
 				</div>
 				<div class="dialog-footer">
 					<button id="close-import-db" class="input-style">Cancel</button>

@@ -288,6 +288,14 @@
 	}
 }
 
+#delete-ns-dialog .dialog-content > div {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
+	padding: 1rem;
+}
+
 #delete-ns-dialog p {
 	padding-inline: 1rem;
 	text-align: center;

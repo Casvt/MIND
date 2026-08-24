@@ -10,11 +10,13 @@
 	<dialog id="delete-account-dialog">
 		<div class="dialog-container">
 			<div class="dialog-content">
-				<p>Are you sure you want to permanently delete your account?</p>
-				<div class="confirm-container">
-					<button id="confirm-delete-account" class="input-style">Confirm</button>
-					<button id="close-delete-account" class="input-style">Cancel</button>
-				</div>
+				<div>
+                    <p>Are you sure you want to permanently delete your account?</p>
+                    <div class="confirm-container">
+                        <button id="confirm-delete-account" class="input-style">Confirm</button>
+                        <button id="close-delete-account" class="input-style">Cancel</button>
+                    </div>
+                </div>
 			</div>
 		</div>
 	</dialog>
@@ -25,18 +27,20 @@
 				<h2>Edit Account</h2>
 			</div>
 			<div class="dialog-content">
-				<p>Leave fields empty to not change their value</p>
-				<form id="edit-account-form">
-                    <label for="edit-username">Username</label>
-					<div class="checked-input-container">
-						<input type="text" id="edit-username" autocomplete="username" placeholder="New username" class="input-style">
-						<p id="invalid-username-error">Username invalid</p>
-						<p id="username-taken-error">Username already taken</p>
-					</div>
+				<div>
+                    <p>Leave fields empty to not change their value</p>
+                    <form id="edit-account-form">
+                        <label for="edit-username">Username</label>
+                        <div class="checked-input-container">
+                            <input type="text" id="edit-username" autocomplete="username" placeholder="New username" class="input-style">
+                            <p id="invalid-username-error">Username invalid</p>
+                            <p id="username-taken-error">Username already taken</p>
+                        </div>
 
-                    <label for="edit-password">Password</label>
-					<input type="password" id="edit-password" autocomplete="new-password" placeholder="New password" class="input-style">
-				</form>
+                        <label for="edit-password">Password</label>
+                        <input type="password" id="edit-password" autocomplete="new-password" placeholder="New password" class="input-style">
+                    </form>
+                </div>
 			</div>
 			<div class="dialog-footer">
 				<button id="close-edit-account" class="input-style">Cancel</button>

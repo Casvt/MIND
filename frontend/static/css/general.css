@@ -514,7 +514,7 @@ div.long-input-style > input {
 
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
+	justify-content: space-around;
 	align-items: center;
 	gap: 1rem;
 }

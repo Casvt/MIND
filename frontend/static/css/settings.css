@@ -10,14 +10,27 @@ main > h2:first-of-type {
 	margin-inline: auto;
 }
 
-:where(#edit-account-dialog, #delete-user-dialog) .dialog-content > p {
-	padding-inline: 1rem;
-	text-align: center;
+#edit-account-dialog,
+#delete-account-dialog {
+	--max-height: 25rem;
+}
+
+:where(#edit-account-dialog, #delete-account-dialog) .dialog-content > div {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
+	padding: 1rem;
+
+	& > p {
+		padding-inline: 1rem;
+		text-align: center;
+	}
 }
 
 #edit-account-form {
 	width: min(90%, 16rem);
-	height: 12rem;
+	height: 14rem;
 
 	display: flex;
 	flex-direction: column;

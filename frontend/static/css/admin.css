@@ -154,6 +154,7 @@ div.input-style:has(input.changed) {
 /* Dialog content styling */
 #add-user-form,
 #edit-user-form {
+	flex: 0 0 auto;
 	width: min(90%, 16rem);
 	height: 12rem;
 
@@ -161,10 +162,27 @@ div.input-style:has(input.changed) {
 	flex-direction: column;
 	justify-content: center;
 	gap: .4rem;
-	
+
 	& > .checked-input-container {
 		margin-bottom: 1rem;
 	}
+}
+
+#edit-user-dialog {
+	--max-height: 25rem;
+}
+
+#add-user-form {
+	height: 14rem;
+	padding: 1rem;
+}
+
+:where(#edit-user-dialog, #delete-user-dialog, #upload-db-dialog, #import-db-dialog) .dialog-content > div {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
+	padding: 1rem;
 }
 
 #edit-user-form:has(div.hidden) {
@@ -180,7 +198,7 @@ dialog:where(#upload-db-dialog, #import-db-dialog) {
 }
 
 :where(#upload-db-dialog, #import-db-dialog, #add-user-dialog, #edit-user-dialog)
- .dialog-content > p {
+ .dialog-content > div > p {
 	padding-inline: 1rem;
 	text-align: center;
 }
@@ -244,6 +262,10 @@ dialog:where(#upload-db-dialog, #import-db-dialog) {
 
 #plugin-not-found {
 	transform: translateY(1rem);
+}
+
+#plugins-dialog .table-container {
+	overflow: unset;
 }
 
 #plugins-table :where(th, td):last-child {
