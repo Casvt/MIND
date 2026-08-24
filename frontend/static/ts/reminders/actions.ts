@@ -148,13 +148,12 @@ export function evaluateSizing(): void {
     const entries = [...libEls.tabs[activeTab].querySelectorAll<HTMLButtonElement>(
         "button:not(.add-entry)"
     )]
-    entries.forEach(e => e.classList.remove("fit"))
     entries.forEach(e => {
         const title = e.querySelector("h2")!
+        e.classList.remove("expand")
         if (title.clientHeight < title.scrollHeight)
             e.classList.add("expand")
     })
-    entries.forEach(e => e.classList.add("fit"))
 }
 
 export async function fillLibrary(reminderType: ReminderType): Promise<void> {

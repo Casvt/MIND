@@ -219,15 +219,13 @@ main:has(
 /* Tabs */
 /*  */
 #tab-container > div {
-	--gap: 1rem;
-	--entry-width: 13rem;
-	max-width: 43rem;
+	max-width: 60rem;
 	margin-inline: auto;
 
 	display: none;
-	justify-content: left;
-	gap: var(--gap);
-	flex-wrap: wrap;
+	grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+	grid-auto-rows: 7rem;
+	gap: 1rem;
 
 	padding: 1rem;
 }
@@ -235,11 +233,11 @@ main:has(
 main:has(#reminder-tab-selector[data-selected]) #reminder-tab,
 main:has(#static-tab-selector[data-selected]) #static-reminder-tab,
 main:has(#template-tab-selector[data-selected]) #template-tab {
-    display: flex;
+    display: grid;
 }
 
 body:has(#wide-toggle[data-selected]) #tab-container > div {
-	max-width: 85rem;
+	max-width: unset;
 }
 
 /*  */
@@ -267,9 +265,8 @@ body:has(#wide-toggle[data-selected]) #tab-container > div {
 
 .entry {
 	--color: var(--color-gray);
-	width: var(--entry-width);
-	min-height: 5.8rem;
-	max-height: 8.9rem;
+	width: 100%;
+	height: 100%;
 	position: relative;
 
 	display: flex;
@@ -282,12 +279,8 @@ body:has(#wide-toggle[data-selected]) #tab-container > div {
 	color: var(--color-light);
 }
 
-.entry.fit {
-	flex-grow: 1;
-}
-
 .entry.expand {
-	width: calc(var(--entry-width) * 2 + var(--gap));
+	grid-column: span 2;
 }
 
 .entry h2 {
@@ -317,9 +310,8 @@ body:has(#wide-toggle[data-selected]) #tab-container > div {
 	#search-form #wide-toggle {
 		display: none;
 	}
-
-	.entry {
-		flex-grow: 1;
-		width: 9rem;
+	
+	.entry.expand {
+		grid-column: unset;
 	}
 }

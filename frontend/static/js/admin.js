@@ -810,7 +810,7 @@ var UploadDatabaseWindow = class {
     fetchAPI("/admin/database", {
       method: "POST",
       params: {
-        copy_hosting_settings: adminEls.uploadDb.inputs.keepHostingSettings
+        copy_hosting_settings: adminEls.uploadDb.inputs.keepHostingSettings.checked
       },
       body: formData
     }).then((_) => setTimeout(
@@ -847,7 +847,7 @@ var ImportDatabaseWindow = class {
   }
   submit() {
     const backupIndex = this.state.backupIndex;
-    if (!backupIndex)
+    if (backupIndex === null)
       throw new Error("Trying to submit importing a db without having the dialog open");
     adminEls.importDb.submit.replaceChildren(createIcon("icon-loading"));
     adminEls.importDb.submit.classList.add("spinning");
