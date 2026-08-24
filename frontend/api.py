@@ -147,6 +147,7 @@ def auth() -> None:
         exp = (
             int(epoch_time()) + sv.login_time
         )
+        AuthManager.api_key_map[hashed_api_key] = (user_data, exp)
 
     g.hashed_api_key = hashed_api_key
     g.user_data = user_data
