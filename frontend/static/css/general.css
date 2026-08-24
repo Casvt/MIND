@@ -171,23 +171,12 @@ dialog[open]::backdrop {
 	display: none !important;
 }
 
-.error,
-.error-container p {
+.error {
 	color: var(--color-error) !important;
 	font-size: 1rem !important;
 }
 
-.error-container p {
-	display: block !important;
-}
-
-.error-icon :where(path, rect),
-.error-container :where(path, rect) {
-	fill: var(--color-error) !important;
-}
-
-.error-input,
-.error-container input {
+.error-input {
 	border: 2px solid var(--color-error) !important;
 }
 

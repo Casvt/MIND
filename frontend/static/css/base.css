@@ -165,7 +165,7 @@ nav > div > :where(button, a) {
 		display var(--nav-show-speed) var(--playful-curve) allow-discrete;
 }
 
-main h2 {
+main > h2 {
 	font-size: 1.75rem;
 	margin-bottom: 1rem;
 }
