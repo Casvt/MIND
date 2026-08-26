@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Union
 
 from backend.base.custom_exceptions import (InvalidKeyValue, InvalidTime,
@@ -163,8 +163,11 @@ class Reminder:
 
         if time is not None:
             if not repeated_reminder:
-                if time < datetime.utcnow().timestamp():
+                if time < datetime.now(
+                    timezone.utc
+                ).replace(tzinfo=None).timestamp():
                     raise InvalidTime(time)
+
             time = round(time)
 
         if notification_services:
@@ -394,7 +397,7 @@ class Reminders:
             f'{cron_schedule=}, {color=}, {enabled=}')
 
         # Validate data
-        if time < datetime.utcnow().timestamp():
+        if time < datetime.now(timezone.utc).replace(tzinfo=None).timestamp():
             raise InvalidTime(time)
         time = round(time)
 

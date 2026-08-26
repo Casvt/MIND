@@ -6,7 +6,7 @@ Handling of the reminders such that they are sent at their scheduled time.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Union
 
 from backend.base.definitions import Constants, RepeatQuantity, SendResult
@@ -113,7 +113,10 @@ class ReminderHandler:
             if cls.reminder_timer is not None:
                 cls.reminder_timer.cancel()
 
-            delta_t = time - datetime.utcnow().timestamp()
+            delta_t = time - datetime.now(
+                timezone.utc
+            ).replace(tzinfo=None).timestamp()
+
             cls.reminder_timer = Server().get_db_timer_thread(
                 delta_t,
                 cls._trigger_reminders,

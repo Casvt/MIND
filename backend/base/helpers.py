@@ -385,15 +385,21 @@ def find_next_time(
         weekdays.sort()
 
     current_time = datetime.now(timezone.utc)
-    original_datetime = datetime.fromtimestamp(original_time, tz=timezone.utc)
-    new_time = datetime.fromtimestamp(original_time, tz=timezone.utc)
+    original_datetime = datetime.fromtimestamp(
+        original_time
+    ).replace(tzinfo=timezone.utc)
+    new_time = datetime.fromtimestamp(
+        original_time
+    ).replace(tzinfo=timezone.utc)
 
     if cron_schedule is not None:
         cron_instance = Cron(cron_schedule)
-        schedule = cron_instance.schedule(current_time)
-        new_time = schedule.next()
+        schedule = cron_instance.schedule()
+        new_time = schedule.next().replace(tzinfo=None).astimezone(timezone.utc)
         while new_time <= current_time:
-            new_time = schedule.next()
+            new_time = schedule.next().replace(
+                tzinfo=None
+            ).astimezone(timezone.utc)
 
     elif (
         repeat_quantity is not None
@@ -442,12 +448,13 @@ def find_next_time(
             second=original_datetime.second
         )
 
-    result = int(new_time.timestamp())
+    result = int(new_time.replace(tzinfo=None).timestamp())
     LOGGER.debug(
         f'{original_datetime=}, {current_time=} ' +
         f'and interval of {repeat_interval} {repeat_quantity} ' +
         f'and weekdays {weekdays} ' +
-        f'leads to {result}'
+        f'and cron schedule {cron_schedule} ' +
+        f'leads to {new_time=}'
     )
     return result
 
