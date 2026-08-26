@@ -76,12 +76,10 @@ class ReminderHandler:
                     "Failed to send notification for reminder %s: ",
                     reminder.id
                 )
-                cls.next_trigger_time = None
 
-            else:
-                cls.reminder_timer = None
-                cls.next_trigger_time = None
-                cls.set_reminder_timer()
+        cls.reminder_timer = None
+        cls.next_trigger_time = None
+        cls.set_reminder_timer()
 
         return
 
