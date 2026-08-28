@@ -431,7 +431,7 @@ var reminderTypeToName = {
   [2 /* TEMPLATE */]: "template"
 };
 var colorOptions = {
-  "#3c3c3c": "Gray",
+  "#232323": "Gray",
   "#49191e": "Red",
   "#171a42": "Blue",
   "#083b06": "Green",
@@ -539,7 +539,7 @@ var EditorWindow = class {
     libEls.editor.inputs.body.value = "";
   }
   fillTimelessForm(data) {
-    libEls.editor.inputs.color.value = data.color || Object.keys(colorOptions)[0];
+    libEls.editor.inputs.color.value = Object.keys(colorOptions).includes(data.color || "") ? data.color || "" : Object.keys(colorOptions)[0];
     libEls.editor.inputs.ns.querySelectorAll("option").forEach((option) => {
       option.selected = data.notification_services.includes(parseInt(option.value));
     });
