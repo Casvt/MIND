@@ -138,8 +138,9 @@ table {
 dialog {
 	--ani-duration: 100ms;
 	--max-height: 23rem;
+	--max-width: 40rem;
 
-	width: min(100%, 40rem);
+	width: min(100%, var(--max-width));
 	height: min(100%, var(--max-height));
 
 	border-radius: 6px;
@@ -195,7 +196,7 @@ svg.spinning {
 	to { transform: rotate(360deg) }
 }
 
-:where(input, textarea, select, button, div).input-style {
+:where(input, textarea, select, button, div, label).input-style {
 	height: 2.7rem;
 	width: 100%;
 
@@ -215,7 +216,7 @@ svg.spinning {
 	}
 }
 
-:where(input, textarea, select, button).input-style,
+:where(input, textarea, select, button, label).input-style,
 div.input-style > :where(input, p) {
 	padding: .5rem;
 }
@@ -494,7 +495,7 @@ div.long-input-style > input {
 	border-bottom: 0;
 }
 
-.dialog-footer > button,
+.dialog-footer button,
 .confirm-container > button {
 	width: 5rem;
 	height: 2.3rem;

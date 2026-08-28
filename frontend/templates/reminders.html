@@ -7,6 +7,115 @@
     <script defer src="{{ url_for('static', filename='js/reminders.js') }}"></script>
 {% endblock %}
 {% block windows %}
+    <dialog id="editor-dialog">
+        <div class="dialog-container">
+            <div class="dialog-header">
+                <h2 id="editor-activity"></h2>
+            </div>
+            <div class="dialog-content">
+                <form id="editor-form">
+                    <div>
+                        <select id="template-selection" class="input-style">
+                            <option value="0" selected>No template</option>
+                        </select>
+                        <label for="enabled-toggle" id="enabled-container" class="input-style">
+                            <input type="checkbox" id="enabled-toggle" checked>
+                            <span>Enabled</span>
+                        </label>
+                        <select id="color-selection" class="input-style">
+                            <button>
+                                <selectedcontent></selectedcontent>
+                            </button>
+                        </select>
+                        <select id="repetition-selection" class="input-style">
+                            <option value="normal">Run Once</option>
+                            <option value="repeated">At Interval</option>
+                            <option value="week_days">At Week Days</option>
+                            <option value="cron">Custom Cron Schedule</option>
+                        </select>
+                        <div id="time-container" class="checked-input-container">
+                            <input type="datetime-local" id="time-input" class="input-style" required>
+                            <p>Time is in the past</p>
+                        </div>
+                        <div id="repeat-container" class="input-style">
+                            <span>Repeat every </span>
+                            <input type="number" id="repeat-interval" required placeholder="interval" min="1" step="1" oninput="validity.valid || (value='');">
+                            <select id="repeat-quantity" class="input-style">
+                                <option value="minutes">Minute(s)</option>
+                                <option value="hours">Hour(s)</option>
+                                <option value="days" selected>Day(s)</option>
+                                <option value="weeks">Week(s)</option>
+                                <option value="months">Month(s)</option>
+                                <option value="years">Year(s)</option>
+                            </select>
+                        </div>
+                        <div id="weekday-container" class="input-style">
+                            <div>
+                                <label>
+                                    <span>Mo</span>
+                                    <input type="checkbox" name="weekday-mo">
+                                </label>
+                                <label>
+                                    <span>Tu</span>
+                                    <input type="checkbox" name="weekday-tu">
+                                </label>
+                                <label>
+                                    <span>We</span>
+                                    <input type="checkbox" name="weekday-we">
+                                </label>
+                                <label>
+                                    <span>Thu</span>
+                                    <input type="checkbox" name="weekday-thu">
+                                </label>
+                                <label>
+                                    <span>Fr</span>
+                                    <input type="checkbox" name="weekday-fr">
+                                </label>
+                                <label>
+                                    <span>Sa</span>
+                                    <input type="checkbox" name="weekday-sa">
+                                </label>
+                                <label>
+                                    <span>Su</span>
+                                    <input type="checkbox" name="weekday-su">
+                                </label>
+                            </div>
+                        </div>
+                        <div id="cron-container" class="checked-input-container">
+                            <input type="text" id="cron-schedule" class="input-style" placeholder="Enter Cron schedule (e.g.: 0 0 * * *)" required>
+                            <p>Cron schedule is invalid</p>
+                        </div>
+                        <details id="ns-container">
+                            <summary>Notification Services</summary>
+                            <select id="ns-selection" multiple></select>
+                        </details>
+                    </div>
+                    <div>
+                        <input type="text" id="title-input" class="input-style" placeholder="Title" required>
+                        <textarea id="body-input" class="input-style" placeholder="Text (optional)"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="dialog-footer">
+                <div>
+                    <div>
+                        <button id="delete-editor" class="input-style">Delete</button>
+                    </div>
+                    <div>
+                        <button id="close-editor" class="input-style">Cancel</button>
+                        <button id="test-editor" class="input-style test-button" type="button">
+                            <div>
+                                <span id="test-span">Test</span>
+                                <span id="trigger-span">Trigger</span>
+                            </div>
+                            <div>Sent</div>
+                        </button>
+                        <button form="editor-form" id="submit-editor" class="input-style" type="submit">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </dialog>
 {% endblock %}
 {% block main %}
     <div id="tab-selector">

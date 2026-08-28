@@ -46,7 +46,8 @@
 		"customisable",
 		"customised",
 		"noqa",
-		"traceback"
+		"traceback",
+		"selectedcontent"
 	],
 	"cSpell.languageSettings": [
 		{

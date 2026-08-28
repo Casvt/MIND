@@ -103,7 +103,7 @@ nav {
 	border: 1px solid var(--color-dark-border);
 	background-color: var(--color-gray);
 
-	box-shadow: 0 0 10px 2px rgb(0 0 0 / 60%);
+	box-shadow: 0 0 10px 2px rgb(0 0 0 / 30%);
 
 	transition: left var(--nav-show-speed) var(--playful-curve);
 
