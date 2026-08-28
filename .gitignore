@@ -138,3 +138,6 @@ dmypy.json
 
 # Project management files
 release*.sh
+
+# Build files
+frontend/static/js/
