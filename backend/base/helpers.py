@@ -318,7 +318,7 @@ def send_apprise_notification(
             body=text or '\u200B'
         )
         if not result:
-            if "socket exception" in log.getvalue(): # type: ignore
+            if "Connection error" in log.getvalue(): # type: ignore
                 return SendResult.CONNECTION_ERROR
             else:
                 return SendResult.REJECTED_URL
