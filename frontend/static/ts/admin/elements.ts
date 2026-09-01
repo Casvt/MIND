@@ -81,15 +81,18 @@ export const adminEls = {
 		form: document.getElementById("edit-user-form") as HTMLFormElement,
 
         inputContainers: {
-			username: document.querySelector("#edit-user-form .checked-input-container:has(input[type='text'])") as HTMLDivElement
+			username: document.getElementById("edit-username-container") as HTMLDivElement,
+            mfa: document.getElementById("edit-mfa-container") as HTMLDivElement
 		},
 		inputs: {
 			username: document.getElementById("edit-user-username") as HTMLInputElement,
-			password: document.getElementById("edit-user-password") as HTMLInputElement
+			password: document.getElementById("edit-user-password") as HTMLInputElement,
+            mfa: document.getElementById("edit-user-mfa") as HTMLInputElement
 		},
 		errors: {
 			usernameInvalid: document.getElementById("edit-invalid-username") as HTMLParagraphElement,
-			usernameTaken: document.getElementById("edit-taken-username") as HTMLParagraphElement
+			usernameTaken: document.getElementById("edit-taken-username") as HTMLParagraphElement,
+            mfaInvalid: document.getElementById("edit-invalid-mfa") as HTMLParagraphElement
 		}
 	},
     deleteUser: {

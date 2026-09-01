@@ -6,6 +6,8 @@ export class Constants {
 
     public static readonly libraryRefreshInterval = 60000 // ms
 
+    public static readonly passwordReplacement = "*******"
+
     public static readonly unsavedChangesMessage = "You have unsaved changes. Are you sure you want to leave?"
 
     public static readonly restartMessage =

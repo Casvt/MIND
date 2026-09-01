@@ -155,7 +155,7 @@ div.input-style:has(input.changed) {
 #add-user-form,
 #edit-user-form {
 	flex: 0 0 auto;
-	width: min(90%, 16rem);
+	width: min(90%, 20rem);
 	height: 12rem;
 
 	display: flex;
@@ -165,6 +165,11 @@ div.input-style:has(input.changed) {
 
 	& > .checked-input-container {
 		margin-bottom: 1rem;
+		max-width: unset;
+		
+		& > * {
+			max-width: unset;
+		}
 	}
 }
 
@@ -183,10 +188,6 @@ div.input-style:has(input.changed) {
 	align-items: center;
 	gap: 1rem;
 	padding: 1rem;
-}
-
-#edit-user-form:has(div.hidden) {
-	height: unset;
 }
 
 #edit-user-form > label:has( + :where(div, input).hidden) {

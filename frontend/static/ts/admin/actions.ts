@@ -1,4 +1,4 @@
-import { Constants, createIcon, downloadBackupDatabase, fetchAPI, getLocalStorage, hide, invalidUsernameReasonMap, Window } from "../general";
+import { Constants, createIcon, downloadBackupDatabase, fetchAPI, getLocalStorage, hide, invalidUsernameReasonMap, nsTestFailReasonMap, Window } from "../general";
 import { adminEls } from "./elements";
 
 // region About
@@ -402,16 +402,20 @@ class PluginsWindow implements Window {
 }
 
 // region User Management
-export const users: Record<number, {username: string, admin: boolean}> = {}
+type UserData = {
+    id: number,
+    username: string,
+    admin: boolean,
+    mfa_apprise_url: string | null
+}
+export const users: Record<number, UserData> = {}
 
 export function loadUsers(): void {
     adminEls.userList.innerHTML = ''
     fetchAPI("/admin/users")
     .then(json => {
-        json.result.forEach((
-            user: {id: number, username: string, admin: boolean}
-        ) => {
-            users[user.id] = {username: user.username, admin: user.admin}
+        json.result.forEach((user: UserData) => {
+            users[user.id] = user
 
             const entry = document.createElement("tr")
             entry.dataset.id = user.id.toString()
@@ -426,7 +430,7 @@ export function loadUsers(): void {
             const editUser = document.createElement("button")
             editUser.appendChild(createIcon("icon-edit"))
             editUser.title = "Edit the user"
-            editUser.onclick = e => windowInstances.editUser.show({
+            editUser.onclick = () => windowInstances.editUser.show({
                 userId: user.id
             })
             actions.appendChild(editUser)
@@ -434,7 +438,7 @@ export function loadUsers(): void {
             const deleteUser = document.createElement("button")
             deleteUser.appendChild(createIcon("icon-delete"))
             deleteUser.title = "Delete the user"
-            deleteUser.onclick = e => windowInstances.deleteUser.show({
+            deleteUser.onclick = () => windowInstances.deleteUser.show({
                 userId: user.id
             })
             actions.appendChild(deleteUser)
@@ -515,22 +519,30 @@ class EditUserWindow implements Window {
 
     public show(args: {userId: number}): void {
         this.state.userId = args.userId
-        const {username, admin} = users[args.userId]
+        const userData = users[args.userId]
 
-        adminEls.editUser.username.innerText = username
+        adminEls.editUser.username.innerText = userData.username
 
         adminEls.editUser.inputContainers.username.classList.remove("error-input-container")
+        adminEls.editUser.inputContainers.mfa.classList.remove("error-input-container")
         hide({to_hide: [
             adminEls.editUser.errors.usernameInvalid,
             adminEls.editUser.errors.usernameTaken
         ]})
-        adminEls.editUser.inputs.username.value = ''
-        adminEls.editUser.inputs.password.value = ''
+        adminEls.editUser.inputs.username.value = userData.username
+        adminEls.editUser.inputs.password.value = Constants.passwordReplacement
+        adminEls.editUser.inputs.mfa.value = userData.mfa_apprise_url || ''
 
-        if (admin)
-            hide({to_hide: [adminEls.editUser.inputContainers.username]})
+        if (userData.admin)
+            hide({
+                to_hide: [adminEls.editUser.inputContainers.username],
+                to_show: [adminEls.editUser.inputContainers.mfa]
+            })
         else
-            hide({to_show: [adminEls.editUser.inputContainers.username]})
+            hide({
+                to_hide: [adminEls.editUser.inputContainers.mfa],
+                to_show: [adminEls.editUser.inputContainers.username]
+            })
 
         this.dialog.showModal()
     }
@@ -540,30 +552,40 @@ class EditUserWindow implements Window {
     }
 
     public submit(): void {
+        const userId = this.state.userId
+        if (!userId)
+            throw new Error("Trying to submit editing a user without having the dialog open")
+
+        const userData = users[userId]
+
         adminEls.editUser.inputContainers.username.classList.remove("error-input-container")
+        adminEls.editUser.inputContainers.mfa.classList.remove("error-input-container")
         hide({to_hide: [
             adminEls.editUser.errors.usernameInvalid,
             adminEls.editUser.errors.usernameTaken
         ]})
 
-        const data: Partial<{new_username: string, new_password: string}> = {},
+        const data: Partial<{
+                new_username: string,
+                new_password: string,
+                new_mfa_apprise_url: string | null
+            }> = {},
             usernameValue = adminEls.editUser.inputs.username.value,
-            passwordValue = adminEls.editUser.inputs.password.value
+            passwordValue = adminEls.editUser.inputs.password.value,
+            mfaValue = adminEls.editUser.inputs.mfa.value || null
 
-        if (usernameValue)
+        if (usernameValue && usernameValue !== userData.username)
             data.new_username = usernameValue
-        if (passwordValue)
+        if (passwordValue && passwordValue !== Constants.passwordReplacement)
             data.new_password = passwordValue
+        if (mfaValue !== userData.mfa_apprise_url)
+            data.new_mfa_apprise_url = mfaValue
 
         if (!Object.keys(data).length) {
             // Nothing changed
             this.hide()
             return
         }
-
-        const userId = this.state.userId
-        if (!userId)
-            throw new Error("Trying to submit editing a user without having the dialog open")
 
         fetchAPI(`/admin/users/${userId}`, {
             method: "PUT",
@@ -578,12 +600,17 @@ class EditUserWindow implements Window {
                 adminEls.editUser.errors.usernameInvalid.innerText = invalidUsernameReasonMap[json.result.reason]
                 hide({to_show: [adminEls.editUser.errors.usernameInvalid]})
                 adminEls.editUser.inputContainers.username.classList.add("error-input-container")
+            }
 
-            } else if (json.error === "UsernameTaken") {
+            else if (json.error === "UsernameTaken") {
                 hide({to_show: [adminEls.editUser.errors.usernameTaken]})
                 adminEls.editUser.inputContainers.username.classList.add("error-input-container")
+            }
 
-            } else {
+            else if (json.error === "InvalidKeyValue")
+                adminEls.editUser.inputContainers.mfa.classList.add("error-input-container")
+
+            else {
                 console.log(json)
             }
         })
