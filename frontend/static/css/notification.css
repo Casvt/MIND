@@ -265,6 +265,22 @@
 	transform: rotate(45deg);
 }
 
+#test-service {
+	anchor-name: --test-service;
+}
+
+#test-ns-error {
+	position-anchor: --test-service;
+}
+
+#submit-add-ns {
+	anchor-name: --submit-service;
+}
+
+#submit-ns-error {
+	position-anchor: --submit-service;
+}
+
 /*  */
 /* Edit and delete windows */
 /*  */

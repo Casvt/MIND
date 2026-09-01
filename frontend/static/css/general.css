@@ -543,6 +543,36 @@ div.long-input-style > input {
 	}
 }
 
+.popover {
+	position: absolute;
+	bottom: anchor(top);
+	justify-self: anchor-center;
+
+	margin-bottom: .5rem;
+	margin-inline: .5rem;
+
+	padding: .25rem .5rem;
+	border-radius: 6px;
+	background-color: var(--color-error);
+
+	box-shadow: var(--default-shadow);
+}
+
+.popover::after {
+	content: "";
+
+	position: absolute;
+	inset: 100% auto auto calc(50% - .5rem);
+	/* Bug in Chrome makes anchor positioning of pseudo elements
+	not work correctly. Currently shows arrow centered below popover.
+	Should show arrow centered above anchor. */
+	/* left: anchor(center); */
+	top: 100%;
+
+	border-top: .5rem solid var(--color-error);
+	border-inline: .5rem solid transparent;
+}
+
 /*  */
 /* General styling */
 /*  */

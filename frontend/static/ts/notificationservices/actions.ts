@@ -94,9 +94,8 @@ class AddNSWindow implements Window {
         createURLBuilder(options[args.index])
 
         nsEls.add.test.classList.remove("error-input")
-        nsEls.add.test.title = ''
         nsEls.add.submit.classList.remove("error-input")
-        nsEls.add.submit.title = ''
+        hide({to_hide: [nsEls.add.testError, nsEls.add.submitError]})
 
         windowInstances.options.hide()
         this.dialog.showModal()
@@ -113,6 +112,10 @@ class AddNSWindow implements Window {
         if (this.serviceIndex === null)
             throw new Error("Testing service before builder is opened")
 
+        nsEls.add.test.classList.remove("error-input")
+        nsEls.add.submit.classList.remove("error-input")
+        hide({to_hide: [nsEls.add.testError, nsEls.add.submitError]})
+
         if (!validateInputRegexes(options[this.serviceIndex]))
             return
 
@@ -121,7 +124,8 @@ class AddNSWindow implements Window {
         }
         if (!data.url) {
             testButton.classList.add("error-input")
-            testButton.title = "Required field missing"
+            nsEls.add.testError.innerText = "Required field missing"
+            hide({to_show: [nsEls.add.testError]})
             return
         }
 
@@ -131,12 +135,11 @@ class AddNSWindow implements Window {
         })
         .then(json => {
             if (json.result.success) {
-                testButton.classList.remove("error-input")
-                testButton.title = ''
                 testButton.classList.add("show-sent")
             } else {
                 testButton.classList.add("error-input")
-                testButton.title = nsTestFailReasonMap[json.result.description]
+                nsEls.add.testError.innerText = nsTestFailReasonMap[json.result.description]
+                hide({to_show: [nsEls.add.testError]})
             }
         })
     }
@@ -146,6 +149,10 @@ class AddNSWindow implements Window {
 
         if (this.serviceIndex === null)
             throw new Error("Adding service before builder is opened")
+
+        nsEls.add.test.classList.remove("error-input")
+        nsEls.add.submit.classList.remove("error-input")
+        hide({to_hide: [nsEls.add.testError, nsEls.add.submitError]})
 
         if (!validateInputRegexes(options[this.serviceIndex]))
             return
@@ -160,7 +167,8 @@ class AddNSWindow implements Window {
         }
         if (!data.url) {
             addButton.classList.add("error-input")
-            addButton.title = "Required field missing"
+            nsEls.add.submitError.innerText = "Required field missing"
+            hide({to_show: [nsEls.add.submitError]})
             return
         }
 
@@ -170,7 +178,6 @@ class AddNSWindow implements Window {
         })
         .then(() => {
             addButton.classList.remove("error-input")
-            addButton.title = ''
 
             loadServices()
             this.hide()
@@ -179,7 +186,8 @@ class AddNSWindow implements Window {
         .catch(json => {
             if (json.error === "URLInvalid") {
                 addButton.classList.add("error-input")
-                addButton.title = nsTestFailReasonMap[json.result.reason]
+                nsEls.add.submitError.innerText = nsTestFailReasonMap[json.result.reason]
+                hide({to_show: [nsEls.add.submitError]})
             }
             else
                 console.log(json)

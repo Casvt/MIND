@@ -1,11 +1,11 @@
 export const nsEls = {
     servicesList: document.getElementById("services-list") as HTMLTableSectionElement,
-    
+
     options: {
         open: document.getElementById("open-service-options") as HTMLButtonElement,
         dialog: document.getElementById("ns-options-dialog") as HTMLDialogElement,
         close: document.getElementById("close-ns-options") as HTMLButtonElement,
-        
+
         list: document.getElementById("options-list") as HTMLDivElement,
         search: document.getElementById("ns-search-input") as HTMLInputElement
     },
@@ -17,7 +17,10 @@ export const nsEls = {
         submit: document.getElementById("submit-add-ns") as HTMLButtonElement,
 
         typeTitle: document.getElementById("add-type") as HTMLSpanElement,
-        form: document.getElementById("builder-form") as HTMLFormElement
+        form: document.getElementById("builder-form") as HTMLFormElement,
+        
+        testError: document.getElementById("test-ns-error") as HTMLDivElement,
+        submitError: document.getElementById("submit-ns-error") as HTMLDivElement
     },
 
     edit: {
