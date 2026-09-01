@@ -124,7 +124,7 @@ class AddNSWindow implements Window {
         }
         if (!data.url) {
             testButton.classList.add("error-input")
-            nsEls.add.testError.innerText = "Required field missing"
+            nsEls.add.testError.innerText = "Can't create URL from combination of inputs"
             hide({to_show: [nsEls.add.testError]})
             return
         }
@@ -167,7 +167,7 @@ class AddNSWindow implements Window {
         }
         if (!data.url) {
             addButton.classList.add("error-input")
-            nsEls.add.submitError.innerText = "Required field missing"
+            nsEls.add.submitError.innerText = "Can't create URL from combination of inputs"
             hide({to_show: [nsEls.add.submitError]})
             return
         }

@@ -56,6 +56,7 @@ def _process_list(
         token = all_tokens[content]
         list_entry['content'].append({
             'name': token['name'],
+            'map_to': content,
             'required': token['required'],
             'type': token['type'],
             'prefix': token.get('prefix'),

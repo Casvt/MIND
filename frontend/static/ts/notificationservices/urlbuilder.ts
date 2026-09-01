@@ -28,6 +28,7 @@ type ListEntry = {
     type: "string" | "int" | "float" | "bool"
     name: string
     required: boolean
+    map_to: string
     prefix: string | null
     regex: string[] | null
 }
@@ -99,7 +100,6 @@ function createFloatInput(param: BasicParameter): HTMLInputElement {
 function createBoolInput(param: BasicParameter): HTMLSelectElement {
     const input = document.createElement('select')
     input.classList.add('input-style')
-    // input.placeholder = param.name
     input.required = param.required
 
     const yesEntry = document.createElement("option")
@@ -123,7 +123,6 @@ function createChoiceInput(param: ChoiceParameter): HTMLSelectElement {
 	const choice = document.createElement('select')
 	choice.classList.add('input-style')
 	choice.required = param.required
-	// choice.placeholder = token.name
 	param.options.forEach(option => {
 		const entry = document.createElement('option')
 		entry.value = option
@@ -325,6 +324,8 @@ export function buildURL(data: ServiceTemplate): string | null {
     })
 
     const values: Record<string, string> = {}
+    const singleValueLists: {listKey: string, fieldKey: string, value: string}[] = []
+
     // Gather all values and format
 	Object.entries(tokens).forEach(([idx, el]) => {
         const inputData = data.details.tokens[parseInt(idx)]
@@ -334,7 +335,7 @@ export function buildURL(data: ServiceTemplate): string | null {
             //@ts-expect-error
 			let value = `${inputData.prefix || ''}${el.value}`;
 			if (value)
-				values[inputData.map_to] = value;
+				values[inputData.map_to] = value
 		}
 
         else {
@@ -354,30 +355,53 @@ export function buildURL(data: ServiceTemplate): string | null {
 				.flat()
 				.join(inputData.delim)
 
-			if (value)
+			if (value) {
 				values[inputData.map_to] = value
+
+                if (inputData.content.length === 1 && !value.includes(inputData.delim)) {
+                    // Could also fill a key with name of parameter that list
+                    // constists of with a single value. See issue #93 and apprise/#1417.
+                    singleValueLists.push({
+                        listKey: inputData.map_to,
+                        fieldKey: inputData.content[0].map_to,
+                        value: value
+                    })
+                }
+            }
 		}
 	})
 
     // Find template(s) that match the given tokens
-	const inputKeys = Object.keys(values).sort().join();
-	const matchingTemplates = data.details.templates.filter(template =>
-		inputKeys === template
-            .replaceAll('}', '{')
-            .split('{')
-            .filter((e, i) => i % 2)
-            .sort()
-            .join()
-	);
+    const findMatchingTemplates = (filledKeys: string[]): string[] => {
+        const convertedKeys = filledKeys.sort().join()
+        return data.details.templates.filter(template =>
+            convertedKeys === template
+                .replaceAll('}', '{')
+                .split('{')
+                .filter((_, i) => i % 2)
+                .sort()
+                .join()
+        )
+    }
 
-	if (!matchingTemplates.length)
-		return null;
+    let matchingTemplates = findMatchingTemplates(Object.keys(values))
+
+    if (!matchingTemplates.length) {
+        singleValueLists.forEach(entry => {
+            delete values[entry.listKey]
+            values[entry.fieldKey] = entry.value
+        })
+
+        matchingTemplates = findMatchingTemplates(Object.keys(values))
+        if (!matchingTemplates.length)
+            return null
+    }
 
     // Build URL with template and values
-	let template = matchingTemplates[0];
+	let template = matchingTemplates[0]
 
 	for (const [key, value] of Object.entries(values))
-		template = template.replace(`{${key}}`, value);
+		template = template.replace(`{${key}}`, value)
 
 	// Add args
     const inputArgs = new URLSearchParams()
