@@ -189,6 +189,10 @@ div.input-style:has(input.changed) {
 	height: unset;
 }
 
+#edit-user-form > label:has( + :where(div, input).hidden) {
+	display: none;
+}
+
 dialog span {
 	font-weight: bold;
 }
