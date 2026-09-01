@@ -1,4 +1,4 @@
-import { Constants, createIcon, downloadBackupDatabase, fetchAPI, getLocalStorage, hide, invalidUsernameReasonMap, nsTestFailReasonMap, Window } from "../general";
+import { Constants, createIcon, downloadBackupDatabase, fetchAPI, getLocalStorage, hide, invalidUsernameReasonMap, nsTestFailReasonMap, UserData, Window } from "../general";
 import { adminEls } from "./elements";
 
 // region About
@@ -402,12 +402,6 @@ class PluginsWindow implements Window {
 }
 
 // region User Management
-type UserData = {
-    id: number,
-    username: string,
-    admin: boolean,
-    mfa_apprise_url: string | null
-}
 export const users: Record<number, UserData> = {}
 
 export function loadUsers(): void {

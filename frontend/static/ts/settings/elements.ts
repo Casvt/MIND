@@ -11,10 +11,14 @@ export const settingsEls = {
         form: document.getElementById("edit-account-form") as HTMLFormElement,
         close: document.getElementById("close-edit-account") as HTMLButtonElement,
         
-        usernameContainer: document.querySelector("#edit-account-form .checked-input-container:has(input[type='text'])") as HTMLDivElement,
+        containers: {
+            username: document.getElementById("edit-username-container") as HTMLDivElement,
+            mfa: document.getElementById("edit-mfa-container") as HTMLDivElement
+        },
         inputs: {
             username: document.getElementById("edit-username") as HTMLInputElement,
-            password: document.getElementById("edit-password") as HTMLInputElement
+            password: document.getElementById("edit-password") as HTMLInputElement,
+            mfa: document.getElementById("edit-user-mfa") as HTMLInputElement
         },
         errors: {
             usernameInvalid: document.getElementById("invalid-username-error") as HTMLParagraphElement,

@@ -10,7 +10,10 @@ main > h2:first-of-type {
 	margin-inline: auto;
 }
 
-#edit-account-dialog,
+#edit-account-dialog {
+	--max-height: 28rem;
+}
+
 #delete-account-dialog {
 	--max-height: 25rem;
 }
@@ -29,16 +32,21 @@ main > h2:first-of-type {
 }
 
 #edit-account-form {
-	width: min(90%, 16rem);
-	height: 14rem;
+	width: min(90%, 20rem);
+	height: 19rem;
 
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	gap: .4rem;
-	
-	& > .checked-input-container {
+
+	& > :where(.checked-input-container, input) {
 		margin-bottom: 1rem;
+		max-width: unset;
+		
+		& > * {
+			max-width: unset;
+		}
 	}
 }
 

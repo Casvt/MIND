@@ -27,20 +27,21 @@
 				<h2>Edit Account</h2>
 			</div>
 			<div class="dialog-content">
-				<div>
-                    <p>Leave fields empty to not change their value</p>
-                    <form id="edit-account-form">
-                        <label for="edit-username">Username</label>
-                        <div class="checked-input-container">
-                            <input type="text" id="edit-username" autocomplete="username" placeholder="New username" class="input-style">
-                            <p id="invalid-username-error">Username invalid</p>
-                            <p id="username-taken-error">Username already taken</p>
-                        </div>
-
-                        <label for="edit-password">Password</label>
-                        <input type="password" id="edit-password" autocomplete="new-password" placeholder="New password" class="input-style">
-                    </form>
-                </div>
+                <form id="edit-account-form">
+                    <label for="edit-username">Username</label>
+                    <div id="edit-username-container" class="checked-input-container">
+                        <input type="text" id="edit-username" autocomplete="username" placeholder="New username" class="input-style">
+                        <p id="invalid-username-error">Username invalid</p>
+                        <p id="username-taken-error">Username already taken</p>
+                    </div>
+                    <label for="edit-password">Password</label>
+                    <input type="password" id="edit-password" autocomplete="new-password" placeholder="New password" class="input-style">
+                    <label for="edit-user-mfa">Apprise URL for MFA (empty to disable)</label>
+                    <div id="edit-mfa-container" class="checked-input-container">
+                        <input type="text" id="edit-user-mfa" placeholder="New Apprise URL for MFA" class="input-style">
+                        <p id="edit-invalid-mfa">Invalid Apprise URL</p>
+                    </div>
+                </form>
 			</div>
 			<div class="dialog-footer">
 				<button id="close-edit-account" class="input-style">Cancel</button>

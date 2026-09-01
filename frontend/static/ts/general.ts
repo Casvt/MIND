@@ -28,6 +28,14 @@ export const nsTestFailReasonMap: Record<string, string> = {
     rejected_url: "Value(s) rejected by service"
 }
 
+// region Types
+export type UserData = {
+    id: number;
+    username: string;
+    admin: boolean;
+    mfa_apprise_url: string | null;
+}
+
 // region Definitions
 export abstract class Window {
     public abstract readonly dialog: HTMLDialogElement
