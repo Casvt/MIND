@@ -34,7 +34,13 @@ url_var_map = {
     'int:b_idx': DatabaseFileNotFound
 }
 
-result = f"""# API
+result = f"""---
+hide:
+  - navigation
+---
+
+# API
+
 Below is the API documentation. Report an issue on [GitHub](https://github.com/Casvt/MIND/issues).
 
 All endpoints have the `{API_PREFIX}` prefix. That means, for example, that `/auth/login` can be reached at `{API_PREFIX}/auth/login`.

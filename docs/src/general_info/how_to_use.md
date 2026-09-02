@@ -1,6 +1,6 @@
 ## Introduction
 
-On this page you can find more information on the type of reminders, how to add them, how to manage them and some implementation details. It is assumed that you already have [set up your notification services](../installation/setup_after_installation.md#add-a-notification-service).
+On this page you can find more information on the type of reminders, how to add them and how to manage them. It is assumed that you already have [set up your notification services](../installation/setup_after_installation.md#add-a-notification-service).
 
 ## Types of Reminders
 
@@ -26,9 +26,6 @@ Once it's added, the timer is set! When the set time is reached, the reminder wi
 By default, normal reminders are 'single-use' and are deleted after they are triggered. However, it's also possible to repeat reminders either by time interval or week days.
 
 For repetition by time interval, select 'Repeated' when creating a reminder and select the time interval (e.g. '5 days' or '1 year'). The first time the reminder will be sent is on the set time. The interval will then be added and the resulting time will be the next time the reminder will be triggered.
-
-!!! info "Implementation detail: repetition on non-yearly days"
-	If the reminder is set on a day that does not exist every interval (e.g. leap day each year, or the 31st each month) it will be triggered on the set day the first time, but from then on will trigger on the closest day within the same month and it will stay there. So if you set a reminder for 29-2-2024 (D-M-Y) and set the reminder to repeat each year, the next reminders will be triggered on 28-2-2025, 28-2-2026, 28-2-2027, 28-2-2028, etc. Notice that even in 2028, when there is a 29th day in February, it will still run on the 28th. This is because it ran on the 28th the previous year, so add one year to it and it will run on the 28th again.
 
 Instead of repeating based on a certain time interval, it is also possible to repeat based on the week days. Select 'Week Days' when creating a reminder and select the days of the week that you want the reminder to trigger on. For example, if you select 'Mo' and 'Thu', the reminder will be triggered every Monday and Thursday. The time is based on the time set. The date of the time set decides when the reminder starts repeating.
 

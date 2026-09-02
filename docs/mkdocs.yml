@@ -81,16 +81,15 @@ nav:
   - Installation And Updating:
     - Introduction: installation/installation.md
     - Docker: installation/docker.md
-    - Manual Instal: installation/manual_instal.md
+    - Manual Install: installation/manual_install.md
     - Setup After Installation: installation/setup_after_installation.md
   - General Information:
-    - Introduction: general_info/workings.md
-    - Reminders: general_info/reminders.md
+    - Introduction: general_info/general_info.md
+    - How To Use: general_info/how_to_use.md
     - Admin Panel: general_info/admin_panel.md
+    - Implementation Details: general_info/implementation_details.md
   - Settings:
     - Introduction: settings/settings.md
     - User Settings: settings/user_settings.md
     - Admin Settings: settings/admin_settings.md
-  - Other Docs:
-    - Reporting: other_docs/reporting.md
-    - API: other_docs/api.md
+  - API: other_docs/api.md
