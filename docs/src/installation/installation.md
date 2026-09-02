@@ -1,17 +1,21 @@
-Installing MIND can be done via Docker or via a manual instal. Docker requires less setup and has better support, but if your OS/system does not support Docker, you can also instal MIND directly on your OS via a manual instal.
+# Installation and Updating
 
-!!! success "Recommended Installation"
-    The recommended way to instal MIND is using Docker.
+## Installation Method
 
-For instructions on installing MIND using Docker, see the [Docker installation instructions](./docker.md). For instructions on installing Kapowarr via a manual instal, see the [manual installation instructions](./manual_instal.md).
+MIND supports multiple installation methods. The two most common methods are using Docker and directly on your computer. The recommended method is Docker. Choose an installation method:
 
-The [Setup After Installation page](./setup_after_installation.md) contains the basic steps to take after installing MIND. It's advised to check it out.
+<div class="button-container">
+	<a href="../docker">Docker</a>
+	<a href="../manual_install">Manual Install</a>
+</div>
 
-Updating an installation can also be found on the installation pages of the respective installation method.
+After installing MIND, there is some configuration needed so that it can start working and act to your preferences. It's advised to visit the [Setup After Installation page](./setup_after_installation.md) after installation for more information.
+
+Instructions on how to update an installation can be found on the pages of the respective installation method.
 
 ## Quick Instructions
 
-If you already have experience with Docker, then below you can find some quick instructions to get MIND up and running fast. If you need some more guidance, follow the full guide for [Docker](./docker.md) or [a manual instal](./manual_instal.md).
+If you already have experience with Docker, then below you can find some quick instructions to get MIND up and running fast. If you need some more guidance, follow the full guide for [Docker](./docker.md) or [a manual install](./manual_install.md).
 
 Replace the timezone value (`TZ=`) with the [TZ database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) of your timezone (value of `TZ identifier` on webpage). The database will be stored in a Docker volume. 
 
@@ -21,9 +25,12 @@ Replace the timezone value (`TZ=`) with the [TZ database name](https://en.wikipe
 		```bash
 		docker run -d \
 			--name mind \
+			--restart unless-stopped \
 			-v "mind-db:/app/db" \
-			-e TZ=Europe/Amsterdam \
 			-p 8080:8080 \
+			-e TZ=Etc/UTC \
+			-e PUID=0 \
+			-e PGID=0 \
 			mrcas/mind:latest
 		```
 
@@ -32,33 +39,38 @@ Replace the timezone value (`TZ=`) with the [TZ database name](https://en.wikipe
 		```bash
 		docker run -d \
 			--name mind \
+			--restart unless-stopped \
 			-v "mind-db:/app/db" \
-			-e TZ=Europe/Amsterdam \
 			-p 8080:8080 \
+			-e TZ=Etc/UTC \
+			-e PUID=0 \
+			-e PGID=0 \
 			mrcas/mind:latest
 		```
 
 	=== "Windows"
 
 		```powershell
-		docker run -d --name mind -v "mind-db:/app/db" -e TZ=Europe/Amsterdam -p 8080:8080 mrcas/mind:latest
+		docker run -d --name mind --restart unless-stopped -v "mind-db:/app/db" -p 8080:8080 -e TZ=Etc/UTC -e PUID=0 -e PGID=0 mrcas/mind:latest
 		```
 
 === "Docker Compose"
 
 	```yml
-	version: "3.3"
 	services:
-	  mind:
-	    container_name: mind
-	      image: mrcas/mind:latest
-	      volumes:
-	        - "mind-db:/app/db"
-	      environment:
-	        - TZ=Europe/Amsterdam
-	      ports:
-	        - 8080:8080
+		mind:
+			container_name: mind
+			image: mrcas/mind:latest
+			restart: unless-stopped
+			environment:
+			- PUID=0
+			- PGID=0
+			- TZ=Etc/UTC
+			volumes:
+			- "mind-db:/app/db"
+			ports:
+			- 8080:8080
 
 	volumes:
-	  mind-db:	
+		mind-db:
 	```

@@ -2,6 +2,7 @@ services:
   mind:
     container_name: mind
     image: mrcas/mind:latest
+    restart: unless-stopped
     environment:
       - PUID=0
       - PGID=0
