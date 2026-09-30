@@ -4,30 +4,23 @@ Here you can find documentation on the admin settings, which are the settings av
 
 ### Allow New Accounts
 
-Whether or not people that access the web-ui have the option to create an account. When disabled, it is not possible to create new accounts, except for the admin via the admin panel.
+Whether people that access the web-ui have the option to create an account. When disabled, it is not possible for them to create new accounts. The admin has to do it from the admin panel.
 
 ### Login Time
 
-The authentication timeout. For how long users stay logged in before they have to authenticate again.
+How long users stay logged in before they have to authenticate again.
 
 ### Login Time Trigger
 
-Whether or not to reset the login timer (A.K.A. the authentication timeout) when using MIND. If the value is set to `After Login`, the timer will start counting after the user has logged in and will force the user the authenticate again once it has run out. If the value is set to `After Last Use`, the timer will start counting after the last time the user used MIND. So if the timeout is long enough that the user will consistently use MIND more regularly than the timeout duration, the user wouldn't need to authenticate ever again (until they don't use MIND for long enough that the timer runs out).
-
-## Logging
-
-### Logging Level
-
-Keep this at `Info` in normal situations. If you encounter a problem and need to share logs, set this to `Debug` and recreate the problem. Then set it back to `Info` again. More information on this on the ['Reporting' page](../other_docs/reporting.md) and [general info page on the admin panel](../general_info/admin_panel.md#logging).
+Whether to reset the login timer (a.k.a. the authentication timeout) when using MIND. If the value is set to `After Login`, the timer will start counting after the user has logged in and will force the user the authenticate again once it has run out. If the value is set to `After Last Use`, the timer will start counting after the last time the user used MIND. So if the timeout is long enough that the user will consistently use MIND more regularly than the timeout duration, the user wouldn't need to authenticate ever again (until they don't use MIND for long enough that the timer runs out).
 
 ## Hosting
 
-Any changes to these settings will restart MIND immediately. The changes are applied and MIND will start running with the new hosting settings. **_If you do not log into the admin panel within one minute after restarting, the changes will be reverted._** This means that MIND will basically 'try out' the new hosting settings for one minute. If you haven't logged into the admin panel within that one minute after restart, the changes will be canceled, the old hosting settings will be applied and MIND will be restarted again. By logging into the admin panel, you keep the hosting settings. This feature is useful if you change the hosting settings in such way that the UI becomes unreachable; simply wait one minute and the changes will be reverted.
+This section defines how MIND hosts the web-UI. Changing any setting here will make MIND automatically restart after saving. Log back into the admin panel within 60 seconds for the changes to stay, or they will be reverted.
 
 ### Host
 
-This tells MIND what IP to bind to. If you specify an IP that is _not_ on the machine running MIND, you _will_ encounter errors.  
-Using `0.0.0.0` will have MIND bind to all interfaces it finds on the host machine.
+This tells MIND what IP to bind to. Using `0.0.0.0` will have MIND bind to all interfaces it finds on the host machine. You can also enter an IPv6 address.
 
 _Note: this setting is not applicable if you have MIND deployed using Docker._
 
@@ -50,6 +43,26 @@ If you have MIND deployed using Docker, do not change this setting but instead f
 
 ### URL Prefix
 
-This is used for reverse proxy support - the default is empty. If you want to put MIND behind a proxy (so you can access the web-UI via a nice URL), set a URL prefix (it _must_ start with a `/` character).  
+If you want to put MIND behind a proxy so that you can access the web-UI via a nice URL, set a URL prefix (it must start with a `/` character). Set it empty to disable.
 
-To get MIND running on `http://example.com/mind`, you would set your reverse proxy to forward the `/mind` path to the IP and port of your mind instance, and set URL prefix to `/mind`.
+To get MIND running on `http://example.com/mind`, you would set your reverse proxy to forward the `/mind` path to the IP and port of your MIND instance, and set the URL prefix to `/mind`.
+
+## Logging
+
+### Logging Level
+
+Keep this at `Info` in normal situations. If you encounter a problem and need to share logs, set this to `Debug` and recreate the problem. Then set it back to `Info` again. More information on this at the [general information about the admin panel](../general_info/admin_panel.md#logging).
+
+## Database Backup Settings
+
+### Database Backup Interval
+
+How often a backup of the database should be made.
+
+### Database Backup Retention
+
+The amount of backups to keep. If a new backup is made and the maximum amount of backups have already been made, then the oldest one is deleted. For example, if a backup is made once per day and the retention is set to 3 backups, then you'll have a backup of each of the last 3 days.
+
+### Database Backup Folder
+
+The folder that the database backups are put in. By default this is the same folder that the active database file is in, but you can change it so that the database backups are stored somewhere else.
