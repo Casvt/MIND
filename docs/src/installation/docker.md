@@ -1,4 +1,4 @@
-On this page, you can find instructions on how to instal MIND using Docker and how to update a Docker installation.
+On this page, you can find instructions on how to install MIND using Docker and how to update a Docker installation.
 
 ## Installation
 
@@ -6,13 +6,20 @@ On this page, you can find instructions on how to instal MIND using Docker and h
 
 Make sure to set all time related settings (time, date, timezone, etc.) correct on your computer, as MIND depends on it to work correctly.
 
-### Instal Docker
+### Install Docker
 
-The first step is to instal Docker, if you don't have it installed already. The official Docker documentation hub offers great instructions on [how to instal docker CLI and Docker Desktop](https://docs.docker.com/engine/install/). Take notice of if you installed the 'Docker CLI' (the Docker documentation also calls this 'Docker CE') or if you installed 'Docker Desktop', for future instructions.
+The first step is to install Docker if you don't have it installed already. The official Docker documentation hub offers great instructions on [how to install docker CLI and Docker Desktop](https://docs.docker.com/engine/install/). Take notice of whether you installed the 'Docker CLI' (the Docker documentation also calls this 'Docker CE') or 'Docker Desktop', for future instructions.
 
-### Create Docker volume or folder
+??? info "Quick introduction to Docker"
+	Docker allows you to create little virtual computers, called 'containers'. You can run an application inside these containers. This is useful because you decide how much resources these containers can use, and what access these applications get to "the outside". It makes it safer and installation easier. It makes it safer because the application only has access to folders on the computer that you explicitly give it access to, and makes installation easier because you don't have to make sure that everything is set up properly, as the developer will ensure that.
+	
+	Allowing folders and network connections through the container is done using 'mapping'. For example, you can map the folder `D:\MIND_db` on the host to the folder `/app/db` inside the container. Then everything in the host folder is visible to the application via the folder mapped inside the container. Mapping network ports works in a similar manner.
+	
+	When you turn off a container, all changes to files and folders inside the container are lost (e.g. the database). This is so that the environment inside the container is always the same when starting up. In order to save a file/folder permanently, it has to be stored on the host and then mapped to somewhere inside the container.
 
-MIND needs a permanent place to put the database file, which contains all the user data and configs. This can be a [Docker volume](https://docs.docker.com/storage/volumes/), or a folder on the host machine.
+### Create place for the database
+
+MIND needs a permanent place to put the database file. This can be a [Docker volume](https://docs.docker.com/storage/volumes/) or a folder on the host machine.
 
 === "Docker Volume"
 	=== "Docker CLI"
@@ -34,19 +41,18 @@ MIND needs a permanent place to put the database file, which contains all the us
 
 === "Local Folder"
 	=== "Linux"
-		Linux standards would suggest putting the folder in `/opt/application_name`, as the `/opt` directory is where program options should be stored. This is not mandatory however; you are allowed to create a folder anywhere you like. If we apply the standard to MIND, the folder would be `/opt/MIND/db`.
+		Following the Linux standards, we suggest the folder `/opt/MIND/db`. This is not mandatory however. You are allowed to create a folder anywhere you like.
 
-		Create the desired folder using the UI (if your distro offers this) or with the following shell command (replace `/path/to/directory` with desired path):
+		If your Linux distro offers it, create the desired folder using the UI. Otherwise, create it with the following shell command (replace `/path/to/directory` with the desired path):
 
 		```bash
 		mkdir "/path/to/directory"
 		```
 
-		!!! info "Permissions and ownership"
-			The permissions on this folder need to allow the container to read, write, and execute inside it. It also needs to have proper ownership. More documentation on this subject coming.
+		The user that the container runs as will need read, write and execution permissions. You can change the user that the container runs as using the PUID (user) and PGID (group) environment variables when launching the container later. The folder also needs to either be owned by that user, be owned by a group that the user is a part of, or have sufficient permissions so that _any_ user can use the folder.
 
 	=== "MacOS"
-		MacOS standards would suggest putting the folder in `/Applications/application_name`. This is not mandatory however; you are allowed to create a folder anywhere you like. If we apply the standard to MIND, the folder would be `/Applications/MIND/db`.
+		Following MacOS standards, we suggest the folder `/Applications/MIND/db`. This is not mandatory however. You are allowed to create a folder anywhere you like.
 
 		Create the desired folder using the UI or with the following shell command (replace `/path/to/directory` with desired path):
 
@@ -54,20 +60,16 @@ MIND needs a permanent place to put the database file, which contains all the us
 		mkdir "/path/to/directory"
 		```
 
-		!!! info "Permissions and ownership"
-			The permissions on this folder need to allow the container to read, write, and execute inside it. It also needs to have proper ownership. More documentation on this subject coming.
+		The user that the container runs as will need read, write and execution permissions. You can change the user that the container runs as using the PUID and PGID (for the group) environment variables when launching the container later. The folder also needs to either be owned by that user, be owned by a group that the user is a part of, or have sufficient permissions so that _any_ user can use the folder.
 
 	=== "Windows"
-		There is no defined standard for Windows on where to put such a folder. We suggest a path like `C:\apps\application_name`, so that it can be managed easily. This is not mandatory however; you are allowed to create a folder anywhere you like. If we apply this suggestion to MIND, the folder would be `C:\apps\MIND\db`.
-		
-		Create the desired folder either using the Windows Explorer, or using the following Powershell command:
+		There is no defined standard for Windows on where to put such a folder. We suggest a path like `C:\apps\MIND\db` or `D:\MIND\db`. This is not mandatory however. You are allowed to create a folder anywhere you like.
+
+		Create the desired folder either using the Windows Explorer or using the following Powershell command:
 
 		```powershell
-		mkdir "C:\apps\MIND\db"
+		mkdir "C:\path\to\directory"
 		```
-
-		!!! info "Permissions and ownership"
-			The permissions on this folder need to allow the container to read, write, and execute inside it. It also needs to have proper ownership. More documentation on this subject coming.
 
 ### Launch container
 
@@ -81,9 +83,12 @@ Now we can launch the container.
 		```bash
 		docker run -d \
 			--name mind \
+			--restart unless-stopped \
 			-v "mind-db:/app/db" \
-			-e TZ=Europe/Amsterdam \
 			-p 8080:8080 \
+			-e TZ=Etc/UTC \
+			-e PUID=0 \
+			-e PGID=0 \
 			mrcas/mind:latest
 		```
 
@@ -92,46 +97,60 @@ Now we can launch the container.
 		```bash
 		docker run -d \
 			--name mind \
+			--restart unless-stopped \
 			-v "mind-db:/app/db" \
-			-e TZ=Europe/Amsterdam \
 			-p 8080:8080 \
+			-e TZ=Etc/UTC \
+			-e PUID=0 \
+			-e PGID=0 \
 			mrcas/mind:latest
 		```
 
 	=== "Windows"
 
 		```powershell
-		docker run -d --name mind -v "mind-db:/app/db" -e TZ=Europe/Amsterdam -p 8080:8080 mrcas/mind:latest
+		docker run -d --name mind --restart unless-stopped -v "mind-db:/app/db" -p 8080:8080 -e TZ=Etc/UTC -e PUID=0 -e PGID=0 mrcas/mind:latest
 		```
 
 	A few notes about this command:
 
-	1. If you're using a folder on the host machine instead of a docker volume to store the database file ([reference](#create-docker-volume-or-folder)), replace `mind-db` with the path to the host folder.  
-	E.g. `"/opt/MIND/db:/app/db"`.  
-	E.g. `"C:\apps\MIND\db:/app/db"`.
+	1. If you're using a folder on the host machine instead of a docker volume to store the database file, replace `mind-db` with the path to the host folder. It's mapped to `/app/db` inside the container.
 
-	2. Replace the timezone value (`TZ=`) with the [TZ database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) of your timezone (value of `TZ identifier` on webpage).
+	!!! example "Examples"
+		- `-v "/opt/MIND/db:/app/db"`
+		- `-v "C:\apps\MIND\db:/app/db"`
 
-	3. Information on how to change the port can be found on the [Setup After Installation page](./setup_after_installation.md#port).
+	2. If you want to run MIND on a different port, you can do that by replacing the left `8080` with the desired port.
+	
+	!!! example "Examples"
+		- `-p 8009:8080` to be available on `8009`
+		- `-p 443:8080` to be available on `443`
+		- `-p 8080:8080` to be available on `8080`
+
+	3. You can change the user and group that the application inside the container runs as using the PUID (user) and PGID (group) environment variables.
+	
+	4. Set the `TZ` environment variable to the [timezone database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) of your timezone (value of `TZ identifier` on webpage).
 
 === "Docker Compose"
-	The contents of the `docker-compose.yml` file are below. The source file can also be found [on GitHub](https://github.com/Casvt/MIND/blob/Development/docker-compose.yml). But before you copy, paste and run it, read the notes below!
+	The contents of the `docker-compose.yml` file are below. The source file can also be found [on GitHub](https://github.com/Casvt/MIND/blob/Main/docker-compose.yml). But before you copy, paste and run it, read the notes below!
 
 	```yml
-	version: "3.3"
 	services:
-	  mind:
-	    container_name: mind
-	      image: mrcas/mind:latest
-	      volumes:
-	        - "mind-db:/app/db"
-	      environment:
-	        - TZ=Europe/Amsterdam
-	      ports:
-	        - 8080:8080
+		mind:
+			container_name: mind
+			image: mrcas/mind:latest
+			restart: unless-stopped
+			environment:
+				- PUID=0
+				- PGID=0
+				- TZ=Etc/UTC
+			volumes:
+				- "mind-db:/app/db"
+			ports:
+				- 8080:8080
 
 	volumes:
-	  mind-db:	
+		mind-db:
 	```
 	
 	Then run the following command to start the container. Run this command from within the directory where the `docker-compose.yml` file is located.
@@ -142,28 +161,49 @@ Now we can launch the container.
 
 	A few notes about the `docker-compose.yml` file:
 
-	1. If you're using a folder on the host machine instead of a docker volume to store the database file ([reference](#create-docker-volume-or-folder)), replace `mind-db` with the path to the host folder.  
-	E.g. `"/opt/MIND/db:/app/db"`.  
-	E.g. `"C:\apps\MIND\db:/app/db"`.
+	1.  If you're using a folder on the host machine instead of a docker volume to store the database file, replace `mind-db` with the path to the host folder. It's mapped to `/app/db` inside the container.
 
-	2. Replace the timezone value (`TZ=`) with the [TZ database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) of your timezone (value of `TZ identifier` on webpage).
+	!!! example "Examples"
+		- `- "/opt/MIND/db:/app/db"`
+		- `- "C:\apps\MIND\db:/app/db"`
 
-	3. Information on how to change the port can be found on the [Setup After Installation page](./setup_after_installation.md#port).
+	2. If you want to run MIND on a different port, you can do that by replacing the left `5656` with the desired port.
+	
+	!!! example "Examples"
+		- `- 8009:8080` to be available on `8009`
+		- `- 443:8080` to be available on `443`
+		- `- 8080:8080` to be available on `8080`
+
+	3. You can change the user and group that the application inside the container runs as using the PUID (user) and PGID (group) environment variables.
+	
+	4. Set the `TZ` environment variable to the [timezone database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) of your timezone (value of `TZ identifier` on webpage).
 
 === "Docker Desktop"
 	1. Click the search bar at the top and search for `mrcas/mind`.
+	
 	2. Click `Run` on the entry saying `mrcas/mind`.
-	3. Open `Images`, and on the right, under `Actions` click the play/run button for `mrcas/mind`.
+	
+	3. Open `Images` and on the right, under `Actions`, click the play/run button for `mrcas/mind`.
+	
 	4. Expand the 'Optional settings'.
+	
 	5. For the `Container name`, set the value to `mind`.
-	6. For the `Host port`, set the value to `8080`. Information on how to change the port can be found on the [Setup After Installation page](./setup_after_installation.md#port).
-	7. For the `Host path`, set the value to `mind-db` if you are using a Docker volume for the database. Otherwise, set it to the folder where you want to store the database, [that you created earlier](#create-docker-volume-or-folder). Set the accompanying `Container path` to `/app/db`.
-	8. For the `Variable`, set the value to `TZ`. Set the accompanying `Value` to the [TZ database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) of your timezone (value of `TZ identifier` on webpage). E.g. `Europe/Amsterdam`.
+	
+	6. For the `Host port`, set the value to `8080`. Set it to a different value if you want to run MIND on a different port.
+	
+	7. For the `Host path`, set the value to `kapowarr-db` if you are using a Docker volume for the database. Otherwise, set it to the path to the folder on the host. Set the accompanying `Container path` to `/app/db`.
+	
+	8. Under `Environment Variables`, set the `Variable` field to `TZ` and the `Value` field to the [timezone database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) of your timezone (value of `TZ identifier` on webpage).
+	
+	9. You can change the user and group that the application inside the container runs as using the PUID (user) and PGID (group) environment variables. If so, add another environment variable using the plus button on the right. Set the `Variable` field to `PUID` and the `Value` field to the ID of the desired user. Add yet another environment variable using the plus button on the right. Set the `Variable` field to `PGID` and the `Value` field to the ID of the desired group.
 
+### Check Setup After Installation
 
-## Update instal
+Now that the container is up and running, you can access it at [http://localhost:8080](http://localhost:8080). Check out the [Setup After Installation](./setup_after_installation.md) page for instructions on how to configure MIND so that it works properly.
 
-Below you can find instructions on how to update an instal.
+## Updating
+
+Below you can find instructions on how to update an install.
 
 === "Docker CLI"
 	If needed, run these commands with `sudo`. It is assumed that the name of the container is `mind` (which is set using the `--name` option in the command).
@@ -171,7 +211,7 @@ Below you can find instructions on how to update an instal.
 	1. `docker container stop mind`
 	2. `docker container rm mind`
 	3. `docker image rm mrcas/mind:latest`
-	4. Run the command you previously used to start the container.
+	4. Repeat the steps of [launching the container](#launch-container).
 
 === "Docker Compose"
 	If needed, run these commands with `sudo`. You need to be in the same directory as the `docker-compose.yml` file when running these commands.
