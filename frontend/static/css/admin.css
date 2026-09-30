@@ -183,6 +183,8 @@ div.input-style:has(input.changed) {
 }
 
 :where(#edit-user-dialog, #delete-user-dialog, #upload-db-dialog, #import-db-dialog) .dialog-content > div {
+	width: 100%;
+
 	display: flex;
 	flex-direction: column;
 	align-items: center;
