@@ -1,3 +1,9 @@
 ## Repeating Reminders at an Interval
 
-If the reminder is set on a day that does not exist every interval (e.g. leap day each year, or the 31st each month) it will be triggered on the set day the first time, but from then on will trigger on the closest day within the same month and it will stay there. So if you set a reminder for 29-2-2024 (D-M-Y) and set the reminder to repeat each year, the next reminders will be triggered on 28-2-2025, 28-2-2026, 28-2-2027, 28-2-2028, etc. Notice that even in 2028, when there is a 29th day in February, it will still run on the 28th. This is because it ran on the 28th the previous year, so add one year to it and it will run on the 28th again.
+It is possible to create a repeated reminder that triggers on a day that doesn't always exist. For example, a reminder that runs on leap day, every year. Or a reminder that runs on the 31st of the month, every month. The targeted days don't always exist when the reminder runs. MIND will run the reminder on a day that _does_ exist, and comes before the targeted day. So for example, with the leap year example, that'd mean the reminder would run on the following days (D-M-Y format):
+
+- 29-2-2024
+- 28-2-2025
+- 28-2-2026
+- 28-2-2027
+- 29-2-2028
