@@ -1,4 +1,8 @@
-Here you can find documentation on the user settings, which are the settings available to a normal user, in the settings tab.
+Here you can find documentation on the user settings, which are the settings available to a normal user, in their settings tab.
+
+## Show Clock
+
+Whether to show a clock in the top right of the web-UI.
 
 ## Locale
 
@@ -6,4 +10,4 @@ This setting is for formatting times and dates according to the format used in t
 
 ## Default Notification Service
 
-This setting decides which notification service is selected by default when creating a new reminder.
+The notification service that should be selected by default when creating a new reminder.
