@@ -1,6 +1,8 @@
 ## Introduction
 
-The admin panel allows you to manage your MIND instance. It has multiple features regarding the management of your instance and it's users. You can change how users authenticate and create accounts, download the logs, change the hosting settings, add/edit/delete users, export and import the database and restart or shutdown the application.
+The admin panel allows you to manage your MIND instance. It has multiple features regarding the management of your instance and its users. You can change how users authenticate and create accounts, download the logs, change the hosting settings, add/edit/delete users, export and import the database and restart or shutdown the application.
+
+The settings for authentication, hosting, logging and database backups are all described on the ['Admin Settings' page](../settings/admin_settings.md).
 
 !!! warning "Restrict Access"
 	The panel gives you a lot of power, so it's important that nobody can access it but you (by changing the default password).
@@ -9,25 +11,11 @@ The admin panel allows you to manage your MIND instance. It has multiple feature
 
 You can access the admin panel by logging into the admin account. The default username is `admin` and the default password is `admin`. How to change the password (which is strongly recommended) is described in the ['User Management' section](#user-management).
 
-## Authentication
-
-The authentication settings are described on the ['Admin Settings' page](../settings/admin_settings.md#authentication).
-
-## Logging
-
-The 'Logging Level' setting is for enabling debug logging. Only enable this when you encounter problems and need to share logs. Once enabled, all debug logs will go to a file. This file, containing all the debug logs, can be downloaded using the 'Download Debug Logs' button. Once the logging level is set back to `Info`, the debug logging to the file will be stopped. Once the logging level is set to `Debug` again, the file will be emptied and all debug logs will be put in it again. With this setup, you can enable debug logging, reproduce the error (which will be logged to the file), disable debug logging and download the log file. The file will then contain all relevant logs.
-
-## Hosting
-
-The hosting settings are described on the ['Admin Settings' page](../settings/admin_settings.md#hosting).
-
 ## User Management
 
 The admin panel allows you to manage the users on your instance. You can add new users, change the password of existing users and delete users. The ability to add users will always be there, regardless of the value of the ['Allow New Accounts' setting](../settings/admin_settings.md#allow-new-accounts). If that setting is disabled (disallowing users to create accounts themselves), then the admin panel is the only place where new accounts can be made.
 
-If the username field turns red while adding a new user, then the username is either already taken or is invalid.
-
-Click on the pen icon to change the password of the user. This is useful if the user has forgotten their password. You can also change the password of the admin user this way, which is strongly recommended.
+Click the large plus button to start adding an account. Enter a unique username and a password for the account, then click 'Add'. Click on the pen icon next to a user entry to change the username or password of the user. This is useful if the user has forgotten their password. You can also change the password of the admin user this way, which is strongly recommended. Use the bin icon to delete the user. You cannot delete the admin. Edit the admin account to not only change the password, but to also optionally setup MFA. The Apprise URL that you enter will be used to send the MFA code when trying to log into the account. The users can set the MFA code themselves in their account settings.
 
 ## Database
 
@@ -45,9 +33,15 @@ The uploaded file could be denied for multiple reasons:
 
 1. It is not an (sqlite) database file. Only import database files that you downloaded with the 'Download Database' button.
 2. The database file is too old. If the database is for such an old version of MIND, it could fail to migrate it.
-3. The database file is too new. If the database is for a newer version of MIND than the version that you upload it to, it get's denied.
+3. The database file is too new. If the database is for a newer version of MIND than the version that you upload it to, it's denied.
 
-After importing the database, MIND will restart with the new database in use. **_It is required to log into the admin panel within one minute in order to keep the newly imported database file. If you do not, the import will be reverted, MIND will restart again but now with the old database again._** This is in order to protect you from breaking MIND if the database file is invalid or if the hosting settings make the UI unreachable (if you have the 'Keep Hosting Settings' option disabled).
+After importing the database, MIND will restart with the new database in use. It is required to log into the admin panel within 60 seconds in order to keep the newly imported database file. If you do not, the import will be reverted, MIND will restart again but now with the old database again. This is in order to protect you from breaking MIND if the database file is invalid or if the hosting settings make the UI unreachable (if you have the 'Keep Hosting Settings' option disabled).
+
+The download button next to each database backup entry will download the backup file to your computer. The upload button next to each database backup entry will allow you to import/upload the backup, similar to uploading a database file yourself.
+
+## Apprise Plugins
+
+If you have a custom Apprise [plugin](https://appriseit.com/library/plugin/), then you click the 'Manage Paths' button to open a window where you can add the path to the file that the plugin is defined in. It will then become available to use inside MIND.
 
 ## Power
 
