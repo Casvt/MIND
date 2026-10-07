@@ -51,7 +51,7 @@ To get MIND running on `http://example.com/mind`, you would set your reverse pro
 
 ### Logging Level
 
-Keep this at `Info` in normal situations. If you encounter a problem and need to share logs, set this to `Debug` and recreate the problem. Then set it back to `Info` again. More information on this at the [general information about the admin panel](../general_info/admin_panel.md#logging).
+Keep this at `Info` in normal situations. If you encounter a problem and need to share logs, set this to `Debug` and recreate the problem. Then download the logs and set the log level back to `Info` again.
 
 ## Database Backup Settings
 
