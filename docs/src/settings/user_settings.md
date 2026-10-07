@@ -11,3 +11,7 @@ This setting is for formatting times and dates according to the format used in t
 ## Default Notification Service
 
 The notification service that should be selected by default when creating a new reminder.
+
+## Edit Account
+
+The 'Edit Account' button opens a window where you can change the username or password of your account. It's also the place where you can set up MFA. The Apprise URL that you enter for MFA will be used to send the MFA code when trying to log into the account.
