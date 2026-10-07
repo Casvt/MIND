@@ -24,10 +24,6 @@ When accessing the web-ui, you'll be prompted to log in. Click on `Or create an 
 
 In the user settings, you can change your locale so that the dates and times are displayed in the format used by your country. 
 
-### Add a notification service
+### Add a notification service and reminder
 
-A notification service is a way of sending a notification. For example an e-mail to a group of people or a PushBullet notification to a specific device. What the actual content of the notification is, is decided by the title and text of the reminder. The notification service only specifies in which way the title and text is sent. You set it up once, and then you can select it when creating a reminder.
-
-Go to the "Notification Services" tab in the web-ui and click the `+` button. Choose a platform, enter the required information and give the service a name. From then on, you can select the notification service when creating/editing a reminder.
-
-You can now start adding reminders! See the [How To Use guide](../general_info/how_to_use.md) for guidance.
+You can now start adding one or more notification services and reminders. See the [How To Use guide](../general_info/how_to_use.md#).
