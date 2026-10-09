@@ -32,7 +32,7 @@ theme:
   palette:
     # Light mode
     - media: "(prefers-color-scheme: light)"
-      scheme: MIND
+      scheme: MIND-light
       toggle:
         icon: material/toggle-switch-off-outline
         name: Switch to dark mode
