@@ -23,7 +23,8 @@
 	--color-dark-border: rgba(152, 152, 152, 0.08);
 	--color-light-border: rgba(255, 255, 255, 0.08);
 
-	--header-height: 3.5rem;
+	--global-font-size: 15px;
+	--header-height: 3.25rem;
 	--nav-width: 15rem;
 	--nav-show-speed: 300ms;
 	--nav-button-spacing: .5rem;
@@ -41,6 +42,10 @@
 /*  */
 /* Default styling */
 /*  */
+html {
+	font-size: var(--global-font-size);
+}
+
 dialog {
 	margin: auto;
 	overscroll-behavior: contain;

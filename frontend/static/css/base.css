@@ -127,6 +127,7 @@ nav > div > :where(button, a) {
     gap: 1rem;
 
 	padding: var(--nav-button-spacing);
+	padding-left: calc(var(--nav-button-spacing) + .2rem);
 	border-radius: 4px;
 	border: 1px solid var(--color-dark);
 	border-left-width: 2px;
@@ -146,8 +147,8 @@ nav > div > :where(button, a) {
 	}
 
 	& svg {
-		height: 1.4rem;
-		width: 1.4rem;
+		height: 1.25rem;
+		width: 1.25rem;
 	}
 }
 
