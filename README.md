@@ -30,11 +30,15 @@ Featured on [Noted](https://noted.lol/mind-reminders/), [Scotti-BYTE](https://di
 
 ## Installation, support and documentation
 
-- For instructions on how to install MIND, see the [installation documentation](https://casvt.github.io/MIND/installation/installation).
-- For support, a [discord server](https://discord.gg/Xy9VUASHhr) is available or [make an issue](https://github.com/Casvt/MIND/issues).
-- For the planning of issues or their progress, check the [project board](https://github.com/users/Casvt/projects/3).
-- For all documentation, see the [documentation hub](https://casvt.github.io/MIND).
-- For donations, go to the [Ko-Fi page](https://ko-fi.com/casvt).
+- For instructions on how to install MIND, see the [installation documentation](https://casvt.github.io/MIND/installation/installation)
+- For support, a [discord server](https://discord.gg/Xy9VUASHhr) is available or [make an issue](https://github.com/Casvt/MIND/issues)
+- For the planning of issues or their progress, check the [project board](https://github.com/users/Casvt/projects/3)
+- For all documentation, see the [documentation hub](https://casvt.github.io/MIND)
+- For donations, go to the [Ko-Fi page](https://ko-fi.com/casvt)
+
+## Development status
+
+MIND is considered to be feature complete. Bug fixes, security updates and small quality-of-life improvements are still shipped if they come up. Pull requests are also still reviewed regardless of whether they are for small fixes or big new features. But in general, no new features are planned.
 
 ## Screenshots
 
