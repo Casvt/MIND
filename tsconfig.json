@@ -9,6 +9,7 @@
     "noEmit": true,
     "jsx": "preserve",
     "noFallthroughCasesInSwitch": true,
+    "isolatedModules": true
   },
   "include": ["./frontend/static/ts"]
 }

@@ -157,3 +157,9 @@ tests/
 docs/
 requirements-dev.txt
 release.sh
+
+# NPM files
+node_modules/
+
+# Build files
+frontend/static/js/

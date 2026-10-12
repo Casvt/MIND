@@ -141,3 +141,6 @@ release*.sh
 
 # Build files
 frontend/static/js/
+
+# NPM files
+node_modules/

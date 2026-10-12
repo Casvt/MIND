@@ -198,7 +198,7 @@ class Server(metaclass=Singleton):
         """Same as `self.shutdown()`, but restart instead of shutting down.
 
         Args:
-            start_type (StartType, optional): Why Kapowarr should
+            start_type (StartType, optional): Why MIND should
                 restart.
                 Defaults to StartType.RESTART.
         """

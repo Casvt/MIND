@@ -30,3 +30,7 @@ CONTRIBUTING.md
 tsconfig.json
 frontend/static/ts/*
 requirements-dev.txt
+node_modules/*
+package.json
+package-lock.json
+esbuild.config.mjs

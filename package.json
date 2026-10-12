@@ -1,0 +1,16 @@
+{
+    "name": "MIND",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "typecheck": "tsc",
+        "build": "node esbuild.config.mjs"
+    },
+    "devDependencies": {
+        "esbuild": "0.28.2",
+        "typescript": "7.0.2"
+    },
+    "allowScripts": {
+        "esbuild@0.28.2": true
+    }
+}

@@ -191,7 +191,7 @@ Now we can launch the container.
 	
 	6. For the `Host port`, set the value to `8080`. Set it to a different value if you want to run MIND on a different port.
 	
-	7. For the `Host path`, set the value to `kapowarr-db` if you are using a Docker volume for the database. Otherwise, set it to the path to the folder on the host. Set the accompanying `Container path` to `/app/db`.
+	7. For the `Host path`, set the value to `mind-db` if you are using a Docker volume for the database. Otherwise, set it to the path to the folder on the host. Set the accompanying `Container path` to `/app/db`.
 	
 	8. Under `Environment Variables`, set the `Variable` field to `TZ` and the `Value` field to the [timezone database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List) of your timezone (value of `TZ identifier` on webpage).
 	

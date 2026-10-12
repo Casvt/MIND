@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Format All",
+            "label": "Format Backend",
             "type": "shell",
             "command": "python3 -m isort .; python3 -m autopep8 --in-place -r .",
             "windows": {
@@ -17,7 +17,7 @@
         {
             "label": "Build Frontend",
             "type": "shell",
-            "command": "tsc && esbuild ./ts/login/login.ts ./ts/admin/admin.ts ./ts/reminders/reminders.ts ./ts/notificationservices/notificationservices.ts ./ts/settings/settings.ts --bundle --format=esm --tree-shaking=true --outdir=./js --entry-names='[name]'",
+            "command": "npm run typecheck && npm run build",
             "group": {
                 "kind": "build",
                 "isDefault": true
