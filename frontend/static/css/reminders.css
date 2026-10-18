@@ -225,6 +225,7 @@ main:has(
 	display: none;
 	grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
 	grid-auto-rows: minmax(6.6rem, auto);
+	grid-auto-flow: dense;
 	gap: 1rem;
 
 	padding: 1rem;
@@ -273,6 +274,7 @@ body:has(#wide-toggle[data-selected]) #tab-container > div {
 	overflow-y: hidden;
 	height: 100%;
 	margin: .75rem;
+	padding-bottom: 1px;
 
 	text-align: left;
 	font-size: 1.2rem;

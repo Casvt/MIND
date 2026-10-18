@@ -149,7 +149,8 @@ export function evaluateSizing(): void {
     entries.forEach(e => {
         const title = e.querySelector("h2")!
         e.classList.remove("expand")
-        if (title.clientHeight < title.scrollHeight)
+        const minClientHeight = activeTab === ReminderType.REMINDER ? 65 : 75
+        if (Math.min(title.clientHeight, minClientHeight) < title.scrollHeight)
             e.classList.add("expand")
     })
 }
