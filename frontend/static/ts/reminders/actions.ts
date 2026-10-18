@@ -209,10 +209,17 @@ export async function loadLibrary(reminderType: ReminderType): Promise<void> {
         })
 
     const table = libEls.tabs[reminderType]
-    table.querySelectorAll("button.entry:not(.add-entry)").forEach(
+    table.querySelectorAll("button:not(.add-entry), div").forEach(
         e => e.remove()
     )
     table.appendChild(container)
+
+    // Make sure at least three columns exist so that add button
+    // isn't very wide as columns can be as wide as possible
+    for (let i = json.result.length; i < 2; i++) {
+        const spaceTaker = document.createElement("div")
+        table.appendChild(spaceTaker)
+    }
 
     evaluateSizing()
 }
