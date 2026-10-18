@@ -3,7 +3,18 @@ ARG PYTHON=3.13
 
 FROM python:${PYTHON}-slim-${DISTRO} AS python
 
-# --- Build Stage ---
+# --- Frontend Build Stage ---
+FROM node:${DISTRO}-slim AS frontend-builder
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY esbuild.config.mjs ./
+COPY frontend/static/ts ./frontend/static/ts/
+RUN npm run build
+
+# --- Python Build Stage ---
 FROM rust:slim-${DISTRO} AS builder
 WORKDIR /wheels
 
@@ -46,6 +57,13 @@ RUN groupadd -g 1000 mind && \
     mkdir -p /app/db /app/logs
     
 COPY --chmod=755 . .
+RUN rm -rf ./frontend/static/ts \
+    package-lock.json package.json \
+    esbuild.config.mjs tsconfig.json \
+    requirements.txt
+
+# Copy built files over
+COPY --from=frontend-builder /app/frontend/static/js /app/frontend/static/js
 
 ENV PUID=0 \
     PGID=0 \
