@@ -1,6 +1,6 @@
 [project]
 name = "MIND"
-version = "1.4.1"
+version = "1.5.0"
 description = "MIND is a simple self hosted reminder application that can send push notifications to your device. Set the reminder and forget about it!"
 authors = [
     {name = "Cas van Tijn"}
