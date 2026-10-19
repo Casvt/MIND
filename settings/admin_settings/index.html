@@ -16,7 +16,7 @@
         <link rel="prev" href="../user_settings/">
       
       
-        <link rel="next" href="../../other_docs/reporting/">
+        <link rel="next" href="../../other_docs/api/">
       
       
         
@@ -73,7 +73,7 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="MIND" data-md-color-primary="indigo" data-md-color-accent="indigo">
+    <body dir="ltr" data-md-color-scheme="MIND-light" data-md-color-primary="indigo" data-md-color-accent="indigo">
   
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
@@ -130,7 +130,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="MIND" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="MIND-light" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
     
       <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
@@ -265,7 +265,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../general_info/workings/" class="md-tabs__link">
+        <a href="../../general_info/general_info/" class="md-tabs__link">
           
   
   
@@ -308,20 +308,17 @@
   
   
   
-    
-    
-      <li class="md-tabs__item">
-        <a href="../../other_docs/reporting/" class="md-tabs__link">
-          
+    <li class="md-tabs__item">
+      <a href="../../other_docs/api/" class="md-tabs__link">
+        
   
   
     
   
-  Other Docs
+  API
 
-        </a>
-      </li>
-    
+      </a>
+    </li>
   
 
       
@@ -529,14 +526,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../installation/manual_instal/" class="md-nav__link">
+      <a href="../../installation/manual_install/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Manual Instal
+    Manual Install
   
 
     
@@ -600,6 +597,8 @@
       
         
       
+        
+      
     
     
     
@@ -654,7 +653,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../general_info/workings/" class="md-nav__link">
+      <a href="../../general_info/general_info/" class="md-nav__link">
         
   
   
@@ -682,14 +681,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../general_info/reminders/" class="md-nav__link">
+      <a href="../../general_info/how_to_use/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Reminders
+    How To Use
   
 
     
@@ -718,6 +717,34 @@
     
   
     Admin Panel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../general_info/implementation_details/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation Details
   
 
     
@@ -972,34 +999,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#logging" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Logging
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Logging">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#logging-level" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Logging Level
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#hosting" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1049,6 +1048,84 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Logging">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#logging-level" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging Level
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#database-backup-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Backup Settings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Database Backup Settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#database-backup-interval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Backup Interval
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-backup-retention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Backup Retention
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-backup-folder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Backup Folder
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1071,94 +1148,6 @@
   
   
   
-    
-    
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Other Docs
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Other Docs
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../other_docs/reporting/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Reporting
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
     <li class="md-nav__item">
       <a href="../../other_docs/api/" class="md-nav__link">
         
@@ -1176,14 +1165,6 @@
   
 
       </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
     </li>
   
 
@@ -1263,34 +1244,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#logging" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Logging
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Logging">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#logging-level" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Logging Level
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#hosting" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1340,6 +1293,84 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#logging" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Logging">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#logging-level" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Logging Level
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#database-backup-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Backup Settings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Database Backup Settings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#database-backup-interval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Backup Interval
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-backup-retention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Backup Retention
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#database-backup-folder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Database Backup Folder
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1365,19 +1396,15 @@
 <p>Here you can find documentation on the admin settings, which are the settings available in the admin panel.</p>
 <h2 id="authentication">Authentication<a class="headerlink" href="#authentication" title="Permanent link">&para;</a></h2>
 <h3 id="allow-new-accounts">Allow New Accounts<a class="headerlink" href="#allow-new-accounts" title="Permanent link">&para;</a></h3>
-<p>Whether or not people that access the web-ui have the option to create an account. When disabled, it is not possible to create new accounts, except for the admin via the admin panel.</p>
+<p>Whether people that access the web-ui have the option to create an account. When disabled, it is not possible for them to create new accounts. The admin has to do it from the admin panel.</p>
 <h3 id="login-time">Login Time<a class="headerlink" href="#login-time" title="Permanent link">&para;</a></h3>
-<p>The authentication timeout. For how long users stay logged in before they have to authenticate again.</p>
+<p>How long users stay logged in before they have to authenticate again.</p>
 <h3 id="login-time-trigger">Login Time Trigger<a class="headerlink" href="#login-time-trigger" title="Permanent link">&para;</a></h3>
-<p>Whether or not to reset the login timer (A.K.A. the authentication timeout) when using MIND. If the value is set to <code class="highlight">After Login</code>, the timer will start counting after the user has logged in and will force the user the authenticate again once it has run out. If the value is set to <code class="highlight">After Last Use</code>, the timer will start counting after the last time the user used MIND. So if the timeout is long enough that the user will consistently use MIND more regularly than the timeout duration, the user wouldn't need to authenticate ever again (until they don't use MIND for long enough that the timer runs out).</p>
-<h2 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">&para;</a></h2>
-<h3 id="logging-level">Logging Level<a class="headerlink" href="#logging-level" title="Permanent link">&para;</a></h3>
-<p>Keep this at <code class="highlight">Info</code> in normal situations. If you encounter a problem and need to share logs, set this to <code class="highlight">Debug</code> and recreate the problem. Then set it back to <code class="highlight">Info</code> again. More information on this on the <a href="../../other_docs/reporting/">'Reporting' page</a> and <a href="../../general_info/admin_panel/#logging">general info page on the admin panel</a>.</p>
+<p>Whether to reset the login timer (a.k.a. the authentication timeout) when using MIND. If the value is set to <code class="highlight">After Login</code>, the timer will start counting after the user has logged in and will force the user the authenticate again once it has run out. If the value is set to <code class="highlight">After Last Use</code>, the timer will start counting after the last time the user used MIND. So if the timeout is long enough that the user will consistently use MIND more regularly than the timeout duration, the user wouldn't need to authenticate ever again (until they don't use MIND for long enough that the timer runs out).</p>
 <h2 id="hosting">Hosting<a class="headerlink" href="#hosting" title="Permanent link">&para;</a></h2>
-<p>Any changes to these settings will restart MIND immediately. The changes are applied and MIND will start running with the new hosting settings. <strong><em>If you do not log into the admin panel within one minute after restarting, the changes will be reverted.</em></strong> This means that MIND will basically 'try out' the new hosting settings for one minute. If you haven't logged into the admin panel within that one minute after restart, the changes will be canceled, the old hosting settings will be applied and MIND will be restarted again. By logging into the admin panel, you keep the hosting settings. This feature is useful if you change the hosting settings in such way that the UI becomes unreachable; simply wait one minute and the changes will be reverted.</p>
+<p>This section defines how MIND hosts the web-UI. Changing any setting here will make MIND automatically restart after saving. Log back into the admin panel within 60 seconds for the changes to stay, or they will be reverted.</p>
 <h3 id="host">Host<a class="headerlink" href="#host" title="Permanent link">&para;</a></h3>
-<p>This tells MIND what IP to bind to. If you specify an IP that is <em>not</em> on the machine running MIND, you <em>will</em> encounter errors.<br />
-Using <code class="highlight"><span class="mf">0.0.0.0</span></code> will have MIND bind to all interfaces it finds on the host machine.</p>
+<p>This tells MIND what IP to bind to. Using <code class="highlight"><span class="mf">0.0.0.0</span></code> will have MIND bind to all interfaces it finds on the host machine. You can also enter an IPv6 address.</p>
 <p><em>Note: this setting is not applicable if you have MIND deployed using Docker.</em></p>
 <h3 id="port">Port<a class="headerlink" href="#port" title="Permanent link">&para;</a></h3>
 <p>This tells MIND what port to listen on. The default is <code class="highlight"><span class="mf">8080</span></code>, which would put the MIND UI on <code class="highlight"><span class="l">http://</span><span class="p">{</span>HOST<span class="p">}:</span><span class="mi">8080</span><span class="o">/</span></code>.</p>
@@ -1400,8 +1427,18 @@ Using <code class="highlight"><span class="mf">0.0.0.0</span></code> will have M
 </div>
 </div>
 <h3 id="url-prefix">URL Prefix<a class="headerlink" href="#url-prefix" title="Permanent link">&para;</a></h3>
-<p>This is used for reverse proxy support - the default is empty. If you want to put MIND behind a proxy (so you can access the web-UI via a nice URL), set a URL prefix (it <em>must</em> start with a <code class="highlight">/</code> character).  </p>
-<p>To get MIND running on <code class="highlight">http://example.com/mind</code>, you would set your reverse proxy to forward the <code class="highlight">/mind</code> path to the IP and port of your mind instance, and set URL prefix to <code class="highlight">/mind</code>.</p>
+<p>If you want to put MIND behind a proxy so that you can access the web-UI via a nice URL, set a URL prefix (it must start with a <code class="highlight">/</code> character). Set it empty to disable.</p>
+<p>To get MIND running on <code class="highlight">http://example.com/mind</code>, you would set your reverse proxy to forward the <code class="highlight">/mind</code> path to the IP and port of your MIND instance, and set the URL prefix to <code class="highlight">/mind</code>.</p>
+<h2 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">&para;</a></h2>
+<h3 id="logging-level">Logging Level<a class="headerlink" href="#logging-level" title="Permanent link">&para;</a></h3>
+<p>Keep this at <code class="highlight">Info</code> in normal situations. If you encounter a problem and need to share logs, set this to <code class="highlight">Debug</code> and recreate the problem. Then download the logs and set the log level back to <code class="highlight">Info</code> again.</p>
+<h2 id="database-backup-settings">Database Backup Settings<a class="headerlink" href="#database-backup-settings" title="Permanent link">&para;</a></h2>
+<h3 id="database-backup-interval">Database Backup Interval<a class="headerlink" href="#database-backup-interval" title="Permanent link">&para;</a></h3>
+<p>How often a backup of the database should be made.</p>
+<h3 id="database-backup-retention">Database Backup Retention<a class="headerlink" href="#database-backup-retention" title="Permanent link">&para;</a></h3>
+<p>The amount of backups to keep. If a new backup is made and the maximum amount of backups have already been made, then the oldest one is deleted. For example, if a backup is made once per day and the retention is set to 3 backups, then you'll have a backup of each of the last 3 days.</p>
+<h3 id="database-backup-folder">Database Backup Folder<a class="headerlink" href="#database-backup-folder" title="Permanent link">&para;</a></h3>
+<p>The folder that the database backups are put in. By default this is the same folder that the active database file is in, but you can change it so that the database backups are stored somewhere else.</p>
 
 
 
@@ -1422,7 +1459,7 @@ Using <code class="highlight"><span class="mf">0.0.0.0</span></code> will have M
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 10, 2024 13:17:03 UTC"><span class="timeago" datetime="2024-03-10T13:17:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 10, 2024 13:17:03 UTC">2024-03-10</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="October 7, 2026 16:05:23 UTC"><span class="timeago" datetime="2026-10-07T16:05:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="October 7, 2026 16:05:23 UTC">2026-10-07</span>
   </span>
 
     

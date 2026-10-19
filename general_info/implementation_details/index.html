@@ -13,10 +13,10 @@
       
       
       
-        <link rel="prev" href="../../installation/setup_after_installation/">
+        <link rel="prev" href="../admin_panel/">
       
       
-        <link rel="next" href="../reminders/">
+        <link rel="next" href="../../settings/settings/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Introduction - MIND Docs</title>
+        <title>Implementation Details - MIND Docs</title>
       
     
     
@@ -73,7 +73,7 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="MIND" data-md-color-primary="indigo" data-md-color-accent="indigo">
+    <body dir="ltr" data-md-color-scheme="MIND-light" data-md-color-primary="indigo" data-md-color-accent="indigo">
   
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#introduction" class="md-skip">
+        <a href="#repeating-reminders-at-an-interval" class="md-skip">
           Skip to content
         </a>
       
@@ -117,7 +117,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Introduction
+              Implementation Details
             
           </span>
         </div>
@@ -130,7 +130,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="MIND" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="MIND-light" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
     
       <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
@@ -267,7 +267,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+        <a href="../general_info/" class="md-tabs__link">
           
   
   
@@ -308,20 +308,17 @@
   
   
   
-    
-    
-      <li class="md-tabs__item">
-        <a href="../../other_docs/reporting/" class="md-tabs__link">
-          
+    <li class="md-tabs__item">
+      <a href="../../other_docs/api/" class="md-tabs__link">
+        
   
   
     
   
-  Other Docs
+  API
 
-        </a>
-      </li>
-    
+      </a>
+    </li>
   
 
       
@@ -529,14 +526,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../installation/manual_instal/" class="md-nav__link">
+      <a href="../../installation/manual_install/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Manual Instal
+    Manual Install
   
 
     
@@ -602,6 +599,8 @@
       
         
       
+        
+      
     
     
     
@@ -654,19 +653,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../general_info/" class="md-nav__link">
         
   
   
@@ -682,7 +672,6 @@
   
 
       </a>
-      
     </li>
   
 
@@ -695,14 +684,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../reminders/" class="md-nav__link">
+      <a href="../how_to_use/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Reminders
+    How To Use
   
 
     
@@ -739,6 +728,99 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation Details
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Implementation Details
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#repeating-reminders-at-an-interval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repeating Reminders at an Interval
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#detecting-timezone-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detecting Timezone Changes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -910,94 +992,6 @@
   
   
   
-    
-    
-      
-        
-      
-        
-      
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
-        
-          
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
-            
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Other Docs
-  
-
-    
-  </span>
-  
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
-            <span class="md-nav__icon md-icon"></span>
-            
-  
-    Other Docs
-  
-
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../other_docs/reporting/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Reporting
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
     <li class="md-nav__item">
       <a href="../../other_docs/api/" class="md-nav__link">
         
@@ -1015,14 +1009,6 @@
   
 
       </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
     </li>
   
 
@@ -1044,8 +1030,36 @@
   
   
   
-    
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#repeating-reminders-at-an-interval" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repeating Reminders at an Interval
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#detecting-timezone-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detecting Timezone Changes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -1065,12 +1079,20 @@
   
 
 
-<h1 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h1>
-<p>Here you can learn more about how to use MIND, how features work and certain implementation details.</p>
-<p><a href="../reminders/">Reminders</a><br />
-How to make and manage reminders.</p>
-<p><a href="../admin_panel/">Admin Panel</a><br />
-What is possible in the admin panel.</p>
+  <h1>Implementation Details</h1>
+
+<h2 id="repeating-reminders-at-an-interval">Repeating Reminders at an Interval<a class="headerlink" href="#repeating-reminders-at-an-interval" title="Permanent link">&para;</a></h2>
+<p>It is possible to create a repeated reminder that triggers on a day that doesn't always exist. For example, a reminder that runs on leap day, every year. Or a reminder that runs on the 31<sup>st</sup> of the month, every month. The targeted days don't always exist when the reminder runs. MIND will run the reminder on a day that <em>does</em> exist, and comes before the targeted day. So for example, with the leap year example, that'd mean the reminder would run on the following days (D-M-Y format):</p>
+<ul>
+<li>29-2-2024</li>
+<li>28-2-2025</li>
+<li>28-2-2026</li>
+<li>28-2-2027</li>
+<li>29-2-2028</li>
+</ul>
+<h2 id="detecting-timezone-changes">Detecting Timezone Changes<a class="headerlink" href="#detecting-timezone-changes" title="Permanent link">&para;</a></h2>
+<p>MIND has handling for when the timezone of the computer that it runs on changes. It could for example be that the timezone switches between daylight savings time and standard time or that the computer is moved to another country where the timezone is different. If MIND detects this, the reminders are appropriately altered so that they still trigger at the same time. That means that if the reminder originally ran at 3 o'clock in the afternoon, then after the timezone switch the reminder will still run at 3 o'clock in the afternoon even though this is technically a different point in the absolute timeline.</p>
+<p>It can take up to a day before MIND detects that the timezone has changed. On Windows it might require a restart of MIND before the change is detected.</p>
 
 
 
@@ -1091,7 +1113,7 @@ What is possible in the admin panel.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="March 10, 2024 13:17:03 UTC"><span class="timeago" datetime="2024-03-10T13:17:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="March 10, 2024 13:17:03 UTC">2024-03-10</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago" title="September 30, 2026 22:15:07 UTC"><span class="timeago" datetime="2026-09-30T22:15:07+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date" title="September 30, 2026 22:15:07 UTC">2026-09-30</span>
   </span>
 
     
