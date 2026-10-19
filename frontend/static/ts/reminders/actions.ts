@@ -105,9 +105,11 @@ function buildTimelessLibraryEntry(data: TimelessReminderData): HTMLButtonElemen
     if (data.color !== null)
         entry.style.setProperty('--color', data.color)
 
+    const titleContainer = document.createElement("div")
     const title = document.createElement('h2')
     title.innerText = data.title
-    entry.appendChild(title)
+    titleContainer.appendChild(title)
+    entry.appendChild(titleContainer)
 
     return entry
 }
@@ -144,7 +146,7 @@ function buildLibraryEntry(data: ReminderData): HTMLButtonElement {
 
 export function evaluateSizing(): void {
     const entries = [...libEls.tabs[activeTab].querySelectorAll<HTMLButtonElement>(
-        "button:not(.add-entry)"
+        "button.entry:not(.add-entry)"
     )]
     entries.forEach(e => {
         const title = e.querySelector("h2")!
@@ -210,7 +212,7 @@ export async function loadLibrary(reminderType: ReminderType): Promise<void> {
         })
 
     const table = libEls.tabs[reminderType]
-    table.querySelectorAll("button:not(.add-entry), div").forEach(
+    table.querySelectorAll(".entry:not(.add-entry)").forEach(
         e => e.remove()
     )
     table.appendChild(container)
@@ -219,6 +221,7 @@ export async function loadLibrary(reminderType: ReminderType): Promise<void> {
     // isn't very wide as columns can be as wide as possible
     for (let i = json.result.length; i < 2; i++) {
         const spaceTaker = document.createElement("div")
+        spaceTaker.classList.add("entry")
         table.appendChild(spaceTaker)
     }
 

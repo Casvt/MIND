@@ -244,7 +244,7 @@ body:has(#wide-toggle[data-selected]) #tab-container > div {
 /*  */
 /* Library Entries */
 /*  */
-.entry {
+:not(div).entry {
 	--color: var(--color-gray);
 	width: 100%;
 	height: 100%;
@@ -270,10 +270,12 @@ body:has(#wide-toggle[data-selected]) #tab-container > div {
 	border-color: var(--color-light-gray);
 }
 
-.entry h2 {
-	overflow-y: hidden;
+.entry div {
 	height: 100%;
 	margin: .75rem;
+}
+
+.entry h2 {
 	padding-bottom: 1px;
 
 	text-align: left;
