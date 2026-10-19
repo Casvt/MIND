@@ -1,15 +1,21 @@
-# API
-Below is the API documentation. Report an issue on [GitHub](https://github.com/Casvt/MIND/issues).
+---
+hide:
+  - navigation
+---
+
+# API Documentation
+
+This is the documentation for the REST API of MIND.
 
 All endpoints have the `/api` prefix. That means, for example, that `/auth/login` can be reached at `/api/auth/login`.
 
 ## Authentication
 
 Authentication is done using an API key.
-To log in, make a POST request to the [`/api/auth/login`](#authlogin) endpoint.
-You'll receive an API key, which you can then use in your requests to authenticate.
+To log in, make a POST request to the [`/auth/login`](#authlogin) endpoint.
+You'll receive an API key that you can then use in your requests to authenticate.
 Supply it via the url parameter `api_key`.
-This API key is valid for one hour (though the admin can change this duration) after which the key expires, any further requests return 401 'APIKeyExpired' and you are required to log in again.
+This API key is valid for one hour after which the key expires, any further requests return 401 'APIKeyExpired' and you are required to log in again (though the admin can change how long it stays valid).
 If no `api_key` is supplied or it is invalid, 401 `APIKeyInvalid` is returned.
 
 For example:
@@ -19,7 +25,7 @@ curl -sSL 'http://192.168.2.15:8080/api/reminders?api_key=ABCDEFG'
 
 ## Supplying data
 
-Often, data needs to be supplied with a request:
+There are various ways that data is expected to be supplied in the request:
 
 - If the parameters need to be supplied via `url`, add them to the url as url parameters.
 - If the parameters need to be supplied via `body`, add them to the body as a json object and supply the `Content-Type: application/json` header.
@@ -39,13 +45,13 @@ curl -sSLX POST \
 # File parameter
 curl -sSLX POST \
 	-H 'Content-Type: multipart/form-data' \
-	-F file=@/backups/MIND_backup.db \
+	-F file=@/backups/MIND_db_backup.db \
 	'http://192.168.2.15:8080/api/admin/database?api_key=ABCDEFG'
 
 ```
 
 ## Endpoints
-The following is automatically generated. Please report any issues on [GitHub](https://github.com/Casvt/MIND/issues).
+The following is automatically generated. Please report any issues with the documentation on [GitHub](https://github.com/Casvt/MIND/issues).
 ### `/auth/login`
 
 | Requires being logged in | Description |
