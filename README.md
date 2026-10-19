@@ -42,6 +42,17 @@ MIND is considered to be feature complete. Bug fixes, security updates and small
 
 ## Screenshots
 
-![](https://github.com/Casvt/Kapowarr/assets/88994465/f55c895b-7975-4a3e-88a0-f8e2a148bf8a)
-![](https://github.com/Casvt/Kapowarr/assets/88994465/63d72943-0c88-4315-9a8a-01a5dc5f6f15)
-![](https://github.com/Casvt/Kapowarr/assets/88994465/1f9cc9a2-ced5-49a2-b779-93528bb50bd4)
+<img src="./docs/src/assets/img/homepage.png">
+<p align="center">Home Page</p>
+</br>
+
+<img src="./docs/src/assets/img/edit_reminder.png">
+<p align="center">Editing a Reminder</p>
+</br>
+
+<img src="./docs/src/assets/img/notification_services_options.png">
+<p align="center">Choosing a Notification Service to Configure</p>
+</br>
+
+<img src="./docs/src/assets/img/admin_panel.png">
+<p align="center">The Admin Panel</p>
