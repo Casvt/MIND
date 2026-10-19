@@ -257,11 +257,3 @@ if __name__ == '__main__':
     else:
         with open(API_FILE, 'w+') as f:
             f.write(result)
-
-        if argv[-1] == "push":
-            run(["git", "config", "--global", "user.email", '"casvantijn@gmail.com"'])
-            run(["git", "config", "--global", "user.name", '"CasVT"'])
-            run(["git", "checkout", "Development"])
-            run(["git", "add", API_FILE])
-            run(["git", "commit", "-m", "Updated API docs"])
-            run(["git", "push"])
