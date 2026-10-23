@@ -199,6 +199,9 @@ def set_log_level(
         level (Union[int, str]): The level to set the logging to.
             Should be a logging level, like `logging.INFO` or `"DEBUG"`.
     """
+    if isinstance(level, str) and level.isdigit():
+        level = int(level)
+
     if isinstance(level, str):
         level = logging._nameToLevel[level.upper()]
 
