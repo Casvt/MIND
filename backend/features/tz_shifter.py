@@ -22,12 +22,13 @@ if TYPE_CHECKING:
 
 
 def get_timezone_offset() -> int:
-    """Get the offset between the local timezone and UTC, in minutes.
+    """Get the offset between the local timezone and UTC, in seconds.
 
     Returns:
-        int: The offset in minutes.
+        int: The offset in seconds.
     """
-    time.tzset()
+    if hasattr(time, "tzset"):
+        time.tzset()
     if time.localtime().tm_isdst == 0:
         return -time.timezone
     return -time.altzone
