@@ -736,16 +736,6 @@ class UserlessRemindersDB:
         self.rms_db = ReminderServicesDB(ReminderType.REMINDER)
         return
 
-    def exists(self, reminder_id: int) -> bool:
-        return get_db().execute("""
-            SELECT 1
-            FROM reminders
-            WHERE id = ?
-            LIMIT 1;
-            """,
-            (reminder_id,)
-        ).fetchone() is not None
-
     def reminder_id_to_user_id(self, reminder_id: int) -> int:
         return get_db().execute(
             """
@@ -798,66 +788,6 @@ class UserlessRemindersDB:
             ReminderData(**entry)
             for entry in result
         ]
-
-    def add(
-        self,
-        user_id: int,
-        title: str,
-        text: Union[str, None],
-        time: int,
-        repeat_quantity: Union[str, None],
-        repeat_interval: Union[int, None],
-        weekdays: Union[str, None],
-        cron_schedule: Union[str, None],
-        original_time: Union[int, None],
-        color: Union[str, None],
-        notification_services: List[int],
-        enabled: bool
-    ) -> int:
-        new_id = get_db().execute("""
-            INSERT INTO reminders(
-                user_id,
-                title, text,
-                time,
-                repeat_quantity, repeat_interval,
-                weekdays,
-                cron_schedule,
-                original_time,
-                color,
-                enabled
-            )
-            VALUES (
-                :user_id,
-                :title, :text,
-                :time,
-                :rq, :ri,
-                :wd,
-                :cs,
-                :ot,
-                :color,
-                :enabled
-            );
-            """,
-            {
-                "user_id": user_id,
-                "title": title,
-                "text": text,
-                "time": time,
-                "rq": repeat_quantity,
-                "ri": repeat_interval,
-                "wd": weekdays,
-                "cs": cron_schedule,
-                "ot": original_time,
-                "color": color,
-                "enabled": enabled
-            }
-        ).lastrowid
-
-        self.rms_db.update_ns_bindings(
-            new_id, notification_services
-        )
-
-        return new_id
 
     def update(
         self,
