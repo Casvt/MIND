@@ -7,21 +7,21 @@ on:
 
 jobs:
   deploy:
-    name: Update API docs and build docs
+    name: Build Docs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        name: Setup checkout
+      - uses: actions/checkout@v7
+        name: Set up checkout
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v4
-        name: Setup python 3.12
+      - uses: actions/setup-python@v7
+        name: Set up Python 3.12
         with:
           python-version: 3.12
           cache: 'pip'
 
-      - run: pip install -r requirements.txt -r docs/requirements-docs.txt
+      - run: python -m pip install -r requirements.txt -r docs/requirements-docs.txt
         name: Install dependencies
 
       - run: mkdocs gh-deploy --force -f docs/mkdocs.yml
