@@ -49,10 +49,12 @@ class TimezoneChangeHandler:
         current_time = datetime.now()
         target_time = current_time.replace(
             hour=Constants.TZ_CHANGE_CHECK_TIME[0],
-            minute=Constants.TZ_CHANGE_CHECK_TIME[1]
+            minute=Constants.TZ_CHANGE_CHECK_TIME[1],
+            second=0,
+            microsecond=0
         )
 
-        if target_time < current_time:
+        if target_time <= current_time:
             # Current target time is in the past (trigger time has already been
             # today), so run tomorrow at trigger time.
             target_time += timedelta(days=1)
