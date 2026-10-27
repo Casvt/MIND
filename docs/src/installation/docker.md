@@ -203,7 +203,7 @@ Now that the container is up and running, you can access it at [http://localhost
 
 ## Updating
 
-Below you can find instructions on how to update an install.
+Below you can find instructions on how to update an install. In order for the database to properly migrate, it's advised to upgrade minor version by minor version (i.e. v1.0.0, v1.1.0, v1.2.0, etc.).
 
 === "Docker CLI"
 	If needed, run these commands with `sudo`. It is assumed that the name of the container is `mind` (which is set using the `--name` option in the command).
