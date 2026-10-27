@@ -54,5 +54,5 @@ MIND is considered to be feature complete. Bug fixes, security updates and small
 <p align="center">Choosing a Notification Service to Configure</p>
 </br>
 
-<img src="./docs/src/assets/img/admin_panel.png">
+<img src="./docs/src/assets/img/admin_panel.jpg">
 <p align="center">The Admin Panel</p>
