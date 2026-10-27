@@ -57,7 +57,9 @@ class DatabaseMigrationHandler:
         from backend.internals.settings import Settings
 
         s = Settings()
-        current_db_version = s.sv.database_version
+        # When migrating from an old version, the value could actually be a
+        # string so force it to become an int
+        current_db_version = int(s.sv.database_version)
         newest_version = cls.latest_db_version()
 
         if current_db_version > newest_version:
@@ -96,13 +98,16 @@ class DatabaseMigrationHandler:
 
 @DatabaseMigrationHandler.register_handler(1)
 def _migrate_to_utc():
-    from datetime import datetime
+    from datetime import datetime, timezone
     from time import time
 
     cursor = get_db()
 
     t = time()
-    utc_offset = datetime.fromtimestamp(t) - datetime.utcfromtimestamp(t)
+    utc_offset = (
+        datetime.fromtimestamp(t)
+        - datetime.fromtimestamp(t, tz=timezone.utc).replace(tzinfo=None)
+    )
 
     cursor.execute("SELECT time, id FROM reminders;")
     new_reminders = [
@@ -225,14 +230,35 @@ def _migrate_to_reminder_services():
 
 @DatabaseMigrationHandler.register_handler(5)
 def _migrate_remove_user1():
-    from backend.base.custom_exceptions import AccessUnauthorized, UserNotFound
+    from backend.base.helpers import get_hash
     from backend.implementations.users import Users
 
-    try:
-        Users().login('User1', 'Password1').delete()
+    users = Users()
+    if not users.user_db.taken("User1"):
+        return
 
-    except (UserNotFound, AccessUnauthorized):
-        pass
+    user_id = users.user_db.username_to_id("User1")
+
+    cursor = get_db()
+    user_salt, user_hash = cursor.execute(
+        "SELECT salt, hash FROM users WHERE id = ?", (user_id,)
+    ).fetchone()
+
+    hash_password = get_hash(user_salt, "Password1")
+    if hash_password != user_hash:
+        return
+
+    # Delete user, it was accidentally added
+    cursor.executescript(f"""
+        BEGIN TRANSACTION;
+
+        DELETE FROM reminders WHERE user_id = {user_id};
+        DELETE FROM templates WHERE user_id = {user_id};
+        DELETE FROM notification_services WHERE user_id = {user_id};
+        DELETE FROM users WHERE id = {user_id};
+
+        COMMIT;
+    """)
 
     return
 
@@ -271,9 +297,16 @@ def _migrate_add_admin():
     )
     users = Users()
     if 'admin' in users:
-        users.get_one(
-            users.user_db.username_to_id('admin')
-        ).update_username('admin_old')
+        get_db().execute("""
+            UPDATE users
+            SET username = :username
+            WHERE id = :user_id;
+            """,
+            {
+                "username": "admin_old",
+                "user_id": users.user_db.username_to_id("admin")
+            }
+        )
 
     users.add(
         Constants.ADMIN_USERNAME, Constants.ADMIN_PASSWORD,
