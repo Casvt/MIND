@@ -1,4 +1,4 @@
-import { Constants, createIcon, downloadBackupDatabase, fetchAPI, getLocalStorage, hide, invalidUsernameReasonMap, nsTestFailReasonMap, UserData, Window } from "../general";
+import { Constants, createIcon, downloadBackupDatabase, fetchAPI, getLocalStorage, hide, invalidUsernameReasonMap, UserData } from "../general";
 import { adminEls } from "./elements";
 
 // region About
@@ -237,7 +237,7 @@ export function submitSettings(): void {
 }
 
 // region Setting Resetting
-class ResetWindow implements Window {
+class ResetWindow {
     public dialog = adminEls.resetSettings.dialog
 
     public prepare(): void {
@@ -271,10 +271,6 @@ class ResetWindow implements Window {
             el => el.checked = false
         )
         this.dialog.showModal()
-    }
-
-    public hide(): void {
-        this.dialog.close()
     }
 
     public submit(): void {
@@ -364,18 +360,12 @@ function loadPlugins(plugins: string[]): void {
     })
 }
 
-class PluginsWindow implements Window {
+class PluginsWindow {
     public dialog = adminEls.plugins.dialog
 
-    public prepare(): void {}
-
-    public show(args: object = {}): void {
+    public show(): void {
         hide({to_hide: [adminEls.plugins.addRow, adminEls.plugins.error]})
         this.dialog.showModal()
-    }
-
-    public hide(): void {
-        this.dialog.close()
     }
 
     public submit(): void {
@@ -446,12 +436,10 @@ export function loadUsers(): void {
     })
 }
 
-class AddUserWindow implements Window {
+class AddUserWindow {
     public dialog = adminEls.addUser.dialog
 
-    public prepare(): void {}
-
-    public show(args: object = {}): void {
+    public show(): void {
         adminEls.addUser.inputContainers.username.classList.remove("error-input-container")
         hide({to_hide: [
             adminEls.addUser.errors.usernameInvalid, adminEls.addUser.errors.usernameTaken
@@ -460,10 +448,6 @@ class AddUserWindow implements Window {
         adminEls.addUser.inputs.password.value = ''
 
         this.dialog.showModal()
-    }
-
-    public hide(): void {
-        this.dialog.close()
     }
 
     public submit(): void {
@@ -483,7 +467,7 @@ class AddUserWindow implements Window {
         })
         .then(_ => {
             loadUsers()
-            this.hide()
+            this.dialog.close()
         })
         .catch(json => {
             if (json.error === "UsernameInvalid") {
@@ -502,14 +486,12 @@ class AddUserWindow implements Window {
     }
 }
 
-class EditUserWindow implements Window {
+class EditUserWindow {
     private state = {
         userId: null as number | null
     }
 
     public dialog = adminEls.editUser.dialog
-
-    public prepare(): void {}
 
     public show(args: {userId: number}): void {
         this.state.userId = args.userId
@@ -539,10 +521,6 @@ class EditUserWindow implements Window {
             })
 
         this.dialog.showModal()
-    }
-
-    public hide(): void {
-        this.dialog.close()
     }
 
     public submit(): void {
@@ -577,7 +555,7 @@ class EditUserWindow implements Window {
 
         if (!Object.keys(data).length) {
             // Nothing changed
-            this.hide()
+            this.dialog.close()
             return
         }
 
@@ -587,7 +565,7 @@ class EditUserWindow implements Window {
         })
         .then(_ => {
             loadUsers()
-            this.hide()
+            this.dialog.close()
         })
         .catch(json => {
             if (json.error === "UsernameInvalid") {
@@ -611,14 +589,12 @@ class EditUserWindow implements Window {
     }
 }
 
-class DeleteUserWindow implements Window {
+class DeleteUserWindow {
     private state = {
         userId: null as number | null
     }
 
     public dialog = adminEls.deleteUser.dialog
-
-    public prepare(): void {}
 
     public show(args: {userId: number}): void {
         this.state.userId = args.userId
@@ -626,10 +602,6 @@ class DeleteUserWindow implements Window {
 
         adminEls.deleteUser.username.innerText = username
         adminEls.deleteUser.dialog.showModal()
-    }
-
-    public hide(): void {
-        this.dialog.close()
     }
 
     public submit(): void {
@@ -640,7 +612,7 @@ class DeleteUserWindow implements Window {
         fetchAPI(`/admin/users/${userId}`, {method: "DELETE"})
         .then(_ => {
             adminEls.userList.querySelector(`tr[data-id="${userId}"]`)?.remove()
-            this.hide()
+            this.dialog.close()
         })
     }
 }
@@ -695,20 +667,14 @@ export function loadBackups(): void {
     })
 }
 
-class UploadDatabaseWindow implements Window {
+class UploadDatabaseWindow {
     public dialog = adminEls.uploadDb.dialog
 
-    public prepare(): void {}
-
-    public show(args: object = {}): void {
+    public show(): void {
         adminEls.uploadDb.inputs.file.value = ''
         adminEls.uploadDb.inputContainers.file.classList.remove("error-input-container")
         adminEls.uploadDb.inputs.keepHostingSettings.checked = false
         this.dialog.showModal()
-    }
-
-    public hide(): void {
-        this.dialog.close()
     }
 
     public submit(): void {
@@ -746,14 +712,12 @@ class UploadDatabaseWindow implements Window {
     }
 }
 
-class ImportDatabaseWindow implements Window {
+class ImportDatabaseWindow {
     private state = {
         backupIndex: null as number | null
     }
 
     public dialog = adminEls.importDb.dialog
-
-    public prepare(): void {}
 
     public show(args: {backupIndex: number}): void {
         this.state.backupIndex = args.backupIndex
@@ -765,10 +729,6 @@ class ImportDatabaseWindow implements Window {
         adminEls.importDb.inputs.keepHostingSettings.checked = false
 
         adminEls.importDb.dialog.showModal()
-    }
-
-    public hide(): void {
-        this.dialog.close()
     }
 
     public submit(): void {

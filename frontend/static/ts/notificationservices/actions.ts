@@ -1,4 +1,4 @@
-import { createIcon, fetchAPI, hide, nsTestFailReasonMap, Window } from "../general";
+import { createIcon, fetchAPI, hide, nsTestFailReasonMap } from "../general";
 import { nsEls } from "./elements";
 import { buildURL, createURLBuilder, ServiceTemplate, validateInputRegexes } from "./urlbuilder";
 
@@ -7,7 +7,7 @@ type ServiceData = {id: number, title: string, url: string}
 const services: Record<number, ServiceData> = {}
 const options: ServiceTemplate[] = []
 
-class NSOptionsWindow implements Window {
+class NSOptionsWindow {
     public dialog = nsEls.options.dialog
     public isShown: boolean = false
 
@@ -39,8 +39,6 @@ class NSOptionsWindow implements Window {
         this.isShown = false
         this.dialog.close()
     }
-
-    public submit(): void { }
 
     public searchOptions() {
         if (this.autoSearchTimer !== null)
@@ -81,11 +79,9 @@ class NSOptionsWindow implements Window {
     }
 }
 
-class AddNSWindow implements Window {
+class AddNSWindow {
     public dialog = nsEls.add.dialog
     private serviceIndex: number | null = null
-
-    public prepare(): void { }
 
     public show(args: {index: number}): void {
         this.serviceIndex = args.index
@@ -195,12 +191,10 @@ class AddNSWindow implements Window {
     }
 }
 
-class EditNSWindow implements Window {
+class EditNSWindow {
     private serviceId: number | null = null
 
     public dialog = nsEls.edit.dialog
-
-    public prepare(): void { }
 
     public show(args: {id: number}): void {
         this.serviceId = args.id
@@ -208,10 +202,6 @@ class EditNSWindow implements Window {
         nsEls.edit.inputs.url.value = services[args.id].url
         nsEls.edit.urlContainer.classList.remove("error-input-container")
         this.dialog.showModal()
-    }
-
-    public hide(): void {
-        this.dialog.close()
     }
 
     public submit(): void {
@@ -228,7 +218,7 @@ class EditNSWindow implements Window {
         })
         .then(() => {
             loadServices()
-            this.hide()
+            this.dialog.close()
         })
         .catch(json => {
             if (json.error === "URLInvalid" || json.error === "InvalidKeyValue") {
@@ -242,13 +232,11 @@ class EditNSWindow implements Window {
     }
 }
 
-class DeleteNSWindow implements Window {
+class DeleteNSWindow {
     private serviceId: number | null = null
     private deleteRemindersUsing: boolean = false
 
     public dialog = nsEls.delete.dialog
-
-    public prepare(): void { }
 
     public show(args: {id: number}): void {
         this.serviceId = args.id

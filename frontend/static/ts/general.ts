@@ -36,16 +36,6 @@ export type UserData = {
     mfa_apprise_url: string | null;
 }
 
-// region Definitions
-export abstract class Window {
-    public abstract readonly dialog: HTMLDialogElement
-
-    public abstract prepare(): void
-    public abstract show(args: object): void
-    public abstract hide(): void
-    public abstract submit(): void
-}
-
 // region Helpers
 
 /**

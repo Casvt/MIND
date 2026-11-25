@@ -1,5 +1,5 @@
 import { setupClock } from "../base/actions";
-import { Constants, fetchAPI, getLocalStorage, hide, setLocalStorage, UserData, Window } from "../general";
+import { Constants, fetchAPI, getLocalStorage, hide, setLocalStorage, UserData } from "../general";
 import { settingsEls } from "./elements";
 
 // region Settings
@@ -53,13 +53,11 @@ export function updateDefaultService() {
 }
 
 // region Edit Account
-export class EditAccountWindow implements Window {
+export class EditAccountWindow {
     public dialog = settingsEls.editAcc.dialog
     private userData: UserData | null = null
 
-    public prepare(): void {}
-
-    public async show(args: object = {}): Promise<void> {
+    public async show(): Promise<void> {
         this.userData = (await fetchAPI('/user')).result as UserData
 
         settingsEls.editAcc.containers.username.classList.remove("error-input-container")
@@ -74,10 +72,6 @@ export class EditAccountWindow implements Window {
         settingsEls.editAcc.inputs.mfa.value = this.userData.mfa_apprise_url || ''
 
         settingsEls.editAcc.dialog.showModal()
-    }
-
-    public hide(): void {
-        this.dialog.close()
     }
 
     public submit(): void {
@@ -110,7 +104,7 @@ export class EditAccountWindow implements Window {
 
         if (!Object.keys(data).length) {
             // Nothing changed
-            this.hide()
+            this.dialog.close()
             return
         }
 
@@ -118,7 +112,7 @@ export class EditAccountWindow implements Window {
             method: "PUT",
             body: data
         })
-        .then(() => this.hide())
+        .then(() => this.dialog.close())
         .catch(json => {
             if (json.error === "UsernameInvalid") {
                 settingsEls.editAcc.errors.usernameInvalid.innerText = json.result.reason

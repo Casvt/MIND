@@ -1,4 +1,4 @@
-import { fetchAPI, getLocalStorage, hide, setLocalStorage, Window } from "../general";
+import { fetchAPI, getLocalStorage, hide, setLocalStorage } from "../general";
 import { libEls, ReminderType } from "./elements";
 
 // region Tab Management
@@ -246,7 +246,7 @@ const colorOptions = {
 
 export let nsExists = false
 
-class EditorWindow implements Window {
+class EditorWindow {
     private state = {
         reminderType: null as ReminderType | null,
         entryId: null as number | null
