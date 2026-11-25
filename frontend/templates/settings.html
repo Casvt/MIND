@@ -7,21 +7,21 @@
     <script defer src="{{ url_for('static', filename='js/settings.js') }}"></script>
 {% endblock %}
 {% block windows %}
-	<dialog id="delete-account-dialog">
+	<dialog id="delete-account-dialog" closedby="any">
 		<div class="dialog-container">
 			<div class="dialog-content">
 				<div>
                     <p>Are you sure you want to permanently delete your account?</p>
                     <div class="confirm-container">
                         <button id="confirm-delete-account" class="input-style">Confirm</button>
-                        <button id="close-delete-account" class="input-style">Cancel</button>
+                        <button id="close-delete-account" class="input-style" commandfor="delete-account-dialog" command="close">Cancel</button>
                     </div>
                 </div>
 			</div>
 		</div>
 	</dialog>
 
-	<dialog id="edit-account-dialog">
+	<dialog id="edit-account-dialog" closedby="any">
 		<div class="dialog-container">
 			<div class="dialog-header">
 				<h2>Edit Account</h2>
@@ -44,7 +44,7 @@
                 </form>
 			</div>
 			<div class="dialog-footer">
-				<button id="close-edit-account" class="input-style">Cancel</button>
+				<button id="close-edit-account" class="input-style" commandfor="edit-account-dialog" command="close">Cancel</button>
 				<button type="submit" form="edit-account-form" id="confirm-edit-account" class="input-style">Save</button>
 			</div>
 		</div>
@@ -137,7 +137,7 @@
                 </tr>
                 <tr>
                     <th><label for="open-delete-account">Delete Account</label></th>
-                    <td><button id="open-delete-account" class="input-style">Delete Account</button></td>
+                    <td><button id="open-delete-account" class="input-style" commandfor="delete-account-dialog" command="show-modal">Delete Account</button></td>
                 </tr>
             </tbody>
         </table>

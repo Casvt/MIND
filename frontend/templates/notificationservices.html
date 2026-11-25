@@ -7,7 +7,7 @@
     <script defer src="{{ url_for('static', filename='js/notificationservices.js') }}"></script>
 {% endblock %}
 {% block windows %}
-    <dialog id="ns-options-dialog">
+    <dialog id="ns-options-dialog" closedby="any">
         <div class="dialog-container">
             <div class="dialog-header">
                 <h2>Add Notification Service</h2>
@@ -24,7 +24,7 @@
         </div>
     </dialog>
 
-    <dialog id="add-ns-dialog">
+    <dialog id="add-ns-dialog" closedby="any">
         <div class="dialog-container">
             <div class="dialog-header">
                 <h2>Add <span id="add-type"></span> Notification Service</h2>
@@ -45,7 +45,7 @@
         <div id="submit-ns-error" class="popover"></div>
     </dialog>
 
-	<dialog id="edit-ns-dialog">
+	<dialog id="edit-ns-dialog" closedby="any">
 		<div class="dialog-container">
 			<div class="dialog-header">
 				<h2>Edit Notification Service</h2>
@@ -61,13 +61,13 @@
 				</form>
 			</div>
 			<div class="dialog-footer">
-				<button id="close-edit-ns" class="input-style">Cancel</button>
+				<button id="close-edit-ns" class="input-style" commandfor="edit-ns-dialog" command="close">Cancel</button>
 				<button type="submit" form="edit-ns-form" id="confirm-edit-ns" class="input-style">Save</button>
 			</div>
 		</div>
 	</dialog>
 
-	<dialog id="delete-ns-dialog">
+	<dialog id="delete-ns-dialog" closedby="any">
 		<div class="dialog-container">
 			<div class="dialog-content">
 				<div>

@@ -629,7 +629,7 @@ class DeleteUserWindow implements Window {
     }
 
     public hide(): void {
-        adminEls.deleteUser.dialog.close()
+        this.dialog.close()
     }
 
     public submit(): void {

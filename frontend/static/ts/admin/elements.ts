@@ -37,7 +37,6 @@ export const adminEls = {
     resetSettings: {
         dialog: document.getElementById("reset-settings-dialog") as HTMLDialogElement,
         open: document.getElementById("open-reset-settings") as HTMLButtonElement,
-        cancel: document.getElementById("close-reset-settings") as HTMLButtonElement,
         submit: document.getElementById("submit-reset-settings") as HTMLButtonElement,
         list: document.getElementById("reset-list") as HTMLDivElement,
         form: document.getElementById("reset-settings-form") as HTMLFormElement
@@ -46,7 +45,6 @@ export const adminEls = {
     plugins: {
         dialog: document.getElementById("plugins-dialog") as HTMLDialogElement,
         open: document.getElementById("open-plugins") as HTMLButtonElement,
-        cancel: document.getElementById("close-plugins") as HTMLButtonElement,
         add: document.getElementById("add-plugin") as HTMLButtonElement,
         addRow: document.getElementById("add-plugin-row") as HTMLTableRowElement,
         addInput: document.getElementById("plugin-path") as HTMLInputElement,
@@ -59,7 +57,6 @@ export const adminEls = {
     addUser: {
         dialog: document.getElementById("add-user-dialog") as HTMLDialogElement,
         open: document.getElementById("open-add-user") as HTMLButtonElement,
-        cancel: document.getElementById("close-add-user") as HTMLButtonElement,
         form: document.getElementById("add-user-form") as HTMLFormElement,
 
         inputContainers: {
@@ -77,7 +74,6 @@ export const adminEls = {
 	editUser: {
 		dialog: document.getElementById("edit-user-dialog") as HTMLDialogElement,
 		username: document.getElementById("edit-target-username") as HTMLSpanElement,
-		cancel: document.getElementById("close-edit-user") as HTMLButtonElement,
 		form: document.getElementById("edit-user-form") as HTMLFormElement,
 
         inputContainers: {
@@ -98,7 +94,6 @@ export const adminEls = {
     deleteUser: {
 		dialog: document.getElementById("delete-user-dialog") as HTMLDialogElement,
 		username: document.getElementById("delete-target-username") as HTMLSpanElement,
-		cancel: document.getElementById("close-delete-user") as HTMLButtonElement,
 		confirm: document.getElementById("confirm-delete-user") as HTMLButtonElement
 	},
 
@@ -107,7 +102,6 @@ export const adminEls = {
 	uploadDb: {
 		dialog: document.getElementById("upload-db-dialog") as HTMLDialogElement,
         open: document.getElementById("open-upload-db") as HTMLButtonElement,
-		cancel: document.getElementById("close-upload-db") as HTMLButtonElement,
 		submit: document.getElementById("submit-upload-db") as HTMLButtonElement,
 		form: document.getElementById("upload-db-form") as HTMLFormElement,
 
@@ -123,7 +117,6 @@ export const adminEls = {
         dialog: document.getElementById("import-db-dialog") as HTMLDialogElement,
 		backupName: document.getElementById("db-backup-name") as HTMLSpanElement,
 		backupCreation: document.getElementById("db-creation-date") as HTMLSpanElement,
-		cancel: document.getElementById("close-import-db") as HTMLButtonElement,
 		submit: document.getElementById("submit-import-db") as HTMLButtonElement,
 		form: document.getElementById("import-db-form") as HTMLFormElement,
 

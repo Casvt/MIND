@@ -79,12 +79,7 @@ function bindAddButtons(): void {
 
 // region Editor
 libEls.editor.cancel.onclick = () => windowInstances.editor.hide()
-libEls.editor.dialog.onclick = e => {
-    if (e.target === e.currentTarget) {
-        e.stopPropagation()
-        windowInstances.editor.hide()
-    }
-}
+libEls.editor.dialog.onclose = () => windowInstances.editor.hide()
 libEls.editor.form.onsubmit = e => {
     e.preventDefault()
     windowInstances.editor.submit()

@@ -7,7 +7,7 @@
     <script defer src="{{ url_for('static', filename='js/reminders.js') }}"></script>
 {% endblock %}
 {% block windows %}
-    <dialog id="editor-dialog">
+    <dialog id="editor-dialog" closedby="any">
         <div class="dialog-container">
             <div class="dialog-header">
                 <h2 id="editor-activity"></h2>

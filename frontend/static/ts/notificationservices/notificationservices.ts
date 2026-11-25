@@ -4,12 +4,7 @@ import { loadServices, windowInstances } from "./actions";
 import { nsEls } from "./elements";
 
 nsEls.options.open.onclick = () => windowInstances.options.show()
-nsEls.options.dialog.onclick = e => {
-    if (e.target === e.currentTarget) {
-        e.stopPropagation()
-        windowInstances.options.hide()
-    }
-}
+nsEls.options.dialog.onclose = () => windowInstances.options.hide()
 nsEls.options.close.onclick = () => windowInstances.options.hide()
 nsEls.options.search.oninput = () => {
     if (windowInstances.options.autoSearchTimer !== null)
@@ -31,12 +26,7 @@ document.body.addEventListener("keydown", (e: KeyboardEvent) => {
     }
 })
 
-nsEls.add.dialog.onclick = e => {
-    if (e.target === e.currentTarget) {
-        e.stopPropagation()
-        windowInstances.add.hide()
-    }
-}
+nsEls.add.dialog.onclose = () => windowInstances.add.hide()
 nsEls.add.back.onclick = () => windowInstances.add.hide()
 nsEls.add.test.onclick = () => windowInstances.add.test()
 nsEls.add.form.onsubmit = e => {
@@ -44,24 +34,12 @@ nsEls.add.form.onsubmit = e => {
     windowInstances.add.submit()
 }
 
-nsEls.edit.dialog.onclick = e => {
-    if (e.target === e.currentTarget) {
-        e.stopPropagation()
-        windowInstances.edit.hide()
-    }
-}
-nsEls.edit.close.onclick = () => windowInstances.edit.hide()
 nsEls.edit.form.onsubmit = e => {
     e.preventDefault()
     windowInstances.edit.submit()
 }
 
-nsEls.delete.dialog.onclick = e => {
-    if (e.target === e.currentTarget) {
-        e.stopPropagation()
-        windowInstances.delete.hide()
-    }
-}
+nsEls.delete.dialog.onclose = () => windowInstances.delete.hide()
 nsEls.delete.close.onclick = () => windowInstances.delete.hide()
 nsEls.delete.confirm.onclick = () => windowInstances.delete.submit()
 

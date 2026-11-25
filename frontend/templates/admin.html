@@ -28,7 +28,7 @@
 		</div>
 	</header>
 	<main>
-		<dialog id="reset-settings-dialog">
+		<dialog id="reset-settings-dialog" closedby="any">
 			<div class="dialog-container">
 				<div class="dialog-header">
 					<h2>Reset Settings</h2>
@@ -43,12 +43,12 @@
 					</form>
 				</div>
 				<div class="dialog-footer">
-					<button id="close-reset-settings" class="input-style">Cancel</button>
+					<button id="close-reset-settings" class="input-style" commandfor="reset-settings-dialog" command="close">Cancel</button>
 					<button type="submit" id="submit-reset-settings" form="reset-settings-form" class="input-style">Reset</button>
 				</div>
 			</div>
 		</dialog>
-		<dialog id="plugins-dialog">
+		<dialog id="plugins-dialog" closedby="any">
 			<div class="dialog-container">
 				<div class="dialog-header">
 					<h2>Apprise Plugin Paths</h2>
@@ -87,11 +87,11 @@
 					</div>
 				</div>
 				<div class="dialog-footer">
-					<button id="close-plugins" class="input-style">Close</button>
+					<button id="close-plugins" class="input-style" commandfor="plugins-dialog" command="close">Close</button>
 				</div>
 			</div>
 		</dialog>
-		<dialog id="add-user-dialog">
+		<dialog id="add-user-dialog" closedby="any">
 			<div class="dialog-container">
 				<div class="dialog-header">
 					<h2>Add User</h2>
@@ -110,12 +110,12 @@
 					</form>
 				</div>
 				<div class="dialog-footer">
-					<button id="close-add-user" class="input-style">Cancel</button>
+					<button id="close-add-user" class="input-style" commandfor="add-user-dialog" command="close">Cancel</button>
 					<button type="submit" id="submit-add-user" form="add-user-form" class="input-style">Add</button>
 				</div>
 			</div>
 		</dialog>
-		<dialog id="edit-user-dialog">
+		<dialog id="edit-user-dialog" closedby="any">
 			<div class="dialog-container">
 				<div class="dialog-header">
 					<h2>Edit User</h2>
@@ -141,25 +141,25 @@
 					</div>
 				</div>
 				<div class="dialog-footer">
-					<button id="close-edit-user" class="input-style">Cancel</button>
+					<button id="close-edit-user" class="input-style" commandfor="edit-user-dialog" command="close">Cancel</button>
 					<button type="submit" id="submit-edit-user" form="edit-user-form" class="input-style">Save</button>
 				</div>
 			</div>
 		</dialog>
-		<dialog id="delete-user-dialog">
+		<dialog id="delete-user-dialog" closedby="any">
 			<div class="dialog-container">
 				<div class="dialog-content">
 					<div>
 						<p>Are you sure you want to delete the user <span id="delete-target-username"></span>?</p>
 						<div class="confirm-container">
-							<button id="confirm-delete-user" class="input-style">Confirm</button>
+							<button id="confirm-delete-user" class="input-style" commandfor="delete-user-dialog" command="close">Confirm</button>
 							<button id="close-delete-user" class="input-style">Cancel</button>
 						</div>
 					</div>
 				</div>
 			</div>
 		</dialog>
-		<dialog id="upload-db-dialog">
+		<dialog id="upload-db-dialog" closedby="any">
 			<div class="dialog-container">
 				<div class="dialog-header">
 					<h2>Upload Database</h2>
@@ -194,12 +194,12 @@
 					</div>
 				</div>
 				<div class="dialog-footer">
-					<button id="close-upload-db" class="input-style">Cancel</button>
+					<button id="close-upload-db" class="input-style" commandfor="upload-db-dialog" command="close">Cancel</button>
 					<button type="submit" id="submit-upload-db" form="upload-db-form" class="input-style">Import</button>
 				</div>
 			</div>
 		</dialog>
-		<dialog id="import-db-dialog">
+		<dialog id="import-db-dialog" closedby="any">
 			<div class="dialog-container">
 				<div class="dialog-header">
 					<h2>Import Database</h2>
@@ -226,7 +226,7 @@
 					</div>
 				</div>
 				<div class="dialog-footer">
-					<button id="close-import-db" class="input-style">Cancel</button>
+					<button id="close-import-db" class="input-style" commandfor="import-db-dialog" command="close">Cancel</button>
 					<button type="submit" id="submit-import-db" form="import-db-form" class="input-style">Import</button>
 				</div>
 			</div>

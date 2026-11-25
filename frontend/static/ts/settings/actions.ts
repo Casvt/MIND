@@ -77,7 +77,7 @@ export class EditAccountWindow implements Window {
     }
 
     public hide(): void {
-        settingsEls.editAcc.dialog.close()
+        this.dialog.close()
     }
 
     public submit(): void {

@@ -26,7 +26,6 @@ export const nsEls = {
     edit: {
         dialog: document.getElementById("edit-ns-dialog") as HTMLDialogElement,
         form: document.getElementById("edit-ns-form") as HTMLFormElement,
-        close: document.getElementById("close-edit-ns") as HTMLButtonElement,
 
         urlContainer: document.querySelector("#edit-ns-form .checked-input-container:has(#edit-url)") as HTMLDivElement,
         inputs: {

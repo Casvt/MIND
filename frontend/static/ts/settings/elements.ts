@@ -9,8 +9,7 @@ export const settingsEls = {
         open: document.getElementById("open-edit-account") as HTMLButtonElement,
         dialog: document.getElementById("edit-account-dialog") as HTMLDialogElement,
         form: document.getElementById("edit-account-form") as HTMLFormElement,
-        close: document.getElementById("close-edit-account") as HTMLButtonElement,
-        
+
         containers: {
             username: document.getElementById("edit-username-container") as HTMLDivElement,
             mfa: document.getElementById("edit-mfa-container") as HTMLDivElement
@@ -27,9 +26,6 @@ export const settingsEls = {
     },
 
     delAcc: {
-        open: document.getElementById("open-delete-account") as HTMLButtonElement,
-        dialog: document.getElementById("delete-account-dialog") as HTMLDialogElement,
-        close: document.getElementById("close-delete-account") as HTMLButtonElement,
         confirm: document.getElementById("confirm-delete-account") as HTMLButtonElement
     }
 }
