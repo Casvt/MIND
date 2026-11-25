@@ -763,7 +763,7 @@ class UserlessRemindersDB:
     ) -> List[ReminderData]:
         time_filter = ""
         if time:
-            time_filter = "WHERE time = :time"
+            time_filter = "AND time = :time"
 
         result = get_db().execute(f"""
             SELECT
@@ -774,6 +774,7 @@ class UserlessRemindersDB:
                 weekdays AS _weekdays, cron_schedule,
                 enabled
             FROM reminders
+            WHERE enabled = 1
             {time_filter};
             """,
             {
