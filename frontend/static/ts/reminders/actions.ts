@@ -118,8 +118,7 @@ function buildLibraryEntry(data: ReminderData): HTMLButtonElement {
     const entry = buildTimelessLibraryEntry(data)
 
     const time = document.createElement('p')
-    const offset = new Date(data.time * 1000).getTimezoneOffset() * -60
-    const d = new Date((data.time + offset) * 1000)
+    const d = new Date(data.time * 1000)
     let formattedDate = d.toLocaleString(getLocalStorage().locale)
 
     if (data.repeat_interval !== null && data.repeat_quantity !== null) {
@@ -382,10 +381,7 @@ class EditorWindow {
         this.fillTimelessForm(data)
 
         libEls.editor.inputs.enabled.checked = data.enabled
-        const triggerDate = new Date(
-            (data.time + new Date(data.time * 1000).getTimezoneOffset() * -60)
-            * 1000
-        )
+        const triggerDate = new Date(data.time * 1000)
         libEls.editor.inputs.time.value =
             triggerDate.toLocaleString("en-CA").slice(0, 10)
             + "T"
@@ -567,10 +563,9 @@ class EditorWindow {
                 cronSchedule: string | null = null
 
             if (libEls.editor.inputs.repetition.value === "cron")
-                time = Date.now() / 1000 + 5 + new Date().getTimezoneOffset() * 60
+                time = Date.now() / 1000 + 5
             else
                 time = new Date(libEls.editor.inputs.time.value).getTime() / 1000
-                    + new Date(libEls.editor.inputs.time.value).getTimezoneOffset() * 60
 
             switch (libEls.editor.inputs.repetition.value) {
                 case "repeated":

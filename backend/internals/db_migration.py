@@ -406,3 +406,34 @@ def _migrate_add_mfa_column():
             ADD mfa_apprise_url TEXT;
     """)
     return
+
+
+@DatabaseMigrationHandler.register_handler(14)
+def _migrate_utc_offset():
+    from datetime import datetime, timezone
+
+    def transition(t):
+        return (
+            datetime
+            .fromtimestamp(t)
+            .replace(tzinfo=timezone.utc)
+            .timestamp()
+        )
+
+    cursor = get_db()
+    reminders = cursor.execute(
+        "SELECT id, original_time, time FROM reminders;"
+    ).fetchall()
+    cursor.executemany(
+        "UPDATE reminders SET original_time=?, time=? WHERE id=?;",
+        (
+            (
+                transition(reminder[1]) if reminder[1] is not None else None,
+                transition(reminder[2]),
+                reminder[0]
+            )
+            for reminder in reminders
+        )
+    )
+
+    return

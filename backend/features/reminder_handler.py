@@ -113,7 +113,7 @@ class ReminderHandler:
 
             delta_t = time - datetime.now(
                 timezone.utc
-            ).replace(tzinfo=None).timestamp()
+            ).timestamp()
 
             cls.reminder_timer = Server().get_db_timer_thread(
                 delta_t,

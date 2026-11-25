@@ -386,20 +386,18 @@ def find_next_time(
 
     current_time = datetime.now(timezone.utc)
     original_datetime = datetime.fromtimestamp(
-        original_time
-    ).replace(tzinfo=timezone.utc)
+        original_time, tz=timezone.utc
+    )
     new_time = datetime.fromtimestamp(
-        original_time
-    ).replace(tzinfo=timezone.utc)
+        original_time, tz=timezone.utc
+    )
 
     if cron_schedule is not None:
         cron_instance = Cron(cron_schedule)
         schedule = cron_instance.schedule()
-        new_time = schedule.next().replace(tzinfo=None).astimezone(timezone.utc)
+        new_time = schedule.next()
         while new_time <= current_time:
-            new_time = schedule.next().replace(
-                tzinfo=None
-            ).astimezone(timezone.utc)
+            new_time = schedule.next()
 
     elif (
         repeat_quantity is not None
@@ -448,7 +446,7 @@ def find_next_time(
             second=original_datetime.second
         )
 
-    result = int(new_time.replace(tzinfo=None).timestamp())
+    result = int(new_time.timestamp())
     LOGGER.debug(
         f'{original_datetime=}, {current_time=} ' +
         f'and interval of {repeat_interval} {repeat_quantity} ' +

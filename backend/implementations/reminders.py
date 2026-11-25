@@ -165,7 +165,7 @@ class Reminder:
             if not repeated_reminder:
                 if time < datetime.now(
                     timezone.utc
-                ).replace(tzinfo=None).timestamp():
+                ).timestamp():
                     raise InvalidTime(time)
 
             time = round(time)
@@ -397,7 +397,7 @@ class Reminders:
             f'{cron_schedule=}, {color=}, {enabled=}')
 
         # Validate data
-        if time < datetime.now(timezone.utc).replace(tzinfo=None).timestamp():
+        if time < datetime.now(timezone.utc).timestamp():
             raise InvalidTime(time)
         time = round(time)
 
