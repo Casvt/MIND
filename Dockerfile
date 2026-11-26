@@ -44,6 +44,7 @@ RUN --mount=target=/var/lib/apt/lists,type=cache,sharing=private \
     --mount=target=/var/cache/apt,type=cache,sharing=private \
     apt-get update \
     && apt-get full-upgrade -y \
+    && apt-get install -y --no-install-recommends curl \
     && apt-get autoremove -y
 COPY --from=tianon/gosu /gosu /usr/local/bin/
 
@@ -70,6 +71,9 @@ ENV PUID=0 \
     TZ=UTC
 
 EXPOSE 8080
+
+HEALTHCHECK --interval=5m --start-period=10s \
+    CMD curl --fail http://localhost:8080/api/about || exit 1
 
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["python3", "/app/MIND.py", "--LogFolder", "/app/logs"]
