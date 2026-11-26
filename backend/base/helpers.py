@@ -384,7 +384,12 @@ def find_next_time(
     if weekdays is not None:
         weekdays.sort()
 
-    current_time = datetime.now(timezone.utc)
+    # Just in case the timer triggered the callback microseconds earlier than
+    # planned due to thread scheduling imprecision, add one second.
+    current_time = (
+        datetime.now(timezone.utc).replace(microsecond=0)
+        + relativedelta(seconds=1)
+    )
     original_datetime = datetime.fromtimestamp(
         original_time, tz=timezone.utc
     )
