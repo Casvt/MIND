@@ -186,7 +186,7 @@
 	background-color: var(--color-dark);
 	color: var(--color-light);
 
-	box-shadow: 0 0 6px 4px rgb(0 0 0 / 60%);
+	box-shadow: 0 0 6px 4px var(--color-shadow-06);
 }
 
 #sort-input option {
@@ -258,7 +258,7 @@ body:has(#wide-toggle[data-selected]) #tab-container > div {
 	color: var(--color-light);
 	background-color: var(--color);
 
-	box-shadow: 0 0 10px 2px rgb(0 0 0 / 30%);
+	box-shadow: 0 0 10px 2px var(--color-shadow-03);
 	transition: border-color 100ms ease-in-out;
 }
 
@@ -447,7 +447,7 @@ body:has(#wide-toggle[data-selected]) #tab-container > div {
 	background-color: var(--color-dark);
 	color: var(--color-light);
 
-	box-shadow: 0 0 6px 4px rgb(0 0 0 / 60%);
+	box-shadow: 0 0 6px 4px var(--color-shadow-06);
 }
 
 #color-selection selectedcontent {

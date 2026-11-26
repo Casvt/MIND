@@ -90,9 +90,9 @@ main > h2:first-of-type {
 
 	&:hover {
 		background-color: var(--color-mid-gray);
-		box-shadow: 0px 0px 9px 5px rgba(0, 0, 0, .8);
+		box-shadow: 0px 0px 9px 5px var(--color-shadow-08);
 	}
-	
+
 	&:first-child:hover {
 		background-color: var(--color-success);
 	}
